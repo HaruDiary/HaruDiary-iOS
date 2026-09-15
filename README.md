@@ -43,6 +43,7 @@ Firebase 설정 파일은 공개 저장소에 포함하지 않습니다. 앱 실
 ## 협업과 리팩토링
 
 - [로직 우선 리팩토링 로드맵](docs/REFACTORING_ROADMAP.md)
+- [UIKit → SwiftUI 전환 준비](docs/UIKIT_SWIFTUI_MIGRATION.md)
 - [개발 컨벤션](docs/CONVENTIONS.md)
 - [AI 공통 지침](AGENTS.md)
 - [테스트 실행과 CI 범위](docs/TESTING.md)

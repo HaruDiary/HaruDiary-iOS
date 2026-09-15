@@ -39,12 +39,24 @@ EveryDiary/EveryDiary/
   Domain/           # UIKit·Firebase에 독립적인 모델, 정책, use case
   Data/             # 저장 DTO, Repository 구현, Firebase adapter
   Features/         # 최종 SwiftUI 화면과 화면 상태
-  DesignSystem/     # 뷰 전환 단계에서 공통 색상·타이포·컴포넌트
+  Shared/           # 사용처가 확인된 날짜·설정·작은 공통 함수
+  DesignSystem/     # 공통 토큰은 먼저, UI 컴포넌트는 화면 전환 때
 ```
 
 현재 폴더를 미리 전부 옮기지 않는다. 로직이 분리된 기능부터 위 구조를 적용한다.
 파일 이동만 하는 PR은 행동 변경 PR과 분리한다. 기능이 요구하지 않는 범용 Coordinator,
 대형 DI 프레임워크, TCA 등 추가 프레임워크 도입은 별도 논의한다.
+
+## 공통 기반과 SwiftUI
+
+- [전환 준비 문서](UIKIT_SWIFTUI_MIGRATION.md)의 기존 자산/도구 분류를 먼저 확인한다.
+- 색상은 역할별 토큰으로 이름을 정하고 같은 colorset을 양쪽 UI에서 사용한다.
+- 타이포·여백·모서리 기준은 목업에서 합의한다. 임의의 숫자를 각 화면에서 복제하지 않는다.
+- 날짜 저장 형식과 사용자 표시 형식은 분리한다. 공통 함수는 실제 사용처와 테스트를 근거로 추출한다.
+- SwiftUI 로컬 상태는 State/Binding, 공유 참조 상태는 iOS 17의 Observation을 우선 검토한다.
+  화면마다 ViewModel을 강제로 만들지 않고, 복잡한 동작/공유 상태에 필요할 때 둔다.
+- UIKit 연결 adapter는 필요한 기능에 한정하고 제거 조건을 적는다.
+- 디자인 토큰 구현과 전체 화면 교체는 별도 단계다. 빈 폴더나 미사용 공통 컴포넌트를 양산하지 않는다.
 
 ## Git과 PR
 
