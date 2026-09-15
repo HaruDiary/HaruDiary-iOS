@@ -1,0 +1,64 @@
+name: iOS CI
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  logic-tests:
+    name: Logic tests
+    runs-on: macos-26
+    timeout-minutes: 25
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      HARUDIARY_CI_OUTPUT: ${{ runner.temp }}/harudiary-ci
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Show toolchain
+        run: xcodebuild -version
+      - name: Run production model tests without launching the app
+        run: bash scripts/ci.sh test
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: logic-test-results
+          path: |
+            ${{ runner.temp }}/harudiary-ci/*.log
+            ${{ runner.temp }}/harudiary-ci/*.xcresult
+          if-no-files-found: warn
+          retention-days: 7
+
+  app-build:
+    name: Simulator build
+    runs-on: macos-26
+    timeout-minutes: 35
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      HARUDIARY_CI_OUTPUT: ${{ runner.temp }}/harudiary-ci
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Build with a nonfunctional CI-only Firebase plist
+        run: bash scripts/ci.sh build
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: simulator-build-log
+          path: ${{ runner.temp }}/harudiary-ci/build.log
+          if-no-files-found: warn
+          retention-days: 7
