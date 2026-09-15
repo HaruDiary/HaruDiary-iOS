@@ -21,7 +21,6 @@ jobs:
     timeout-minutes: 25
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
-      HARUDIARY_CI_OUTPUT: ${{ runner.temp }}/harudiary-ci
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -29,7 +28,7 @@ jobs:
       - name: Show toolchain
         run: xcodebuild -version
       - name: Run production model tests without launching the app
-        run: bash scripts/ci.sh test
+        run: HARUDIARY_CI_OUTPUT="$RUNNER_TEMP/harudiary-ci" bash scripts/ci.sh test
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -47,13 +46,12 @@ jobs:
     timeout-minutes: 35
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
-      HARUDIARY_CI_OUTPUT: ${{ runner.temp }}/harudiary-ci
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
       - name: Build with a nonfunctional CI-only Firebase plist
-        run: bash scripts/ci.sh build
+        run: HARUDIARY_CI_OUTPUT="$RUNNER_TEMP/harudiary-ci" bash scripts/ci.sh build
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
