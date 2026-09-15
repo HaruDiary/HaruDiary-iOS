@@ -6,12 +6,22 @@
 //
 
 import UIKit
+import Observation
 
 import SnapKit
 
 class CalendarVC: UIViewController {
     
-    private var diaries: [DiaryEntry] = []
+    private let viewModel: CalendarViewModel
+    private var decoratedDays: Set<CalendarDay> = []
+    private var diaries: [DiaryEntry] { viewModel.selectedEntries }
+
+    init(viewModel: CalendarViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { return nil }
     
     private lazy var settingButton : UIBarButtonItem = {
         let settingButton = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
@@ -51,20 +61,7 @@ class CalendarVC: UIViewController {
         autoLayoutCalendarVC()
         configurateViews()
         loadDiaries() // 처음 View 로드 시, data load
-        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil) // 로그인 & 로그아웃 감지하여 data reload
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        dateSelectCalendar()
-    }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-    
-    @objc private func loginStatusChanged() {
-        loadDiaries()
+        observeState()
     }
     
     @objc private func tabSettingBTN() {
@@ -107,41 +104,24 @@ class CalendarVC: UIViewController {
     }
     
     private func loadDiaries() {
-        DiaryManager.shared.fetchDiaries { [weak self] (diaries, error) in
-             guard let self = self else { return }
-             if let diaries = diaries {
-                 self.diaries = diaries
-                 let activeDiaries = diaries.filter { !$0.isDeleted }
-                 // 날짜 정보를 기반으로 데코레이션 업데이트
-                 self.updateCalendarDecoration(with: activeDiaries)
-             } else if let error = error {
-                 print("Error fetching diaries: \(error.localizedDescription)")
-             }
-         }
+        viewModel.start()
+    }
+
+    private func observeState() {
+        let dates = viewModel.index.decorationDaysToReload(previous: decoratedDays)
+        decoratedDays = viewModel.index.decoratedDays
+        calendarView.reloadDecorations(forDateComponents: dates.map(\.dateComponents), animated: true)
+        withObservationTracking {
+            _ = viewModel.index
+            _ = viewModel.state
+        } onChange: { [weak self] in
+            Task { @MainActor in self?.observeState() }
+        }
     }
 }
 
 //MARK: - UICalendarView Custom & Decorations
 extension CalendarVC {
-    private func updateCalendarDecoration(with diaries: [DiaryEntry]) {
-        let calendar = Calendar.current
-        let currentYear = calendar.component(.year, from: Date())
-        
-        // 현재 년도에 해당하는 일기만 필터링합니다.
-        let validDiaries = diaries.filter { diary in
-            let diaryYear = calendar.component(.year, from: diary.date)
-            return diaryYear == currentYear
-        }
-        
-        // 필터링된 일기의 날짜로 DateComponents 배열을 생성합니다.
-        let updateDateComponents = Set(validDiaries.compactMap { diary -> DateComponents? in
-            return calendar.dateComponents([.year, .month, .day], from: diary.date)
-        })
-        
-        // UICalendarView에 데코레이션을 업데이트합니다.
-        self.calendarView.reloadDecorations(forDateComponents: Array(updateDateComponents), animated: true)
-    }
-    
     private func configurateViews() {
         customCalendar()
         setDateComponents()
@@ -156,9 +136,9 @@ extension CalendarVC {
         calendarView.layer.shadowColor = UIColor(named: "mainTheme")?.cgColor
         calendarView.layer.shadowOpacity = 0.1
         calendarView.layer.shadowOffset = CGSize(width: 0, height: 0)
-        calendarView.calendar = .current
+        calendarView.calendar = viewModel.calendar
         calendarView.locale = Locale(identifier: "ko-KR")
-        calendarView.timeZone = .current
+        calendarView.timeZone = viewModel.calendar.timeZone
         calendarView.fontDesign = .rounded
         calendarView.layer.cornerRadius = 20
         calendarView.delegate = self
@@ -189,38 +169,24 @@ extension CalendarVC {
 extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDelegate {
    
     func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
-        guard let date = Calendar.current.date(from: dateComponents),
+        guard let date = viewModel.calendar.date(from: dateComponents),
               calendarView.availableDateRange.contains(date) else {
             return nil
         }
         
-        let activeDiaries = diaries.filter { !$0.isDeleted }
-        let hasDiary = activeDiaries.contains { diary in
-            let isSameDay = Calendar.current.isDate(diary.date, inSameDayAs: date)
-            return isSameDay
-        }
+        let hasDiary = viewModel.index.decoratedDays.contains(CalendarDay(date: date, calendar: viewModel.calendar))
         return hasDiary ? .default(color: .mainTheme, size: .medium) : nil
     }
     
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
         guard let dateComponents = dateComponents,
-              let date = Calendar.current.date(from: dateComponents) else {
+              let date = viewModel.calendar.date(from: dateComponents) else {
             return
         }
         
-        let dateString = DateFormatter.yyyyMMdd.string(from: date)
-        
-        // 선택된 날짜에 해당하는 일기들을 필터링합니다.
-        let activeDiaries = diaries.filter { !$0.isDeleted }
-        let selectedDiaries = activeDiaries.filter { diary in
-            return Calendar.current.isDate(diary.date, inSameDayAs: date)
-        }
-        
-        // CalendarListVC로 이동하고 선택된 일기들을 전달합니다.
-        if !selectedDiaries.isEmpty {
-            let calendarListVC = CalendarListVC()
-            calendarListVC.selectedDiaries = selectedDiaries // 선택된 일기 전달
-            calendarListVC.selectedDateString = dateString // 선택된 날짜 전달
+        viewModel.select(date)
+        if !viewModel.selectedEntries.isEmpty {
+            let calendarListVC = CalendarListVC(viewModel: viewModel)
             calendarListVC.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(calendarListVC, animated: true)
         }
