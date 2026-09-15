@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>사용자가 일기를 작성한 위치를 저장하기 위해 권한이 필요합니다.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>일기에 사진을 첨부하기 위해 사진 라이브러리 접근 권한이 필요합니다.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>setGID</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.994025581548-s7f4bioo3ciua1eiv2c11rbq9jfq4n7n</string>
+			</array>
+		</dict>
+	</array>
+	<key>SignInWithApplePrivateKey</key>
+	<string>MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgBybCqClNnZAdkbJP
+xgGYsxTv8ZFbDxEmnKm4f4Yd8zKgCgYIKoZIzj0DAQehRANCAAQbGXjUmmW18HU5
++lev6+WtGaQMq1CyHh3BuNn/4sUGCsb4EGFPyQ3iczcgWvzsz5+3s7DDYmLh8Z9I
+cGWhzwkO</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>SFProDisplay-Regular.otf</string>
+		<string>SFProRounded-Regular.otf</string>
+		<string>SFProDisplay-Bold.otf</string>
+		<string>SFProRounded-Bold.otf</string>
+	</array>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>Default Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+</dict>
+</plist>
