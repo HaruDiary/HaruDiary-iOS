@@ -147,3 +147,8 @@ Firebase·외부 서비스 접근 분리
 - [개발 컨벤션](CONVENTIONS.md)
 - [공통 AI 지침](../AGENTS.md)
 - [테스트와 CI](TESTING.md)
+
+## 디자인 참고
+
+[최종 작업 목업 v2 · 화면 6장](design/redesign-v2/README.md)을 공통 참고 자료로 사용한다.
+여정·월간 화면은 수정 전 시안이며, 마을 상세 기획은 추후 논의한다.
