@@ -39,3 +39,18 @@ Firebase 설정 파일은 공개 저장소에 포함하지 않습니다. 앱 실
 키를 채운 파일을 커밋하지 마세요.
 
 실기기 빌드는 Signing & Capabilities에서 본인의 Apple Development Team을 선택해야 합니다.
+
+## 협업과 리팩토링
+
+- [로직 우선 리팩토링 로드맵](docs/REFACTORING_ROADMAP.md)
+- [개발 컨벤션](docs/CONVENTIONS.md)
+- [AI 공통 지침](AGENTS.md)
+- [테스트 실행과 CI 범위](docs/TESTING.md)
+
+```sh
+bash scripts/ci.sh test
+bash scripts/ci.sh build
+```
+
+PR과 dev push에서 일기 모델 테스트 및 시뮬레이터 빌드를 실행합니다.
+CI는 운영 Firebase 설정이나 GitHub secrets 없이 동작합니다.
