@@ -55,7 +55,7 @@ bash scripts/ci.sh test
 bash scripts/ci.sh build
 ```
 
-- 단위 테스트는 앱을 실행하지 않고 실제 `DataModel.swift`를 컴파일한다.
+- 단위 테스트는 앱을 실행하지 않고 실제 일기 모델·날짜 처리·Calendar 상태 소스를 컴파일한다.
 - CI용 Firebase plist는 빌드용 가짜 값이다. 인증·동기화 성공의 증거가 아니다.
 - 앱 실행·기능 검증이 필요한 작업은 실제 시뮬레이터/기기에서 해당 흐름을 확인한다.
 - 테스트 삭제·skip·실패 무시로 CI를 통과시키지 않는다.

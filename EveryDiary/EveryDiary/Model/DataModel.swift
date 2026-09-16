@@ -8,23 +8,6 @@ import CoreLocation
 import Foundation
 import UIKit
 
-struct DiaryEntry: Codable {
-    var id: String?
-    var title: String
-    var content: String
-    var dateString: String
-    var emotion: String
-    var weather: String
-    var weatherDescription: String?
-    var weatherTemp: Double?
-    var imageURL: [String]?
-    var userID: String?
-    var isDeleted: Bool = false
-    var deleteDate: Date?
-    var useMetadataLocation: Bool = false
-    var currentLocationInfo: String?
-}
-
 // 사진 & 메타데이터를 FirebaseStorage에 저장하기 위한 Struct
 struct ImageLocationInfo {
     var image: UIImage
@@ -38,23 +21,6 @@ struct LocationInfo {
     var longitude: CLLocationDegrees
 }
 
-extension DiaryEntry {
-    var date: Date {
-        return DateFormatter.yyyyMMddHHmmss.date(from: dateString) ?? Date()
-    }
-    
-    init(title: String, content: String, date: Date, emotion: String, weather: String, imageURL: [String]? = nil, useMetaDataLocation: Bool = false, currentLocationInfo: String? = nil) {
-        self.title = title
-        self.content = content
-        self.dateString = DateFormatter.yyyyMMddHHmmss.string(from: date)
-        self.emotion = emotion
-        self.weather = weather
-        self.imageURL = imageURL
-        self.useMetadataLocation = useMetaDataLocation
-        self.currentLocationInfo = currentLocationInfo
-    }
-}
-
 enum CellModel {
     case profileItem(email: String, name: String, image: String?, isLoggedIn: Bool)
     case settingItem(title: String, iconImage: String, number:Int)
@@ -66,22 +32,6 @@ enum AlertCellModel : Equatable {
     case dateItem(title: String, image: String, label: String, switchStatus: Bool, isExpanded: Bool)
     case timePicker
     case dayItem(title: String, isSelected: Bool)
-}
-
-extension DateFormatter {
-    static func createFormatter(dateFormat: String) -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = dateFormat
-        formatter.locale = Locale(identifier: "ko-KR")
-        formatter.timeZone = .current
-        return formatter
-    }
-    
-    static let yyyyMMddHHmmss: DateFormatter = createFormatter(dateFormat: "yyyy-MM-dd HH:mm:ss Z")
-    static let yyyyMMdd: DateFormatter = createFormatter(dateFormat: "yyyy-MM-dd")
-    static let yyyyMM: DateFormatter = createFormatter(dateFormat: "yyyy.MM")
-    static let yyyyMMddE: DateFormatter = createFormatter(dateFormat: "yyyy. MM. dd(E)")
-    static let yyyyMMDD: DateFormatter = createFormatter(dateFormat: "yyyy.MM.dd")
 }
 
 struct OnboardingModel : Equatable {

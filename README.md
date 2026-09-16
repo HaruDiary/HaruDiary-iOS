@@ -46,6 +46,7 @@ Firebase 설정 파일은 공개 저장소에 포함하지 않습니다. 앱 실
 
 - [로직 우선 리팩토링 로드맵](docs/REFACTORING_ROADMAP.md)
 - [UIKit → SwiftUI 전환 준비](docs/UIKIT_SWIFTUI_MIGRATION.md)
+- [Calendar 리팩토링과 연결 계약](docs/CALENDAR_REFACTORING.md)
 - [개발 컨벤션](docs/CONVENTIONS.md)
 - [AI 공통 지침](AGENTS.md)
 - [테스트 실행과 CI 범위](docs/TESTING.md)
@@ -55,5 +56,5 @@ bash scripts/ci.sh test
 bash scripts/ci.sh build
 ```
 
-PR과 dev push에서 일기 모델 테스트 및 시뮬레이터 빌드를 실행합니다.
+PR과 dev push에서 일기 모델·Calendar 로직 테스트 및 시뮬레이터 빌드를 실행합니다.
 CI는 운영 Firebase 설정이나 GitHub secrets 없이 동작합니다.

@@ -6,13 +6,21 @@
 //
 
 import UIKit
+import Observation
 
 import SnapKit
 
 class CalendarListVC: UIViewController {
-    var selectedDiaries: [DiaryEntry] = [] // 선택된 일기들을 저장하는 프로퍼티
-    var selectedDateString: String? // 선택된 날짜를 문자열로 저장할 프로퍼티
-    
+    private let viewModel: CalendarViewModel
+    private var selectedDiaries: [DiaryEntry] { viewModel.selectedEntries }
+
+    init(viewModel: CalendarViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { return nil }
+
     private lazy var dateLabel: UILabel = {
         let dateLabel = UILabel()
         dateLabel.font = UIFont(name: "SFProDisplay-Bold", size: 20)
@@ -40,7 +48,7 @@ class CalendarListVC: UIViewController {
         view.backgroundColor = .mainBackground
         addSubViewCalendarListVC()
         autoLayoutCalendarListVC()
-        updateDateLabel()
+        observeState()
     }
     
     private func autoLayoutCalendarListVC() {
@@ -62,44 +70,20 @@ class CalendarListVC: UIViewController {
     }
     
     private func fetchUpdateDiaries() {
-        DiaryManager.shared.fetchDiaries { [weak self] (diaries, error) in
-            guard let self = self, let diaries = diaries, error == nil else {
-                // 에러 처리...
-                return
-            }
-            // 선택된 날짜 문자열이 설정되어 있지 않다면, 모든 일기를 로드합니다.
-            guard let selectedDateString = self.selectedDateString else {
-                self.selectedDiaries = diaries
-                DispatchQueue.main.async {
-                    self.dailyListCollectionView.reloadData()
-                }
-                return
-            }
-            // 선택된 날짜 문자열과 일치하는 일기만 필터링합니다.
-            self.selectedDiaries = diaries.filter { diary in
-                guard let diaryDate = DateFormatter.yyyyMMddHHmmss.date(from: diary.dateString) else {
-                    return false
-                }
-                let formattedDiaryDateString = DateFormatter.yyyyMMdd.string(from: diaryDate)
-                return formattedDiaryDateString == selectedDateString
-            }
-
-            DispatchQueue.main.async {
-                self.dailyListCollectionView.reloadData()
-            }
-        }
+        viewModel.start()
     }
-    
-    private func updateDateLabel() {
-        guard let firstDiary = selectedDiaries.first else {
-            dateLabel.text = "No diaries selected"
-            return
-        }
-        
-        if let date = DateFormatter.yyyyMMddHHmmss.date(from: firstDiary.dateString) {
-            dateLabel.text = DateFormatter.yyyyMMddE.string(from: date)
-        } else {
-            dateLabel.text = "Invalid date"
+
+    private func observeState() {
+        let formatter = DateFormatter.createFormatter(dateFormat: "yyyy. MM. dd(E)")
+        formatter.calendar = viewModel.calendar
+        formatter.timeZone = viewModel.calendar.timeZone
+        dateLabel.text = formatter.string(from: viewModel.selectedDate)
+        dailyListCollectionView.reloadData()
+        withObservationTracking {
+            _ = viewModel.index
+            _ = viewModel.selectedDate
+        } onChange: { [weak self] in
+            Task { @MainActor in self?.observeState() }
         }
     }
 }
