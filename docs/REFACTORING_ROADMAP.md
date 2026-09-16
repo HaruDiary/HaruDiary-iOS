@@ -141,10 +141,9 @@ Calendar 작업에서 일기 모델·날짜 formatter의 Foundation 분리, Cale
 세부 범위와 남은 통합 검증은 [Calendar 리팩토링](CALENDAR_REFACTORING.md)을 참고한다.
 다른 기능과 앱 전체의 로드맵 완료를 의미하지 않는다.
 
-**먼저 전환 목록을 함께 검토하고 공통 기반의 최소 범위를 정한다.**
+**다음 공통 기반 작업은 Calendar에서 도입한 서비스 계약을 앱 진입 계층에서 생성·주입하도록 정리하는 것이다.**
 
-첫 로직 리팩토링은 `DataModel.swift`의 기존 데이터 테스트를 보강하고 모델·날짜 책임을 분리하는 것이다.
-그 다음 `FireStore.swift`의 조회 책임부터 Repository로 옮긴다.
+일기 모델과 날짜 formatter는 Calendar 작업에서 분리되었다. [공통 의존성 관리](DEPENDENCIES.md)를 기준으로 생성 경계를 정리한 뒤, 기존 목록·작성의 데이터 접근을 기능 단위로 옮긴다.
 
 - [UIKit → SwiftUI 전환 준비](UIKIT_SWIFTUI_MIGRATION.md)
 - [개발 컨벤션](CONVENTIONS.md)

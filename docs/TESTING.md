@@ -4,13 +4,13 @@
 
 | 검사 | 실제 범위 | 포함하지 않는 것 |
 |---|---|---|
-| Logic tests | 운영 일기 모델 6개, Calendar 날짜/그리드 10개, fake 기반 상태·사용자 전환·구독 수명 11개: 총 27개 XCTest | Firestore SDK의 Codable 동작, 서버 읽기/쓰기, 실제 로그인, 마을 규칙, 실제 UI 동작 |
+| Logic tests | 운영 일기 모델 6개, Calendar 날짜/그리드 10개, fake 기반 상태·사용자 전환·구독 수명 11개: 공통 의존성 조립 3개를 포함한 총 30개 XCTest | Firestore SDK의 Codable 동작, 서버 읽기/쓰기, 실제 로그인, 마을 규칙, 실제 UI 동작 |
 | Simulator build | `EveryDiary` 앱의 Debug 시뮬레이터 컴파일·링크·번들 검증 | 앱 실행, 운영 Firebase 연결, 실기기 서명, App Store archive |
 
 `EveryDiaryLogicTests`는 hostless XCTest 타깃이다. 앱을 실행하지 않고 운영 소스 파일을
 직접 컴파일하므로 Firebase 설정 파일이 필요 없다. 테스트용 모델 사본은 없다.
 실제 `Domain/DiaryEntry.swift`, Calendar 로직, Repository 프로토콜, 날짜 formatter와
-`CalendarViewModel.swift`를 컴파일하며 UIKit 모델 파일의 기존 테스트 타깃 연결은 제거했다.
+`CalendarViewModel.swift`, `AppDependencies.swift`, `CalendarModule.swift`, 이미지 로더 계약을 컴파일하며 UIKit 모델 파일의 기존 테스트 타깃 연결은 제거했다.
 새 파일을 폴더에 추가하는 것만으로 Xcode 타깃에 자동 연결되지는 않는다.
 
 ## 로컬 실행
@@ -23,7 +23,8 @@ bash scripts/ci.sh build
 ```
 
 활성 개발자 경로가 CommandLineTools라면 전역 설정을 바꾸지 않고 명령 앞에
-`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`를 지정할 수 있다.
+`DEVELOPER_DIR=<설치된 Xcode.app 경로>/Contents/Developer`를 지정할 수 있다.
+현재 선택된 경로는 `xcode-select -p`로 확인한다.
 
 Calendar의 화면 동작과 오프라인 검증 범위는 [Calendar 리팩토링](CALENDAR_REFACTORING.md)을 참고한다.
 

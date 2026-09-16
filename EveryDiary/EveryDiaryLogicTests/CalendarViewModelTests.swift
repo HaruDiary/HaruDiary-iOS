@@ -1,8 +1,81 @@
 import Foundation
 import XCTest
+import UIKit
 
 @MainActor
 final class CalendarViewModelTests: XCTestCase {
+    func testAppCompositionUsesInjectedCalendarClockAndImageLoader() async throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: -8 * 3600))
+        let now = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-01-01T02:00:00Z"))
+        let imageLoader = FakeCalendarImageLoader()
+        let repository = FakeDiaryRepository()
+        let session = FakeDiarySession(userID: nil)
+        let dependencies = AppDependencies(
+            diaryRepository: repository, userSession: session,
+            calendarImageLoader: imageLoader, calendar: calendar, now: { now }
+        )
+        let module = dependencies.makeCalendarModule()
+        let anotherModule = dependencies.makeCalendarModule()
+        XCTAssertFalse(module.viewModel === anotherModule.viewModel)
+        XCTAssertTrue(repository.observations.isEmpty)
+        XCTAssertEqual(session.observationCount, 0)
+        XCTAssertEqual(module.viewModel.calendar.timeZone, calendar.timeZone)
+        XCTAssertEqual(calendar.component(.year, from: module.viewModel.selectedDate), 2025)
+        XCTAssertEqual(calendar.component(.month, from: module.viewModel.selectedDate), 12)
+        XCTAssertEqual(calendar.component(.day, from: module.viewModel.selectedDate), 31)
+        let url = try XCTUnwrap(URL(string: "https://example.invalid/image"))
+        let image = await module.imageLoader.image(for: url)
+        XCTAssertTrue(image === imageLoader.result)
+        XCTAssertEqual(imageLoader.requestedURL, url)
+        let anotherImage = await anotherModule.imageLoader.image(for: url)
+        XCTAssertTrue(anotherImage === imageLoader.result)
+    }
+
+    func testAppCompositionLoadsInjectedRepositoryAndClearsOnInjectedSessionLogout() async throws {
+        let repository = FakeDiaryRepository()
+        let session = FakeDiarySession(userID: "injected-user")
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
+        let today = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 9, day: 15)))
+        let module = AppDependencies(
+            diaryRepository: repository, userSession: session,
+            calendarImageLoader: FakeCalendarImageLoader(), calendar: calendar, now: { today }
+        ).makeCalendarModule()
+        let model = module.viewModel
+        model.start()
+        defer { model.stop() }
+        try await waitUntil { repository.observations.count == 1 }
+        XCTAssertEqual(repository.observations.first?.userID, "injected-user")
+        repository.send([entry("injected-diary")])
+        try await waitUntil { model.selectedEntries.first?.id == "injected-diary" }
+        session.send(nil)
+        try await waitUntil { model.selectedEntries.isEmpty && model.state == .loaded }
+        try await waitUntil { repository.terminated.contains(0) }
+    }
+
+    func testAppCompositionReadsClockAgainWhenUserChanges() async throws {
+        let repository = FakeDiaryRepository()
+        let session = FakeDiarySession(userID: "first")
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
+        var today = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 12, day: 31)))
+        let model = AppDependencies(
+            diaryRepository: repository, userSession: session,
+            calendarImageLoader: FakeCalendarImageLoader(), calendar: calendar, now: { today }
+        ).makeCalendarModule().viewModel
+        model.start()
+        defer { model.stop() }
+        try await waitUntil { repository.observations.count == 1 }
+        today = try XCTUnwrap(calendar.date(from: DateComponents(year: 2027, month: 1, day: 1)))
+        session.send("second")
+        try await waitUntil { repository.observations.count == 2 }
+        XCTAssertEqual(calendar.component(.year, from: model.selectedDate), 2027)
+        XCTAssertEqual(calendar.component(.month, from: model.selectedDate), 1)
+        XCTAssertEqual(calendar.component(.day, from: model.selectedDate), 1)
+    }
+
+
     private func makeModel(userID: String? = "user-a") throws -> (CalendarViewModel, FakeDiaryRepository, FakeDiarySession) {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
@@ -242,5 +315,16 @@ private final class FakeDiarySession: DiaryUserSession {
     func send(_ userID: String?) {
         self.userID = userID
         continuation?.yield(userID)
+    }
+}
+
+@MainActor
+private final class FakeCalendarImageLoader: CalendarImageLoading {
+    let result = UIImage()
+    private(set) var requestedURL: URL?
+
+    func image(for url: URL) async -> UIImage? {
+        requestedURL = url
+        return result
     }
 }
