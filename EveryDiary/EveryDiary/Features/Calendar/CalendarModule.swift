@@ -1,15 +1,13 @@
-import FirebaseAuth
-import FirebaseFirestore
-import UIKit
+import Foundation
 
 @MainActor
-enum CalendarModule {
-    static func makeViewController() -> UIViewController {
-        let viewModel = CalendarViewModel(
-            repository: FirebaseDiaryReadingRepository(database: .firestore()),
-            session: FirebaseDiaryUserSession(auth: .auth()),
-            calendar: .current
-        )
-        return CalendarHostingController(viewModel: viewModel, imageLoader: CachedCalendarImageLoader(cache: .shared))
+struct CalendarModule {
+    let viewModel: CalendarViewModel
+    let imageLoader: any CalendarImageLoading
+
+    init(repository: any DiaryReadingRepository, session: any DiaryUserSession,
+         imageLoader: any CalendarImageLoading, calendar: Calendar, now: @escaping () -> Date) {
+        viewModel = CalendarViewModel(repository: repository, session: session, calendar: calendar, now: now)
+        self.imageLoader = imageLoader
     }
 }

@@ -2,11 +2,6 @@ import Foundation
 import UIKit
 
 @MainActor
-protocol CalendarImageLoading {
-    func image(for url: URL) async -> UIImage?
-}
-
-@MainActor
 final class CachedCalendarImageLoader: CalendarImageLoading {
     private let cache: ImageCacheManager
 
