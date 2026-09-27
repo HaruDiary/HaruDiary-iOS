@@ -42,8 +42,8 @@
 날씨 설정과 오류 처리, 데이터 쓰기 경계는 후속 작업이다.
 공통 색상·타이포 기준은 기존 `DiaryTheme`를 출발점으로 별도 정리한다.
 
-Calendar의 Firebase 디코딩은 현재 문서 하나가 실패하면 전체 구독을 실패시키는 문제가
-기존 PR 리뷰에서 지적되었다. 의존성 생성 위치 변경과 별도로 동작 재현과 회귀 테스트가 필요하다.
+Firebase 디코딩에서 문서 하나가 실패하면 전체 구독이 실패하던 문제(PR #1 리뷰 지적)는
+`DiaryDocumentDecoding`으로 문서별로 디코딩해 해결했다. 형식이 맞지 않는 문서만 건너뛰고 건수만 로그에 남긴다.
 [기존 리뷰](https://github.com/HaruDiary/HaruDiary-iOS/pull/1#discussion_r4016577753)
 
 ## 검증

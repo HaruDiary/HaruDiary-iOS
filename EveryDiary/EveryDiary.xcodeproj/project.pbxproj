@@ -146,6 +146,9 @@
 		424ED0361D1543C5A3B66C90 /* DayKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6324AE064574465A82455BD2 /* DayKind.swift */; };
 		8DD632A28C81488294BAA5E4 /* DayKindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */; };
 		22C182E499894E82A27047B2 /* DiaryWeatherIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */; };
+		6329E90B791045EA9A38C37B /* DiaryDocumentDecoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E851EEAA92546DAB5CA3FFE /* DiaryDocumentDecoding.swift */; };
+		A416D33CE12042618745C98B /* DiaryDocumentDecoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E851EEAA92546DAB5CA3FFE /* DiaryDocumentDecoding.swift */; };
+		DA0D49A076EF43ECAE040843 /* DiaryDocumentDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FAAA1DC7DFF409D9B8A4315 /* DiaryDocumentDecodingTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -270,6 +273,8 @@
 		6324AE064574465A82455BD2 /* DayKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKind.swift"; sourceTree = "<group>"; };
 		7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKindTests.swift"; sourceTree = "<group>"; };
 		8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWeatherIcon.swift"; sourceTree = "<group>"; };
+		0E851EEAA92546DAB5CA3FFE /* DiaryDocumentDecoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryDocumentDecoding.swift"; sourceTree = "<group>"; };
+		1FAAA1DC7DFF409D9B8A4315 /* DiaryDocumentDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryDocumentDecodingTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -508,6 +513,7 @@
 		CE00DB6416F6564570F700F0 /* EveryDiaryLogicTests */ = {
 			isa = PBXGroup;
 			children = (
+				1FAAA1DC7DFF409D9B8A4315 /* DiaryDocumentDecodingTests.swift */,
 				7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */,
 				0D07560776BB423EAB1F19AC /* DiaryListViewModelTests.swift */,
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
@@ -544,6 +550,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				0E851EEAA92546DAB5CA3FFE /* DiaryDocumentDecoding.swift */,
 				6324AE064574465A82455BD2 /* DayKind.swift */,
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
@@ -737,6 +744,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA0D49A076EF43ECAE040843 /* DiaryDocumentDecodingTests.swift in Sources */,
+				A416D33CE12042618745C98B /* DiaryDocumentDecoding.swift in Sources */,
 				8DD632A28C81488294BAA5E4 /* DayKindTests.swift in Sources */,
 				424ED0361D1543C5A3B66C90 /* DayKind.swift in Sources */,
 				1D5F031E719547F3923E8441 /* DiaryListModule.swift in Sources */,
@@ -767,6 +776,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6329E90B791045EA9A38C37B /* DiaryDocumentDecoding.swift in Sources */,
 				22C182E499894E82A27047B2 /* DiaryWeatherIcon.swift in Sources */,
 				E576E797870B4577809525AA /* DayKind.swift in Sources */,
 				1E35C1E4A31A4D958E57EC97 /* DiaryListModule+UIKit.swift in Sources */,
