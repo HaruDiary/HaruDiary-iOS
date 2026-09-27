@@ -33,7 +33,7 @@ struct CalendarView: View {
                 .padding(DiaryTheme.Spacing.screen)
                 .padding(.bottom, DiaryTheme.Size.floatingButton + DiaryTheme.Spacing.section)
             }
-            CalendarWriteButton(action: onWriteDiary)
+            DiaryWriteButton(action: onWriteDiary)
                 .padding(DiaryTheme.Spacing.screen)
         }
     }
@@ -228,21 +228,5 @@ struct CalendarLoadStatus: View {
         case .loaded:
             EmptyView()
         }
-    }
-}
-
-struct CalendarWriteButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "square.and.pencil")
-                .font(.system(size: DiaryTheme.Size.icon))
-                .foregroundStyle(DiaryTheme.Colors.surface)
-                .frame(width: DiaryTheme.Size.floatingButton, height: DiaryTheme.Size.floatingButton)
-                .background(DiaryTheme.Colors.brand, in: Circle())
-                .shadow(color: DiaryTheme.Colors.brand.opacity(0.2), radius: 8, y: 4)
-        }
-        .accessibilityLabel("일기 작성")
     }
 }

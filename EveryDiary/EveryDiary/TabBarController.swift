@@ -8,7 +8,7 @@
 import UIKit
 
 class TabBarController: UITabBarController {
-    let firstVC = UINavigationController.init(rootViewController: DiaryListVC())
+    let firstVC = UINavigationController(rootViewController: DiaryListModule.makeViewController())
     let secondVC = UINavigationController.init(rootViewController: MotivationVC())
     let thirdVC = UINavigationController(rootViewController: CalendarModule.makeViewController())
     

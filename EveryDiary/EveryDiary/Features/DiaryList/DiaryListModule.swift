@@ -12,4 +12,8 @@ enum DiaryListModule {
             calendar: .current
         )
     }
+
+    static func makeViewController() -> UIViewController {
+        DiaryListHostingController(viewModel: makeViewModel(), imageLoader: CachedCalendarImageLoader(cache: .shared))
+    }
 }

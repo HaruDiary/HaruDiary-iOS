@@ -28,7 +28,7 @@ struct CalendarDayListView: View {
                 .padding(DiaryTheme.Spacing.screen)
                 .padding(.bottom, DiaryTheme.Size.floatingButton + DiaryTheme.Spacing.section)
             }
-            CalendarWriteButton(action: onWriteDiary).padding(DiaryTheme.Spacing.screen)
+            DiaryWriteButton(action: onWriteDiary).padding(DiaryTheme.Spacing.screen)
         }
     }
 }
