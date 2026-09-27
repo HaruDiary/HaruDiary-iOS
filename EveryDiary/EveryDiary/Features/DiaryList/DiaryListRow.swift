@@ -17,7 +17,7 @@ struct DiaryListRow: View {
         columns {
             dateColumn
             VStack(alignment: .leading, spacing: DiaryTheme.Spacing.small) {
-                // The icons sit in a photo-wide slot so the title always starts where the content does.
+                // The icons sit in a photo-wide slot so every title starts on the same line.
                 HStack(spacing: alignsTitleWithContent ? DiaryTheme.Spacing.medium : DiaryTheme.Spacing.small) {
                     iconSlot.accessibilityHidden(true)
                     Text(entry.title)
@@ -27,10 +27,9 @@ struct DiaryListRow: View {
                         .truncationMode(.tail)
                 }
                 columns {
+                    // Without a photo the content starts where the photo would be, using the full width.
                     if let url = thumbnailURL {
                         DiaryListThumbnail(url: url, imageLoader: imageLoader)
-                    } else if alignsTitleWithContent {
-                        Color.clear.frame(width: DiaryListThumbnail.side, height: 0)
                     }
                     Text(entry.content)
                         .font(.subheadline)
