@@ -36,6 +36,14 @@ class FirebaseStorageManager {
             let firebaseReference = Storage.storage().reference().child("\(pathRoot)/\(imageName)")
             dispatchGroup.enter()
             firebaseReference.putData(imageData, metadata: metaData) { metaData, error in
+                if let error = error as NSError? {
+                    // A failed upload has no file to link; callers treat the missing URL as a failure.
+                    // Domain/code only: the HTTP status (e.g. 402 when Storage billing is unavailable) is in the underlying error.
+                    let underlying = (error.userInfo[NSUnderlyingErrorKey] as? NSError).map { " \($0.domain) \($0.code)" } ?? ""
+                    print("Image upload failed: \(error.domain) \(error.code)\(underlying)")
+                    dispatchGroup.leave()
+                    return
+                }
                 firebaseReference.downloadURL { url, error in
                     if let downloadURL = url {
                         uploadedURL.append(downloadURL)

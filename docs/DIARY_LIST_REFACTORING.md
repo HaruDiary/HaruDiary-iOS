@@ -67,8 +67,6 @@ Firebase 저장 경로 `users/{uid}/diaries/{id}`와 필드·문서 ID는 변경
 ## 남겨 둔 UIKit 코드
 
 `DiaryListVC`는 같은 ViewModel을 사용하도록 연결해 검증했고, 현재 탭은 SwiftUI를 사용한다.
-`WriteDiaryVC`가 실패 알림 presenter로 `DiaryListVC()`를 생성하므로 인자 없는 생성자를 유지하고,
-구독은 화면이 실제로 나타날 때 시작한다. 해당 알림이 화면에 보이지 않는 기존 문제는 작성 화면 작업에서 다룬다.
 `PaginationManager`는 `TrashVC`가 사용하므로 유지한다. 목록 셀·헤더 등은 통합 검증 후 제거한다.
 이미지 로더는 Calendar의 `CalendarImageLoading`을 재사용한다. 공통 이름으로의 정리는 의존성 조립 PR(#2) 병합 후 진행한다.
 

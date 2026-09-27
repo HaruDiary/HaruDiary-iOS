@@ -21,7 +21,6 @@
 | `Features/DiaryList/DiaryListModule.swift`, `+UIKit.swift` | 일기 목록 상태 생성과 UIKit hosting controller 연결. Calendar와 같은 조회·세션을 재사용 |
 
 일기 쓰기 경계는 휴지통 이동이라는 첫 사용처와 함께 `DiaryTrashing`으로 추가했다. 운영 구현은 요청한 사용자 경로의 휴지통 필드만 수정한다.
-`DiaryListVC()`의 인자 없는 생성자는 `WriteDiaryVC`의 기존 알림 경로 때문에 `AppDependencies.live()`를 직접 사용한다. 해당 호출부 정리 후 제거한다.
 
 운영 의존성은 `AppDelegate`의 Firebase 초기화 이후 scene 연결 시 생성한다.
 같은 의존성으로 여러 모듈을 만들더라도 화면 상태는 각각 새로 생성된다.
