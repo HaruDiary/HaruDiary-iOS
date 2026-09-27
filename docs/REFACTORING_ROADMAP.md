@@ -137,8 +137,11 @@ Firebase·외부 서비스 접근 분리
 
 PR 템플릿, 컨벤션, AI 공통 지침과 CI가 준비되어 있다.
 Calendar 작업에서 일기 모델·날짜 formatter의 Foundation 분리, Calendar 날짜별 처리·조회 경계·
-화면 상태 분리와 SwiftUI 탭 연결을 적용했다. 현재 로직 테스트는 총 27개다.
-세부 범위와 남은 통합 검증은 [Calendar 리팩토링](CALENDAR_REFACTORING.md)을 참고한다.
+화면 상태 분리와 SwiftUI 탭 연결을 적용했다. 일기 목록은 조회·검색·휴지통 이동 상태를 분리해
+UIKit에서 검증한 뒤 SwiftUI 탭으로 교체했고, 사용자별 구독 수명을 Calendar와 공유한다.
+현재 로직 테스트는 총 45개다.
+세부 범위와 남은 통합 검증은 [Calendar 리팩토링](CALENDAR_REFACTORING.md),
+[일기 목록 리팩토링](DIARY_LIST_REFACTORING.md)을 참고한다.
 다른 기능과 앱 전체의 로드맵 완료를 의미하지 않는다.
 
 **먼저 전환 목록을 함께 검토하고 공통 기반의 최소 범위를 정한다.**
