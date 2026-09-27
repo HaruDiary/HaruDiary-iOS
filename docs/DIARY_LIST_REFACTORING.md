@@ -26,8 +26,8 @@ Firebase 저장 경로 `users/{uid}/diaries/{id}`와 필드·문서 ID는 변경
 |---|---|
 | `Domain/DiaryList/DiaryListIndex.swift` | 삭제·날짜 오류 제외, 월·시각 최신순, 같은 시각은 문서 ID 순, 제목/본문 검색 |
 | `Domain/UserDiaryFeed.swift` | 사용자 변경 감지, 사용자별 단일 구독, 늦은 응답 차단, 취소·해제. Calendar와 공유 |
-| `Domain/DiaryUpdating.swift` | 일기 문서 교체 인터페이스, 휴지통 이동 규칙(`isDeleted`, `deleteDate`) |
-| `Data/FirebaseDiaryUpdater.swift` | 기존 `DiaryManager.updateDiary`를 감싸 같은 경로·필드로 저장 |
+| `Domain/DiaryTrashing.swift` | 휴지통 이동 인터페이스. 요청한 사용자 ID·문서 ID·시각을 받는다 |
+| `Data/FirebaseDiaryTrash.swift` | `users/{요청 사용자}/diaries/{id}`의 `isDeleted`·`deleteDate`만 `updateData`. 문서가 없으면 실패 |
 | `Features/DiaryList/DiaryListViewModel.swift` | 조회 상태, 섹션, 검색어, 업로드 표시, 휴지통 이동 결과 |
 | `Features/DiaryList/DiaryListView.swift`, `DiaryListRow.swift` | 목록·검색·빈 상태·오류 표시와 입력 |
 | `Features/DiaryList/DiaryListHostingController.swift` | 작성·상세·수정·설정·일시 메시지 UIKit 연결 |
@@ -44,6 +44,9 @@ Firebase 저장 경로 `users/{uid}/diaries/{id}`와 필드·문서 ID는 변경
   기록이 많은 계정의 첫 로드 비용은 실제 데이터로 확인이 필요하다.
 - 검색은 입력마다 즉시 반영한다. 앞뒤 공백만 있는 검색어는 전체 목록으로 본다.
 - 휴지통 이동은 저장 성공 후 "삭제 완료", 실패 시 "삭제 실패"를 표시한다. 목록에서는 구독 갱신으로 빠진다.
+- 휴지통 이동은 목록이 관찰 중인 사용자에 묶는다. 쓰기 시점의 로그인 사용자를 쓰지 않고, 필드 두 개만 수정해
+  계정 전환 후에도 다른 계정에 문서를 쓰지 않는다. 전환 전 요청의 늦은 결과 메시지는 표시하지 않는다.
+  이전 구현(`DiaryManager.updateDiary`의 문서 전체 `setData`)과 달리 기존 문서에 `id` 필드를 추가하지 않는다.
 - 업로드 진행은 기존처럼 새 일기 작성에만 표시한다. 저장이 겹치면 모두 끝날 때까지 유지한다.
 - 로그인 상태 변경은 `loginstatusChanged` 알림 대신 Firebase 인증 상태 구독으로 반영한다.
 - 월 이동 화살표(목업 01)는 월 하나만 보여 주는 동작 변경이라 적용하지 않았다. 연속 월별 목록을 유지한다.

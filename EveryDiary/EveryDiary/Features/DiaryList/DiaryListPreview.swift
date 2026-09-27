@@ -10,7 +10,7 @@ private struct DiaryListPreviewView: View {
         calendar.timeZone = TimeZone(secondsFromGMT: 9 * 3600) ?? .current
         viewModel = DiaryListViewModel(
             repository: DiaryListPreviewRepository(mode: mode), session: DiaryListPreviewSession(),
-            updater: DiaryListPreviewUpdater(), calendar: calendar, now: { CalendarPreviewData.now }
+            trash: DiaryListPreviewTrash(), calendar: calendar, now: { CalendarPreviewData.now }
         )
         viewModel.query = query
     }
@@ -54,8 +54,8 @@ private final class DiaryListPreviewSession: DiaryUserSession {
 }
 
 @MainActor
-private final class DiaryListPreviewUpdater: DiaryUpdating {
-    func update(_ entry: DiaryEntry) async throws {}
+private final class DiaryListPreviewTrash: DiaryTrashing {
+    func moveToTrash(diaryID: String, userID: String, at date: Date) async throws {}
 }
 
 @MainActor

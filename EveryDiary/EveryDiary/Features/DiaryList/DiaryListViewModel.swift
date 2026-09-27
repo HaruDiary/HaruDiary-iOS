@@ -27,16 +27,17 @@ final class DiaryListViewModel {
     let calendar: Calendar
 
     @ObservationIgnored private let feed: UserDiaryFeed
-    @ObservationIgnored private let updater: any DiaryUpdating
+    @ObservationIgnored private let trash: any DiaryTrashing
     @ObservationIgnored private let now: () -> Date
     @ObservationIgnored private var entries: [DiaryEntry] = []
     @ObservationIgnored private var pendingUploadCount = 0
     @ObservationIgnored private var trashingIDs: Set<String> = []
+    @ObservationIgnored private var userGeneration = 0
 
-    init(repository: any DiaryReadingRepository, session: any DiaryUserSession, updater: any DiaryUpdating,
+    init(repository: any DiaryReadingRepository, session: any DiaryUserSession, trash: any DiaryTrashing,
          calendar: Calendar, now: @escaping () -> Date = Date.init) {
         feed = UserDiaryFeed(repository: repository, session: session)
-        self.updater = updater
+        self.trash = trash
         self.calendar = calendar
         self.now = now
         feed.onEvent = { [weak self] in self?.apply($0) }
@@ -74,25 +75,33 @@ final class DiaryListViewModel {
     }
 
     func moveToTrash(_ entry: DiaryEntry) async {
-        guard let diaryID = entry.id else {
+        // Bind the request to the user whose list is shown, not to whoever is signed in when it is written.
+        guard let diaryID = entry.id, let userID = feed.currentUserID else {
             notice = .trashFailed
             return
         }
         guard !trashingIDs.contains(diaryID) else { return }
+        let generation = userGeneration
         trashingIDs.insert(diaryID)
-        defer { trashingIDs.remove(diaryID) }
+        let result: Notice
         do {
             // The live subscription removes the diary from the list once the change is stored.
-            try await updater.update(entry.movedToTrash(at: now()))
-            notice = .movedToTrash
+            try await trash.moveToTrash(diaryID: diaryID, userID: userID, at: now())
+            result = .movedToTrash
         } catch {
-            notice = .trashFailed
+            result = .trashFailed
         }
+        // A late result for the previous user must not appear on the next user's screen.
+        guard generation == userGeneration else { return }
+        trashingIDs.remove(diaryID)
+        notice = result
     }
 
     private func apply(_ event: UserDiaryFeed.Event) {
         switch event {
         case .userChanged:
+            userGeneration += 1
+            trashingIDs.removeAll()
             entries = []
             rebuildSections()
         case .loading:

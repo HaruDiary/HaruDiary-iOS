@@ -6,16 +6,16 @@ import XCTest
 final class DiaryListViewModelTests: XCTestCase {
     private let now = Date(timeIntervalSince1970: 1_789_430_400)
 
-    private func makeModel(userID: String? = "user-a") throws -> (DiaryListViewModel, ListRepository, ListSession, ListUpdater) {
+    private func makeModel(userID: String? = "user-a") throws -> (DiaryListViewModel, ListRepository, ListSession, ListTrash) {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
         let repository = ListRepository()
         let session = ListSession(userID: userID)
-        let updater = ListUpdater()
+        let trash = ListTrash()
         let fixedNow = now
-        let model = DiaryListViewModel(repository: repository, session: session, updater: updater,
+        let model = DiaryListViewModel(repository: repository, session: session, trash: trash,
                                        calendar: calendar, now: { fixedNow })
-        return (model, repository, session, updater)
+        return (model, repository, session, trash)
     }
 
     private func entry(_ id: String, day: Int = 15, month: Int = 9, title: String? = nil, isDeleted: Bool = false) -> DiaryEntry {
@@ -149,44 +149,80 @@ final class DiaryListViewModelTests: XCTestCase {
         XCTAssertFalse(model.isUploadingDiary)
     }
 
-    func testMoveToTrashStoresDeletedCopyWithCurrentTime() async throws {
-        let (model, _, _, updater) = try makeModel()
-        let original = entry("diary")
+    private func startObserving(_ model: DiaryListViewModel, _ repository: ListRepository) async throws {
+        model.start()
+        try await waitUntil { repository.observations.count == 1 }
+    }
 
-        async let move: Void = model.moveToTrash(original)
-        try await waitUntil { updater.requests.count == 1 }
-        updater.finish(with: nil)
+    func testMoveToTrashTargetsObservedUserWithCurrentTime() async throws {
+        let (model, repository, _, trash) = try makeModel()
+        try await startObserving(model, repository)
+        defer { model.stop() }
+
+        async let move: Void = model.moveToTrash(entry("diary"))
+        try await waitUntil { trash.requests.count == 1 }
+        trash.finish(with: nil)
         await move
 
-        let stored = try XCTUnwrap(updater.requests.first)
-        XCTAssertEqual(stored.id, "diary")
-        XCTAssertTrue(stored.isDeleted)
-        XCTAssertEqual(stored.deleteDate, now)
-        XCTAssertEqual(stored.title, original.title)
-        XCTAssertEqual(stored.dateString, original.dateString)
+        let request = try XCTUnwrap(trash.requests.first)
+        XCTAssertEqual(request.diaryID, "diary")
+        XCTAssertEqual(request.userID, "user-a")
+        XCTAssertEqual(request.date, now)
         XCTAssertEqual(model.notice, .movedToTrash)
     }
 
+    func testTrashRequestStaysWithOriginalUserAndLateResultIsNotShownAfterSwitch() async throws {
+        let (model, repository, session, trash) = try makeModel()
+        try await startObserving(model, repository)
+        defer { model.stop() }
+
+        async let move: Void = model.moveToTrash(entry("diary-of-a"))
+        try await waitUntil { trash.requests.count == 1 }
+        session.send("user-b")
+        try await waitUntil { repository.observations.count == 2 }
+        trash.finish(with: nil)
+        await move
+
+        XCTAssertEqual(trash.requests.first?.userID, "user-a")
+        XCTAssertNil(model.notice)
+    }
+
+    func testTrashWithoutSignedInUserFailsWithoutWriting() async throws {
+        let (model, _, _, trash) = try makeModel(userID: nil)
+        model.start()
+        defer { model.stop() }
+        try await waitUntil { model.state == .loaded }
+
+        await model.moveToTrash(entry("orphan"))
+
+        XCTAssertTrue(trash.requests.isEmpty)
+        XCTAssertEqual(model.notice, .trashFailed)
+    }
+
     func testFailedMoveToTrashIsReported() async throws {
-        let (model, _, _, updater) = try makeModel()
+        let (model, repository, _, trash) = try makeModel()
+        try await startObserving(model, repository)
+        defer { model.stop() }
 
         async let move: Void = model.moveToTrash(entry("diary"))
-        try await waitUntil { updater.requests.count == 1 }
-        updater.finish(with: NSError(domain: "DiaryListTests", code: 1))
+        try await waitUntil { trash.requests.count == 1 }
+        trash.finish(with: NSError(domain: "DiaryListTests", code: 1))
         await move
 
         XCTAssertEqual(model.notice, .trashFailed)
     }
 
     func testRepeatedTrashRequestIsIgnoredWhileSaving() async throws {
-        let (model, _, _, updater) = try makeModel()
+        let (model, repository, _, trash) = try makeModel()
+        try await startObserving(model, repository)
+        defer { model.stop() }
 
         async let first: Void = model.moveToTrash(entry("diary"))
-        try await waitUntil { updater.requests.count == 1 }
+        try await waitUntil { trash.requests.count == 1 }
         await model.moveToTrash(entry("diary"))
-        XCTAssertEqual(updater.requests.count, 1)
+        XCTAssertEqual(trash.requests.count, 1)
 
-        updater.finish(with: nil)
+        trash.finish(with: nil)
         await first
         XCTAssertEqual(model.notice, .movedToTrash)
     }
@@ -196,10 +232,10 @@ final class DiaryListViewModelTests: XCTestCase {
         calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
         let repository = ListRepository()
         let session = ListSession(userID: "injected-user")
-        let updater = ListUpdater()
+        let trash = ListTrash()
         let fixedNow = now
         let dependencies = AppDependencies(
-            diaryRepository: repository, userSession: session, diaryUpdater: updater,
+            diaryRepository: repository, userSession: session, diaryTrash: trash,
             calendarImageLoader: ListImageLoader(), calendar: calendar, now: { fixedNow }
         )
         let module = dependencies.makeDiaryListModule()
@@ -214,16 +250,17 @@ final class DiaryListViewModelTests: XCTestCase {
         XCTAssertEqual(model.calendar.timeZone, calendar.timeZone)
 
         async let move: Void = model.moveToTrash(entry("diary"))
-        try await waitUntil { updater.requests.count == 1 }
-        updater.finish(with: nil)
+        try await waitUntil { trash.requests.count == 1 }
+        trash.finish(with: nil)
         await move
-        XCTAssertEqual(updater.requests.first?.deleteDate, now)
+        XCTAssertEqual(trash.requests.first?.userID, "injected-user")
+        XCTAssertEqual(trash.requests.first?.date, now)
     }
 
     func testDeallocationReleasesSubscription() async throws {
         let repository = ListRepository()
         var model: DiaryListViewModel? = DiaryListViewModel(
-            repository: repository, session: ListSession(userID: "user-a"), updater: ListUpdater(), calendar: .current
+            repository: repository, session: ListSession(userID: "user-a"), trash: ListTrash(), calendar: .current
         )
         weak var weakModel = model
         model?.start()
@@ -287,12 +324,18 @@ private final class ListSession: DiaryUserSession {
 }
 
 @MainActor
-private final class ListUpdater: DiaryUpdating {
-    private(set) var requests: [DiaryEntry] = []
+private final class ListTrash: DiaryTrashing {
+    struct Request {
+        let diaryID: String
+        let userID: String
+        let date: Date
+    }
+
+    private(set) var requests: [Request] = []
     private var pending: [CheckedContinuation<Void, Error>] = []
 
-    func update(_ entry: DiaryEntry) async throws {
-        requests.append(entry)
+    func moveToTrash(diaryID: String, userID: String, at date: Date) async throws {
+        requests.append(Request(diaryID: diaryID, userID: userID, date: date))
         try await withCheckedThrowingContinuation { pending.append($0) }
     }
 

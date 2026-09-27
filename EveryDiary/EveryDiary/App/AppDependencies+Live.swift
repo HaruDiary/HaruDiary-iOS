@@ -7,7 +7,7 @@ extension AppDependencies {
         AppDependencies(
             diaryRepository: FirebaseDiaryReadingRepository(database: .firestore()),
             userSession: FirebaseDiaryUserSession(auth: .auth()),
-            diaryUpdater: FirebaseDiaryUpdater(manager: .shared),
+            diaryTrash: FirebaseDiaryTrash(database: .firestore()),
             calendarImageLoader: CachedCalendarImageLoader(cache: .shared),
             calendar: .current,
             now: Date.init

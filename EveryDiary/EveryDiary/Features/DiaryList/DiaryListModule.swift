@@ -5,9 +5,9 @@ struct DiaryListModule {
     let viewModel: DiaryListViewModel
     let imageLoader: any CalendarImageLoading
 
-    init(repository: any DiaryReadingRepository, session: any DiaryUserSession, updater: any DiaryUpdating,
+    init(repository: any DiaryReadingRepository, session: any DiaryUserSession, trash: any DiaryTrashing,
          imageLoader: any CalendarImageLoading, calendar: Calendar, now: @escaping () -> Date) {
-        viewModel = DiaryListViewModel(repository: repository, session: session, updater: updater,
+        viewModel = DiaryListViewModel(repository: repository, session: session, trash: trash,
                                        calendar: calendar, now: now)
         self.imageLoader = imageLoader
     }

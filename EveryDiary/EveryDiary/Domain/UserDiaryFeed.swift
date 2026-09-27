@@ -22,6 +22,11 @@ final class UserDiaryFeed {
     private var hasReceivedUser = false
     private var generation = 0
 
+    /// The user whose diaries are currently observed; nil before the first session event or when signed out.
+    var currentUserID: String? {
+        hasReceivedUser ? userID : nil
+    }
+
     init(repository: any DiaryReadingRepository, session: any DiaryUserSession) {
         self.repository = repository
         self.session = session
