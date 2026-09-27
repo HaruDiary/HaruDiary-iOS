@@ -10,7 +10,14 @@ import UIKit
 class TabBarController: UITabBarController {
     let firstVC = UINavigationController.init(rootViewController: DiaryListVC())
     let secondVC = UINavigationController.init(rootViewController: MotivationVC())
-    let thirdVC = UINavigationController(rootViewController: CalendarModule.makeViewController())
+    let thirdVC: UINavigationController
+
+    init(dependencies: AppDependencies) {
+        thirdVC = UINavigationController(rootViewController: dependencies.makeCalendarModule().makeViewController())
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { return nil }
     
     override func viewDidLoad() {
         super.viewDidLoad()

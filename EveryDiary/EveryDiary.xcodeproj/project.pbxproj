@@ -109,6 +109,13 @@
 		EA3E98C73D2D4D59BC130B75 /* CalendarPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AC1AC8F29A124B3FE57738 /* CalendarPreview.swift */; };
 		0A094B09B87D9E41E85A1392 /* DiaryTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040BD821321645E60FF1909E /* DiaryTheme.swift */; };
 		ACFFBF2182BFFBED68270CF1 /* CalendarPreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19043FE0D5E079D44FB70E39 /* CalendarPreviewData.swift */; };
+		A679E9FE3F02E1475D2A3453 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0A1A4ACBF380538217CCF /* AppDependencies.swift */; };
+		A6DFE15F343FA7A052911502 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0A1A4ACBF380538217CCF /* AppDependencies.swift */; };
+		AC2C4633B29F140249F119A5 /* AppDependencies+Live.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D766F8A0230FD70E9D218E /* AppDependencies+Live.swift */; };
+		D9869F6B940EE2FE42B49566 /* CalendarImageLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B0DDC556D00782C3F47643 /* CalendarImageLoading.swift */; };
+		E6A11250561016383822936F /* CalendarImageLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B0DDC556D00782C3F47643 /* CalendarImageLoading.swift */; };
+		ECCCB9B265E51F8E124E0931 /* CalendarModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F48F50BB73E9E4A9B0BF94C /* CalendarModule+UIKit.swift */; };
+		414F8630D807B7793C177C33 /* CalendarModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -207,6 +214,10 @@
 		73AC1AC8F29A124B3FE57738 /* CalendarPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarPreview.swift"; sourceTree = "<group>"; };
 		040BD821321645E60FF1909E /* DiaryTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTheme.swift"; sourceTree = "<group>"; };
 		19043FE0D5E079D44FB70E39 /* CalendarPreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarPreviewData.swift"; sourceTree = "<group>"; };
+		40A0A1A4ACBF380538217CCF /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDependencies.swift"; sourceTree = "<group>"; };
+		61D766F8A0230FD70E9D218E /* AppDependencies+Live.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDependencies+Live.swift"; sourceTree = "<group>"; };
+		10B0DDC556D00782C3F47643 /* CalendarImageLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarImageLoading.swift"; sourceTree = "<group>"; };
+		5F48F50BB73E9E4A9B0BF94C /* CalendarModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule+UIKit.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -335,6 +346,7 @@
 		6BABC3672B85D107009267B3 /* EveryDiary */ = {
 			isa = PBXGroup;
 			children = (
+				9CABC0000000000000000001 /* App */,
 				BDF71909E1ED119D43F0FF4A /* DesignSystem */,
 				BC49A4866C5E0A9951D22E14 /* Features */,
 				9987856AA8934E3BE9726639 /* Data */,
@@ -502,6 +514,8 @@
 		BC49A4866C5E0A9951D22E14 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				5F48F50BB73E9E4A9B0BF94C /* CalendarModule+UIKit.swift */,
+				10B0DDC556D00782C3F47643 /* CalendarImageLoading.swift */,
 				19043FE0D5E079D44FB70E39 /* CalendarPreviewData.swift */,
 				73AC1AC8F29A124B3FE57738 /* CalendarPreview.swift */,
 				5B786B16EF72A953A03BBB30 /* CalendarHostingController.swift */,
@@ -521,6 +535,15 @@
 				040BD821321645E60FF1909E /* DiaryTheme.swift */,
 			);
 			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		9CABC0000000000000000001 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				40A0A1A4ACBF380538217CCF /* AppDependencies.swift */,
+				61D766F8A0230FD70E9D218E /* AppDependencies+Live.swift */,
+			);
+			path = App;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -640,6 +663,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				414F8630D807B7793C177C33 /* CalendarModule.swift in Sources */,
+				E6A11250561016383822936F /* CalendarImageLoading.swift in Sources */,
+				A6DFE15F343FA7A052911502 /* AppDependencies.swift in Sources */,
 				0381394D255592FA1F83588D /* CalendarViewModelTests.swift in Sources */,
 				00C61E7E577D7F4C26FA9F55 /* CalendarViewModel.swift in Sources */,
 				F598E0932D21B852FDEC3A81 /* DiaryReadingRepository.swift in Sources */,
@@ -655,6 +681,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ECCCB9B265E51F8E124E0931 /* CalendarModule+UIKit.swift in Sources */,
+				D9869F6B940EE2FE42B49566 /* CalendarImageLoading.swift in Sources */,
+				AC2C4633B29F140249F119A5 /* AppDependencies+Live.swift in Sources */,
+				A679E9FE3F02E1475D2A3453 /* AppDependencies.swift in Sources */,
 				ACFFBF2182BFFBED68270CF1 /* CalendarPreviewData.swift in Sources */,
 				0A094B09B87D9E41E85A1392 /* DiaryTheme.swift in Sources */,
 				EA3E98C73D2D4D59BC130B75 /* CalendarPreview.swift in Sources */,
