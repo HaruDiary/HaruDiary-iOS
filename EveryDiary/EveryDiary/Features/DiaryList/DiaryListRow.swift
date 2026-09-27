@@ -59,7 +59,7 @@ struct DiaryListRow: View {
         } else {
             VStack(spacing: 2) {
                 Text(dayText).font(.title3.weight(.bold)).foregroundStyle(dayColor ?? DiaryTheme.Colors.text)
-                Text(weekdayText).font(DiaryTheme.Fonts.caption).foregroundStyle(dayColor ?? DiaryTheme.Colors.secondaryText)
+                Text(weekdayText).font(.footnote.weight(.medium)).foregroundStyle(dayColor ?? DiaryTheme.Colors.secondaryText)
             }
             .frame(minWidth: 32)
         }
