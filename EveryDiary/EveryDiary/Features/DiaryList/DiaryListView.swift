@@ -75,33 +75,36 @@ struct DiaryListView: View {
         }
     }
 
+    // A List (not a ScrollView) so rows get the system swipe actions, like Mail.
     private var list: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: DiaryTheme.Spacing.medium, pinnedViews: [.sectionHeaders]) {
-                if viewModel.isSearching {
-                    Text("검색 결과 \(viewModel.visibleCount)개")
-                        .font(DiaryTheme.Fonts.caption)
-                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
-                }
-                if viewModel.state == .failed {
-                    DiaryListLoadFailure(onRetry: viewModel.retry)
-                }
-                if viewModel.isUploadingDiary {
-                    DiaryListUploadingRow()
-                }
-                ForEach(viewModel.sections) { section in
-                    Section {
-                        ForEach(section.entries, id: \.id) { entry in
-                            row(for: entry)
-                        }
-                    } header: {
-                        monthHeader(section)
+        List {
+            if viewModel.isSearching {
+                Text("검색 결과 \(viewModel.visibleCount)개")
+                    .font(DiaryTheme.Fonts.caption)
+                    .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                    .cardRow()
+            }
+            if viewModel.state == .failed {
+                DiaryListLoadFailure(onRetry: viewModel.retry).cardRow()
+            }
+            if viewModel.isUploadingDiary {
+                DiaryListUploadingRow().cardRow()
+            }
+            ForEach(viewModel.sections) { section in
+                Section {
+                    ForEach(section.entries, id: \.id) { entry in
+                        row(for: entry).cardRow()
                     }
+                } header: {
+                    monthHeader(section)
                 }
             }
-            .padding(.horizontal, DiaryTheme.Spacing.screen)
-            .padding(.bottom, DiaryTheme.Size.floatingButton + DiaryTheme.Spacing.section)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .environment(\.defaultMinListRowHeight, 0)
+        .contentMargins(.top, 0, for: .scrollContent)
+        .contentMargins(.bottom, DiaryTheme.Size.floatingButton + DiaryTheme.Spacing.section, for: .scrollContent)
         .scrollDismissesKeyboard(.immediately)
         .refreshable { viewModel.retry() }
     }
@@ -111,6 +114,17 @@ struct DiaryListView: View {
             DiaryListRow(entry: entry, calendar: viewModel.calendar, imageLoader: imageLoader)
         }
         .buttonStyle(.plain)
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button(role: .destructive) {
+                Task { await viewModel.moveToTrash(entry) }
+            } label: {
+                Label("휴지통", systemImage: "trash")
+            }
+            Button { leaveSearch { onEditDiary(entry) } } label: {
+                Label("수정", systemImage: "pencil")
+            }
+            .tint(DiaryTheme.Colors.brand)
+        }
         .contextMenu {
             Button { leaveSearch { onEditDiary(entry) } } label: { Label("수정", systemImage: "pencil") }
             Button(role: .destructive) {
@@ -131,8 +145,10 @@ struct DiaryListView: View {
         Text("\(String(section.year))년 \(section.month)월")
             .font(DiaryTheme.Fonts.section)
             .foregroundStyle(DiaryTheme.Colors.brand)
+            .padding(.horizontal, DiaryTheme.Spacing.screen)
             .frame(maxWidth: .infinity, minHeight: DiaryTheme.Size.touchTarget, alignment: .leading)
             .background(DiaryTheme.Colors.background)
+            .listRowInsets(EdgeInsets())
             .accessibilityAddTraits(.isHeader)
     }
 
@@ -229,5 +245,15 @@ private struct DiaryListEmptyState: View {
         .multilineTextAlignment(.center)
         .padding(DiaryTheme.Spacing.section)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private extension View {
+    /// Keeps the card look inside a plain List: no separators or row background, card spacing as insets.
+    func cardRow() -> some View {
+        listRowInsets(EdgeInsets(top: DiaryTheme.Spacing.small / 2 + 2, leading: DiaryTheme.Spacing.screen,
+                                 bottom: DiaryTheme.Spacing.small / 2 + 2, trailing: DiaryTheme.Spacing.screen))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
     }
 }

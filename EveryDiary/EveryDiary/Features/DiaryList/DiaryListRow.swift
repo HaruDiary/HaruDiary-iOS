@@ -17,18 +17,9 @@ struct DiaryListRow: View {
         columns {
             dateColumn
             VStack(alignment: .leading, spacing: DiaryTheme.Spacing.small) {
-                // With a photo, the icons take the photo's width so the title starts where the content does.
+                // The icons sit in a photo-wide slot so the title always starts where the content does.
                 HStack(spacing: alignsTitleWithContent ? DiaryTheme.Spacing.medium : DiaryTheme.Spacing.small) {
-                    HStack(spacing: DiaryTheme.Spacing.small) {
-                        if !entry.weather.isEmpty {
-                            DiaryWeatherIcon(name: entry.weather)
-                        }
-                        if !entry.emotion.isEmpty {
-                            Image(entry.emotion).resizable().scaledToFit().frame(width: 20, height: 20)
-                        }
-                    }
-                    .frame(width: alignsTitleWithContent ? DiaryListThumbnail.side : nil, alignment: .leading)
-                    .accessibilityHidden(true)
+                    iconSlot.accessibilityHidden(true)
                     Text(entry.title)
                         .font(DiaryTheme.Fonts.section)
                         .foregroundStyle(DiaryTheme.Colors.text)
@@ -38,6 +29,8 @@ struct DiaryListRow: View {
                 columns {
                     if let url = thumbnailURL {
                         DiaryListThumbnail(url: url, imageLoader: imageLoader)
+                    } else if alignsTitleWithContent {
+                        Color.clear.frame(width: DiaryListThumbnail.side, height: 0)
                     }
                     Text(entry.content)
                         .font(.subheadline)
@@ -74,7 +67,27 @@ struct DiaryListRow: View {
     }
 
     private var alignsTitleWithContent: Bool {
-        thumbnailURL != nil && !dynamicTypeSize.isAccessibilitySize
+        !dynamicTypeSize.isAccessibilitySize
+    }
+
+    // Weather centered in the left half, emotion in the right half; a single icon takes the whole slot.
+    @ViewBuilder
+    private var iconSlot: some View {
+        let icons = HStack(spacing: alignsTitleWithContent ? 0 : DiaryTheme.Spacing.small) {
+            if !entry.weather.isEmpty {
+                DiaryWeatherIcon(name: entry.weather)
+                    .frame(maxWidth: alignsTitleWithContent ? .infinity : nil)
+            }
+            if !entry.emotion.isEmpty {
+                Image(entry.emotion).resizable().scaledToFit().frame(width: 20, height: 20)
+                    .frame(maxWidth: alignsTitleWithContent ? .infinity : nil)
+            }
+        }
+        if alignsTitleWithContent {
+            icons.frame(width: DiaryListThumbnail.side)
+        } else {
+            icons
+        }
     }
 
     private var dayColor: Color? {
