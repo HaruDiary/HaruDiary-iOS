@@ -5,6 +5,8 @@
 //  Created by Dahlia on 3/13/24.
 //
 
+// Unused since the SwiftUI onboarding (OnboardingModule) became the entry point.
+// Kept only for comparison; delete together with PageVC/ContentVC once PR #3 settles.
 import UIKit
 
 import SnapKit

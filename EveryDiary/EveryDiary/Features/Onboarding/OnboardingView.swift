@@ -86,7 +86,8 @@ struct OnboardingView: View {
                 .frame(minHeight: DiaryTheme.Size.touchTarget)
                 .accessibilityHint("소개를 마치고 일기 목록으로 이동합니다")
                 .accessibilityIdentifier("onboarding.skip")
-                .disabled(viewModel.isCompleted)
+                // Same as next/page dots: avoid replacing the root while a page transition is animating.
+                .disabled(isPageSettling || viewModel.isCompleted)
         }
         .padding(.horizontal, DiaryTheme.Spacing.section)
         .padding(.top, DiaryTheme.Spacing.small)
