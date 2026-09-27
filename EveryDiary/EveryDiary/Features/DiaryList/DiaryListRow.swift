@@ -17,15 +17,17 @@ struct DiaryListRow: View {
         columns {
             dateColumn
             VStack(alignment: .leading, spacing: DiaryTheme.Spacing.small) {
-                HStack(spacing: DiaryTheme.Spacing.small) {
-                    Group {
+                // With a photo, the icons take the photo's width so the title starts where the content does.
+                HStack(spacing: alignsTitleWithContent ? DiaryTheme.Spacing.medium : DiaryTheme.Spacing.small) {
+                    HStack(spacing: DiaryTheme.Spacing.small) {
                         if !entry.weather.isEmpty {
-                            Image(entry.weather).resizable().scaledToFit().frame(width: 20, height: 20)
+                            DiaryWeatherIcon(name: entry.weather)
                         }
                         if !entry.emotion.isEmpty {
                             Image(entry.emotion).resizable().scaledToFit().frame(width: 20, height: 20)
                         }
                     }
+                    .frame(width: alignsTitleWithContent ? DiaryListThumbnail.side : nil, alignment: .leading)
                     .accessibilityHidden(true)
                     Text(entry.title)
                         .font(DiaryTheme.Fonts.section)
@@ -71,6 +73,10 @@ struct DiaryListRow: View {
         }
     }
 
+    private var alignsTitleWithContent: Bool {
+        thumbnailURL != nil && !dynamicTypeSize.isAccessibilitySize
+    }
+
     private var dayColor: Color? {
         guard let date else { return nil }
         switch DayKind(date: date, calendar: calendar) {
@@ -112,6 +118,7 @@ struct DiaryListRow: View {
 }
 
 private struct DiaryListThumbnail: View {
+    static let side: CGFloat = 64
     let url: URL
     let imageLoader: any CalendarImageLoading
     @State private var image: UIImage?
@@ -128,7 +135,7 @@ private struct DiaryListThumbnail: View {
                 Image(systemName: "photo").foregroundStyle(DiaryTheme.Colors.secondaryText)
             }
         }
-        .frame(width: 64, height: 64)
+        .frame(width: Self.side, height: Self.side)
         .clipShape(RoundedRectangle(cornerRadius: DiaryTheme.Spacing.small))
         .accessibilityHidden(true)
         .task(id: url) {

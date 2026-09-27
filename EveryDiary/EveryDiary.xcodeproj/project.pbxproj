@@ -145,6 +145,7 @@
 		E576E797870B4577809525AA /* DayKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6324AE064574465A82455BD2 /* DayKind.swift */; };
 		424ED0361D1543C5A3B66C90 /* DayKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6324AE064574465A82455BD2 /* DayKind.swift */; };
 		8DD632A28C81488294BAA5E4 /* DayKindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */; };
+		22C182E499894E82A27047B2 /* DiaryWeatherIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -268,6 +269,7 @@
 		482F67E504C742B2A05E19C0 /* DiaryListModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListModule+UIKit.swift"; sourceTree = "<group>"; };
 		6324AE064574465A82455BD2 /* DayKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKind.swift"; sourceTree = "<group>"; };
 		7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKindTests.swift"; sourceTree = "<group>"; };
+		8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWeatherIcon.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -602,6 +604,7 @@
 		BDF71909E1ED119D43F0FF4A /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */,
 				4D68D4420386455C94759513 /* DiaryWriteButton.swift */,
 				040BD821321645E60FF1909E /* DiaryTheme.swift */,
 			);
@@ -764,6 +767,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22C182E499894E82A27047B2 /* DiaryWeatherIcon.swift in Sources */,
 				E576E797870B4577809525AA /* DayKind.swift in Sources */,
 				1E35C1E4A31A4D958E57EC97 /* DiaryListModule+UIKit.swift in Sources */,
 				32632D98E1CC4BC39530A74B /* DiaryWriteButton.swift in Sources */,
