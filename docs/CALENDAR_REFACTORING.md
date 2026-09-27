@@ -20,12 +20,14 @@ Firebase 저장 경로·필드·계정·문서 ID는 변경하지 않는다.
 | `Features/Calendar/CalendarViewModel.swift` | 월·선택 날짜·조회 상태와 사용자 변경/오류/재시도 처리 |
 | `Features/Calendar/CalendarView.swift`, `CalendarDayListView.swift` | 캘린더·날짜별 목록 표시와 입력 |
 | `Features/Calendar/CalendarHostingController.swift` | 기존 작성·상세·설정 화면 및 UIKit 탐색 연결 |
-| `Features/Calendar/CalendarModule.swift` | 실제 의존성 조립. 탭 진입점 |
+| `Features/Calendar/CalendarModule.swift` | 주입받은 의존성으로 화면 상태 구성. UIKit 연결은 `CalendarModule+UIKit.swift` |
 | `DesignSystem/DiaryTheme.swift` | 기존 colorset을 공유하는 역할별 색상, 최소 타이포·여백·형태 기준 |
 
 일기 모델과 formatter를 옮겼지만 사진/설정/온보딩 모델은 기존 `DataModel.swift`에 유지한다.
 일기 모델과 formatter는 앱·hostless 테스트가 같은 운영 파일을 컴파일한다.
 공통 Repository 작업 시 새 CRUD 체계를 중복 생성하지 않고 위 읽기 인터페이스를 통합한다.
+
+운영 서비스 생성·주입은 [공통 의존성 관리](DEPENDENCIES.md)의 앱 진입 계층에서 담당한다.
 
 ## 조회와 상태 수명
 
