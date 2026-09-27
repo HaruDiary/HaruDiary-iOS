@@ -109,6 +109,13 @@
 		EA3E98C73D2D4D59BC130B75 /* CalendarPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AC1AC8F29A124B3FE57738 /* CalendarPreview.swift */; };
 		0A094B09B87D9E41E85A1392 /* DiaryTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040BD821321645E60FF1909E /* DiaryTheme.swift */; };
 		ACFFBF2182BFFBED68270CF1 /* CalendarPreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19043FE0D5E079D44FB70E39 /* CalendarPreviewData.swift */; };
+		F5A7555511D3AF59C33D0DB3 /* OnboardingProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DC8C0509FE561B652A305B /* OnboardingProgressStore.swift */; };
+		E3E1C687B1DC4D097D0173DB /* OnboardingProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DC8C0509FE561B652A305B /* OnboardingProgressStore.swift */; };
+		75AC3860E9FE309831B3F5F9 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF6F77C4A5A25AB918EF7A9E /* OnboardingViewModel.swift */; };
+		59E3C72F799D4E6B74ECC489 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF6F77C4A5A25AB918EF7A9E /* OnboardingViewModel.swift */; };
+		05DAB852E56A1805B5B72EBB /* OnboardingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */; };
+		7AD1EE51DA407B2833A0BD18 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5B105E6F8BD7B6B2E2BC7B /* OnboardingView.swift */; };
+		B1E063E7D0B3A633A8C60E01 /* OnboardingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB340F7AFEA380AD8ACFB6C1 /* OnboardingModule.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -207,6 +214,11 @@
 		73AC1AC8F29A124B3FE57738 /* CalendarPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarPreview.swift"; sourceTree = "<group>"; };
 		040BD821321645E60FF1909E /* DiaryTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTheme.swift"; sourceTree = "<group>"; };
 		19043FE0D5E079D44FB70E39 /* CalendarPreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarPreviewData.swift"; sourceTree = "<group>"; };
+		A8DC8C0509FE561B652A305B /* OnboardingProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Onboarding/OnboardingProgressStore.swift"; sourceTree = "<group>"; };
+		CF6F77C4A5A25AB918EF7A9E /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Onboarding/OnboardingViewModel.swift"; sourceTree = "<group>"; };
+		DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OnboardingViewModelTests.swift"; sourceTree = "<group>"; };
+		7B5B105E6F8BD7B6B2E2BC7B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Onboarding/OnboardingView.swift"; sourceTree = "<group>"; };
+		FB340F7AFEA380AD8ACFB6C1 /* OnboardingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Onboarding/OnboardingModule.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -444,6 +456,7 @@
 		CE00DB6416F6564570F700F0 /* EveryDiaryLogicTests */ = {
 			isa = PBXGroup;
 			children = (
+				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
 				394F66EE9A24302500E6BAF0 /* CalendarDiaryIndexTests.swift */,
 				00B31F32A3F08AD9CD188D48 /* DiaryEntryTests.swift */,
@@ -476,6 +489,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				A8DC8C0509FE561B652A305B /* OnboardingProgressStore.swift */,
 				4B344B95B910CC4E92228FFD /* DiaryReadingRepository.swift */,
 				1C80F5CF0E2BFB91EF7D7364 /* CalendarDiaryIndex.swift */,
 				A76C8A38EF0C2E9575194A3F /* DiaryEntry.swift */,
@@ -502,6 +516,9 @@
 		BC49A4866C5E0A9951D22E14 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				FB340F7AFEA380AD8ACFB6C1 /* OnboardingModule.swift */,
+				7B5B105E6F8BD7B6B2E2BC7B /* OnboardingView.swift */,
+				CF6F77C4A5A25AB918EF7A9E /* OnboardingViewModel.swift */,
 				19043FE0D5E079D44FB70E39 /* CalendarPreviewData.swift */,
 				73AC1AC8F29A124B3FE57738 /* CalendarPreview.swift */,
 				5B786B16EF72A953A03BBB30 /* CalendarHostingController.swift */,
@@ -640,6 +657,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				05DAB852E56A1805B5B72EBB /* OnboardingViewModelTests.swift in Sources */,
+				59E3C72F799D4E6B74ECC489 /* OnboardingViewModel.swift in Sources */,
+				E3E1C687B1DC4D097D0173DB /* OnboardingProgressStore.swift in Sources */,
 				0381394D255592FA1F83588D /* CalendarViewModelTests.swift in Sources */,
 				00C61E7E577D7F4C26FA9F55 /* CalendarViewModel.swift in Sources */,
 				F598E0932D21B852FDEC3A81 /* DiaryReadingRepository.swift in Sources */,
@@ -655,6 +675,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B1E063E7D0B3A633A8C60E01 /* OnboardingModule.swift in Sources */,
+				7AD1EE51DA407B2833A0BD18 /* OnboardingView.swift in Sources */,
+				75AC3860E9FE309831B3F5F9 /* OnboardingViewModel.swift in Sources */,
+				F5A7555511D3AF59C33D0DB3 /* OnboardingProgressStore.swift in Sources */,
 				ACFFBF2182BFFBED68270CF1 /* CalendarPreviewData.swift in Sources */,
 				0A094B09B87D9E41E85A1392 /* DiaryTheme.swift in Sources */,
 				EA3E98C73D2D4D59BC130B75 /* CalendarPreview.swift in Sources */,

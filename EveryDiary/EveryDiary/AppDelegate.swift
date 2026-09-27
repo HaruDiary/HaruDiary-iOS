@@ -4,7 +4,6 @@
 //
 //  Created by t2023-m0044 on 2/21/24.
 //
-import CoreLocation
 import NotificationCenter
 import UIKit
 import UserNotifications
@@ -17,13 +16,11 @@ import GoogleSignIn
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var userNotificationCenter: UNUserNotificationCenter?
-    let locationManager = CLLocationManager()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         
-        locationManager.requestWhenInUseAuthorization()
-
+        // Location is requested by the diary's weather/map flows when they are used.
         FirebaseApp.configure()
         GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
             if error != nil || user == nil {
@@ -71,4 +68,3 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         completionHandler()
     }
 }
-
