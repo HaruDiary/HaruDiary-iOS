@@ -17,7 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         self.window = window
-        OnboardingModule.install(in: window) { TabBarController() }
+        OnboardingModule.install(in: window) { TabBarController(dependencies: .live()) }
         //강제로 다크모드 해제
         window.overrideUserInterfaceStyle = .light
         window.makeKeyAndVisible()
