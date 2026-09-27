@@ -109,11 +109,16 @@ class DiaryUploadManager {
 
     @MainActor
     private func deleteImages(_ urls: [String]) async {
+        guard !urls.isEmpty else { return }
+        var failedCount = 0
         for url in urls {
-            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                FirebaseStorageManager.deleteImage(urlString: url) { _ in continuation.resume() }
+            let failed = await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
+                FirebaseStorageManager.deleteImage(urlString: url) { error in continuation.resume(returning: error != nil) }
             }
+            if failed { failedCount += 1 }
         }
+        // Counts only; a failed delete leaves an unused file in Storage but never affects the diary.
+        print("Removed \(urls.count - failedCount) photo file(s), \(failedCount) failed")
     }
 
     private func uploadImages(_ imagesLocationInfo: [ImageLocationInfo], completion: @escaping ([String]) -> Void) {
