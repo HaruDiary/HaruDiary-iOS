@@ -22,9 +22,9 @@ class DiaryListVC: UIViewController, UIAdaptivePresentationControllerDelegate {
         super.init(nibName: nil, bundle: nil)
     }
 
-    // Kept for existing call sites; the subscription starts only when the screen appears.
+    // Kept only for WriteDiaryVC's legacy alert presenter; the subscription starts only when the screen appears.
     convenience init() {
-        self.init(viewModel: DiaryListModule.makeViewModel())
+        self.init(viewModel: AppDependencies.live().makeDiaryListModule().viewModel)
     }
 
     required init?(coder: NSCoder) { return nil }

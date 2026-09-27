@@ -1,19 +1,14 @@
-import FirebaseAuth
-import FirebaseFirestore
-import UIKit
+import Foundation
 
 @MainActor
-enum DiaryListModule {
-    static func makeViewModel() -> DiaryListViewModel {
-        DiaryListViewModel(
-            repository: FirebaseDiaryReadingRepository(database: .firestore()),
-            session: FirebaseDiaryUserSession(auth: .auth()),
-            updater: FirebaseDiaryUpdater(manager: .shared),
-            calendar: .current
-        )
-    }
+struct DiaryListModule {
+    let viewModel: DiaryListViewModel
+    let imageLoader: any CalendarImageLoading
 
-    static func makeViewController() -> UIViewController {
-        DiaryListHostingController(viewModel: makeViewModel(), imageLoader: CachedCalendarImageLoader(cache: .shared))
+    init(repository: any DiaryReadingRepository, session: any DiaryUserSession, updater: any DiaryUpdating,
+         imageLoader: any CalendarImageLoading, calendar: Calendar, now: @escaping () -> Date) {
+        viewModel = DiaryListViewModel(repository: repository, session: session, updater: updater,
+                                       calendar: calendar, now: now)
+        self.imageLoader = imageLoader
     }
 }

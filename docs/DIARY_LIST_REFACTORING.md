@@ -29,7 +29,7 @@ Firebase 저장 경로 `users/{uid}/diaries/{id}`와 필드·문서 ID는 변경
 | `Features/DiaryList/DiaryListViewModel.swift` | 조회 상태, 섹션, 검색어, 업로드 표시, 휴지통 이동 결과 |
 | `Features/DiaryList/DiaryListView.swift`, `DiaryListRow.swift` | 목록·검색·빈 상태·오류 표시와 입력 |
 | `Features/DiaryList/DiaryListHostingController.swift` | 작성·상세·수정·설정·일시 메시지 UIKit 연결 |
-| `Features/DiaryList/DiaryListModule.swift` | 실제 의존성 조립, 탭 진입점 |
+| `Features/DiaryList/DiaryListModule.swift`, `+UIKit.swift` | `AppDependencies`에서 주입받은 서비스로 상태 생성, UIKit 탭 연결 |
 | `DesignSystem/DiaryWriteButton.swift` | Calendar와 목록이 공유하는 작성 버튼 |
 
 ## 보존과 변경
@@ -62,6 +62,7 @@ bash scripts/ci.sh build
 ```
 
 - 기존 27개 → 45개 통과: 목록 분류·검색 7개, 목록 상태·구독 수명·휴지통 11개 추가. Calendar 테스트 11개는 공유 구독 분리 후에도 수정 없이 통과했다.
+- dev(PR #2 의존성 조립, PR #3 온보딩) 반영 후 목록 모듈을 `AppDependencies`로 조립하고 조립 경로 테스트 1개를 추가했다. 총 58개.
 - 오프라인 harness(운영 목록 소스 + fake 저장소·세션·작성 화면, Firebase 미연결)로 iPhone 17 Pro / iOS 26.5에서 확인:
   - UIKit `DiaryListVC`: 월별 목록, 휴지통·날짜 오류 일기 숨김, 대소문자 무시 검색, 검색 중 새 일기 반영, 검색 해제,
     업로드 중 단일 로딩 셀과 선택한 일기 정확히 열림, 업로드 완료 후 새 일기 표시, 휴지통 이동 성공/실패 메시지,

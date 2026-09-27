@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import XCTest
 
 @MainActor
@@ -190,6 +191,35 @@ final class DiaryListViewModelTests: XCTestCase {
         XCTAssertEqual(model.notice, .movedToTrash)
     }
 
+    func testAppCompositionBuildsIndependentListStateFromInjectedServices() async throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
+        let repository = ListRepository()
+        let session = ListSession(userID: "injected-user")
+        let updater = ListUpdater()
+        let fixedNow = now
+        let dependencies = AppDependencies(
+            diaryRepository: repository, userSession: session, diaryUpdater: updater,
+            calendarImageLoader: ListImageLoader(), calendar: calendar, now: { fixedNow }
+        )
+        let module = dependencies.makeDiaryListModule()
+        XCTAssertFalse(module.viewModel === dependencies.makeDiaryListModule().viewModel)
+        XCTAssertTrue(repository.observations.isEmpty)
+
+        let model = module.viewModel
+        model.start()
+        defer { model.stop() }
+        try await waitUntil { repository.observations.count == 1 }
+        XCTAssertEqual(repository.observations.first?.userID, "injected-user")
+        XCTAssertEqual(model.calendar.timeZone, calendar.timeZone)
+
+        async let move: Void = model.moveToTrash(entry("diary"))
+        try await waitUntil { updater.requests.count == 1 }
+        updater.finish(with: nil)
+        await move
+        XCTAssertEqual(updater.requests.first?.deleteDate, now)
+    }
+
     func testDeallocationReleasesSubscription() async throws {
         let repository = ListRepository()
         var model: DiaryListViewModel? = DiaryListViewModel(
@@ -275,4 +305,9 @@ private final class ListUpdater: DiaryUpdating {
             continuation.resume()
         }
     }
+}
+
+@MainActor
+private final class ListImageLoader: CalendarImageLoading {
+    func image(for url: URL) async -> UIImage? { nil }
 }
