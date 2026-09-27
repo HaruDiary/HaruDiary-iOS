@@ -10,6 +10,7 @@ enum DiaryTheme {
         static let secondaryText = Color("SubText")
         static let error = Color("mainError")
         static let selection = Color("subTheme")
+        static let onboardingBackground = Color("onboardingBackground")
 
         static let brandUIKit = UIColor(named: "mainTheme") ?? .systemPurple
         static let backgroundUIKit = UIColor(named: "mainBackground") ?? .systemBackground
@@ -38,5 +39,15 @@ enum DiaryTheme {
         static let touchTarget: CGFloat = 44
         static let floatingButton: CGFloat = 56
         static let thumbnail: CGFloat = 80
+    }
+
+    enum Onboarding {
+        static let contentWidth: CGFloat = 560
+        static let illustrationMaxHeight: CGFloat = 360
+        static let illustrationMinHeight: CGFloat = 180
+        static let buttonHeight: CGFloat = 56
+        static let title = Font.system(.title2, design: .rounded).weight(.bold)
+        static let pageDuration = 0.32
+        static let pressDuration = 0.15
     }
 }

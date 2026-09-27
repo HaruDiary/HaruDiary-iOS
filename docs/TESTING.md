@@ -4,7 +4,7 @@
 
 | 검사 | 실제 범위 | 포함하지 않는 것 |
 |---|---|---|
-| Logic tests | 운영 일기 모델 6개, Calendar 날짜/그리드 10개, fake 기반 상태·사용자 전환·구독 수명 11개: 공통 의존성 조립 3개를 포함한 총 30개 XCTest | Firestore SDK의 Codable 동작, 서버 읽기/쓰기, 실제 로그인, 마을 규칙, 실제 UI 동작 |
+| Logic tests | 운영 일기 모델 6개, Calendar 날짜/그리드 10개, Calendar 상태·사용자 전환·구독 수명 11개, 공통 의존성 조립 3개, 온보딩 진행·완료 9개: 총 39개 XCTest | Firestore SDK의 Codable 동작, 서버 읽기/쓰기, 실제 로그인, 마을 규칙, 실제 UI 동작 |
 | Simulator build | `EveryDiary` 앱의 Debug 시뮬레이터 컴파일·링크·번들 검증 | 앱 실행, 운영 Firebase 연결, 실기기 서명, App Store archive |
 
 `EveryDiaryLogicTests`는 hostless XCTest 타깃이다. 앱을 실행하지 않고 운영 소스 파일을
@@ -27,6 +27,7 @@ bash scripts/ci.sh build
 현재 선택된 경로는 `xcode-select -p`로 확인한다.
 
 Calendar의 화면 동작과 오프라인 검증 범위는 [Calendar 리팩토링](CALENDAR_REFACTORING.md)을 참고한다.
+온보딩의 완료 처리와 화면 검증 범위는 [온보딩 리팩토링](ONBOARDING_REFACTORING.md)을 참고한다.
 
 - test: 부팅된 iPhone 시뮬레이터 우선, 없으면 설치된 iPhone을 선택한다.
 - 특정 기기는 `HARUDIARY_SIMULATOR_ID=<UDID> bash scripts/ci.sh test`로 지정한다.

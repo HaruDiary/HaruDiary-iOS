@@ -5,12 +5,14 @@
 //  Created by Dahlia on 3/13/24.
 //
 
+// Unused since the SwiftUI onboarding (OnboardingModule) became the entry point.
+// Kept only for comparison; delete together with PageVC/ContentVC once PR #3 settles.
 import UIKit
 
 import SnapKit
-import FirebaseAuth
 
 class StartVC: UIViewController {
+    private let progress = UserDefaultsOnboardingProgressStore()
     
     private var pageVC : PageVC!
     
@@ -53,8 +55,7 @@ class StartVC: UIViewController {
         if currentPageIndex < pageVC.pages.count - 1 {
             moveToNextPage()
         } else {
-            UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-            signOut()
+            progress.hasCompletedOnboarding = true
             showMainScreen()
         }
     }
@@ -64,7 +65,7 @@ class StartVC: UIViewController {
     }
     
     private func addSubViewsStartVC() {
-        if !UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+        if !progress.hasCompletedOnboarding {
             pageVC = PageVC(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
             pageVC.delegate = self
             pageControl.numberOfPages = pageVC.pageCount
@@ -120,21 +121,6 @@ class StartVC: UIViewController {
                 self.pageControl.currentPage = self.currentPageIndex
                 self.updateButtonText()
             }
-        }
-    }
-    
-    private func signOut() {
-        let auth = Auth.auth()
-        do {
-            try auth.signOut()
-            if Auth.auth().currentUser == nil {
-                print("로그아웃 성공!")
-                NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-            } else {
-                print("로그아웃 실패!")
-            }
-        } catch let signOutError as NSError {
-            print("Error Signing out:  %@", signOutError)
         }
     }
     
