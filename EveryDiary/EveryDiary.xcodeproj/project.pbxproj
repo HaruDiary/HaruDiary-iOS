@@ -112,6 +112,8 @@
 		04CD4DEAD01847F5BC0E029F /* DiaryListIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75AF2D7AF636414F979568FC /* DiaryListIndex.swift */; };
 		BA6B36EBB18D4D7F80A3B29A /* DiaryListIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75AF2D7AF636414F979568FC /* DiaryListIndex.swift */; };
 		C0739DF61D634FF689C788CF /* DiaryListIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CFB78A398FE43D38E763B6D /* DiaryListIndexTests.swift */; };
+		AADA30B9DB834397927DA47B /* UserDiaryFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B879BFFD6E4E71B3C4233B /* UserDiaryFeed.swift */; };
+		C6A47C94B0D24B37AB61FA4E /* UserDiaryFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B879BFFD6E4E71B3C4233B /* UserDiaryFeed.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -212,6 +214,7 @@
 		19043FE0D5E079D44FB70E39 /* CalendarPreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarPreviewData.swift"; sourceTree = "<group>"; };
 		75AF2D7AF636414F979568FC /* DiaryListIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListIndex.swift"; sourceTree = "<group>"; };
 		9CFB78A398FE43D38E763B6D /* DiaryListIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryListIndexTests.swift"; sourceTree = "<group>"; };
+		69B879BFFD6E4E71B3C4233B /* UserDiaryFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDiaryFeed.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -482,6 +485,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				69B879BFFD6E4E71B3C4233B /* UserDiaryFeed.swift */,
 				75AF2D7AF636414F979568FC /* DiaryListIndex.swift */,
 				4B344B95B910CC4E92228FFD /* DiaryReadingRepository.swift */,
 				1C80F5CF0E2BFB91EF7D7364 /* CalendarDiaryIndex.swift */,
@@ -647,6 +651,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6A47C94B0D24B37AB61FA4E /* UserDiaryFeed.swift in Sources */,
 				C0739DF61D634FF689C788CF /* DiaryListIndexTests.swift in Sources */,
 				BA6B36EBB18D4D7F80A3B29A /* DiaryListIndex.swift in Sources */,
 				0381394D255592FA1F83588D /* CalendarViewModelTests.swift in Sources */,
@@ -664,6 +669,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AADA30B9DB834397927DA47B /* UserDiaryFeed.swift in Sources */,
 				04CD4DEAD01847F5BC0E029F /* DiaryListIndex.swift in Sources */,
 				ACFFBF2182BFFBED68270CF1 /* CalendarPreviewData.swift in Sources */,
 				0A094B09B87D9E41E85A1392 /* DiaryTheme.swift in Sources */,
