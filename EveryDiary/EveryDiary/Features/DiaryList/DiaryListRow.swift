@@ -18,28 +18,31 @@ struct DiaryListRow: View {
             dateColumn
             VStack(alignment: .leading, spacing: DiaryTheme.Spacing.small) {
                 HStack(spacing: DiaryTheme.Spacing.small) {
-                    if !entry.weather.isEmpty {
-                        Image(entry.weather).resizable().scaledToFit().frame(width: 20, height: 20)
+                    Group {
+                        if !entry.weather.isEmpty {
+                            Image(entry.weather).resizable().scaledToFit().frame(width: 20, height: 20)
+                        }
+                        if !entry.emotion.isEmpty {
+                            Image(entry.emotion).resizable().scaledToFit().frame(width: 20, height: 20)
+                        }
                     }
-                    if !entry.emotion.isEmpty {
-                        Image(entry.emotion).resizable().scaledToFit().frame(width: 20, height: 20)
-                    }
+                    .accessibilityHidden(true)
+                    Text(entry.title)
+                        .font(DiaryTheme.Fonts.section)
+                        .foregroundStyle(DiaryTheme.Colors.text)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 1)
+                        .truncationMode(.tail)
                 }
-                .accessibilityHidden(true)
                 columns {
                     if let url = thumbnailURL {
                         DiaryListThumbnail(url: url, imageLoader: imageLoader)
                     }
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(entry.title)
-                            .font(DiaryTheme.Fonts.section)
-                            .foregroundStyle(DiaryTheme.Colors.text)
-                            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
-                        Text(entry.content)
-                            .font(.subheadline)
-                            .foregroundStyle(DiaryTheme.Colors.secondaryText)
-                            .lineLimit(dynamicTypeSize.isAccessibilitySize ? 4 : 2)
-                    }
+                    Text(entry.content)
+                        .font(.subheadline)
+                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                        // Beside a photo the text can use the photo's height (about three lines).
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 4 : (thumbnailURL == nil ? 2 : 3))
+                        .truncationMode(.tail)
                 }
             }
             Spacer(minLength: 0)
@@ -58,13 +61,22 @@ struct DiaryListRow: View {
         if dynamicTypeSize.isAccessibilitySize {
             Text("\(dayText)일 \(weekdayText)")
                 .font(DiaryTheme.Fonts.caption.weight(.semibold))
-                .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                .foregroundStyle(dayColor ?? DiaryTheme.Colors.secondaryText)
         } else {
             VStack(spacing: 2) {
-                Text(dayText).font(.title3.weight(.bold)).foregroundStyle(DiaryTheme.Colors.text)
-                Text(weekdayText).font(DiaryTheme.Fonts.caption).foregroundStyle(DiaryTheme.Colors.secondaryText)
+                Text(dayText).font(.title3.weight(.bold)).foregroundStyle(dayColor ?? DiaryTheme.Colors.text)
+                Text(weekdayText).font(DiaryTheme.Fonts.caption).foregroundStyle(dayColor ?? DiaryTheme.Colors.secondaryText)
             }
             .frame(minWidth: 32)
+        }
+    }
+
+    private var dayColor: Color? {
+        guard let date else { return nil }
+        switch DayKind(date: date, calendar: calendar) {
+        case .weekday: return nil
+        case .saturday: return DiaryTheme.Colors.saturday
+        case .holiday: return DiaryTheme.Colors.holiday
         }
     }
 

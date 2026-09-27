@@ -142,6 +142,9 @@
 		9F0BE6148D65424BB742F1FE /* DiaryListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D07560776BB423EAB1F19AC /* DiaryListViewModelTests.swift */; };
 		1E35C1E4A31A4D958E57EC97 /* DiaryListModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482F67E504C742B2A05E19C0 /* DiaryListModule+UIKit.swift */; };
 		1D5F031E719547F3923E8441 /* DiaryListModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85917D9A7D944FA7ACC8933C /* DiaryListModule.swift */; };
+		E576E797870B4577809525AA /* DayKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6324AE064574465A82455BD2 /* DayKind.swift */; };
+		424ED0361D1543C5A3B66C90 /* DayKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6324AE064574465A82455BD2 /* DayKind.swift */; };
+		8DD632A28C81488294BAA5E4 /* DayKindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -263,6 +266,8 @@
 		E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryListIndexTests.swift"; sourceTree = "<group>"; };
 		0D07560776BB423EAB1F19AC /* DiaryListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryListViewModelTests.swift"; sourceTree = "<group>"; };
 		482F67E504C742B2A05E19C0 /* DiaryListModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListModule+UIKit.swift"; sourceTree = "<group>"; };
+		6324AE064574465A82455BD2 /* DayKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKind.swift"; sourceTree = "<group>"; };
+		7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKindTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -501,6 +506,7 @@
 		CE00DB6416F6564570F700F0 /* EveryDiaryLogicTests */ = {
 			isa = PBXGroup;
 			children = (
+				7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */,
 				0D07560776BB423EAB1F19AC /* DiaryListViewModelTests.swift */,
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
@@ -536,6 +542,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				6324AE064574465A82455BD2 /* DayKind.swift */,
 				DFCF0745505E4B1487AB4DD5 /* DiaryUpdating.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
 				62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */,
@@ -727,6 +734,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8DD632A28C81488294BAA5E4 /* DayKindTests.swift in Sources */,
+				424ED0361D1543C5A3B66C90 /* DayKind.swift in Sources */,
 				1D5F031E719547F3923E8441 /* DiaryListModule.swift in Sources */,
 				9F0BE6148D65424BB742F1FE /* DiaryListViewModelTests.swift in Sources */,
 				7BBDC41BC8CD43ADB7895E8F /* DiaryListIndexTests.swift in Sources */,
@@ -755,6 +764,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E576E797870B4577809525AA /* DayKind.swift in Sources */,
 				1E35C1E4A31A4D958E57EC97 /* DiaryListModule+UIKit.swift in Sources */,
 				32632D98E1CC4BC39530A74B /* DiaryWriteButton.swift in Sources */,
 				0B401B3208D1497085C8E9B8 /* DiaryListPreview.swift in Sources */,
