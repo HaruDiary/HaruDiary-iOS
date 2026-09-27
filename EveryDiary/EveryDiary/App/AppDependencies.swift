@@ -4,6 +4,7 @@ import Foundation
 struct AppDependencies {
     let diaryRepository: any DiaryReadingRepository
     let userSession: any DiaryUserSession
+    let diaryTrash: any DiaryTrashing
     let calendarImageLoader: any CalendarImageLoading
     let calendar: Calendar
     let now: () -> Date
@@ -11,5 +12,10 @@ struct AppDependencies {
     func makeCalendarModule() -> CalendarModule {
         CalendarModule(repository: diaryRepository, session: userSession,
                        imageLoader: calendarImageLoader, calendar: calendar, now: now)
+    }
+
+    func makeDiaryListModule() -> DiaryListModule {
+        DiaryListModule(repository: diaryRepository, session: userSession, trash: diaryTrash,
+                        imageLoader: calendarImageLoader, calendar: calendar, now: now)
     }
 }

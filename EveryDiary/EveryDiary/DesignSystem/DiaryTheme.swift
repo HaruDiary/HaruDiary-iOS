@@ -10,6 +10,9 @@ enum DiaryTheme {
         static let secondaryText = Color("SubText")
         static let error = Color("mainError")
         static let selection = Color("subTheme")
+        // Date labels: Saturday blue, Sunday/public holiday red (system colors adapt to dark mode).
+        static let saturday = Color(.systemBlue)
+        static let holiday = Color(.systemRed)
         static let onboardingBackground = Color("onboardingBackground")
 
         static let brandUIKit = UIColor(named: "mainTheme") ?? .systemPurple

@@ -123,6 +123,29 @@
 		E6A11250561016383822936F /* CalendarImageLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B0DDC556D00782C3F47643 /* CalendarImageLoading.swift */; };
 		ECCCB9B265E51F8E124E0931 /* CalendarModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F48F50BB73E9E4A9B0BF94C /* CalendarModule+UIKit.swift */; };
 		414F8630D807B7793C177C33 /* CalendarModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */; };
+		48EB3DE62D7A47E2A33ED0E5 /* DiaryListIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */; };
+		0AA5C09B97BA493193A4CAC9 /* DiaryListIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */; };
+		F4CB8A6B91D6417D86B2D370 /* UserDiaryFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */; };
+		DAD88B399E5C4307808BF89B /* UserDiaryFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */; };
+		96642B834EB444CA9ECCFD96 /* DiaryTrashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */; };
+		7279067B89E14CB08C3546B6 /* DiaryTrashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */; };
+		647488499E0740F282D024CE /* FirebaseDiaryTrash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AAB81D6DBC642429FBF0175 /* FirebaseDiaryTrash.swift */; };
+		B47EB636C096400BAAC7359C /* DiaryListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47CDA91F2C774E1795104BA9 /* DiaryListViewModel.swift */; };
+		38317E12A6544ADCA6D72192 /* DiaryListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47CDA91F2C774E1795104BA9 /* DiaryListViewModel.swift */; };
+		AFA5F9226730420F8E7101B4 /* DiaryListModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85917D9A7D944FA7ACC8933C /* DiaryListModule.swift */; };
+		40246E99AF72438BAF0C644A /* DiaryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B81E6FF1AE463BB66738B6 /* DiaryListView.swift */; };
+		9036480FB5F94CC08FD52521 /* DiaryListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8EA1CB49150447EB30080BE /* DiaryListRow.swift */; };
+		3EA15FFB3017425AA361A2DA /* DiaryListHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258147EB1F9A4465B8381397 /* DiaryListHostingController.swift */; };
+		0B401B3208D1497085C8E9B8 /* DiaryListPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 299B8B1313BF4345B9CE7AF8 /* DiaryListPreview.swift */; };
+		32632D98E1CC4BC39530A74B /* DiaryWriteButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D68D4420386455C94759513 /* DiaryWriteButton.swift */; };
+		7BBDC41BC8CD43ADB7895E8F /* DiaryListIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */; };
+		9F0BE6148D65424BB742F1FE /* DiaryListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D07560776BB423EAB1F19AC /* DiaryListViewModelTests.swift */; };
+		1E35C1E4A31A4D958E57EC97 /* DiaryListModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482F67E504C742B2A05E19C0 /* DiaryListModule+UIKit.swift */; };
+		1D5F031E719547F3923E8441 /* DiaryListModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85917D9A7D944FA7ACC8933C /* DiaryListModule.swift */; };
+		E576E797870B4577809525AA /* DayKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6324AE064574465A82455BD2 /* DayKind.swift */; };
+		424ED0361D1543C5A3B66C90 /* DayKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6324AE064574465A82455BD2 /* DayKind.swift */; };
+		8DD632A28C81488294BAA5E4 /* DayKindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */; };
+		22C182E499894E82A27047B2 /* DiaryWeatherIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -230,6 +253,23 @@
 		61D766F8A0230FD70E9D218E /* AppDependencies+Live.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDependencies+Live.swift"; sourceTree = "<group>"; };
 		10B0DDC556D00782C3F47643 /* CalendarImageLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarImageLoading.swift"; sourceTree = "<group>"; };
 		5F48F50BB73E9E4A9B0BF94C /* CalendarModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule+UIKit.swift"; sourceTree = "<group>"; };
+		62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListIndex.swift"; sourceTree = "<group>"; };
+		B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDiaryFeed.swift"; sourceTree = "<group>"; };
+		DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTrashing.swift"; sourceTree = "<group>"; };
+		5AAB81D6DBC642429FBF0175 /* FirebaseDiaryTrash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseDiaryTrash.swift"; sourceTree = "<group>"; };
+		47CDA91F2C774E1795104BA9 /* DiaryListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListViewModel.swift"; sourceTree = "<group>"; };
+		85917D9A7D944FA7ACC8933C /* DiaryListModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListModule.swift"; sourceTree = "<group>"; };
+		72B81E6FF1AE463BB66738B6 /* DiaryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListView.swift"; sourceTree = "<group>"; };
+		F8EA1CB49150447EB30080BE /* DiaryListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListRow.swift"; sourceTree = "<group>"; };
+		258147EB1F9A4465B8381397 /* DiaryListHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListHostingController.swift"; sourceTree = "<group>"; };
+		299B8B1313BF4345B9CE7AF8 /* DiaryListPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListPreview.swift"; sourceTree = "<group>"; };
+		4D68D4420386455C94759513 /* DiaryWriteButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWriteButton.swift"; sourceTree = "<group>"; };
+		E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryListIndexTests.swift"; sourceTree = "<group>"; };
+		0D07560776BB423EAB1F19AC /* DiaryListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryListViewModelTests.swift"; sourceTree = "<group>"; };
+		482F67E504C742B2A05E19C0 /* DiaryListModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListModule+UIKit.swift"; sourceTree = "<group>"; };
+		6324AE064574465A82455BD2 /* DayKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKind.swift"; sourceTree = "<group>"; };
+		7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKindTests.swift"; sourceTree = "<group>"; };
+		8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWeatherIcon.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -468,6 +508,9 @@
 		CE00DB6416F6564570F700F0 /* EveryDiaryLogicTests */ = {
 			isa = PBXGroup;
 			children = (
+				7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */,
+				0D07560776BB423EAB1F19AC /* DiaryListViewModelTests.swift */,
+				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
 				394F66EE9A24302500E6BAF0 /* CalendarDiaryIndexTests.swift */,
@@ -501,6 +544,10 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				6324AE064574465A82455BD2 /* DayKind.swift */,
+				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
+				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */,
 				A8DC8C0509FE561B652A305B /* OnboardingProgressStore.swift */,
 				4B344B95B910CC4E92228FFD /* DiaryReadingRepository.swift */,
 				1C80F5CF0E2BFB91EF7D7364 /* CalendarDiaryIndex.swift */,
@@ -520,6 +567,7 @@
 		9987856AA8934E3BE9726639 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				5AAB81D6DBC642429FBF0175 /* FirebaseDiaryTrash.swift */,
 				375356660EB6D2DDE12C07DD /* FirebaseDiaryReadingRepository.swift */,
 			);
 			path = Data;
@@ -528,6 +576,13 @@
 		BC49A4866C5E0A9951D22E14 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				482F67E504C742B2A05E19C0 /* DiaryListModule+UIKit.swift */,
+				299B8B1313BF4345B9CE7AF8 /* DiaryListPreview.swift */,
+				258147EB1F9A4465B8381397 /* DiaryListHostingController.swift */,
+				F8EA1CB49150447EB30080BE /* DiaryListRow.swift */,
+				72B81E6FF1AE463BB66738B6 /* DiaryListView.swift */,
+				85917D9A7D944FA7ACC8933C /* DiaryListModule.swift */,
+				47CDA91F2C774E1795104BA9 /* DiaryListViewModel.swift */,
 				FB340F7AFEA380AD8ACFB6C1 /* OnboardingModule.swift */,
 				7B5B105E6F8BD7B6B2E2BC7B /* OnboardingView.swift */,
 				CF6F77C4A5A25AB918EF7A9E /* OnboardingViewModel.swift */,
@@ -549,6 +604,8 @@
 		BDF71909E1ED119D43F0FF4A /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */,
+				4D68D4420386455C94759513 /* DiaryWriteButton.swift */,
 				040BD821321645E60FF1909E /* DiaryTheme.swift */,
 			);
 			path = DesignSystem;
@@ -680,6 +737,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8DD632A28C81488294BAA5E4 /* DayKindTests.swift in Sources */,
+				424ED0361D1543C5A3B66C90 /* DayKind.swift in Sources */,
+				1D5F031E719547F3923E8441 /* DiaryListModule.swift in Sources */,
+				9F0BE6148D65424BB742F1FE /* DiaryListViewModelTests.swift in Sources */,
+				7BBDC41BC8CD43ADB7895E8F /* DiaryListIndexTests.swift in Sources */,
+				38317E12A6544ADCA6D72192 /* DiaryListViewModel.swift in Sources */,
+				7279067B89E14CB08C3546B6 /* DiaryTrashing.swift in Sources */,
+				DAD88B399E5C4307808BF89B /* UserDiaryFeed.swift in Sources */,
+				0AA5C09B97BA493193A4CAC9 /* DiaryListIndex.swift in Sources */,
 				05DAB852E56A1805B5B72EBB /* OnboardingViewModelTests.swift in Sources */,
 				59E3C72F799D4E6B74ECC489 /* OnboardingViewModel.swift in Sources */,
 				E3E1C687B1DC4D097D0173DB /* OnboardingProgressStore.swift in Sources */,
@@ -701,6 +767,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22C182E499894E82A27047B2 /* DiaryWeatherIcon.swift in Sources */,
+				E576E797870B4577809525AA /* DayKind.swift in Sources */,
+				1E35C1E4A31A4D958E57EC97 /* DiaryListModule+UIKit.swift in Sources */,
+				32632D98E1CC4BC39530A74B /* DiaryWriteButton.swift in Sources */,
+				0B401B3208D1497085C8E9B8 /* DiaryListPreview.swift in Sources */,
+				3EA15FFB3017425AA361A2DA /* DiaryListHostingController.swift in Sources */,
+				9036480FB5F94CC08FD52521 /* DiaryListRow.swift in Sources */,
+				40246E99AF72438BAF0C644A /* DiaryListView.swift in Sources */,
+				AFA5F9226730420F8E7101B4 /* DiaryListModule.swift in Sources */,
+				B47EB636C096400BAAC7359C /* DiaryListViewModel.swift in Sources */,
+				647488499E0740F282D024CE /* FirebaseDiaryTrash.swift in Sources */,
+				96642B834EB444CA9ECCFD96 /* DiaryTrashing.swift in Sources */,
+				F4CB8A6B91D6417D86B2D370 /* UserDiaryFeed.swift in Sources */,
+				48EB3DE62D7A47E2A33ED0E5 /* DiaryListIndex.swift in Sources */,
 				B1E063E7D0B3A633A8C60E01 /* OnboardingModule.swift in Sources */,
 				7AD1EE51DA407B2833A0BD18 /* OnboardingView.swift in Sources */,
 				75AC3860E9FE309831B3F5F9 /* OnboardingViewModel.swift in Sources */,

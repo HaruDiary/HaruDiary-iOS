@@ -17,29 +17,18 @@ final class CalendarViewModel {
     private(set) var selectedDate: Date
     let calendar: Calendar
 
-    @ObservationIgnored private let repository: any DiaryReadingRepository
-    @ObservationIgnored private let session: any DiaryUserSession
+    @ObservationIgnored private let feed: UserDiaryFeed
     @ObservationIgnored private let now: () -> Date
-    @ObservationIgnored private var sessionTask: Task<Void, Never>?
-    @ObservationIgnored private var diaryTask: Task<Void, Never>?
-    @ObservationIgnored private var userID: String?
-    @ObservationIgnored private var hasReceivedUser = false
-    @ObservationIgnored private var generation = 0
 
     init(repository: any DiaryReadingRepository, session: any DiaryUserSession, calendar: Calendar, now: @escaping () -> Date = Date.init) {
-        self.repository = repository
-        self.session = session
+        feed = UserDiaryFeed(repository: repository, session: session)
         self.calendar = calendar
         self.now = now
         let today = now()
         displayedMonth = calendar.dateInterval(of: .month, for: today)?.start ?? today
         selectedDate = calendar.startOfDay(for: today)
         index = CalendarDiaryIndex(entries: [], calendar: calendar, now: today)
-    }
-
-    deinit {
-        sessionTask?.cancel()
-        diaryTask?.cancel()
+        feed.onEvent = { [weak self] in self?.apply($0) }
     }
 
     var selectedDay: CalendarDay {
@@ -60,27 +49,15 @@ final class CalendarViewModel {
     }
 
     func start() {
-        guard sessionTask == nil else { return }
-        let users = session.observeUserIDs()
-        sessionTask = Task { [weak self] in
-            for await userID in users {
-                guard !Task.isCancelled else { return }
-                self?.userDidChange(userID)
-            }
-        }
+        feed.start()
     }
 
     func stop() {
-        generation += 1
-        sessionTask?.cancel()
-        diaryTask?.cancel()
-        sessionTask = nil
-        diaryTask = nil
-        hasReceivedUser = false
+        feed.stop()
     }
 
     func retry() {
-        observeDiaries()
+        feed.retry()
     }
 
     func select(_ date: Date) {
@@ -95,54 +72,20 @@ final class CalendarViewModel {
         selectedDate = calendar.startOfDay(for: next)
     }
 
-    private func userDidChange(_ newUserID: String?) {
-        guard !hasReceivedUser || userID != newUserID else { return }
-        let isDifferentUser = userID != newUserID
-        userID = newUserID
-        hasReceivedUser = true
-        index = CalendarDiaryIndex(entries: [], calendar: calendar, now: now())
-        if isDifferentUser {
-            select(now())
-        }
-        observeDiaries()
-    }
-
-    private func observeDiaries() {
-        generation += 1
-        diaryTask?.cancel()
-        diaryTask = nil
-        guard let userID else {
+    private func apply(_ event: UserDiaryFeed.Event) {
+        switch event {
+        case .userChanged(let isDifferentUser):
             index = CalendarDiaryIndex(entries: [], calendar: calendar, now: now())
-            state = .loaded
-            return
-        }
-        state = .loading
-        let observationGeneration = generation
-        let entries = repository.observeDiaries(userID: userID)
-        diaryTask = Task { [weak self] in
-            do {
-                for try await snapshot in entries {
-                    guard !Task.isCancelled else { return }
-                    self?.receive(snapshot, generation: observationGeneration)
-                }
-                if !Task.isCancelled {
-                    self?.receiveFailure(generation: observationGeneration)
-                }
-            } catch {
-                guard !Task.isCancelled else { return }
-                self?.receiveFailure(generation: observationGeneration)
+            if isDifferentUser {
+                select(now())
             }
+        case .loading:
+            state = .loading
+        case .received(let entries):
+            index = CalendarDiaryIndex(entries: entries, calendar: calendar, now: now())
+            state = .loaded
+        case .failed:
+            state = .failed
         }
-    }
-
-    private func receive(_ entries: [DiaryEntry], generation: Int) {
-        guard generation == self.generation else { return }
-        index = CalendarDiaryIndex(entries: entries, calendar: calendar, now: now())
-        state = .loaded
-    }
-
-    private func receiveFailure(generation: Int) {
-        guard generation == self.generation else { return }
-        state = .failed
     }
 }
