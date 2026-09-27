@@ -7,6 +7,8 @@
 Firebase 저장 경로 `users/{uid}/diaries/{id}`와 필드·문서 ID는 변경하지 않는다.
 일기 작성·상세·수정(`WriteDiaryVC`), 설정, 휴지통 화면(`TrashVC`)은 기존 UIKit을 연결해 사용한다.
 
+![오프라인 샘플 데이터로 확인한 SwiftUI 일기 목록](screenshots/diary-list-swiftui.png)
+
 ## 이전 동작에서 확인한 문제
 
 | 문제 | 발생 조건 | 처리 |
