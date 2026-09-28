@@ -28,7 +28,8 @@ final class ExpiredTrashPurger {
             guard let id = entry.id else { continue }
             inFlight.insert(id)
             do {
-                try await trash.deletePermanently(diaryID: id, userID: userID, imageURLs: entry.imageURL ?? [])
+                try await trash.deletePermanently(diaryID: id, userID: userID, imageURLs: entry.imageURL ?? [],
+                                                  condition: .expired(deleteDate: entry.deleteDate))
                 result.deletedCount += 1
             } catch {
                 result.failedCount += 1

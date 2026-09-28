@@ -339,7 +339,7 @@ private final class UnusedDiaryTrash: DiaryTrashing {
         XCTFail("Calendar must not write diaries")
     }
 
-    func deletePermanently(diaryID: String, userID: String, imageURLs: [String]) async throws -> PhotoCleanup {
+    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], condition: PermanentDeletionCondition) async throws -> PhotoCleanup {
         XCTFail("Calendar must not write diaries")
         return PhotoCleanup()
     }

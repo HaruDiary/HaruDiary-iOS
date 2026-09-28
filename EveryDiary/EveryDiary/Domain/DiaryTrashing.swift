@@ -13,8 +13,17 @@ protocol DiaryTrashing {
     /// Deletes the photo files first and the diary document only when every photo is gone.
     /// When a photo fails, the call throws and the diary stays in the trash so deleting can be retried;
     /// photos that are already gone count as deleted, so a retry finishes the rest.
+    /// The stored document is checked against `condition` before the photos and again when the document is deleted,
+    /// so a diary restored (or trashed again) on another device is not removed.
     @discardableResult
-    func deletePermanently(diaryID: String, userID: String, imageURLs: [String]) async throws -> PhotoCleanup
+    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], condition: PermanentDeletionCondition) async throws -> PhotoCleanup
+}
+
+enum PermanentDeletionCondition: Equatable {
+    /// The user asked: delete while the diary is still in the trash.
+    case inTrash
+    /// Retention ended: delete only while it is still in the trash with the `deleteDate` that was judged expired.
+    case expired(deleteDate: Date?)
 }
 
 struct PhotoCleanup: Equatable {
@@ -24,4 +33,6 @@ struct PhotoCleanup: Equatable {
 enum DiaryTrashError: Error, Equatable {
     /// Some photo files could not be deleted, so the diary document was kept.
     case photoCleanupFailed(failedCount: Int)
+    /// The stored diary no longer matches the deletion condition, e.g. it was restored on another device.
+    case conditionNotMet
 }

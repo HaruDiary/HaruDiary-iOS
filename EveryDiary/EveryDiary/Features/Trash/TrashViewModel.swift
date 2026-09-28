@@ -122,7 +122,8 @@ final class TrashViewModel {
                 case .restore:
                     try await trash.restore(diaryID: id, userID: userID)
                 case .delete:
-                    try await trash.deletePermanently(diaryID: id, userID: userID, imageURLs: entry.imageURL ?? [])
+                    try await trash.deletePermanently(diaryID: id, userID: userID, imageURLs: entry.imageURL ?? [],
+                                                      condition: .inTrash)
                 }
                 succeeded += 1
             } catch {

@@ -341,7 +341,7 @@ private final class ListTrash: DiaryTrashing {
 
     func restore(diaryID: String, userID: String) async throws {}
 
-    func deletePermanently(diaryID: String, userID: String, imageURLs: [String]) async throws -> PhotoCleanup {
+    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], condition: PermanentDeletionCondition) async throws -> PhotoCleanup {
         PhotoCleanup()
     }
 

@@ -91,6 +91,7 @@ final class TrashViewModelTests: XCTestCase {
         await model.deletePermanently(entry("diary", images: ["a.jpg", "b.jpg"]))
 
         XCTAssertEqual(trash.deletions.first?.imageURLs, ["a.jpg", "b.jpg"])
+        XCTAssertEqual(trash.deletions.first?.condition, .inTrash)
         XCTAssertEqual(model.notice, .failed(.delete, succeeded: 0, failed: 1))
     }
 
@@ -200,6 +201,7 @@ private final class RecordingTrash: DiaryTrashing {
         let diaryID: String
         let userID: String
         var imageURLs: [String] = []
+        var condition: PermanentDeletionCondition?
     }
 
     var restores: [Request] = []
@@ -215,8 +217,8 @@ private final class RecordingTrash: DiaryTrashing {
         try await finish(diaryID)
     }
 
-    func deletePermanently(diaryID: String, userID: String, imageURLs: [String]) async throws -> PhotoCleanup {
-        deletions.append(Request(diaryID: diaryID, userID: userID, imageURLs: imageURLs))
+    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], condition: PermanentDeletionCondition) async throws -> PhotoCleanup {
+        deletions.append(Request(diaryID: diaryID, userID: userID, imageURLs: imageURLs, condition: condition))
         try await finish(diaryID)
         return PhotoCleanup(deletedCount: imageURLs.count)
     }
