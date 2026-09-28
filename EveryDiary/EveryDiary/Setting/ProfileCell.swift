@@ -39,8 +39,10 @@ class ProfileCell: UITableViewCell {
     
     // 로그인한 경우 프로필을 눌러 닉네임을 바꿀 수 있음을 알린다.
     private lazy var editImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "pencil"))
-        imageView.tintColor = .subText
+        let symbol = UIImage.SymbolConfiguration(pointSize: 22, weight: .semibold)
+        let imageView = UIImageView(image: UIImage(systemName: "pencil", withConfiguration: symbol))
+        // 이름·아이콘과 같은 앱 기본 색
+        imageView.tintColor = .mainTheme
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -100,7 +102,7 @@ class ProfileCell: UITableViewCell {
             make.width.height.equalTo(50)
         }
         nameLabel.snp.makeConstraints { make in
-            make.centerY.equalToSuperview().offset(-15)
+            make.centerY.equalToSuperview().offset(-20)
             make.leading.equalTo(profileImageView.snp.trailing).offset(16)
             make.trailing.equalTo(loginButton.snp.leading).inset(16)
             make.bottom.equalTo(emailLabel.snp.top).offset(-10)
@@ -113,7 +115,7 @@ class ProfileCell: UITableViewCell {
         editImageView.snp.makeConstraints { make in
             make.centerY.equalTo(loginButton)
             make.trailing.equalToSuperview().inset(24)
-            make.width.height.equalTo(20)
+            make.width.height.equalTo(28)
         }
         loginButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(16)
@@ -129,7 +131,15 @@ class ProfileCell: UITableViewCell {
     }
     
     func prapare(email: String?, name: String?, image: String?, isLoggedIn: Bool) {
-        self.emailLabel.text = email
+        // 로그인 방식과 이메일 두 줄 사이를 띄운다.
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.lineSpacing = 6
+        paragraph.lineBreakMode = .byTruncatingMiddle
+        self.emailLabel.attributedText = email.map { NSAttributedString(string: $0, attributes: [
+            .paragraphStyle: paragraph,
+            .font: emailLabel.font as Any,
+            .foregroundColor: emailLabel.textColor as Any
+        ]) }
         self.nameLabel.text = name
         self.profileImageView.image = UIImage(named: image ?? "profile")
         if isLoggedIn {
