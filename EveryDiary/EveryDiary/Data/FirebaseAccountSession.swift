@@ -58,9 +58,21 @@ final class FirebaseAccountSession: AccountSession {
         }
     }
 
+    // A guest that links Google/Apple may keep no e-mail or name on the account itself;
+    // the linked sign-in still carries them, so those are shown instead.
     nonisolated private static func snapshot(_ user: User) -> AccountSnapshot {
-        AccountSnapshot(isEmailVerified: user.isEmailVerified, email: user.email, displayName: user.displayName,
-                        providerIDs: user.providerData.map(\.providerID))
+        let linked = user.providerData
+        return AccountSnapshot(
+            isEmailVerified: user.isEmailVerified,
+            email: nonEmpty(user.email) ?? linked.lazy.compactMap { nonEmpty($0.email) }.first,
+            displayName: nonEmpty(user.displayName) ?? linked.lazy.compactMap { nonEmpty($0.displayName) }.first,
+            providerIDs: linked.map(\.providerID)
+        )
+    }
+
+    nonisolated private static func nonEmpty(_ value: String?) -> String? {
+        guard let value, !value.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+        return value
     }
 
     // Same Cloud Function and stored refresh token as the previous settings screen. Responses are not logged.
