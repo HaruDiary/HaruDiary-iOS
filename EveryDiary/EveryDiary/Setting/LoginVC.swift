@@ -14,13 +14,30 @@ import FirebaseAuth
 import Firebase
 import GoogleSignIn
 
-#Preview{
-    LoginVC()
-}
-
 class LoginVC: UIViewController {
     
+    private let gateway: any SocialSignInGateway
     fileprivate var currentNonce: String?
+    private var isSigningIn = false {
+        didSet {
+            signGoogleButton.isEnabled = !isSigningIn
+            signAppleButton.isEnabled = !isSigningIn
+            isSigningIn ? progress.startAnimating() : progress.stopAnimating()
+        }
+    }
+    
+    init(gateway: any SocialSignInGateway) {
+        self.gateway = gateway
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) { return nil }
+    
+    private let progress: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
     
     private lazy var topLabel : UILabel = {
         let label = UILabel()
@@ -77,51 +94,68 @@ class LoginVC: UIViewController {
     
     //MARK: - Google로 로그인 및 Firebase 인증
     private func handleGIDSignIn() {
-        // 버튼 클릭 시, 인증
-        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
-        // Create Google Sign In configuration object.
-        let config = GIDConfiguration(clientID: clientID)
-        GIDSignIn.sharedInstance.configuration = config
-        GIDSignIn.sharedInstance.signIn(withPresenting: self) { signInResult, error in
-            guard error == nil else { return }
-            
-            // 인증을 해도 계정 등록 절차가 필요하다
-            // 구글 인증 토큰 받고 -> 사용자 정보 토큰 생성
-            guard let user = signInResult?.user,
-                  let idToken = user.idToken?.tokenString
-            else { return }
-            
-            let email = user.profile?.email
-            let fullName = user.profile?.name
-            
-            let credential = GoogleAuthProvider.credential(withIDToken: idToken,
-                                                           accessToken: user.accessToken.tokenString)
-            
-            if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
-                currentUser.link(with: credential) { authResult, error in
-                    if let error = error {
-                        print("익명 사용자를 영구 계정으로 전환하는 중 오류 발생: \(error.localizedDescription)")
-                        self.deleteWithCredential(credential: credential) {
-                            self.signInWithCredential(credential: credential)
-                        }
-                    } else {
-                        print("익명 사용자를 영구 계정으로 전환 성공")
-                        let changeRequest = currentUser.createProfileChangeRequest()
-                        changeRequest.displayName = fullName
-                        changeRequest.commitChanges { error in
-                            if let error = error {
-                                print("Error updating user profile: \(error)")
-                            }
-                            print("사용자 프로필 업데이트 완료")
-                            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                            self.dismiss(animated: true, completion: nil)
-                        }
-                    }
+        guard !isSigningIn, let clientID = FirebaseApp.app()?.options.clientID else { return }
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+        isSigningIn = true
+        GIDSignIn.sharedInstance.signIn(withPresenting: self) { [weak self] signInResult, error in
+            guard let self else { return }
+            if let error {
+                self.isSigningIn = false
+                // 사용자가 직접 닫은 경우는 알리지 않는다.
+                if (error as NSError).code != GIDSignInError.canceled.rawValue {
+                    self.showSignInFailure(error)
                 }
-            } else {
-                print("현재 사용자가 없습니다. 구글 로그인을 진행합니다.")
-                self.signInWithCredential(credential: credential)
+                return
             }
+            guard let user = signInResult?.user, let idToken = user.idToken?.tokenString else {
+                self.isSigningIn = false
+                self.showSignInFailure(nil)
+                return
+            }
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
+            self.completeSignIn(SocialCredential(provider: .google, raw: credential), displayName: user.profile?.name)
+        }
+    }
+    
+    // 계정 연결·전환 규칙은 SocialSignIn이 정한다. 화면은 결과만 표시한다.
+    private func completeSignIn(_ credential: SocialCredential, displayName: String?) {
+        isSigningIn = true
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                _ = try await SocialSignIn.run(with: credential, displayName: displayName, gateway: self.gateway)
+                // 여정 화면과 설정의 표시 이름 갱신은 아직 이 알림을 사용한다.
+                NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                self.dismiss(animated: true, completion: nil)
+            } catch {
+                self.isSigningIn = false
+                self.showSignInFailure(error)
+            }
+        }
+    }
+    
+    // 원인을 찾을 수 있도록 오류 코드만 표시·기록한다. 토큰과 이메일은 남기지 않는다.
+    private func showSignInFailure(_ error: Error?) {
+        let nsError = error.map { $0 as NSError }
+        let code = nsError.map { "\n(오류: \($0.domain) \($0.code))" } ?? ""
+        print("Sign-in failed\(code.replacingOccurrences(of: "\n", with: " "))")
+        let alert = UIAlertController(title: "로그인하지 못했어요", message: Self.failureMessage(for: nsError) + code, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
+    }
+    
+    private static func failureMessage(for error: NSError?) -> String {
+        guard let error, error.domain == AuthErrorDomain else { return "잠시 후 다시 시도해주세요." }
+        switch AuthErrorCode(rawValue: error.code) {
+        case .accountExistsWithDifferentCredential:
+            // 같은 이메일의 Google·Apple 계정은 하나만 만들 수 있다.
+            return "같은 이메일로 다른 로그인 방식(Google 또는 Apple)의 계정이 있어요.\n그 방식으로 로그인해주세요."
+        case .networkError:
+            return "네트워크 연결을 확인한 뒤 다시 시도해주세요."
+        case .userDisabled:
+            return "사용이 중지된 계정이에요."
+        default:
+            return "잠시 후 다시 시도해주세요."
         }
     }
 }
@@ -141,10 +175,14 @@ extension LoginVC {
         view.addSubview(closeButton)
         view.addSubview(topLabel)
         view.addSubview(bottomLabel)
+        view.addSubview(progress)
         view.backgroundColor = .loginBackground
     }
     
     private func autoLayoutLoginVC() {
+        progress.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
         closeButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
             make.right.equalTo(view.safeAreaLayoutGuide).inset(16)
@@ -217,6 +255,7 @@ extension LoginVC {
     // Apple의 응답을 처리하는 대리자 클래스와 nonce의 SHA256 해시를 요청에 포함하는 것으로 Apple의 로그인 과정 시작
     @available(iOS 13, *)
     private func startSignInWithAppleFlow() {
+        guard !isSigningIn else { return }
         let nonce = randomNonceString()
         currentNonce = nonce
         let appleIDProvider = ASAuthorizationAppleIDProvider()
@@ -241,131 +280,45 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-            guard let nonce = currentNonce else {
-                fatalError("Invalid state: A login callback was received, but no login request was sent.")
-            }
-            
-            // identityToken 가져오기
-            guard let appleIDToken = appleIDCredential.identityToken else {
-                print("Unable to fetch identity token")
-                return
-            }
-            
-            // 가져온 identityToken, String 타입 변환
-            guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-                print("Unable to serialize token string from data: \(appleIDToken.debugDescription)")
-                return
-            }
-            
-            // 변환한 identityToken을 Firebase 로그인 인증에 맞게 할당
-            let credential = OAuthProvider.appleCredential(withIDToken: idTokenString,
-                                                           rawNonce: nonce,
-                                                           fullName: appleIDCredential.fullName)
-            
-            if let currentUser = Auth.auth().currentUser, currentUser.isAnonymous {
-                currentUser.link(with: credential) { authResult, error in
-                    if let error = error as NSError?, error.code == AuthErrorCode.credentialAlreadyInUse.rawValue {
-                        print("기존의 소셜 사용자가 익명 계정 이용 중 변경: \(error.localizedDescription)")
-                        self.deleteWithCredential(credential: credential) {
-                            // Apple 로그인 에러 처리
-                            if let updatedCredential = error.userInfo[AuthErrorUserInfoUpdatedCredentialKey] as? AuthCredential {
-                                // 에러 객체에서 업데이트된 크리덴셜을 받아 재사용
-                                Auth.auth().signIn(with: updatedCredential) { authResult, error in
-                                    if let error = error {
-                                        print("Apple 로그인 재시도 중 오류 발생: \(error.localizedDescription)")
-                                    } else {
-                                        // 로그인 성공 처리
-                                        print("Apple 로그인 성공, 익명 계정에서 Apple 계정으로 전환됨")
-                                        NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                                        self.dismiss(animated: true, completion: nil)
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        print("익명 사용자가 최초로 소셜 계정으로 전환")
-                        self.updateUserProfile(withCredential: appleIDCredential)
-                    }
-                }
-            } else {
-                print("비로그인 상태에 소셜 계정 로그인")
-                self.signInWithCredential(credential: credential)
-            }
-            
-            // 사용자의 authorizationCode를 로그인 시 미리 가져온다. 회원 탈퇴 시, 필요하기 때문이다.
-            if let authorizationCode = appleIDCredential.authorizationCode, let codeString = String(data: authorizationCode, encoding: .utf8) {
-                let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/getRefreshToken?code=\(codeString)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "https://apple.com")!
-                let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
-                    if let data = data {
-                        let refreshToken = String(data: data, encoding: .utf8) ?? ""
-                        UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
-                        UserDefaults.standard.synchronize()
-                    }
-                }
-                task.resume()
-            }
+        guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let nonce = currentNonce,
+              let appleIDToken = appleIDCredential.identityToken,
+              let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+            showSignInFailure(nil)
+            return
         }
+        currentNonce = nil
+        
+        // 변환한 identityToken을 Firebase 로그인 인증에 맞게 할당
+        let credential = OAuthProvider.appleCredential(withIDToken: idTokenString,
+                                                       rawNonce: nonce,
+                                                       fullName: appleIDCredential.fullName)
+        let displayName = [appleIDCredential.fullName?.givenName, appleIDCredential.fullName?.familyName]
+            .compactMap { $0 }
+            .joined(separator: " ")
+        completeSignIn(SocialCredential(provider: .apple, raw: credential), displayName: displayName)
+        storeAppleRefreshToken(from: appleIDCredential)
     }
     
-    // 로그인이 제대로 되지 않았을 경우, Error 발생
+    // 로그인이 제대로 되지 않았을 경우, 사용자가 닫은 경우가 아니면 알린다.
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        // Handle error.
-        print("로그인 실패 - \(error.localizedDescription)")
-    }
-}
-
-extension LoginVC {
-    func updateUserProfile(withCredential credential: ASAuthorizationAppleIDCredential) {
-        guard let currentUser = Auth.auth().currentUser else {
-            print("사용자가 없습니다.")
-            return
-        }
-        
-        let changeRequest = currentUser.createProfileChangeRequest()
-        
-        if let fullName = credential.fullName {
-                let names = [fullName.givenName, fullName.familyName].compactMap { $0 }
-                let displayName = names.joined(separator: " ")
-                changeRequest.displayName = displayName
-        }
-        
-        changeRequest.commitChanges { error in
-            if let error = error {
-                print("Error updating user profile: \(error)")
-            } else {
-                NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                self.dismiss(animated: true, completion: nil)
-            }
+        currentNonce = nil
+        if (error as? ASAuthorizationError)?.code != .canceled {
+            showSignInFailure(error)
         }
     }
     
-    func signInWithCredential(credential: AuthCredential) {
-        Auth.auth().signIn(with: credential) { authResult, error in
-            if let error = error {
-                print("로그인 중 오류 발생: \(error.localizedDescription)")
-                print("\(AuthErrorCode.credentialAlreadyInUse)")
-                return
+    // 회원 탈퇴 시 Apple 토큰 철회에 필요한 refresh token을 로그인 때 미리 받아 둔다(기존과 동일).
+    private func storeAppleRefreshToken(from credential: ASAuthorizationAppleIDCredential) {
+        guard let authorizationCode = credential.authorizationCode,
+              let codeString = String(data: authorizationCode, encoding: .utf8),
+              let query = "code=\(codeString)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/getRefreshToken?\(query)") else { return }
+        URLSession.shared.dataTask(with: url) { data, _, _ in
+            if let data {
+                let refreshToken = String(data: data, encoding: .utf8) ?? ""
+                UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
             }
-            print("로그인 성공!")
-            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-            self.dismiss(animated: true, completion: nil)
-        }
-    }
-    
-    func deleteWithCredential(credential: AuthCredential, completion: @escaping() -> Void) {
-        guard let currentUser = Auth.auth().currentUser else {
-            print("사용자가 없습니다.")
-            return
-        }
-        
-        currentUser.delete { error in
-            if let error = error {
-                print("Error deleting user from Firebase: \(error.localizedDescription)")
-            } else {
-                print("User successfully deleted from Firebase.")
-                completion()
-            }
-        }
+        }.resume()
     }
 }

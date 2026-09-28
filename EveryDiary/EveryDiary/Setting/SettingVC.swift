@@ -96,7 +96,7 @@ class SettingVC: UIViewController {
     }
     
     @objc func didTapLoginButton() {
-        let loginVC = LoginVC()
+        let loginVC = LoginVC(gateway: module.signInGateway)
         loginVC.modalPresentationStyle = .fullScreen
         self.present(loginVC, animated: true)
     }
@@ -196,7 +196,7 @@ extension SettingVC {
     }
     
     func showMainScreen() {
-        let loginVC = LoginVC()
+        let loginVC = LoginVC(gateway: module.signInGateway)
         loginVC.modalPresentationStyle = .fullScreen
         self.present(loginVC, animated: true)
     }

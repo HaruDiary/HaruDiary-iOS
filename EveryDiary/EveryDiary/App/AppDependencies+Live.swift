@@ -12,6 +12,7 @@ extension AppDependencies {
                 auth: .auth(),
                 dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage())
             ),
+            signInGateway: FirebaseSocialSignInGateway(auth: .auth()),
             diaryTrash: FirebaseDiaryTrash(database: .firestore()),
             calendarImageLoader: CachedCalendarImageLoader(cache: .shared),
             calendar: .current,

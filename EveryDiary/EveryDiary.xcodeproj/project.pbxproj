@@ -182,6 +182,10 @@
 		EB45A794506B49CB96256C4C /* AccountDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B474071592B145D8B85309BD /* AccountDeletion.swift */; };
 		7528378CE0D24F2E8E00CD4A /* FirebaseUserDataEraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */; };
 		D21F23D03AB8475EA1C33C13 /* FirebasePhotoFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */; };
+		3D9FF83B299545A3935D0D41 /* SocialSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2883021185774F46B4DB6CA4 /* SocialSignIn.swift */; };
+		37B63B1F2E694B248905B305 /* SocialSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2883021185774F46B4DB6CA4 /* SocialSignIn.swift */; };
+		D30888651EB1404FAF59D7C8 /* FirebaseSocialSignInGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */; };
+		42FAC87B502F4227A8387871 /* SocialSignInTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E953C47FF7CA4523A7534FBC /* SocialSignInTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -331,6 +335,9 @@
 		B474071592B145D8B85309BD /* AccountDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountDeletion.swift"; sourceTree = "<group>"; };
 		5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseUserDataEraser.swift"; sourceTree = "<group>"; };
 		1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebasePhotoFiles.swift"; sourceTree = "<group>"; };
+		2883021185774F46B4DB6CA4 /* SocialSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/SocialSignIn.swift"; sourceTree = "<group>"; };
+		BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseSocialSignInGateway.swift"; sourceTree = "<group>"; };
+		E953C47FF7CA4523A7534FBC /* SocialSignInTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialSignInTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -569,6 +576,7 @@
 		CE00DB6416F6564570F700F0 /* EveryDiaryLogicTests */ = {
 			isa = PBXGroup;
 			children = (
+				E953C47FF7CA4523A7534FBC /* SocialSignInTests.swift */,
 				8A6612B31B0240059B2D34EE /* SettingsViewModelTests.swift */,
 				FE0B8AACB301466AAE9D2BA6 /* TrashViewModelTests.swift */,
 				0DA17968AF8E45979D9ADD82 /* ExpiredTrashPurgerTests.swift */,
@@ -611,6 +619,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				2883021185774F46B4DB6CA4 /* SocialSignIn.swift */,
 				B474071592B145D8B85309BD /* AccountDeletion.swift */,
 				F393DB3464574FF0991E1DB5 /* AccountSession.swift */,
 				0133FDA9A09046DEA4B34AFA /* AccountState.swift */,
@@ -641,6 +650,7 @@
 		9987856AA8934E3BE9726639 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */,
 				1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */,
 				5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */,
 				31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */,
@@ -823,6 +833,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				42FAC87B502F4227A8387871 /* SocialSignInTests.swift in Sources */,
+				37B63B1F2E694B248905B305 /* SocialSignIn.swift in Sources */,
 				EB45A794506B49CB96256C4C /* AccountDeletion.swift in Sources */,
 				F0F3D5C199B14D369C2F15F1 /* SettingsViewModelTests.swift in Sources */,
 				258FDD3E83A3419891E0AFD6 /* SettingsModule.swift in Sources */,
@@ -870,6 +882,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D30888651EB1404FAF59D7C8 /* FirebaseSocialSignInGateway.swift in Sources */,
+				3D9FF83B299545A3935D0D41 /* SocialSignIn.swift in Sources */,
 				D21F23D03AB8475EA1C33C13 /* FirebasePhotoFiles.swift in Sources */,
 				7528378CE0D24F2E8E00CD4A /* FirebaseUserDataEraser.swift in Sources */,
 				F357E15ECC2548EDAC1BB4C1 /* AccountDeletion.swift in Sources */,
