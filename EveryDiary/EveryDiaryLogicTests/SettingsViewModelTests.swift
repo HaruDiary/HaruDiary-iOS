@@ -18,11 +18,17 @@ final class SettingsViewModelTests: XCTestCase {
 
     func testAccountStateKeepsPreviousClassification() {
         XCTAssertEqual(AccountState(nil), .signedOut)
-        // The anonymous account (and any unverified account) was shown as a guest.
+        // The anonymous account (no Google/Apple sign-in, unverified) is a guest.
         XCTAssertEqual(AccountState(AccountSnapshot(isEmailVerified: false)), .guest)
         XCTAssertEqual(AccountState(member()), .member(email: "a@example.com", name: "하루", provider: .google))
         XCTAssertEqual(AccountState(member(provider: "apple.com", email: nil, name: nil)), .member(email: nil, name: nil, provider: .apple))
         XCTAssertEqual(AccountState(member(provider: "password")), .member(email: "a@example.com", name: "하루", provider: nil))
+    }
+
+    func testGuestLinkedToAppleWithUnverifiedEmailIsAMember() {
+        let linked = AccountSnapshot(isEmailVerified: false, email: nil, displayName: "하루", providerIDs: ["apple.com"])
+        XCTAssertEqual(AccountState(linked), .member(email: nil, name: "하루", provider: .apple))
+        XCTAssertEqual(AccountState(AccountSnapshot(isEmailVerified: false, providerIDs: [])), .guest)
     }
 
     func testProfileTextsMatchPreviousSettingsScreen() {

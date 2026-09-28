@@ -23,21 +23,23 @@ enum SocialProvider: Equatable {
 
 enum AccountState: Equatable {
     case signedOut
-    /// Signed in without a verified social account, e.g. the anonymous account created when saving while signed out.
+    /// Signed in without a Google/Apple account, e.g. the anonymous account created when saving while signed out.
     case guest
     case member(email: String?, name: String?, provider: SocialProvider?)
 
-    // Same rule as the previous settings screen: a verified e-mail means a linked Google/Apple account.
+    // A linked Google/Apple sign-in makes a member. The previous screen looked only at a verified e-mail,
+    // but a guest that links Apple can keep an unverified e-mail and was then still shown as a guest.
+    // A verified e-mail without Google/Apple stays a member, as before.
     init(_ snapshot: AccountSnapshot?) {
         guard let snapshot else {
             self = .signedOut
             return
         }
-        guard snapshot.isEmailVerified else {
+        let provider = snapshot.providerIDs.lazy.compactMap(SocialProvider.init(providerID:)).first
+        guard provider != nil || snapshot.isEmailVerified else {
             self = .guest
             return
         }
-        let provider = snapshot.providerIDs.lazy.compactMap(SocialProvider.init(providerID:)).first
         self = .member(email: snapshot.email, name: snapshot.displayName, provider: provider)
     }
 }
