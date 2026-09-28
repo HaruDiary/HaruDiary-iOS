@@ -22,13 +22,24 @@ final class FirebaseUserDataEraser: UserDataErasing {
         throw UserDataErasureError.dataKeepsAppearing
     }
 
+    /// Files uploaded to the user's folder but never saved in a diary (e.g. an interrupted save).
+    /// A network or other failure stops the deletion so it can be retried with the account kept.
+    /// Only when Storage rules deny listing does it continue with the photos the diaries reference;
+    /// files left that way are found and removed by `scripts/admin/withdrawn-account-data.mjs`.
+    private func listUserFolder(_ userID: String) async throws -> [StorageReference] {
+        do {
+            return try await storage.reference().child(userID).listAll().items
+        } catch let error as NSError where error.domain == StorageErrorDomain && error.code == StorageErrorCode.unauthorized.rawValue {
+            print("Listing the user's photo folder is not allowed; erasing the photos saved in diaries only")
+            return []
+        }
+    }
+
     /// Returns how many diaries and photo files were found (and erased) in this pass.
     private func erasePass(userID: String) async throws -> Int {
         // From the server, so diaries missing from the local cache are not left behind.
         let diaries = try await database.collection("users").document(userID).collection("diaries").getDocuments(source: .server)
-        // Files uploaded to the user's folder but never saved in a diary (e.g. an interrupted save).
-        // Listing may be denied by Storage rules; the photos referenced by diaries are still removed.
-        let folderItems = (try? await storage.reference().child(userID).listAll())?.items ?? []
+        let folderItems = try await listUserFolder(userID)
 
         // Photos first: if one fails, the diaries that point to it remain and the deletion can be retried.
         var failedCount = 0
