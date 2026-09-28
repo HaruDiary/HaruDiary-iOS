@@ -222,7 +222,11 @@ extension WriteDiaryVC {
         isSavingDiary = true                    // 저장 시작
         //        uploadImagesAndSaveDiary()
         // 익명 계정 생성
-        createAnonymousAccount { [weak self] in
+        createAnonymousAccount { [weak self] signedIn in
+            guard signedIn else {
+                self?.isSavingDiary = false
+                return
+            }
             self?.uploadImagesAndSaveDiary()
         }
     }
@@ -240,21 +244,17 @@ extension WriteDiaryVC {
         self.dismiss(animated: true) { [weak self] in
             guard let self = self else { return }
             
-            createAnonymousAccount {
-                self.uploadImagesAndSaveDiary1 { success in
-                    // 이미지 업로드 및 일기 저장을 비동기적으로 시작
-                    DispatchQueue.main.async {
-                        if success {
-                            self.delegate?.diaryDidUpdate()
-                            self.loadingDiaryDelegate?.diaryUploadDidFinish()
-                        } else {
-                            TemporaryAlert.presentTemporaryMessage(with: "업로드 실패", message: "일기를 업로드하지 못했습니다.", interval: 2.0, for: DiaryListVC())
-                            self.isSavingDiary = false
-                            self.loadingDiaryDelegate?.diaryUploadDidFinish()
-                            DiaryUploadManager.shared.release(self)
-                        }
-                    }
+            createAnonymousAccount { signedIn in
+                guard signedIn else {
+                    // Without an account nothing can be saved; clear the list's saving row and tell the user.
+                    self.isSavingDiary = false
+                    self.loadingDiaryDelegate?.diaryUploadDidFinish()
+                    DiaryUploadManager.shared.release(self)
+                    TemporaryAlert.presentOnTopScreen(with: "저장 실패", message: "로그인하지 못해 일기를 저장하지 못했습니다.\n잠시 후 다시 시도해주세요.", interval: 2.0)
+                    return
                 }
+                // Saving, the list's saving row and failure messages finish in createAndUploadDiaryEntry.
+                self.uploadImagesAndSaveDiary1()
             }
         }
     }
@@ -268,15 +268,15 @@ extension WriteDiaryVC {
         let useMetadataLocation = self.useMetadataLocation
         let currentLocationInfo = self.currentLocationInfo
         
-        self.uploadImages { uploadImageURLs in
+        self.uploadImages { uploadImageURLs, failedPhotoCount in
             print("DiaryEntry Upload Start")
-            self.createAndUploadDiaryEntry(with: titleText ?? "", content: contentText, dateString: formattedDateString, emotion: selectedEmotion, weather: selectedWeather, useMetadataLocation: useMetadataLocation, currentLocationInfo: currentLocationInfo ?? "", imageUrls: uploadImageURLs)
+            self.createAndUploadDiaryEntry(with: titleText ?? "", content: contentText, dateString: formattedDateString, emotion: selectedEmotion, weather: selectedWeather, useMetadataLocation: useMetadataLocation, currentLocationInfo: currentLocationInfo ?? "", imageUrls: uploadImageURLs, failedPhotoCount: failedPhotoCount)
             print("DiaryEntry Upload Finish")
         }
     }
     
     // 이미지 업로드 및 일기 저장2
-    private func uploadImagesAndSaveDiary1(completion: @escaping (Bool) -> Void) {
+    private func uploadImagesAndSaveDiary1() {
         let titleText = self.titleTextField.text
         let formattedDateString = DateFormatter.yyyyMMddHHmmss.string(from: selectedDate)
         let contentText = contentTextView.text == textViewPlaceHolder ? "" : contentTextView.text ?? ""
@@ -285,26 +285,27 @@ extension WriteDiaryVC {
         let useMetadataLocation = self.useMetadataLocation
         let currentLocationInfo = self.currentLocationInfo
         
-        self.uploadImages { uploadImageURLs in
+        self.uploadImages { uploadImageURLs, failedPhotoCount in
             print("DiaryEntry Upload Start")
-            self.createAndUploadDiaryEntry(with: titleText ?? "", content: contentText, dateString: formattedDateString, emotion: selectedEmotion, weather: selectedWeather, useMetadataLocation: useMetadataLocation, currentLocationInfo: currentLocationInfo ?? "", imageUrls: uploadImageURLs)
+            self.createAndUploadDiaryEntry(with: titleText ?? "", content: contentText, dateString: formattedDateString, emotion: selectedEmotion, weather: selectedWeather, useMetadataLocation: useMetadataLocation, currentLocationInfo: currentLocationInfo ?? "", imageUrls: uploadImageURLs, failedPhotoCount: failedPhotoCount)
             print("DiaryEntry Upload Finish")
         }
     }
     // 익명 계정 생성
-    private func createAnonymousAccount(completion: @escaping () -> Void) {
-        // 익명 계정 생성 로직 추가
+    // Completes with false when no account could be used, so callers can end the save instead of waiting forever.
+    private func createAnonymousAccount(completion: @escaping (Bool) -> Void) {
         DiaryManager.shared.authenticateAnonymouslyIfNeeded { error in
             if let error = error {
                 print("Error creating anonymous account: \(error.localizedDescription)")
+                completion(false)
             } else {
-                print("Anonymous account created successfully.")
-                completion()
+                completion(true)
             }
         }
     }
     
-    private func uploadImages(completion: @escaping ([String]) -> Void) {
+    // Completes with the uploaded URLs in order and how many photos could not be uploaded.
+    private func uploadImages(completion: @escaping ([String], Int) -> Void) {
         let dispatchGroup = DispatchGroup()
         var uploadedImageURLs = Array(repeating: String?.none, count: imagesLocationInfo.count) // URL 배열을 nil로 초기화
         
@@ -334,13 +335,13 @@ extension WriteDiaryVC {
         dispatchGroup.notify(queue: .main) {
             print("Images All Uploaded: \(Date())")
             let orderedUploadImageURLs = uploadedImageURLs.compactMap { $0 }     // nil 값을 제거하고 URL 순서대로 정렬
-            print("completion 콜백 호출 전: \(orderedUploadImageURLs)")
-            completion(Array(orderedUploadImageURLs))     // 순서대로 정렬된 URL 배열로 완료 콜백 호출
+            let attemptedCount = self.imagesLocationInfo.filter { $0.assetIdentifier != nil }.count
+            completion(Array(orderedUploadImageURLs), attemptedCount - orderedUploadImageURLs.count)
         }
     }
     
     // DiaryEntry 생성 및 Firestore 저장
-    private func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, emotion: String, weather: String, useMetadataLocation: Bool, currentLocationInfo: String, imageUrls: [String] = []) {
+    private func createAndUploadDiaryEntry(with title: String, content: String, dateString: String, emotion: String, weather: String, useMetadataLocation: Bool, currentLocationInfo: String, imageUrls: [String] = [], failedPhotoCount: Int = 0) {
         print("Start Creating DiaryEntry")
         let newDiaryEntry = DiaryEntry(
             title: title,
@@ -360,17 +361,19 @@ extension WriteDiaryVC {
             guard let self = self else { return }
             self.isSavingDiary = false  // 성공, 실패 여부를 떠나서 저장 시도가 완료되었으므로 변수 초기화
             if let error = error {
-                // 에러처리
                 print("Error saving diary to Firestore: \(error.localizedDescription)")
+                TemporaryAlert.presentOnTopScreen(with: "저장 실패", message: "일기를 저장하지 못했습니다.\n잠시 후 다시 시도해주세요.", interval: 2.0)
             } else {
-                // 에러가 없다면, 화면 닫기
                 print("Saved Diary Successfully.")
-//                self.dismiss(animated: true, completion: nil)
-                print("dismiss WriteDiaryVC")
                 self.delegate?.diaryDidUpdate()
+                if failedPhotoCount > 0 {
+                    // The text is kept; only the photos that failed to upload are missing.
+                    TemporaryAlert.presentOnTopScreen(with: "사진 저장 실패", message: "사진 \(failedPhotoCount)장을 저장하지 못했습니다.\n일기 내용은 저장되었습니다.", interval: 2.5)
+                }
             }
             // 작업종료를 DiaryListVC에 전달
             self.loadingDiaryDelegate?.diaryUploadDidFinish()
+            DiaryUploadManager.shared.release(self)
         }
     }
     
@@ -397,7 +400,7 @@ extension WriteDiaryVC {
             guard let self = self else { return }
             
             // 2단계: 이미지 업로드
-            self.uploadImages { [weak self] uploadImageURLs in
+            self.uploadImages { [weak self] uploadImageURLs, _ in
                 guard let self = self else { return }
                 
                 // 3단계: 일기 엔트리 업데이트
@@ -435,12 +438,16 @@ extension WriteDiaryVC {
                 currentLocationInfo: currentLocationInfo
             )
             
-            DiaryUploadManager.shared.updateDiary(diaryID: diaryID, diaryEntry: updatedDiaryEntry, imagesLocationInfo: imagesLocationInfo, existingImageURLs: existingImageURLs) { success in
+            DiaryUploadManager.shared.updateDiary(diaryID: diaryID, diaryEntry: updatedDiaryEntry, imagesLocationInfo: imagesLocationInfo, existingImageURLs: existingImageURLs) { result in
                 DispatchQueue.main.async {
-                    if success {
+                    switch result {
+                    case .saved:
                         self.delegate?.diaryDidUpdate()
-                    } else {
-                        TemporaryAlert.presentTemporaryMessage(with: "업데이트 실패", message: "일기를 수정하지 못했습니다.\n일기를 다시 한 번 확인해주세요.", interval: 2.0, for: DiaryListVC())
+                    case .savedWithoutPhotoChanges(let failedCount):
+                        self.delegate?.diaryDidUpdate()
+                        TemporaryAlert.presentOnTopScreen(with: "사진 저장 실패", message: "사진 \(failedCount)장을 저장하지 못해 사진은 이전 상태로 유지됩니다.\n글 수정은 저장되었습니다.", interval: 2.5)
+                    case .failed:
+                        TemporaryAlert.presentOnTopScreen(with: "업데이트 실패", message: "일기를 수정하지 못했습니다.\n일기를 다시 한 번 확인해주세요.", interval: 2.0)
                     }
                     self.isSavingDiary = false
                     self.loadingDiaryDelegate?.diaryUploadDidFinish()

@@ -23,17 +23,15 @@ final class FirebaseDiaryReadingRepository: DiaryReadingRepository {
                     continuation.finish(throwing: CalendarDataError.missingSnapshot)
                     return
                 }
-                do {
-                    let entries = try snapshot.documents.map { document in
-                        var entry = try document.data(as: DiaryEntry.self)
-                        // Navigation uses the existing document identity, including legacy records without an id field.
-                        entry.id = document.documentID
-                        return entry
-                    }
-                    continuation.yield(entries)
-                } catch {
-                    continuation.finish(throwing: error)
+                // A malformed document is skipped instead of failing the whole subscription.
+                let result = DiaryDocumentDecoding.decode(snapshot.documents, documentID: \.documentID) {
+                    try $0.data(as: DiaryEntry.self)
                 }
+                if result.skippedCount > 0 {
+                    // Counts only: document contents and IDs stay out of the log.
+                    print("Skipped \(result.skippedCount) diary document(s) that could not be decoded")
+                }
+                continuation.yield(result.entries)
             }
             continuation.onTermination = { _ in listener.remove() }
         }

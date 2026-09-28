@@ -21,7 +21,6 @@
 | `Features/DiaryList/DiaryListModule.swift`, `+UIKit.swift` | 일기 목록 상태 생성과 UIKit hosting controller 연결. Calendar와 같은 조회·세션을 재사용 |
 
 일기 쓰기 경계는 휴지통 이동이라는 첫 사용처와 함께 `DiaryTrashing`으로 추가했다. 운영 구현은 요청한 사용자 경로의 휴지통 필드만 수정한다.
-`DiaryListVC()`의 인자 없는 생성자는 `WriteDiaryVC`의 기존 알림 경로 때문에 `AppDependencies.live()`를 직접 사용한다. 해당 호출부 정리 후 제거한다.
 
 운영 의존성은 `AppDelegate`의 Firebase 초기화 이후 scene 연결 시 생성한다.
 같은 의존성으로 여러 모듈을 만들더라도 화면 상태는 각각 새로 생성된다.
@@ -42,8 +41,8 @@
 날씨 설정과 오류 처리, 데이터 쓰기 경계는 후속 작업이다.
 공통 색상·타이포 기준은 기존 `DiaryTheme`를 출발점으로 별도 정리한다.
 
-Calendar의 Firebase 디코딩은 현재 문서 하나가 실패하면 전체 구독을 실패시키는 문제가
-기존 PR 리뷰에서 지적되었다. 의존성 생성 위치 변경과 별도로 동작 재현과 회귀 테스트가 필요하다.
+Firebase 디코딩에서 문서 하나가 실패하면 전체 구독이 실패하던 문제(PR #1 리뷰 지적)는
+`DiaryDocumentDecoding`으로 문서별로 디코딩해 해결했다. 형식이 맞지 않는 문서만 건너뛰고 건수만 로그에 남긴다.
 [기존 리뷰](https://github.com/HaruDiary/HaruDiary-iOS/pull/1#discussion_r4016577753)
 
 ## 검증

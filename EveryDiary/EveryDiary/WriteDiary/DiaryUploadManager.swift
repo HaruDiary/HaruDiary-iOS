@@ -42,37 +42,85 @@ class DiaryUploadManager {
         }
     }
     
-    func updateDiary(diaryID: String, diaryEntry: DiaryEntry, imagesLocationInfo: [ImageLocationInfo], existingImageURLs: [String], completion: @escaping (Bool) -> Void) {
-        // 1단계: 기존 이미지 삭제
-        deleteExistingImgaes(urls: existingImageURLs) {
-            // 2단계: 새 이미지 업로드
-            if !imagesLocationInfo.isEmpty {
-                self.uploadImages(imagesLocationInfo) { newImageURLs in
-                    // 3단계: 다이어리 엔트리 업데이트
-                    // 업로드 된 이미지 URL을 포함하여 다이어리 엔트리 업데이트
-                    var updatedDiaryEntry = diaryEntry
-                    updatedDiaryEntry.imageURL = newImageURLs
-                    self.updateDiaryEntry(diaryID: diaryID, updatedDiaryEntry: updatedDiaryEntry, completion: completion)
+    enum UpdateResult {
+        case saved
+        /// The text changes were saved with the diary's previous photos because a photo upload failed.
+        case savedWithoutPhotoChanges(failedCount: Int)
+        case failed
+    }
+
+    func updateDiary(diaryID: String, diaryEntry: DiaryEntry, imagesLocationInfo: [ImageLocationInfo], existingImageURLs: [String], completion: @escaping (UpdateResult) -> Void) {
+        Task { @MainActor in
+            // Upload → save → delete old files, so a failure never removes the photos the diary already has.
+            let outcome = await DiaryPhotoReplacement.replace(
+                previousURLs: existingImageURLs,
+                upload: { await self.uploadEach(imagesLocationInfo) },
+                save: { urls in
+                    var entry = diaryEntry
+                    entry.imageURL = urls.isEmpty ? nil : urls
+                    return await self.save(diaryID: diaryID, entry: entry)
+                },
+                delete: { urls in await self.deleteImages(urls) }
+            )
+            switch outcome {
+            case .updated:
+                completion(.saved)
+            case .saveFailed:
+                completion(.failed)
+            case .uploadFailed(let failedCount):
+                var entry = diaryEntry
+                entry.imageURL = existingImageURLs.isEmpty ? nil : existingImageURLs
+                let saved = await self.save(diaryID: diaryID, entry: entry)
+                completion(saved ? .savedWithoutPhotoChanges(failedCount: failedCount) : .failed)
+            }
+        }
+    }
+
+    // One result per photo in order; nil marks a photo that could not be uploaded.
+    @MainActor
+    private func uploadEach(_ imagesLocationInfo: [ImageLocationInfo]) async -> [String?] {
+        var results: [String?] = []
+        for info in imagesLocationInfo {
+            guard let assetIdentifier = info.assetIdentifier else { continue }
+            let url = await withCheckedContinuation { (continuation: CheckedContinuation<String?, Never>) in
+                FirebaseStorageManager.uploadImage(
+                    image: [info.image],
+                    pathRoot: Auth.auth().currentUser?.uid ?? "UnknownUser",
+                    assetIdentifier: assetIdentifier,
+                    captureTime: info.captureTime,
+                    location: info.location
+                ) { urls in
+                    continuation.resume(returning: urls?.first?.absoluteString)
                 }
-            } else {
-                // 3단계: 다이어리 엔트리 업데이트(no Image)
-                var updatedDiaryEntry = diaryEntry
-                updatedDiaryEntry.imageURL = nil
-                self.updateDiaryEntry(diaryID: diaryID, updatedDiaryEntry: updatedDiaryEntry, completion: completion)
+            }
+            results.append(url)
+        }
+        return results
+    }
+
+    @MainActor
+    private func save(diaryID: String, entry: DiaryEntry) async -> Bool {
+        await withCheckedContinuation { continuation in
+            DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: entry) { error in
+                continuation.resume(returning: error == nil)
             }
         }
     }
-    private func updateDiaryEntry(diaryID: String, updatedDiaryEntry: DiaryEntry, completion: @escaping (Bool) -> Void) {
-        DiaryManager.shared.updateDiary(diaryID: diaryID, newDiary: updatedDiaryEntry) { error in
-            if let error = error {
-                print("Error updating diary entry in Firestore: \(error.localizedDescription)")
-                completion(false)
-            } else {
-                print("Diary entry successfully updated in Firestore.")
-                completion(true)
+
+    @MainActor
+    private func deleteImages(_ urls: [String]) async {
+        guard !urls.isEmpty else { return }
+        var failedCount = 0
+        for url in urls {
+            let failed = await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
+                FirebaseStorageManager.deleteImage(urlString: url) { error in continuation.resume(returning: error != nil) }
             }
+            if failed { failedCount += 1 }
         }
+        // Counts only; a failed delete leaves an unused file in Storage but never affects the diary.
+        print("Removed \(urls.count - failedCount) photo file(s), \(failedCount) failed")
     }
+
     private func uploadImages(_ imagesLocationInfo: [ImageLocationInfo], completion: @escaping ([String]) -> Void) {
         let dispatchGroup = DispatchGroup()
         var uploadedImageURLs = Array(repeating: String?.none, count: imagesLocationInfo.count) // URL 배열을 nil로 초기화
@@ -105,19 +153,6 @@ class DiaryUploadManager {
             let orderedUploadImageURLs = uploadedImageURLs.compactMap { $0 }     // nil 값을 제거하고 URL 순서대로 정렬
             print("completion 콜백 호출 전: \(orderedUploadImageURLs)")
             completion(orderedUploadImageURLs)     // 순서대로 정렬된 URL 배열로 완료 콜백 호출
-        }
-    }
-    private func deleteExistingImgaes(urls: [String], completion: @escaping () -> Void) {
-        let dispatchGroup = DispatchGroup()
-        
-        for urlString in urls {
-            dispatchGroup.enter()
-            FirebaseStorageManager.deleteImage(urlString: urlString) { _ in
-                dispatchGroup.leave()
-            }
-        }
-        dispatchGroup.notify(queue: .main) {
-            completion()
         }
     }
 }
