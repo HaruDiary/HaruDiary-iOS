@@ -178,6 +178,10 @@
 		258FDD3E83A3419891E0AFD6 /* SettingsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D40C7B1D02405CB104C056 /* SettingsModule.swift */; };
 		5E40C4E1EC28447285742FA5 /* SettingsModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */; };
 		F0F3D5C199B14D369C2F15F1 /* SettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6612B31B0240059B2D34EE /* SettingsViewModelTests.swift */; };
+		F357E15ECC2548EDAC1BB4C1 /* AccountDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B474071592B145D8B85309BD /* AccountDeletion.swift */; };
+		EB45A794506B49CB96256C4C /* AccountDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B474071592B145D8B85309BD /* AccountDeletion.swift */; };
+		7528378CE0D24F2E8E00CD4A /* FirebaseUserDataEraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */; };
+		D21F23D03AB8475EA1C33C13 /* FirebasePhotoFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -324,6 +328,9 @@
 		A1D40C7B1D02405CB104C056 /* SettingsModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsModule.swift"; sourceTree = "<group>"; };
 		0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsModule+UIKit.swift"; sourceTree = "<group>"; };
 		8A6612B31B0240059B2D34EE /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsViewModelTests.swift"; sourceTree = "<group>"; };
+		B474071592B145D8B85309BD /* AccountDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountDeletion.swift"; sourceTree = "<group>"; };
+		5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseUserDataEraser.swift"; sourceTree = "<group>"; };
+		1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebasePhotoFiles.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -604,6 +611,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				B474071592B145D8B85309BD /* AccountDeletion.swift */,
 				F393DB3464574FF0991E1DB5 /* AccountSession.swift */,
 				0133FDA9A09046DEA4B34AFA /* AccountState.swift */,
 				C39A241C0B4040A399B6C279 /* ExpiredTrashPurger.swift */,
@@ -633,6 +641,8 @@
 		9987856AA8934E3BE9726639 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */,
+				5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */,
 				31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */,
 				5AAB81D6DBC642429FBF0175 /* FirebaseDiaryTrash.swift */,
 				375356660EB6D2DDE12C07DD /* FirebaseDiaryReadingRepository.swift */,
@@ -813,6 +823,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB45A794506B49CB96256C4C /* AccountDeletion.swift in Sources */,
 				F0F3D5C199B14D369C2F15F1 /* SettingsViewModelTests.swift in Sources */,
 				258FDD3E83A3419891E0AFD6 /* SettingsModule.swift in Sources */,
 				A5A79C2EA21D4984A637AD8F /* SettingsViewModel.swift in Sources */,
@@ -859,6 +870,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D21F23D03AB8475EA1C33C13 /* FirebasePhotoFiles.swift in Sources */,
+				7528378CE0D24F2E8E00CD4A /* FirebaseUserDataEraser.swift in Sources */,
+				F357E15ECC2548EDAC1BB4C1 /* AccountDeletion.swift in Sources */,
 				5E40C4E1EC28447285742FA5 /* SettingsModule+UIKit.swift in Sources */,
 				CD03D1F291054D819F2B2233 /* SettingsModule.swift in Sources */,
 				503FB09E7CBF40B4A0340CD9 /* SettingsViewModel.swift in Sources */,

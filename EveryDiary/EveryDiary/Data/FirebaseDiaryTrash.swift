@@ -1,5 +1,4 @@
 import FirebaseFirestore
-import FirebaseStorage
 import Foundation
 
 @MainActor
@@ -28,10 +27,7 @@ final class FirebaseDiaryTrash: DiaryTrashing {
         var cleanup = PhotoCleanup()
         var failedCount = 0
         for url in imageURLs {
-            let error = await withCheckedContinuation { (continuation: CheckedContinuation<Error?, Never>) in
-                FirebaseStorageManager.deleteImage(urlString: url) { continuation.resume(returning: $0) }
-            }
-            if let error, !Self.isMissingObject(error) { failedCount += 1 } else { cleanup.deletedCount += 1 }
+            if await FirebasePhotoFiles.delete(urlString: url) { cleanup.deletedCount += 1 } else { failedCount += 1 }
         }
         guard failedCount == 0 else { throw DiaryTrashError.photoCleanupFailed(failedCount: failedCount) }
         // Re-checked inside the transaction so a restore saved while photos were being removed wins.
@@ -57,12 +53,6 @@ final class FirebaseDiaryTrash: DiaryTrashing {
         case let (stored?, expected?): return abs(stored.timeIntervalSince(expected)) < 0.001
         default: return false
         }
-    }
-
-    // A photo removed by an earlier, partly failed attempt is already done.
-    private static func isMissingObject(_ error: Error) -> Bool {
-        let error = error as NSError
-        return error.domain == StorageErrorDomain && error.code == StorageErrorCode.objectNotFound.rawValue
     }
 
     private func document(_ diaryID: String, _ userID: String) -> DocumentReference {

@@ -32,6 +32,13 @@ class SettingVC: UIViewController {
         return tableView
     }()
     
+    private let deletionProgress: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .mainTheme
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+    
     init(module: SettingsModule) {
         self.module = module
         super.init(nibName: nil, bundle: nil)
@@ -73,6 +80,7 @@ class SettingVC: UIViewController {
     private func addSubviewsSettingVC() {
         view.backgroundColor = .mainBackground
         view.addSubview(tableView)
+        view.addSubview(deletionProgress)
     }
     
     private func autoLayoutSettingVC() {
@@ -81,6 +89,9 @@ class SettingVC: UIViewController {
             make.leading.equalTo(view.safeAreaLayoutGuide).offset(10)
             make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-10)
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(10)
+        }
+        deletionProgress.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
     
@@ -117,10 +128,19 @@ extension SettingVC {
     private func observeAccount() {
         withObservationTracking {
             _ = viewModel.account
+            _ = viewModel.isDeletingAccount
         } onChange: { [weak self] in
             Task { @MainActor in self?.observeAccount() }
         }
         refresh()
+        // Erasing many diaries and photos takes a while; the screen waits instead of accepting other actions.
+        if viewModel.isDeletingAccount {
+            deletionProgress.startAnimating()
+        } else {
+            deletionProgress.stopAnimating()
+        }
+        view.isUserInteractionEnabled = !viewModel.isDeletingAccount
+        navigationItem.hidesBackButton = viewModel.isDeletingAccount
     }
     
     private func observeNotice() {
@@ -146,7 +166,9 @@ extension SettingVC {
             NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
             presentAlert(title: "회원 탈퇴", message: "회원 탈퇴가 완료되었습니다.") { [weak self] in self?.showMainScreen() }
         case .deletionNeedsRecentLogin:
-            presentAlert(title: "회원 탈퇴 실패", message: "보안을 위해 다시 로그인한 뒤 탈퇴해주세요.")
+            presentAlert(title: "다시 로그인이 필요해요", message: "보안을 위해 로그아웃 후 다시 로그인한 뒤\n5분 안에 탈퇴해주세요.")
+        case .dataErasureFailed:
+            presentAlert(title: "회원 탈퇴 실패", message: "일기와 사진을 모두 지우지 못해 탈퇴를 멈췄어요.\n잠시 후 다시 시도해주세요.")
         case .deletionFailed:
             presentAlert(title: "회원 탈퇴 실패", message: "회원 탈퇴를 완료하지 못했습니다.\n잠시 후 다시 시도해주세요.")
         }
@@ -179,7 +201,7 @@ extension SettingVC {
     
     // 회원 탈퇴 재차 확인
     func showDeleteAccountMessage() {
-        let alert = UIAlertController(title: "회원 탈퇴하시겠습니까?", message: "일기에 저장된 모든 내용이 삭제되며  복구가 불가능해집니다. \n 그래도 진행하시겠습니까?", preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: "회원 탈퇴하시겠습니까?", message: "작성한 일기와 사진이 모두 삭제되며 복구할 수 없습니다.\n그래도 진행하시겠습니까?", preferredStyle: .actionSheet)
         
         let deleteAction = UIAlertAction(title: "회원 탈퇴", style: .destructive) { [weak self] _ in
             guard let self else { return }

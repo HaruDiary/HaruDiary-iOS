@@ -16,6 +16,7 @@ final class SettingsViewModel {
         case signOutFailed
         case accountDeleted
         case deletionNeedsRecentLogin
+        case dataErasureFailed
         case deletionFailed
     }
 
@@ -71,6 +72,8 @@ final class SettingsViewModel {
             notice = .accountDeleted
         } catch AccountDeletionError.requiresRecentLogin {
             notice = .deletionNeedsRecentLogin
+        } catch AccountDeletionError.dataErasureFailed {
+            notice = .dataErasureFailed
         } catch {
             notice = .deletionFailed
         }

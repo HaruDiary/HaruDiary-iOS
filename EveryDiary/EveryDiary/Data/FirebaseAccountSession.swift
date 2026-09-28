@@ -4,9 +4,13 @@ import Foundation
 @MainActor
 final class FirebaseAccountSession: AccountSession {
     private let auth: Auth
+    private let dataEraser: any UserDataErasing
+    private let now: () -> Date
 
-    init(auth: Auth) {
+    init(auth: Auth, dataEraser: any UserDataErasing, now: @escaping () -> Date) {
         self.auth = auth
+        self.dataEraser = dataEraser
+        self.now = now
     }
 
     func observeAccount() -> AsyncStream<AccountSnapshot?> {
@@ -35,11 +39,18 @@ final class FirebaseAccountSession: AccountSession {
         guard let provider = user.providerData.lazy.compactMap({ SocialProvider(providerID: $0.providerID) }).first else {
             throw AccountDeletionError.unsupportedAccount
         }
-        do {
-            try await user.delete()
-        } catch let error as NSError where error.domain == AuthErrorDomain && error.code == AuthErrorCode.requiresRecentLogin.rawValue {
-            throw AccountDeletionError.requiresRecentLogin
-        }
+        let userID = user.uid
+        try await AccountDeletion.run(
+            lastSignIn: user.metadata.lastSignInDate, now: now(),
+            eraseData: { try await dataEraser.eraseAllData(userID: userID) },
+            deleteAccount: {
+                do {
+                    try await user.delete()
+                } catch let error as NSError where error.domain == AuthErrorDomain && error.code == AuthErrorCode.requiresRecentLogin.rawValue {
+                    throw AccountDeletionError.requiresRecentLogin
+                }
+            }
+        )
         // The Apple token is revoked only after the account is gone, so a failed deletion keeps Sign in with Apple working.
         if provider == .apple {
             revokeAppleToken()

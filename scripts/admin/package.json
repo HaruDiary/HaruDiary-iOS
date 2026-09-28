@@ -1,0 +1,9 @@
+{
+  "name": "harudiary-admin-scripts",
+  "private": true,
+  "type": "module",
+  "description": "One-off Firebase maintenance run by a project owner with a service account. Not part of the app build.",
+  "dependencies": {
+    "firebase-admin": "14.5.0"
+  }
+}

@@ -101,6 +101,10 @@ final class SettingsViewModelTests: XCTestCase {
         await model.deleteAccount()
         XCTAssertEqual(model.notice, .deletionNeedsRecentLogin)
 
+        session.deleteError = AccountDeletionError.dataErasureFailed
+        await model.deleteAccount()
+        XCTAssertEqual(model.notice, .dataErasureFailed)
+
         session.deleteError = NSError(domain: "Settings", code: 2)
         await model.deleteAccount()
         XCTAssertEqual(model.notice, .deletionFailed)
@@ -182,4 +186,45 @@ final class UnusedAccountSession: AccountSession {
     func observeAccount() -> AsyncStream<AccountSnapshot?> { AsyncStream { $0.finish() } }
     func signOut() throws { XCTFail("Settings is not used here") }
     func deleteAccount() async throws { XCTFail("Settings is not used here") }
+}
+
+@MainActor
+final class AccountDeletionTests: XCTestCase {
+    private let now = Date(timeIntervalSince1970: 1_790_600_000)
+
+    func testDataIsErasedBeforeTheAccountIsDeleted() async throws {
+        var steps: [String] = []
+        try await AccountDeletion.run(lastSignIn: now.addingTimeInterval(-60), now: now,
+                                      eraseData: { steps.append("erase") },
+                                      deleteAccount: { steps.append("delete") })
+        XCTAssertEqual(steps, ["erase", "delete"])
+    }
+
+    func testNothingIsErasedWithoutARecentSignIn() async {
+        var steps: [String] = []
+        for lastSignIn in [nil, now.addingTimeInterval(-AccountDeletion.recentSignInWindow)] {
+            do {
+                try await AccountDeletion.run(lastSignIn: lastSignIn, now: now,
+                                              eraseData: { steps.append("erase") },
+                                              deleteAccount: { steps.append("delete") })
+                XCTFail("Deletion must stop without a recent sign-in")
+            } catch {
+                XCTAssertEqual(error as? AccountDeletionError, .requiresRecentLogin)
+            }
+        }
+        XCTAssertTrue(steps.isEmpty)
+    }
+
+    func testAccountIsKeptWhenErasingFails() async {
+        var deleted = false
+        do {
+            try await AccountDeletion.run(lastSignIn: now, now: now,
+                                          eraseData: { throw NSError(domain: "Erase", code: 1) },
+                                          deleteAccount: { deleted = true })
+            XCTFail("Deletion must stop when data remains")
+        } catch {
+            XCTAssertEqual(error as? AccountDeletionError, .dataErasureFailed)
+        }
+        XCTAssertFalse(deleted)
+    }
 }
