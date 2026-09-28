@@ -9,17 +9,25 @@ struct DiaryListSection: Identifiable {
     var id: String { String(format: "%04d.%02d", year, month) }
 }
 
+enum DiaryListScope {
+    /// Diaries shown in the main list.
+    case active
+    /// Diaries in the trash.
+    case trash
+}
+
 enum DiaryListIndex {
     static func normalizedQuery(_ text: String) -> String {
         text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     /// Groups visible diaries by month, newest month and newest diary first.
-    static func sections(from entries: [DiaryEntry], matching query: String = "", calendar: Calendar) -> [DiaryListSection] {
+    static func sections(from entries: [DiaryEntry], matching query: String = "", calendar: Calendar,
+                         scope: DiaryListScope = .active) -> [DiaryListSection] {
         let query = normalizedQuery(query)
         let datedEntries = entries.compactMap { entry -> (entry: DiaryEntry, date: Date)? in
             // The list has always hidden records whose stored date cannot be parsed.
-            guard !entry.isDeleted, matches(entry, query: query),
+            guard entry.isDeleted == (scope == .trash), matches(entry, query: query),
                   let date = DateFormatter.yyyyMMddHHmmss.date(from: entry.dateString) else { return nil }
             return (entry, date)
         }.sorted { lhs, rhs in

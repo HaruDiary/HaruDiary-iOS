@@ -56,6 +56,8 @@ private final class DiaryListPreviewSession: DiaryUserSession {
 @MainActor
 private final class DiaryListPreviewTrash: DiaryTrashing {
     func moveToTrash(diaryID: String, userID: String, at date: Date) async throws {}
+    func restore(diaryID: String, userID: String) async throws {}
+    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], trashedAt deleteDate: Date?) async throws -> PhotoCleanup { PhotoCleanup() }
 }
 
 @MainActor

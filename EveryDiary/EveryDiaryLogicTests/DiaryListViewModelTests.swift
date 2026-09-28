@@ -339,6 +339,12 @@ private final class ListTrash: DiaryTrashing {
         try await withCheckedThrowingContinuation { pending.append($0) }
     }
 
+    func restore(diaryID: String, userID: String) async throws {}
+
+    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], trashedAt deleteDate: Date?) async throws -> PhotoCleanup {
+        PhotoCleanup()
+    }
+
     func finish(with error: Error?) {
         guard !pending.isEmpty else { return }
         let continuation = pending.removeFirst()

@@ -140,10 +140,11 @@ Calendar 작업에서 일기 모델·날짜 formatter의 Foundation 분리, Cale
 화면 상태 분리와 SwiftUI 탭 연결을 적용했다.
 온보딩은 5페이지 SwiftUI 화면과 진행·완료 상태를 분리했다.
 일기 목록은 조회·검색·휴지통 이동 상태를 분리해 UIKit에서 검증한 뒤 SwiftUI 탭으로 교체했고,
-사용자별 구독 수명을 Calendar와 공유한다. 현재 로직 테스트는 총 58개다.
+사용자별 구독 수명을 Calendar와 공유한다. 휴지통은 30일 보관 정책과 복원·영구 삭제 상태를 분리해
+목록과 같은 카드 형식의 SwiftUI로 교체했다. 현재 로직 테스트는 총 96개다.
 온보딩의 수동 화면 검증 상태는 [온보딩 리팩토링](ONBOARDING_REFACTORING.md)을 참고한다.
 세부 범위와 남은 통합 검증은 [Calendar 리팩토링](CALENDAR_REFACTORING.md),
-[일기 목록 리팩토링](DIARY_LIST_REFACTORING.md)을 참고한다.
+[일기 목록 리팩토링](DIARY_LIST_REFACTORING.md), [휴지통 리팩토링](TRASH_REFACTORING.md)을 참고한다.
 다른 기능과 앱 전체의 로드맵 완료를 의미하지 않는다.
 
 **다음 공통 기반 작업은 Calendar에서 도입한 서비스 계약을 앱 진입 계층에서 생성·주입하도록 정리하는 것이다.**

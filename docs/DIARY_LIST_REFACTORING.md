@@ -5,7 +5,7 @@
 첫 탭 "나의 일기"의 조회·검색·월별 분류·휴지통 이동을 화면에서 분리하고, 같은 상태로
 기존 UIKit `DiaryListVC`를 먼저 연결·검증한 뒤 목업 v2 기준 SwiftUI 화면으로 교체했다.
 Firebase 저장 경로 `users/{uid}/diaries/{id}`와 필드·문서 ID는 변경하지 않는다.
-일기 작성·상세·수정(`WriteDiaryVC`), 설정, 휴지통 화면(`TrashVC`)은 기존 UIKit을 연결해 사용한다.
+일기 작성·상세·수정(`WriteDiaryVC`), 설정은 기존 UIKit을 연결해 사용한다. 휴지통은 [휴지통 리팩토링](TRASH_REFACTORING.md)에서 교체했다.
 
 ![오프라인 샘플 데이터로 확인한 SwiftUI 일기 목록](screenshots/diary-list-swiftui.png)
 
@@ -67,7 +67,7 @@ Firebase 저장 경로 `users/{uid}/diaries/{id}`와 필드·문서 ID는 변경
 ## 남겨 둔 UIKit 코드
 
 `DiaryListVC`는 같은 ViewModel을 사용하도록 연결해 검증했고, 현재 탭은 SwiftUI를 사용한다.
-`PaginationManager`는 `TrashVC`가 사용하므로 유지한다. 목록 셀·헤더 등은 통합 검증 후 제거한다.
+`PaginationManager`는 비교용으로 남긴 `TrashVC`가 사용하므로 함께 정리한다. 목록 셀·헤더 등은 통합 검증 후 제거한다.
 이미지 로더는 Calendar의 `CalendarImageLoading`을 재사용한다. 공통 이름으로의 정리는 의존성 조립 PR(#2) 병합 후 진행한다.
 
 ## 검증

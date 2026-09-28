@@ -14,6 +14,11 @@ struct AppDependencies {
                        imageLoader: calendarImageLoader, calendar: calendar, now: now)
     }
 
+    func makeTrashModule() -> TrashModule {
+        TrashModule(repository: diaryRepository, session: userSession, trash: diaryTrash,
+                    imageLoader: calendarImageLoader, calendar: calendar, now: now)
+    }
+
     func makeDiaryListModule() -> DiaryListModule {
         DiaryListModule(repository: diaryRepository, session: userSession, trash: diaryTrash,
                         imageLoader: calendarImageLoader, calendar: calendar, now: now)

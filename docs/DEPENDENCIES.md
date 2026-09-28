@@ -19,8 +19,9 @@
 | `Features/Calendar/CalendarModule.swift` | 전달받은 서비스로 독립적인 화면 상태 생성 |
 | `Features/Calendar/CalendarModule+UIKit.swift` | 생성한 상태와 이미지 로더를 UIKit hosting controller에 연결 |
 | `Features/DiaryList/DiaryListModule.swift`, `+UIKit.swift` | 일기 목록 상태 생성과 UIKit hosting controller 연결. Calendar와 같은 조회·세션을 재사용 |
+| `Features/Trash/TrashModule.swift`, `+UIKit.swift` | 휴지통 상태 생성과 hosting controller 연결. 설정 화면이 의존성을 받지 않으므로 `makeLiveViewController()`에서 `AppDependencies.live()`를 만든다(설정 전환 시 제거) |
 
-일기 쓰기 경계는 휴지통 이동이라는 첫 사용처와 함께 `DiaryTrashing`으로 추가했다. 운영 구현은 요청한 사용자 경로의 휴지통 필드만 수정한다.
+일기 쓰기 경계는 휴지통 이동이라는 첫 사용처와 함께 `DiaryTrashing`으로 추가했다. 운영 구현은 요청한 사용자 경로의 휴지통 필드만 수정한다. 휴지통 화면과 함께 복원·영구 삭제를 같은 경계에 추가했다.
 
 운영 의존성은 `AppDelegate`의 Firebase 초기화 이후 scene 연결 시 생성한다.
 같은 의존성으로 여러 모듈을 만들더라도 화면 상태는 각각 새로 생성된다.
