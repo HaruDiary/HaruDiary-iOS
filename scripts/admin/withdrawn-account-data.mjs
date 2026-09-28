@@ -98,6 +98,7 @@ if (!shouldDelete) {
   process.exit(0);
 }
 
+let erased = 0;
 for (const uid of withdrawn) {
   // Recheck right before deleting, in case the account signed in again since the listing.
   const stillMissing = await auth.getUser(uid).then(() => false, (error) => error.code === "auth/user-not-found");
@@ -109,5 +110,6 @@ for (const uid of withdrawn) {
     refs.slice(i, i + 400).forEach((ref) => batch.delete(ref));
     await batch.commit();
   }
+  erased += 1;
 }
-console.log(`Deleted data of ${withdrawn.length} withdrawn accounts.`);
+console.log(`Deleted data of ${erased} withdrawn accounts (${withdrawn.length - erased} skipped because the account exists again).`);
