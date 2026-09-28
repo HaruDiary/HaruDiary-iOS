@@ -30,6 +30,14 @@ final class TrashHostingController: UIHostingController<TrashView>, DiaryUpdateD
         navigationController?.navigationBar.tintColor = DiaryTheme.Colors.brandUIKit
     }
 
+    // Popping the screen ends the subscription and any automatic deletion still running.
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isMovingFromParent || isBeingDismissed || navigationController?.isBeingDismissed == true {
+            viewModel.stop()
+        }
+    }
+
     nonisolated func diaryDidUpdate() {
         Task { @MainActor [weak self] in
             guard let self else { return }
