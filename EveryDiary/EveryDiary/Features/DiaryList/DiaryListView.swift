@@ -39,31 +39,7 @@ struct DiaryListView: View {
     }
 
     private var searchField: some View {
-        HStack(spacing: DiaryTheme.Spacing.small) {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(DiaryTheme.Colors.secondaryText)
-                .accessibilityHidden(true)
-            TextField("일기 검색", text: $viewModel.query)
-                .focused($isSearchFocused)
-                .submitLabel(.search)
-                .onSubmit { isSearchFocused = false }
-                .accessibilityIdentifier("diaryList.search")
-            if !viewModel.query.isEmpty {
-                Button {
-                    viewModel.query = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
-                        .frame(minWidth: DiaryTheme.Size.touchTarget, minHeight: DiaryTheme.Size.touchTarget)
-                }
-                .accessibilityLabel("검색어 지우기")
-            }
-        }
-        .font(DiaryTheme.Fonts.body)
-        .padding(.leading, DiaryTheme.Spacing.medium)
-        .frame(minHeight: DiaryTheme.Size.touchTarget)
-        .background(DiaryTheme.Colors.selection.opacity(0.35), in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
-        .padding(.horizontal, DiaryTheme.Spacing.screen)
+        DiarySearchField(text: $viewModel.query, isFocused: $isSearchFocused)
     }
 
     @ViewBuilder
@@ -82,30 +58,26 @@ struct DiaryListView: View {
                 Text("검색 결과 \(viewModel.visibleCount)개")
                     .font(DiaryTheme.Fonts.caption)
                     .foregroundStyle(DiaryTheme.Colors.secondaryText)
-                    .cardRow()
+                    .diaryCardRow()
             }
             if viewModel.state == .failed {
-                DiaryListLoadFailure(onRetry: viewModel.retry).cardRow()
+                DiaryLoadFailure(onRetry: viewModel.retry).diaryCardRow()
             }
             if viewModel.isUploadingDiary {
-                DiaryListUploadingRow().cardRow()
+                DiaryListUploadingRow().diaryCardRow()
             }
             ForEach(viewModel.sections) { section in
                 Section {
                     ForEach(section.entries, id: \.id) { entry in
-                        row(for: entry).cardRow()
+                        row(for: entry).diaryCardRow()
                     }
                 } header: {
-                    monthHeader(section)
+                    DiaryMonthHeader(section: section)
                 }
             }
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .environment(\.defaultMinListRowHeight, 0)
-        .contentMargins(.top, 0, for: .scrollContent)
+        .diaryCardList()
         .contentMargins(.bottom, DiaryTheme.Size.floatingButton + DiaryTheme.Spacing.section, for: .scrollContent)
-        .scrollDismissesKeyboard(.immediately)
         .refreshable { viewModel.retry() }
     }
 
@@ -141,17 +113,6 @@ struct DiaryListView: View {
         action()
     }
 
-    private func monthHeader(_ section: DiaryListSection) -> some View {
-        Text("\(String(section.year))년 \(section.month)월")
-            .font(DiaryTheme.Fonts.section)
-            .foregroundStyle(DiaryTheme.Colors.brand)
-            .padding(.horizontal, DiaryTheme.Spacing.screen)
-            .frame(maxWidth: .infinity, minHeight: DiaryTheme.Size.touchTarget, alignment: .leading)
-            .background(DiaryTheme.Colors.background)
-            .listRowInsets(EdgeInsets())
-            .accessibilityAddTraits(.isHeader)
-    }
-
     @ViewBuilder
     private var placeholder: some View {
         switch viewModel.state {
@@ -159,17 +120,17 @@ struct DiaryListView: View {
             ProgressView("일기를 불러오는 중이에요")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .failed:
-            DiaryListLoadFailure(onRetry: viewModel.retry)
+            DiaryLoadFailure(onRetry: viewModel.retry)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .loaded:
             if viewModel.isSearching {
-                DiaryListEmptyState(
+                DiaryEmptyState(
                     systemImage: "magnifyingglass",
                     title: "검색 결과가 없어요",
                     message: "제목이나 내용의 다른 단어로 찾아보세요."
                 )
             } else {
-                DiaryListEmptyState(
+                DiaryEmptyState(
                     systemImage: "book",
                     title: "아직 작성한 일기가 없어요",
                     message: "오늘의 이야기를 남겨보세요.",
@@ -178,22 +139,6 @@ struct DiaryListView: View {
                 )
             }
         }
-    }
-}
-
-private struct DiaryListLoadFailure: View {
-    let onRetry: () -> Void
-
-    var body: some View {
-        VStack(spacing: DiaryTheme.Spacing.small) {
-            Text("일기를 불러오지 못했어요")
-                .foregroundStyle(DiaryTheme.Colors.error)
-            Button("다시 시도", action: onRetry)
-                .tint(DiaryTheme.Colors.brand)
-                .frame(minHeight: DiaryTheme.Size.touchTarget)
-        }
-        .font(DiaryTheme.Fonts.body)
-        .frame(maxWidth: .infinity)
     }
 }
 
@@ -208,52 +153,5 @@ private struct DiaryListUploadingRow: View {
         .frame(maxWidth: .infinity, minHeight: DiaryTheme.Size.thumbnail)
         .background(DiaryTheme.Colors.selection.opacity(0.5), in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
         .accessibilityElement(children: .combine)
-    }
-}
-
-private struct DiaryListEmptyState: View {
-    let systemImage: String
-    let title: String
-    let message: String
-    var actionTitle: String?
-    var action: (() -> Void)?
-
-    var body: some View {
-        VStack(spacing: DiaryTheme.Spacing.medium) {
-            Image(systemName: systemImage)
-                .font(.system(size: 56, weight: .light))
-                .foregroundStyle(DiaryTheme.Colors.brand)
-                .accessibilityHidden(true)
-            Text(title)
-                .font(DiaryTheme.Fonts.section)
-                .foregroundStyle(DiaryTheme.Colors.text)
-            Text(message)
-                .font(DiaryTheme.Fonts.body)
-                .foregroundStyle(DiaryTheme.Colors.secondaryText)
-            if let actionTitle, let action {
-                Button(action: action) {
-                    Label(actionTitle, systemImage: "pencil")
-                        .font(DiaryTheme.Fonts.section)
-                        .foregroundStyle(DiaryTheme.Colors.surface)
-                        .padding(.horizontal, DiaryTheme.Spacing.section)
-                        .frame(minHeight: DiaryTheme.Size.touchTarget)
-                        .background(DiaryTheme.Colors.brand, in: Capsule())
-                }
-                .padding(.top, DiaryTheme.Spacing.small)
-            }
-        }
-        .multilineTextAlignment(.center)
-        .padding(DiaryTheme.Spacing.section)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
-
-private extension View {
-    /// Keeps the card look inside a plain List: no separators or row background, card spacing as insets.
-    func cardRow() -> some View {
-        listRowInsets(EdgeInsets(top: DiaryTheme.Spacing.small / 2 + 2, leading: DiaryTheme.Spacing.screen,
-                                 bottom: DiaryTheme.Spacing.small / 2 + 2, trailing: DiaryTheme.Spacing.screen))
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
     }
 }

@@ -1,9 +1,16 @@
 import SwiftUI
 
+/// A short status shown at the end of the title line, e.g. the days left in the trash.
+struct DiaryRowBadge: Equatable {
+    let text: String
+    var isUrgent = false
+}
+
 struct DiaryListRow: View {
     let entry: DiaryEntry
     let calendar: Calendar
     let imageLoader: any CalendarImageLoading
+    var badge: DiaryRowBadge?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     // Accessibility sizes stack the columns so titles are not squeezed into a narrow column.
@@ -25,6 +32,18 @@ struct DiaryListRow: View {
                         .foregroundStyle(DiaryTheme.Colors.text)
                         .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 1)
                         .truncationMode(.tail)
+                    if let badge {
+                        Spacer(minLength: DiaryTheme.Spacing.small)
+                        // The title gives up space first so the badge always stays readable.
+                        Text(badge.text)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(badge.isUrgent ? DiaryTheme.Colors.holiday : DiaryTheme.Colors.secondaryText)
+                            .padding(.horizontal, DiaryTheme.Spacing.small)
+                            .padding(.vertical, 3)
+                            .background((badge.isUrgent ? DiaryTheme.Colors.holiday : DiaryTheme.Colors.secondaryText).opacity(0.12), in: Capsule())
+                            .fixedSize()
+                            .layoutPriority(1)
+                    }
                 }
                 columns {
                     // Without a photo the content starts where the photo would be, using the full width.
@@ -46,7 +65,7 @@ struct DiaryListRow: View {
         .background(DiaryTheme.Colors.surface, in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
         .contentShape(RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(accessibilityDate), \(entry.title)")
+        .accessibilityLabel([accessibilityDate, entry.title, badge?.text].compactMap { $0 }.joined(separator: ", "))
         .accessibilityHint("일기를 엽니다. 길게 누르면 수정하거나 휴지통으로 옮길 수 있어요.")
     }
 

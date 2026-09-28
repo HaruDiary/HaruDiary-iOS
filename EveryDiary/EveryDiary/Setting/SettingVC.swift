@@ -354,7 +354,7 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
                 let lockVC = LockVC()
                 navigationController?.pushViewController(lockVC, animated: true)
             case 3:
-                let trashVC = TrashVC()
+                let trashVC = TrashModule.makeLiveViewController()
                 navigationController?.pushViewController(trashVC, animated: true)
             default:
                 print("error")
