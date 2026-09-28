@@ -152,6 +152,15 @@
 		BEC453C4AF85470EA895ED1B /* DiaryPhotoReplacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71EA87682D94703AF9A9F78 /* DiaryPhotoReplacement.swift */; };
 		1EBA6524B83D4FB78DBC5FB8 /* DiaryPhotoReplacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71EA87682D94703AF9A9F78 /* DiaryPhotoReplacement.swift */; };
 		79014D912936439A80376416 /* DiaryPhotoReplacementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFFF41A907040098AD5C59B /* DiaryPhotoReplacementTests.swift */; };
+		87196E8B8E8C443596CE9EE1 /* DiaryTrashPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E58E2D4A77420EAE1882E4 /* DiaryTrashPolicy.swift */; };
+		6F47BDA8EF9B4C1796C3E28E /* DiaryTrashPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E58E2D4A77420EAE1882E4 /* DiaryTrashPolicy.swift */; };
+		4C1F229FB0D44CFA9569491E /* ExpiredTrashPurger.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39A241C0B4040A399B6C279 /* ExpiredTrashPurger.swift */; };
+		681CF5931F6D47758EEC0411 /* ExpiredTrashPurger.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39A241C0B4040A399B6C279 /* ExpiredTrashPurger.swift */; };
+		6C49F281F0D84F9AAC6B1359 /* TrashViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFCEA1E9B9749B9868E1132 /* TrashViewModel.swift */; };
+		A45F98CD3B224F358D816070 /* TrashViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFCEA1E9B9749B9868E1132 /* TrashViewModel.swift */; };
+		B747CF2EFFE444EA8B1038EF /* DiaryTrashPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1416069C6040D1A9C3662C /* DiaryTrashPolicyTests.swift */; };
+		18BDDECA9D6948C9865B4B19 /* ExpiredTrashPurgerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA17968AF8E45979D9ADD82 /* ExpiredTrashPurgerTests.swift */; };
+		1BA628A79683420BBFEE9BD7 /* TrashViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0B8AACB301466AAE9D2BA6 /* TrashViewModelTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -280,6 +289,12 @@
 		1FAAA1DC7DFF409D9B8A4315 /* DiaryDocumentDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryDocumentDecodingTests.swift"; sourceTree = "<group>"; };
 		D71EA87682D94703AF9A9F78 /* DiaryPhotoReplacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryPhotoReplacement.swift"; sourceTree = "<group>"; };
 		DEFFF41A907040098AD5C59B /* DiaryPhotoReplacementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryPhotoReplacementTests.swift"; sourceTree = "<group>"; };
+		47E58E2D4A77420EAE1882E4 /* DiaryTrashPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Trash/DiaryTrashPolicy.swift"; sourceTree = "<group>"; };
+		C39A241C0B4040A399B6C279 /* ExpiredTrashPurger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Trash/ExpiredTrashPurger.swift"; sourceTree = "<group>"; };
+		5BFCEA1E9B9749B9868E1132 /* TrashViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Trash/TrashViewModel.swift"; sourceTree = "<group>"; };
+		BC1416069C6040D1A9C3662C /* DiaryTrashPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTrashPolicyTests.swift"; sourceTree = "<group>"; };
+		0DA17968AF8E45979D9ADD82 /* ExpiredTrashPurgerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExpiredTrashPurgerTests.swift"; sourceTree = "<group>"; };
+		FE0B8AACB301466AAE9D2BA6 /* TrashViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TrashViewModelTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -518,6 +533,9 @@
 		CE00DB6416F6564570F700F0 /* EveryDiaryLogicTests */ = {
 			isa = PBXGroup;
 			children = (
+				FE0B8AACB301466AAE9D2BA6 /* TrashViewModelTests.swift */,
+				0DA17968AF8E45979D9ADD82 /* ExpiredTrashPurgerTests.swift */,
+				BC1416069C6040D1A9C3662C /* DiaryTrashPolicyTests.swift */,
 				DEFFF41A907040098AD5C59B /* DiaryPhotoReplacementTests.swift */,
 				1FAAA1DC7DFF409D9B8A4315 /* DiaryDocumentDecodingTests.swift */,
 				7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */,
@@ -556,6 +574,8 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				C39A241C0B4040A399B6C279 /* ExpiredTrashPurger.swift */,
+				47E58E2D4A77420EAE1882E4 /* DiaryTrashPolicy.swift */,
 				D71EA87682D94703AF9A9F78 /* DiaryPhotoReplacement.swift */,
 				0E851EEAA92546DAB5CA3FFE /* DiaryDocumentDecoding.swift */,
 				6324AE064574465A82455BD2 /* DayKind.swift */,
@@ -590,6 +610,7 @@
 		BC49A4866C5E0A9951D22E14 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				5BFCEA1E9B9749B9868E1132 /* TrashViewModel.swift */,
 				482F67E504C742B2A05E19C0 /* DiaryListModule+UIKit.swift */,
 				299B8B1313BF4345B9CE7AF8 /* DiaryListPreview.swift */,
 				258147EB1F9A4465B8381397 /* DiaryListHostingController.swift */,
@@ -751,6 +772,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BA628A79683420BBFEE9BD7 /* TrashViewModelTests.swift in Sources */,
+				18BDDECA9D6948C9865B4B19 /* ExpiredTrashPurgerTests.swift in Sources */,
+				B747CF2EFFE444EA8B1038EF /* DiaryTrashPolicyTests.swift in Sources */,
+				A45F98CD3B224F358D816070 /* TrashViewModel.swift in Sources */,
+				681CF5931F6D47758EEC0411 /* ExpiredTrashPurger.swift in Sources */,
+				6F47BDA8EF9B4C1796C3E28E /* DiaryTrashPolicy.swift in Sources */,
 				79014D912936439A80376416 /* DiaryPhotoReplacementTests.swift in Sources */,
 				1EBA6524B83D4FB78DBC5FB8 /* DiaryPhotoReplacement.swift in Sources */,
 				DA0D49A076EF43ECAE040843 /* DiaryDocumentDecodingTests.swift in Sources */,
@@ -785,6 +812,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6C49F281F0D84F9AAC6B1359 /* TrashViewModel.swift in Sources */,
+				4C1F229FB0D44CFA9569491E /* ExpiredTrashPurger.swift in Sources */,
+				87196E8B8E8C443596CE9EE1 /* DiaryTrashPolicy.swift in Sources */,
 				BEC453C4AF85470EA895ED1B /* DiaryPhotoReplacement.swift in Sources */,
 				6329E90B791045EA9A38C37B /* DiaryDocumentDecoding.swift in Sources */,
 				22C182E499894E82A27047B2 /* DiaryWeatherIcon.swift in Sources */,

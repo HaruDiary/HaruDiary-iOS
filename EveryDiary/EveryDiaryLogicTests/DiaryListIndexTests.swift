@@ -89,4 +89,17 @@ final class DiaryListIndexTests: XCTestCase {
         XCTAssertEqual(sections.flatMap(\.entries).count, 2)
         XCTAssertEqual(DiaryListIndex.normalizedQuery("  산책 "), "산책")
     }
+
+    func testTrashScopeShowsOnlyTrashedDiariesWithTheSameGroupingAndSearch() throws {
+        let entries = [
+            entry("active", "2026-09-15 08:00:00 +0900", title: "산책"),
+            entry("trashed-sep", "2026-09-10 08:00:00 +0900", title: "산책", isDeleted: true),
+            entry("trashed-aug", "2026-08-01 08:00:00 +0900", title: "커피", isDeleted: true),
+        ]
+        let calendar = try calendar()
+
+        XCTAssertEqual(DiaryListIndex.sections(from: entries, calendar: calendar, scope: .trash).flatMap(\.entries).map(\.id), ["trashed-sep", "trashed-aug"])
+        XCTAssertEqual(DiaryListIndex.sections(from: entries, calendar: calendar, scope: .trash).map(\.id), ["2026.09", "2026.08"])
+        XCTAssertEqual(DiaryListIndex.sections(from: entries, matching: "산책", calendar: calendar, scope: .trash).flatMap(\.entries).map(\.id), ["trashed-sep"])
+    }
 }
