@@ -42,6 +42,7 @@ final class TrashViewModel {
     @ObservationIgnored private var userGeneration = 0
     // Expired diaries whose automatic deletion failed stay visible so they can be restored or deleted by hand.
     @ObservationIgnored private var purgeFailedIDs: Set<String> = []
+    @ObservationIgnored private var purgeTask: Task<Void, Never>?
 
     init(repository: any DiaryReadingRepository, session: any DiaryUserSession, trash: any DiaryTrashing,
          calendar: Calendar, now: @escaping () -> Date = Date.init) {
@@ -67,6 +68,7 @@ final class TrashViewModel {
 
     func stop() {
         feed.stop()
+        cancelPurge()
     }
 
     func retry() {
@@ -158,6 +160,7 @@ final class TrashViewModel {
             userGeneration += 1
             workingIDs.removeAll()
             purgeFailedIDs.removeAll()
+            cancelPurge()
             entries = []
             rebuildSections()
         case .loading:
@@ -176,7 +179,9 @@ final class TrashViewModel {
         guard let userID = feed.currentUserID else { return }
         let current = now()
         let generation = userGeneration
-        Task { [weak self, purger] in
+        // A newer snapshot replaces the previous run; diaries already being deleted are not requested twice.
+        purgeTask?.cancel()
+        purgeTask = Task { [weak self, purger] in
             let result = await purger.purgeExpired(in: snapshot, userID: userID, now: current)
             if result.deletedCount + result.failedCount > 0 {
                 // Counts only: which diaries were removed stays out of the log.
@@ -186,6 +191,11 @@ final class TrashViewModel {
             self.purgeFailedIDs.formUnion(result.failedIDs)
             self.rebuildSections()
         }
+    }
+
+    private func cancelPurge() {
+        purgeTask?.cancel()
+        purgeTask = nil
     }
 
     private func rebuildSections() {

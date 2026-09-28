@@ -26,6 +26,8 @@ final class ExpiredTrashPurger {
         }
         var result = Result()
         for entry in expired {
+            // Cancelled when the user changes or the trash stops, so another account is not modified.
+            guard !Task.isCancelled else { break }
             guard let id = entry.id else { continue }
             inFlight.insert(id)
             do {

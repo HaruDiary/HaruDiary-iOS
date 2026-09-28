@@ -53,6 +53,24 @@ final class ExpiredTrashPurgerTests: XCTestCase {
         XCTAssertEqual(second.deletedCount, 1)
     }
 
+    func testCancelledPurgeDoesNotRequestRemainingDiaries() async throws {
+        let trash = PurgeTrash()
+        trash.suspends = true
+        let purger = try makePurger(trash: trash)
+        let entries = [entry("first", deletedDaysAgo: 40), entry("second", deletedDaysAgo: 40)]
+
+        let task = Task { await purger.purgeExpired(in: entries, userID: "user-a", now: now) }
+        for _ in 0..<1000 where trash.deleted.isEmpty {
+            try await Task.sleep(nanoseconds: 1_000_000)
+        }
+        task.cancel()
+        trash.resumeAll()
+        let result = await task.value
+
+        XCTAssertEqual(trash.deleted.count, 1)
+        XCTAssertEqual(result.deletedCount, 1)
+    }
+
     func testConcurrentSnapshotsDoNotDeleteTheSameDiaryTwice() async throws {
         let trash = PurgeTrash()
         trash.suspends = true
