@@ -5,18 +5,17 @@
 //  Created by t2023-m0044 on 2/21/24.
 //
 
+import Observation
 import UIKit
-import CryptoKit
-import AuthenticationServices
 
 import SnapKit
-import FirebaseAuth
-import Firebase
-import GoogleSignIn
 
 class SettingVC: UIViewController {
     
-    private var loginStatus: Bool = false
+    private let module: SettingsModule
+    private var viewModel: SettingsViewModel { module.viewModel }
+    
+    private var loginStatus: Bool { viewModel.profile.isLoggedIn }
     
     private var dataSource = [CellModel]()
     
@@ -33,13 +32,26 @@ class SettingVC: UIViewController {
         return tableView
     }()
     
+    init(module: SettingsModule) {
+        self.module = module
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    // The replaced UIKit tabs (DiaryListVC, CalendarVC) still create settings without dependencies.
+    // Remove with those screens; live tabs pass a module from AppDependencies.
+    convenience init() {
+        self.init(module: AppDependencies.live().makeSettingsModule())
+    }
+    
+    required init?(coder: NSCoder) { return nil }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         addSubviewsSettingVC()
         autoLayoutSettingVC()
-        observeAuthState()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
+        viewModel.start()
+        observeAccount()
+        observeNotice()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -48,11 +60,14 @@ class SettingVC: UIViewController {
         tableView.selectRow(at: .none,
                             animated: true,
                             scrollPosition: .top)
-        print("\(String(describing: Auth.auth().currentUser?.displayName))")
     }
     
-    deinit {
-        NotificationCenter.default.removeObserver(self)
+    // Popping settings ends the account observation.
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isMovingFromParent || navigationController?.isBeingDismissed == true {
+            viewModel.stop()
+        }
     }
     
     private func addSubviewsSettingVC() {
@@ -69,10 +84,6 @@ class SettingVC: UIViewController {
         }
     }
     
-    @objc func loginStatusChanged() {
-        observeAuthState()
-    }
-    
     @objc func didTapLoginButton() {
         let loginVC = LoginVC()
         loginVC.modalPresentationStyle = .fullScreen
@@ -86,101 +97,72 @@ class SettingVC: UIViewController {
     }
 }
 
-// MARK: - 사용자의 로그인 상태 유무 감지 & 로그아웃 기능
+// MARK: - 계정 상태 표시 & 로그아웃·회원 탈퇴 결과
 extension SettingVC {
     // 로그인 상태 별 TableView의 구성
     private func refresh() {
-        if let currentUser = Auth.auth().currentUser {
-            if currentUser.isEmailVerified == false {
-                self.dataSource = [
-                    .profileItem(email: "일기를 저장하려면 로그인하세요", name: "손님", image: "profile", isLoggedIn: false),
-                    .settingItem(title: "알림", iconImage: "notification", number: 1),
-                    .settingItem(title: "잠금", iconImage: "lock", number: 2),
-                    .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
-                    .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: false),
-                    .signOutItem(title: "회원 탈퇴", iconImage: "trash", number: 2, isLoggedIn: false)
-                ]
-            } else if currentUser.isEmailVerified == true {
-                var profileImageName = "profile"
-                for userInfo in currentUser.providerData {
-                    switch userInfo.providerID {
-                    case "google.com":
-                        profileImageName = "googleProfile" // Google 로그인 프로필 이미지
-                    case "apple.com":
-                        profileImageName = "appleProfile" // Apple 로그인 프로필 이미지
-                    default:
-                        break
-                    }
-                }
-                self.dataSource = [
-                    .profileItem(email: currentUser.email ?? "인증 완료", name: currentUser.displayName ?? "사용자", image: profileImageName, isLoggedIn: true),
-                    .settingItem(title: "알림", iconImage: "notification", number: 1),
-                    .settingItem(title: "잠금", iconImage: "lock", number: 2),
-                    .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
-                    .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: true),
-                    .signOutItem(title: "회원 탈퇴", iconImage: "withdrawal", number: 2, isLoggedIn: true)
-                ]
-            }
-        } else {
-            self.dataSource = [
-                .profileItem(email: "일기를 저장하려면 로그인하세요", name: "로그인해주세요", image: "profile", isLoggedIn: false),
-                .settingItem(title: "알림", iconImage: "notification", number: 1),
-                .settingItem(title: "잠금", iconImage: "lock", number: 2),
-                .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
-                .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: false),
-                .signOutItem(title: "회원 탈퇴", iconImage: "trash", number: 2, isLoggedIn: false)
-            ]
-        }
+        let profile = viewModel.profile
+        let withdrawalIcon = profile.isLoggedIn ? "withdrawal" : "trash"
+        dataSource = [
+            .profileItem(email: profile.detail, name: profile.name, image: profile.imageName, isLoggedIn: profile.isLoggedIn),
+            .settingItem(title: "알림", iconImage: "notification", number: 1),
+            .settingItem(title: "잠금", iconImage: "lock", number: 2),
+            .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
+            .signOutItem(title: "로그 아웃", iconImage: "logoutRed", number: 1, isLoggedIn: profile.isLoggedIn),
+            .signOutItem(title: "회원 탈퇴", iconImage: withdrawalIcon, number: 2, isLoggedIn: profile.isLoggedIn)
+        ]
         tableView.reloadData()
     }
     
-    // Firebase 인증 상태 감지 메서드
-    private func observeAuthState() {
-        Auth.auth().addStateDidChangeListener { [weak self] (_, user) in
-            guard let self = self else { return }
-            if let user = user {
-                // 사용자가 로그인되어 있음을 알림
-                if user.isEmailVerified == false {
-                    // 사용자가 익명 계정으로 로그인 된 경우
-                    // 로그인 버튼을 활성화 후 데이터 새로고침
-                    self.loginStatus = false
-                } else if user.isEmailVerified == true {
-                    // 사용자가 소셜 계정으로 로그인 된 경우
-                    // 로그인 버튼을 비활성화 후 데이터 새로고침
-                    self.loginStatus = true
-                }
-                self.refresh()
-            } else {
-                // 사용자가 로그인되어 있지 않다면 loginStatus을 false로 설정하고 데이터를 새로고침
-                self.loginStatus = false
-                self.refresh()
-            }
+    private func observeAccount() {
+        withObservationTracking {
+            _ = viewModel.account
+        } onChange: { [weak self] in
+            Task { @MainActor in self?.observeAccount() }
+        }
+        refresh()
+    }
+    
+    private func observeNotice() {
+        withObservationTracking {
+            _ = viewModel.notice
+        } onChange: { [weak self] in
+            Task { @MainActor in self?.observeNotice() }
+        }
+        showNoticeIfNeeded()
+    }
+    
+    private func showNoticeIfNeeded() {
+        guard let notice = viewModel.notice else { return }
+        viewModel.notice = nil
+        switch notice {
+        case .signedOut:
+            // 여정 화면은 아직 이 알림으로 사용자 변경을 반영한다.
+            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+            presentAlert(title: "확인", message: "로그아웃이 완료되었습니다.") { [weak self] in self?.showMainScreen() }
+        case .signOutFailed:
+            presentAlert(title: "로그아웃 실패", message: "로그아웃하지 못했습니다.\n잠시 후 다시 시도해주세요.")
+        case .accountDeleted:
+            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+            presentAlert(title: "회원 탈퇴", message: "회원 탈퇴가 완료되었습니다.") { [weak self] in self?.showMainScreen() }
+        case .deletionNeedsRecentLogin:
+            presentAlert(title: "회원 탈퇴 실패", message: "보안을 위해 다시 로그인한 뒤 탈퇴해주세요.")
+        case .deletionFailed:
+            presentAlert(title: "회원 탈퇴 실패", message: "회원 탈퇴를 완료하지 못했습니다.\n잠시 후 다시 시도해주세요.")
         }
     }
     
-    // 사용자 로그아웃 기능
-    private func signOut() {
-        let firebaseAuth = Auth.auth()
-        do {
-            try firebaseAuth.signOut()
-            if Auth.auth().currentUser == nil {
-                print("로그아웃 성공!")
-            } else {
-                print("로그아웃 실패!")
-            }
-        } catch let signOutError as NSError {
-            print("Error Signing out:  %@", signOutError)
-        }
-        
+    private func presentAlert(title: String, message: String, onConfirm: (() -> Void)? = nil) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default) { _ in onConfirm?() })
+        present(alert, animated: true)
     }
     
     // 사용자 로그아웃 재차 확인
     private func signOutAlert() {
         let alertController = UIAlertController(title: "알림", message: "로그아웃 하시겠습니까?", preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "확인", style: .default) { (_) in
-            self.signOut()
-            self.signOutConfirmAlert()
-            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+        let okAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            self?.viewModel.signOut()
         }
         alertController.addAction(okAction)
         
@@ -189,71 +171,19 @@ extension SettingVC {
         present(alertController, animated: true, completion: nil)
     }
     
-    // 로그아웃 시, 나오는 알림창
-    private func signOutConfirmAlert() {
-        let okAlert = UIAlertController(title: "확인", message: "로그아웃이 완료되었습니다.", preferredStyle: .alert)
-        let okClick = UIAlertAction(title: "확인", style: .default) { _ in
-            self.showMainScreen()
-        }
-        okAlert.addAction(okClick)
-        
-        self.present(okAlert, animated: true, completion: nil)
-    }
-    
     func showMainScreen() {
         let loginVC = LoginVC()
         loginVC.modalPresentationStyle = .fullScreen
         self.present(loginVC, animated: true)
     }
-}
-
-// MARK: - Firebase 사용자 회원탈퇴 & Apple 탈퇴
-extension SettingVC {
     
-    func deleteUserAccout() {
-        guard let currentUser = Auth.auth().currentUser else {
-            return
-        }
-        
-        let providerID = currentUser.providerData.compactMap { $0.providerID }.first
-        
-        switch providerID {
-        case "apple.com":
-            deleteUserDataFromApple()
-        case "google.com":
-            deleteUserDataFromFirebase()
-        default:
-            print("Unsupported provider or provider could not be identified.")
-        }
-    }
-    
-    // Firebase에서 사용자 데이터 삭제
-    func deleteUserDataFromFirebase() {
-        let firebaseAuth = Auth.auth()
-        guard let currentUser = firebaseAuth.currentUser else {
-            print("No user is currently signed in.")
-            return
-        }
-
-        // 사용자 계정 삭제
-        currentUser.delete { error in
-            if let error = error {
-                print("Error deleting user from Firebase: \(error.localizedDescription)")
-            } else {
-                print("User successfully deleted from Firebase.")
-            }
-        }
-    }
-    
-    // 사용자에게 Firebase 회원탈퇴, Apple or Google 소셜아이디 등록 탈퇴하도록 안내하는 메시지 표시
+    // 회원 탈퇴 재차 확인
     func showDeleteAccountMessage() {
         let alert = UIAlertController(title: "회원 탈퇴하시겠습니까?", message: "일기에 저장된 모든 내용이 삭제되며  복구가 불가능해집니다. \n 그래도 진행하시겠습니까?", preferredStyle: .actionSheet)
         
-        let deleteAction = UIAlertAction(title: "회원 탈퇴", style: .destructive) { _ in
-            //            self.deleteUserDataFromApple()
-            self.deleteUserAccout()
-            self.showDeleteAccountConfirmAlert()
-            NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+        let deleteAction = UIAlertAction(title: "회원 탈퇴", style: .destructive) { [weak self] _ in
+            guard let self else { return }
+            Task { await self.viewModel.deleteAccount() }
         }
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         
@@ -261,51 +191,6 @@ extension SettingVC {
         alert.addAction(cancelAction)
         
         present(alert, animated: true, completion: nil)
-    }
-    
-    // 회원 탈퇴 시, 나오는 알림 창
-    func showDeleteAccountConfirmAlert() {
-        let confirmAlert = UIAlertController(title: "회원 탈퇴", message: "회원 탈퇴가 완료되었습니다.", preferredStyle: .alert)
-        let confirmAction = UIAlertAction(title: "확인", style: .default)
-        self.showMainScreen()
-        confirmAlert.addAction(confirmAction)
-        
-        present(confirmAlert, animated: true, completion: nil)
-    }
-    
-    // Apple 계정 탈퇴
-    func deleteUserDataFromApple() {
-        let token = UserDefaults.standard.string(forKey: "refreshToken")
-        
-        if let token = token {
-            let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/revokeToken?refresh_token=\(token)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "https://apple.com")!
-            
-            let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
-                if let error = error {
-                    print("Error:", error.localizedDescription)
-                    return
-                }
-                
-                // HTTP 응답 코드 확인
-                if let httpResponse = response as? HTTPURLResponse {
-                    print("HTTP Status Code:", httpResponse.statusCode)
-                }
-                
-                // 응답 데이터 확인
-                if let data = data, let utf8Text = String(data: data, encoding: .utf8) {
-                    print("Response Data:", utf8Text)
-                }
-            }
-            task.resume()
-        }
-        // Firebase 회원 탈퇴
-        deleteUserDataFromFirebase()
-        // 마지막으로 Firebase 로그아웃
-        do {
-            try Auth.auth().signOut()
-        } catch let signOutError as NSError {
-            print("Error signing out: %@", signOutError)
-        }
     }
 }
 
@@ -354,7 +239,7 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
                 let lockVC = LockVC()
                 navigationController?.pushViewController(lockVC, animated: true)
             case 3:
-                let trashVC = TrashModule.makeLiveViewController()
+                let trashVC = module.makeTrashModule().makeViewController()
                 navigationController?.pushViewController(trashVC, animated: true)
             default:
                 print("error")

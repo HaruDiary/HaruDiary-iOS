@@ -7,10 +7,12 @@ import UIKit
 final class CalendarHostingController: UIHostingController<CalendarView>, DiaryUpdateDelegate {
     private let viewModel: CalendarViewModel
     private let imageLoader: any CalendarImageLoading
+    private let makeSettings: () -> UIViewController
 
-    init(viewModel: CalendarViewModel, imageLoader: any CalendarImageLoading) {
+    init(viewModel: CalendarViewModel, imageLoader: any CalendarImageLoading, makeSettings: @escaping () -> UIViewController) {
         self.viewModel = viewModel
         self.imageLoader = imageLoader
+        self.makeSettings = makeSettings
         super.init(rootView: CalendarView(
             viewModel: viewModel, imageLoader: imageLoader,
             onSelectDiary: { _ in }, onOpenDayList: {}, onWriteDiary: {}, onOpenSettings: {}
@@ -58,7 +60,7 @@ final class CalendarHostingController: UIHostingController<CalendarView>, DiaryU
     }
 
     private func openSettings() {
-        let controller = SettingVC()
+        let controller = makeSettings()
         controller.hidesBottomBarWhenPushed = true
         navigationController?.setNavigationBarHidden(false, animated: true)
         navigationController?.pushViewController(controller, animated: true)
