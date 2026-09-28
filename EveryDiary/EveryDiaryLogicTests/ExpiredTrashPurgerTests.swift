@@ -36,7 +36,7 @@ final class ExpiredTrashPurgerTests: XCTestCase {
         XCTAssertEqual(trash.deleted.first?.userID, "user-a")
         XCTAssertEqual(trash.deleted.first?.imageURLs, ["a.jpg"])
         // The store deletes only if the diary still has the deleteDate judged expired (not restored elsewhere).
-        XCTAssertEqual(trash.deleted.first?.condition, .expired(deleteDate: now.addingTimeInterval(-31 * day)))
+        XCTAssertEqual(trash.deleted.first?.deleteDate, now.addingTimeInterval(-31 * day))
     }
 
     func testFailedDeletionIsCountedAndRetriedNextTime() async throws {
@@ -79,7 +79,7 @@ private final class PurgeTrash: DiaryTrashing {
         let diaryID: String
         let userID: String
         let imageURLs: [String]
-        let condition: PermanentDeletionCondition
+        let deleteDate: Date?
     }
 
     var deleted: [Deletion] = []
@@ -90,8 +90,8 @@ private final class PurgeTrash: DiaryTrashing {
     func moveToTrash(diaryID: String, userID: String, at date: Date) async throws {}
     func restore(diaryID: String, userID: String) async throws {}
 
-    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], condition: PermanentDeletionCondition) async throws -> PhotoCleanup {
-        deleted.append(Deletion(diaryID: diaryID, userID: userID, imageURLs: imageURLs, condition: condition))
+    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], trashedAt deleteDate: Date?) async throws -> PhotoCleanup {
+        deleted.append(Deletion(diaryID: diaryID, userID: userID, imageURLs: imageURLs, deleteDate: deleteDate))
         if suspends {
             await withCheckedContinuation { pending.append($0) }
         }

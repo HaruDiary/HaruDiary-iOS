@@ -29,7 +29,7 @@ final class ExpiredTrashPurger {
             inFlight.insert(id)
             do {
                 try await trash.deletePermanently(diaryID: id, userID: userID, imageURLs: entry.imageURL ?? [],
-                                                  condition: .expired(deleteDate: entry.deleteDate))
+                                                  trashedAt: entry.deleteDate)
                 result.deletedCount += 1
             } catch {
                 result.failedCount += 1

@@ -91,7 +91,8 @@ final class TrashViewModelTests: XCTestCase {
         await model.deletePermanently(entry("diary", images: ["a.jpg", "b.jpg"]))
 
         XCTAssertEqual(trash.deletions.first?.imageURLs, ["a.jpg", "b.jpg"])
-        XCTAssertEqual(trash.deletions.first?.condition, .inTrash)
+        // The store deletes only if the diary still has the deleteDate shown (not restored and trashed again elsewhere).
+        XCTAssertEqual(trash.deletions.first?.deleteDate, now.addingTimeInterval(-1 * day))
         XCTAssertEqual(model.notice, .failed(.delete, succeeded: 0, failed: 1))
     }
 
@@ -201,7 +202,7 @@ private final class RecordingTrash: DiaryTrashing {
         let diaryID: String
         let userID: String
         var imageURLs: [String] = []
-        var condition: PermanentDeletionCondition?
+        var deleteDate: Date?
     }
 
     var restores: [Request] = []
@@ -217,8 +218,8 @@ private final class RecordingTrash: DiaryTrashing {
         try await finish(diaryID)
     }
 
-    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], condition: PermanentDeletionCondition) async throws -> PhotoCleanup {
-        deletions.append(Request(diaryID: diaryID, userID: userID, imageURLs: imageURLs, condition: condition))
+    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], trashedAt deleteDate: Date?) async throws -> PhotoCleanup {
+        deletions.append(Request(diaryID: diaryID, userID: userID, imageURLs: imageURLs, deleteDate: deleteDate))
         try await finish(diaryID)
         return PhotoCleanup(deletedCount: imageURLs.count)
     }

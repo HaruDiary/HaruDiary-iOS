@@ -20,10 +20,10 @@ final class FirebaseDiaryTrash: DiaryTrashing {
         try await document(diaryID, userID).updateData(["isDeleted": false, "deleteDate": FieldValue.delete()])
     }
 
-    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], condition: PermanentDeletionCondition) async throws -> PhotoCleanup {
+    func deletePermanently(diaryID: String, userID: String, imageURLs: [String], trashedAt deleteDate: Date?) async throws -> PhotoCleanup {
         let reference = document(diaryID, userID)
-        guard Self.matches(try await reference.getDocument().data(), condition) else {
-            throw DiaryTrashError.conditionNotMet
+        guard Self.isTrashed(try await reference.getDocument().data(), at: deleteDate) else {
+            throw DiaryTrashError.trashStateChanged
         }
         var cleanup = PhotoCleanup()
         var failedCount = 0
@@ -37,8 +37,8 @@ final class FirebaseDiaryTrash: DiaryTrashing {
         // Re-checked inside the transaction so a restore saved while photos were being removed wins.
         _ = try await database.runTransaction { transaction, errorPointer in
             do {
-                guard Self.matches(try transaction.getDocument(reference).data(), condition) else {
-                    errorPointer?.pointee = DiaryTrashError.conditionNotMet as NSError
+                guard Self.isTrashed(try transaction.getDocument(reference).data(), at: deleteDate) else {
+                    errorPointer?.pointee = DiaryTrashError.trashStateChanged as NSError
                     return nil
                 }
                 transaction.deleteDocument(reference)
@@ -50,18 +50,12 @@ final class FirebaseDiaryTrash: DiaryTrashing {
         return cleanup
     }
 
-    nonisolated private static func matches(_ data: [String: Any]?, _ condition: PermanentDeletionCondition) -> Bool {
+    nonisolated private static func isTrashed(_ data: [String: Any]?, at expected: Date?) -> Bool {
         guard let data, data["isDeleted"] as? Bool == true else { return false }
-        switch condition {
-        case .inTrash:
-            return true
-        case .expired(let expected):
-            let stored = (data["deleteDate"] as? Timestamp)?.dateValue()
-            switch (stored, expected) {
-            case (nil, nil): return true
-            case let (stored?, expected?): return abs(stored.timeIntervalSince(expected)) < 0.001
-            default: return false
-            }
+        switch ((data["deleteDate"] as? Timestamp)?.dateValue(), expected) {
+        case (nil, nil): return true
+        case let (stored?, expected?): return abs(stored.timeIntervalSince(expected)) < 0.001
+        default: return false
         }
     }
 
