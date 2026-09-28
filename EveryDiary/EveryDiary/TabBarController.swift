@@ -9,12 +9,16 @@ import UIKit
 
 class TabBarController: UITabBarController {
     let firstVC: UINavigationController
-    let secondVC = UINavigationController.init(rootViewController: MotivationVC())
+    let secondVC: UINavigationController
     let thirdVC: UINavigationController
 
     init(dependencies: AppDependencies) {
-        firstVC = UINavigationController(rootViewController: dependencies.makeDiaryListModule().makeViewController())
-        thirdVC = UINavigationController(rootViewController: dependencies.makeCalendarModule().makeViewController())
+        let makeSettings = { dependencies.makeSettingsModule().makeViewController() }
+        firstVC = UINavigationController(rootViewController: dependencies.makeDiaryListModule().makeViewController(makeSettings: makeSettings))
+        let motivation = MotivationVC()
+        motivation.makeSettings = makeSettings
+        secondVC = UINavigationController(rootViewController: motivation)
+        thirdVC = UINavigationController(rootViewController: dependencies.makeCalendarModule().makeViewController(makeSettings: makeSettings))
         super.init(nibName: nil, bundle: nil)
     }
 

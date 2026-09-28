@@ -167,6 +167,21 @@
 		95964A794EB44976AA44826B /* TrashModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524ED3536EE44A2785020373 /* TrashModule.swift */; };
 		B944F1A93C004B9AA4CD3DDE /* TrashModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524ED3536EE44A2785020373 /* TrashModule.swift */; };
 		28BE78F22E5C4EEC98E91C7F /* TrashModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B849BEF7D104006888017EF /* TrashModule+UIKit.swift */; };
+		88AF15434D6841A5BC3E7B82 /* AccountState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0133FDA9A09046DEA4B34AFA /* AccountState.swift */; };
+		4F6A9D8257E64684AD30463D /* AccountState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0133FDA9A09046DEA4B34AFA /* AccountState.swift */; };
+		ED513D5F18C641F395DFA3FB /* AccountSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F393DB3464574FF0991E1DB5 /* AccountSession.swift */; };
+		CCB6591A652F447482530764 /* AccountSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F393DB3464574FF0991E1DB5 /* AccountSession.swift */; };
+		ECD7656952A94406875686E0 /* FirebaseAccountSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */; };
+		503FB09E7CBF40B4A0340CD9 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */; };
+		A5A79C2EA21D4984A637AD8F /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */; };
+		CD03D1F291054D819F2B2233 /* SettingsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D40C7B1D02405CB104C056 /* SettingsModule.swift */; };
+		258FDD3E83A3419891E0AFD6 /* SettingsModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D40C7B1D02405CB104C056 /* SettingsModule.swift */; };
+		5E40C4E1EC28447285742FA5 /* SettingsModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */; };
+		F0F3D5C199B14D369C2F15F1 /* SettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6612B31B0240059B2D34EE /* SettingsViewModelTests.swift */; };
+		F357E15ECC2548EDAC1BB4C1 /* AccountDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B474071592B145D8B85309BD /* AccountDeletion.swift */; };
+		EB45A794506B49CB96256C4C /* AccountDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B474071592B145D8B85309BD /* AccountDeletion.swift */; };
+		7528378CE0D24F2E8E00CD4A /* FirebaseUserDataEraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */; };
+		D21F23D03AB8475EA1C33C13 /* FirebasePhotoFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -306,6 +321,16 @@
 		2E450331EF5B4555A6C5B235 /* TrashHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Trash/TrashHostingController.swift"; sourceTree = "<group>"; };
 		524ED3536EE44A2785020373 /* TrashModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Trash/TrashModule.swift"; sourceTree = "<group>"; };
 		7B849BEF7D104006888017EF /* TrashModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Trash/TrashModule+UIKit.swift"; sourceTree = "<group>"; };
+		0133FDA9A09046DEA4B34AFA /* AccountState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountState.swift"; sourceTree = "<group>"; };
+		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
+		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
+		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		A1D40C7B1D02405CB104C056 /* SettingsModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsModule.swift"; sourceTree = "<group>"; };
+		0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsModule+UIKit.swift"; sourceTree = "<group>"; };
+		8A6612B31B0240059B2D34EE /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsViewModelTests.swift"; sourceTree = "<group>"; };
+		B474071592B145D8B85309BD /* AccountDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountDeletion.swift"; sourceTree = "<group>"; };
+		5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseUserDataEraser.swift"; sourceTree = "<group>"; };
+		1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebasePhotoFiles.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -544,6 +569,7 @@
 		CE00DB6416F6564570F700F0 /* EveryDiaryLogicTests */ = {
 			isa = PBXGroup;
 			children = (
+				8A6612B31B0240059B2D34EE /* SettingsViewModelTests.swift */,
 				FE0B8AACB301466AAE9D2BA6 /* TrashViewModelTests.swift */,
 				0DA17968AF8E45979D9ADD82 /* ExpiredTrashPurgerTests.swift */,
 				BC1416069C6040D1A9C3662C /* DiaryTrashPolicyTests.swift */,
@@ -585,6 +611,9 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				B474071592B145D8B85309BD /* AccountDeletion.swift */,
+				F393DB3464574FF0991E1DB5 /* AccountSession.swift */,
+				0133FDA9A09046DEA4B34AFA /* AccountState.swift */,
 				C39A241C0B4040A399B6C279 /* ExpiredTrashPurger.swift */,
 				47E58E2D4A77420EAE1882E4 /* DiaryTrashPolicy.swift */,
 				D71EA87682D94703AF9A9F78 /* DiaryPhotoReplacement.swift */,
@@ -612,6 +641,9 @@
 		9987856AA8934E3BE9726639 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */,
+				5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */,
+				31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */,
 				5AAB81D6DBC642429FBF0175 /* FirebaseDiaryTrash.swift */,
 				375356660EB6D2DDE12C07DD /* FirebaseDiaryReadingRepository.swift */,
 			);
@@ -621,6 +653,9 @@
 		BC49A4866C5E0A9951D22E14 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */,
+				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
+				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
 				7B849BEF7D104006888017EF /* TrashModule+UIKit.swift */,
 				524ED3536EE44A2785020373 /* TrashModule.swift */,
 				2E450331EF5B4555A6C5B235 /* TrashHostingController.swift */,
@@ -788,6 +823,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB45A794506B49CB96256C4C /* AccountDeletion.swift in Sources */,
+				F0F3D5C199B14D369C2F15F1 /* SettingsViewModelTests.swift in Sources */,
+				258FDD3E83A3419891E0AFD6 /* SettingsModule.swift in Sources */,
+				A5A79C2EA21D4984A637AD8F /* SettingsViewModel.swift in Sources */,
+				CCB6591A652F447482530764 /* AccountSession.swift in Sources */,
+				4F6A9D8257E64684AD30463D /* AccountState.swift in Sources */,
 				B944F1A93C004B9AA4CD3DDE /* TrashModule.swift in Sources */,
 				1BA628A79683420BBFEE9BD7 /* TrashViewModelTests.swift in Sources */,
 				18BDDECA9D6948C9865B4B19 /* ExpiredTrashPurgerTests.swift in Sources */,
@@ -829,6 +870,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D21F23D03AB8475EA1C33C13 /* FirebasePhotoFiles.swift in Sources */,
+				7528378CE0D24F2E8E00CD4A /* FirebaseUserDataEraser.swift in Sources */,
+				F357E15ECC2548EDAC1BB4C1 /* AccountDeletion.swift in Sources */,
+				5E40C4E1EC28447285742FA5 /* SettingsModule+UIKit.swift in Sources */,
+				CD03D1F291054D819F2B2233 /* SettingsModule.swift in Sources */,
+				503FB09E7CBF40B4A0340CD9 /* SettingsViewModel.swift in Sources */,
+				ECD7656952A94406875686E0 /* FirebaseAccountSession.swift in Sources */,
+				ED513D5F18C641F395DFA3FB /* AccountSession.swift in Sources */,
+				88AF15434D6841A5BC3E7B82 /* AccountState.swift in Sources */,
 				28BE78F22E5C4EEC98E91C7F /* TrashModule+UIKit.swift in Sources */,
 				95964A794EB44976AA44826B /* TrashModule.swift in Sources */,
 				03D42DE1E33C47C18D5CD403 /* TrashHostingController.swift in Sources */,

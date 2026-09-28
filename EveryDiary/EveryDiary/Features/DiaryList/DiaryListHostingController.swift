@@ -6,9 +6,11 @@ import UIKit
 @MainActor
 final class DiaryListHostingController: UIHostingController<DiaryListView>, DiaryUpdateDelegate, WriteDiaryDelegate {
     private let viewModel: DiaryListViewModel
+    private let makeSettings: () -> UIViewController
 
-    init(viewModel: DiaryListViewModel, imageLoader: any CalendarImageLoading) {
+    init(viewModel: DiaryListViewModel, imageLoader: any CalendarImageLoading, makeSettings: @escaping () -> UIViewController) {
         self.viewModel = viewModel
+        self.makeSettings = makeSettings
         super.init(rootView: DiaryListView(
             viewModel: viewModel, imageLoader: imageLoader,
             onSelectDiary: { _ in }, onEditDiary: { _ in }, onWriteDiary: {}, onOpenSettings: {}
@@ -79,7 +81,7 @@ final class DiaryListHostingController: UIHostingController<DiaryListView>, Diar
     }
 
     private func openSettings() {
-        let controller = SettingVC()
+        let controller = makeSettings()
         controller.hidesBottomBarWhenPushed = true
         navigationController?.setNavigationBarHidden(false, animated: true)
         navigationController?.pushViewController(controller, animated: true)

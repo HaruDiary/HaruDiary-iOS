@@ -11,6 +11,8 @@ import SnapKit
 
 class MotivationVC: UIViewController {
     private let buildings = BuildingView()
+    // Set by TabBarController with the app's dependencies.
+    var makeSettings: () -> UIViewController = { SettingVC() }
     
     private lazy var background : UIImageView = {
         let background = UIImageView(image: UIImage(named: "View.Background"))
@@ -84,7 +86,7 @@ class MotivationVC: UIViewController {
     }
     
     @objc private func tabSettingBTN() {
-        let settingVC = SettingVC()
+        let settingVC = makeSettings()
         settingVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(settingVC, animated: true)
     }

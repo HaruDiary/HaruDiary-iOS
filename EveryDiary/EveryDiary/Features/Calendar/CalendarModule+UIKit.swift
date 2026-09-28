@@ -1,7 +1,7 @@
 import UIKit
 
 extension CalendarModule {
-    func makeViewController() -> UIViewController {
-        CalendarHostingController(viewModel: viewModel, imageLoader: imageLoader)
+    func makeViewController(makeSettings: @escaping () -> UIViewController) -> UIViewController {
+        CalendarHostingController(viewModel: viewModel, imageLoader: imageLoader, makeSettings: makeSettings)
     }
 }

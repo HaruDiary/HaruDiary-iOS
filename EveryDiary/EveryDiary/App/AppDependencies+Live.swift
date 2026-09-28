@@ -1,5 +1,6 @@
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseStorage
 import Foundation
 
 extension AppDependencies {
@@ -7,6 +8,10 @@ extension AppDependencies {
         AppDependencies(
             diaryRepository: FirebaseDiaryReadingRepository(database: .firestore()),
             userSession: FirebaseDiaryUserSession(auth: .auth()),
+            accountSession: FirebaseAccountSession(
+                auth: .auth(),
+                dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage())
+            ),
             diaryTrash: FirebaseDiaryTrash(database: .firestore()),
             calendarImageLoader: CachedCalendarImageLoader(cache: .shared),
             calendar: .current,

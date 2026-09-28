@@ -1,7 +1,7 @@
 import UIKit
 
 extension DiaryListModule {
-    func makeViewController() -> UIViewController {
-        DiaryListHostingController(viewModel: viewModel, imageLoader: imageLoader)
+    func makeViewController(makeSettings: @escaping () -> UIViewController) -> UIViewController {
+        DiaryListHostingController(viewModel: viewModel, imageLoader: imageLoader, makeSettings: makeSettings)
     }
 }
