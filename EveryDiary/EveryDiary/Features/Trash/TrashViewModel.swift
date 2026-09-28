@@ -118,6 +118,8 @@ final class TrashViewModel {
         var succeeded = 0
         var failed = 0
         for entry in targets {
+            // Stop a bulk action once the user changes, so the previous account is not modified further.
+            guard generation == userGeneration else { return }
             guard let id = entry.id else { continue }
             do {
                 switch action {

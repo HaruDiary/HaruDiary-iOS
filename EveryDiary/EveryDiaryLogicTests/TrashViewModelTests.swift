@@ -155,6 +155,22 @@ final class TrashViewModelTests: XCTestCase {
         XCTAssertTrue(model.sections.isEmpty)
     }
 
+    func testBulkDeleteStopsWhenUserChanges() async throws {
+        let (model, repository, session, trash) = try await loaded([entry("first"), entry("second")])
+        defer { model.stop() }
+        trash.suspends = true
+
+        async let empty: Void = model.emptyTrash()
+        try await waitUntil { trash.deletions.count == 1 }
+        session.send("user-b")
+        try await waitUntil { repository.observations.count == 2 }
+        trash.resumeAll()
+        await empty
+
+        XCTAssertEqual(trash.deletions.count, 1)
+        XCTAssertNil(model.notice)
+    }
+
     func testActionsWithoutSignedInUserFailWithoutWriting() async throws {
         let (model, _, _, trash) = try makeModel(userID: nil)
         model.start()
