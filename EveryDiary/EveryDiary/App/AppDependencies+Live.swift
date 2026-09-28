@@ -10,8 +10,7 @@ extension AppDependencies {
             userSession: FirebaseDiaryUserSession(auth: .auth()),
             accountSession: FirebaseAccountSession(
                 auth: .auth(),
-                dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage()),
-                now: Date.init
+                dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage())
             ),
             diaryTrash: FirebaseDiaryTrash(database: .firestore()),
             calendarImageLoader: CachedCalendarImageLoader(cache: .shared),

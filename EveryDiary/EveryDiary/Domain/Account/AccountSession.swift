@@ -19,4 +19,6 @@ enum AccountDeletionError: Error, Equatable {
     case requiresRecentLogin
     /// Some diaries or photos could not be erased, so the account was kept and deletion can be retried.
     case dataErasureFailed
+    /// Diaries and photos were erased, but the account needs a new sign-in before it can be deleted.
+    case dataErasedNeedsRecentLogin
 }

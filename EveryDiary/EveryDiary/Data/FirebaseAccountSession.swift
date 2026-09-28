@@ -5,12 +5,10 @@ import Foundation
 final class FirebaseAccountSession: AccountSession {
     private let auth: Auth
     private let dataEraser: any UserDataErasing
-    private let now: () -> Date
 
-    init(auth: Auth, dataEraser: any UserDataErasing, now: @escaping () -> Date) {
+    init(auth: Auth, dataEraser: any UserDataErasing) {
         self.auth = auth
         self.dataEraser = dataEraser
-        self.now = now
     }
 
     func observeAccount() -> AsyncStream<AccountSnapshot?> {
@@ -40,8 +38,10 @@ final class FirebaseAccountSession: AccountSession {
             throw AccountDeletionError.unsupportedAccount
         }
         let userID = user.uid
+        // Both dates come from a freshly issued token, so the device clock does not matter.
+        let token = try await user.getIDTokenResult(forcingRefresh: true)
         try await AccountDeletion.run(
-            lastSignIn: user.metadata.lastSignInDate, now: now(),
+            signedInFor: token.issuedAtDate.timeIntervalSince(token.authDate),
             eraseData: { try await dataEraser.eraseAllData(userID: userID) },
             deleteAccount: {
                 do {

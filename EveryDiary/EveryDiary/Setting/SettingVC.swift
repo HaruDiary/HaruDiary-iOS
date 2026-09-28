@@ -166,7 +166,9 @@ extension SettingVC {
             NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
             presentAlert(title: "회원 탈퇴", message: "회원 탈퇴가 완료되었습니다.") { [weak self] in self?.showMainScreen() }
         case .deletionNeedsRecentLogin:
-            presentAlert(title: "다시 로그인이 필요해요", message: "보안을 위해 로그아웃 후 다시 로그인한 뒤\n5분 안에 탈퇴해주세요.")
+            presentAlert(title: "다시 로그인이 필요해요", message: "보안을 위해 로그아웃 후 다시 로그인한 뒤\n바로 탈퇴해주세요.")
+        case .dataErasedNeedsRecentLogin:
+            presentAlert(title: "탈퇴를 마치려면 다시 로그인해주세요", message: "일기와 사진은 모두 삭제되었어요.\n로그아웃 후 다시 로그인한 뒤 탈퇴를 한 번 더 눌러주세요.")
         case .dataErasureFailed:
             presentAlert(title: "회원 탈퇴 실패", message: "일기와 사진을 모두 지우지 못해 탈퇴를 멈췄어요.\n잠시 후 다시 시도해주세요.")
         case .deletionFailed:
