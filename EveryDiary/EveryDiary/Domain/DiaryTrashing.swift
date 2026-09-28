@@ -10,13 +10,18 @@ protocol DiaryTrashing {
     /// Brings the diary back to the list. Only `isDeleted` and `deleteDate` change.
     func restore(diaryID: String, userID: String) async throws
 
-    /// Deletes the diary document first, then its photo files, so a failure never leaves
-    /// a diary whose photos are gone. Photo files that fail to delete are only reported.
+    /// Deletes the photo files first and the diary document only when every photo is gone.
+    /// When a photo fails, the call throws and the diary stays in the trash so deleting can be retried;
+    /// photos that are already gone count as deleted, so a retry finishes the rest.
     @discardableResult
     func deletePermanently(diaryID: String, userID: String, imageURLs: [String]) async throws -> PhotoCleanup
 }
 
 struct PhotoCleanup: Equatable {
     var deletedCount = 0
-    var failedCount = 0
+}
+
+enum DiaryTrashError: Error, Equatable {
+    /// Some photo files could not be deleted, so the diary document was kept.
+    case photoCleanupFailed(failedCount: Int)
 }
