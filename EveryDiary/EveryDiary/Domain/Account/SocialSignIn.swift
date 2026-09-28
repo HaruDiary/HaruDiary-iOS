@@ -16,6 +16,8 @@ enum GuestLinkResult {
 protocol SocialSignInGateway {
     /// nil when signed out.
     var isGuest: Bool? { get }
+    /// The profile name of the signed-in account, falling back to the linked Google/Apple name.
+    var currentName: String? { get }
     /// Keeps the guest account (and its diaries) and adds the Google/Apple sign-in to it.
     func linkGuest(with credential: SocialCredential) async throws -> GuestLinkResult
     func signIn(with credential: SocialCredential) async throws
@@ -31,6 +33,11 @@ enum SocialSignIn {
         case signedIn
         case linkedGuest
         case switchedFromGuest
+
+        /// A guest that just became a member always picks a nickname; others only when they have none.
+        func asksForNickname(currentName: String?) -> Bool {
+            self == .linkedGuest || currentName == nil
+        }
     }
 
     @MainActor

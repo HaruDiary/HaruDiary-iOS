@@ -19,10 +19,14 @@ final class SettingsViewModel {
         case dataErasureFailed
         case dataErasedNeedsRecentLogin
         case deletionFailed
+        case nicknameSaved
+        case nicknameInvalid(Nickname.Problem)
+        case nicknameFailed
     }
 
     private(set) var account: AccountState = .signedOut
     private(set) var isDeletingAccount = false
+    private(set) var isSavingNickname = false
     var notice: Notice?
 
     @ObservationIgnored private let session: any AccountSession
@@ -64,6 +68,35 @@ final class SettingsViewModel {
         }
     }
 
+    /// The current nickname to prefill the editor; nil when none is set.
+    var nickname: String? {
+        if case let .member(_, name, _) = account { return name }
+        return nil
+    }
+
+    func updateNickname(_ text: String) async {
+        guard case let .member(email, _, provider) = account, !isSavingNickname else { return }
+        let name: String
+        do {
+            name = try Nickname.validated(text)
+        } catch let problem as Nickname.Problem {
+            notice = .nicknameInvalid(problem)
+            return
+        } catch {
+            return
+        }
+        isSavingNickname = true
+        defer { isSavingNickname = false }
+        do {
+            try await session.updateNickname(name)
+            // A profile change does not trigger the sign-in listener, so the shown account is updated here.
+            account = .member(email: email, name: name, provider: provider)
+            notice = .nicknameSaved
+        } catch {
+            notice = .nicknameFailed
+        }
+    }
+
     func deleteAccount() async {
         guard canManageAccount, !isDeletingAccount else { return }
         isDeletingAccount = true
@@ -91,12 +124,25 @@ final class SettingsViewModel {
             return Profile(name: "손님", detail: "일기를 저장하려면 로그인하세요", imageName: "profile", isLoggedIn: false)
         case let .member(email, name, provider):
             let imageName: String
+            let method: String
             switch provider {
-            case .google: imageName = "googleProfile"
-            case .apple: imageName = "appleProfile"
-            case nil: imageName = "profile"
+            case .google:
+                imageName = "googleProfile"
+                method = "Google로 로그인"
+            case .apple:
+                imageName = "appleProfile"
+                method = "Apple로 로그인"
+            case nil:
+                imageName = "profile"
+                method = "인증 완료"
             }
-            return Profile(name: name ?? "사용자", detail: email ?? "인증 완료", imageName: imageName, isLoggedIn: true)
+            return Profile(name: name ?? "닉네임을 설정해주세요", detail: method + "\n" + shownEmail(email), imageName: imageName, isLoggedIn: true)
         }
+    }
+
+    // Apple's "Hide My Email" relay address is not meaningful to show.
+    private static func shownEmail(_ email: String?) -> String {
+        guard let email else { return "이메일 정보 없음" }
+        return email.hasSuffix("@privaterelay.appleid.com") ? "이메일 가림" : email
     }
 }

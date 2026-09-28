@@ -24,6 +24,9 @@ class ProfileCell: UITableViewCell {
         let emailLabel = UILabel()
         emailLabel.textColor = .subText
         emailLabel.font = UIFont(name: "SFProRounded-Regular", size: 14)
+        // 로그인 방식과 이메일을 두 줄로 표시한다. 긴 이메일은 가운데를 줄인다.
+        emailLabel.numberOfLines = 2
+        emailLabel.lineBreakMode = .byTruncatingMiddle
         return emailLabel
     }()
     
@@ -32,6 +35,14 @@ class ProfileCell: UITableViewCell {
         nameLabel.textColor = .mainTheme
         nameLabel.font = UIFont(name: "SFProRounded-Bold", size: 24)
         return nameLabel
+    }()
+    
+    // 로그인한 경우 프로필을 눌러 닉네임을 바꿀 수 있음을 알린다.
+    private lazy var editImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(systemName: "pencil"))
+        imageView.tintColor = .subText
+        imageView.contentMode = .scaleAspectFit
+        return imageView
     }()
     
     lazy var loginButton : UIButton = {
@@ -79,6 +90,7 @@ class ProfileCell: UITableViewCell {
         addSubview(nameLabel)
         addSubview(profileImageView)
         addSubview(loginButton)
+        addSubview(editImageView)
     }
     
     private func autoLayoutProfileCell() {
@@ -97,7 +109,11 @@ class ProfileCell: UITableViewCell {
         emailLabel.snp.makeConstraints { make in
             make.leading.equalTo(profileImageView.snp.trailing).offset(16)
             make.trailing.equalTo(loginButton.snp.leading).inset(16)
-            make.height.equalTo(20)
+        }
+        editImageView.snp.makeConstraints { make in
+            make.centerY.equalTo(loginButton)
+            make.trailing.equalToSuperview().inset(24)
+            make.width.height.equalTo(20)
         }
         loginButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(16)
@@ -123,5 +139,7 @@ class ProfileCell: UITableViewCell {
                 self.loginButton.isHidden = false
                 self.loginButton.isEnabled = true
         }
+        editImageView.isHidden = !isLoggedIn
+        accessibilityHint = isLoggedIn ? "닉네임을 변경합니다" : nil
     }
 }

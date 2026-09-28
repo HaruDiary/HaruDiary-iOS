@@ -123,13 +123,52 @@ class LoginVC: UIViewController {
         Task { [weak self] in
             guard let self else { return }
             do {
-                _ = try await SocialSignIn.run(with: credential, displayName: displayName, gateway: self.gateway)
+                let outcome = try await SocialSignIn.run(with: credential, displayName: displayName, gateway: self.gateway)
                 // 여정 화면과 설정의 표시 이름 갱신은 아직 이 알림을 사용한다.
                 NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
-                self.dismiss(animated: true, completion: nil)
+                if outcome.asksForNickname(currentName: self.gateway.currentName) {
+                    self.isSigningIn = false
+                    self.askForNickname(message: "일기에서 불릴 이름을 정해주세요.\n설정에서 언제든 바꿀 수 있어요.")
+                } else {
+                    self.dismiss(animated: true, completion: nil)
+                }
             } catch {
                 self.isSigningIn = false
                 self.showSignInFailure(error)
+            }
+        }
+    }
+    
+    // 손님에서 가입했거나 이름이 없는 계정은 로그인 직후 닉네임을 정한다. "나중에"를 누르면 그대로 닫는다.
+    private func askForNickname(message: String) {
+        let alert = NicknameAlert.make(title: "닉네임 설정", message: message, current: gateway.currentName,
+                                       cancelTitle: "나중에", onSave: { [weak self] text in self?.saveNickname(text) },
+                                       onCancel: { [weak self] in self?.dismiss(animated: true) })
+        present(alert, animated: true)
+    }
+    
+    private func saveNickname(_ text: String) {
+        let name: String
+        do {
+            name = try Nickname.validated(text)
+        } catch let problem as Nickname.Problem {
+            askForNickname(message: NicknameAlert.problemMessage(problem))
+            return
+        } catch {
+            return
+        }
+        isSigningIn = true
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.gateway.updateDisplayName(name)
+                NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
+                self.dismiss(animated: true)
+            } catch {
+                self.isSigningIn = false
+                let alert = UIAlertController(title: "닉네임 저장 실패", message: "로그인은 완료되었어요.\n닉네임은 설정에서 다시 정할 수 있어요.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "확인", style: .default) { [weak self] _ in self?.dismiss(animated: true) })
+                self.present(alert, animated: true)
             }
         }
     }

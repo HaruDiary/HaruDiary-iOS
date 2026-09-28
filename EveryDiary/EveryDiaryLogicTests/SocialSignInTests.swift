@@ -52,6 +52,14 @@ final class SocialSignInTests: XCTestCase {
         XCTAssertEqual(gateway.calls, ["link"])
     }
 
+    func testNicknameIsAskedAfterGuestSignUpOrWhenMissing() {
+        XCTAssertTrue(SocialSignIn.Outcome.linkedGuest.asksForNickname(currentName: "하루"))
+        XCTAssertTrue(SocialSignIn.Outcome.signedIn.asksForNickname(currentName: nil))
+        XCTAssertTrue(SocialSignIn.Outcome.switchedFromGuest.asksForNickname(currentName: nil))
+        XCTAssertFalse(SocialSignIn.Outcome.signedIn.asksForNickname(currentName: "하루"))
+        XCTAssertFalse(SocialSignIn.Outcome.switchedFromGuest.asksForNickname(currentName: "하루"))
+    }
+
     func testSignInFailureIsReported() async {
         let gateway = FakeSignInGateway(isGuest: nil)
         gateway.signInError = NSError(domain: "Auth", code: 17004)
@@ -67,6 +75,7 @@ final class SocialSignInTests: XCTestCase {
 @MainActor
 private final class FakeSignInGateway: SocialSignInGateway {
     let isGuest: Bool?
+    var currentName: String?
     var linkResult: GuestLinkResult = .linked
     var linkError: Error?
     var signInError: Error?
@@ -102,6 +111,7 @@ private final class FakeSignInGateway: SocialSignInGateway {
 @MainActor
 final class UnusedSignInGateway: SocialSignInGateway {
     var isGuest: Bool? { nil }
+    var currentName: String? { nil }
     func linkGuest(with credential: SocialCredential) async throws -> GuestLinkResult { .linked }
     func signIn(with credential: SocialCredential) async throws { XCTFail("Login is not used here") }
     func switchFromGuest(to credential: SocialCredential) async throws { XCTFail("Login is not used here") }

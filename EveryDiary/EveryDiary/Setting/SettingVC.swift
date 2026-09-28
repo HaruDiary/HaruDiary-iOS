@@ -173,6 +173,14 @@ extension SettingVC {
             presentAlert(title: "회원 탈퇴 실패", message: "일기와 사진을 모두 지우지 못해 탈퇴를 멈췄어요.\n잠시 후 다시 시도해주세요.")
         case .deletionFailed:
             presentAlert(title: "회원 탈퇴 실패", message: "회원 탈퇴를 완료하지 못했습니다.\n잠시 후 다시 시도해주세요.")
+        case .nicknameSaved:
+            TemporaryAlert.presentTemporaryMessage(with: "저장 완료", message: "닉네임을 저장했어요.", interval: 1.0, for: self)
+        case .nicknameInvalid(let problem):
+            presentAlert(title: "닉네임을 확인해주세요", message: NicknameAlert.problemMessage(problem)) { [weak self] in
+                self?.editNickname()
+            }
+        case .nicknameFailed:
+            presentAlert(title: "닉네임 저장 실패", message: "닉네임을 저장하지 못했어요.\n잠시 후 다시 시도해주세요.")
         }
     }
     
@@ -285,9 +293,18 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
             default:
                 print("Error")
             }
-        default:
-            print("No Any Action")
+        case .profileItem:
+            // 로그인한 경우 프로필을 누르면 닉네임을 바꾼다. 로그인 전에는 로그인 버튼을 사용한다.
+            if viewModel.canManageAccount { editNickname() }
         }
+    }
+    
+    private func editNickname() {
+        let alert = NicknameAlert.make(title: "닉네임 변경", message: nil, current: viewModel.nickname, cancelTitle: "취소") { [weak self] text in
+            guard let self else { return }
+            Task { await self.viewModel.updateNickname(text) }
+        }
+        present(alert, animated: true)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

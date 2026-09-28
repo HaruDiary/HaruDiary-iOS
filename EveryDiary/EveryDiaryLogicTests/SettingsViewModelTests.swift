@@ -36,10 +36,55 @@ final class SettingsViewModelTests: XCTestCase {
                        .init(name: "로그인해주세요", detail: "일기를 저장하려면 로그인하세요", imageName: "profile", isLoggedIn: false))
         XCTAssertEqual(SettingsViewModel.profile(for: .guest),
                        .init(name: "손님", detail: "일기를 저장하려면 로그인하세요", imageName: "profile", isLoggedIn: false))
-        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: nil, name: nil, provider: .apple)),
-                       .init(name: "사용자", detail: "인증 완료", imageName: "appleProfile", isLoggedIn: true))
-        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: "a@example.com", name: "하루", provider: .google)).imageName,
-                       "googleProfile")
+        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: "a@example.com", name: "하루", provider: .google)),
+                       .init(name: "하루", detail: "Google로 로그인\na@example.com", imageName: "googleProfile", isLoggedIn: true))
+    }
+
+    // Apple sends a name only on the first sign-in and may hide the e-mail, so the profile says how the user signed in.
+    func testProfileShowsSignInMethodAndAsksForMissingNickname() {
+        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: "x1@privaterelay.appleid.com", name: nil, provider: .apple)),
+                       .init(name: "닉네임을 설정해주세요", detail: "Apple로 로그인\n이메일 가림", imageName: "appleProfile", isLoggedIn: true))
+        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: nil, name: "하루", provider: .apple)).detail,
+                       "Apple로 로그인\n이메일 정보 없음")
+    }
+
+    // MARK: - Nickname
+
+    func testNicknameRules() throws {
+        XCTAssertEqual(try Nickname.validated("  하루 일기 \n"), "하루 일기")
+        XCTAssertThrowsError(try Nickname.validated("   ")) { XCTAssertEqual($0 as? Nickname.Problem, .empty) }
+        XCTAssertEqual(try Nickname.validated(String(repeating: "가", count: 20)).count, 20)
+        XCTAssertThrowsError(try Nickname.validated(String(repeating: "가", count: 21))) { XCTAssertEqual($0 as? Nickname.Problem, .tooLong) }
+        // Counted as the user sees characters, so an emoji is one.
+        XCTAssertEqual(try Nickname.validated(String(repeating: "👩‍👩‍👧", count: 20)).count, 20)
+    }
+
+    func testNicknameIsSavedAndShownRightAway() async throws {
+        let session = FakeAccountSession()
+        let model = try await signedInModel(session)
+        defer { model.stop() }
+
+        await model.updateNickname("  새 이름 ")
+
+        XCTAssertEqual(session.savedNicknames, ["새 이름"])
+        XCTAssertEqual(model.nickname, "새 이름")
+        XCTAssertEqual(model.profile.name, "새 이름")
+        XCTAssertEqual(model.notice, .nicknameSaved)
+    }
+
+    func testInvalidOrFailedNicknameIsNotShown() async throws {
+        let session = FakeAccountSession()
+        let model = try await signedInModel(session)
+        defer { model.stop() }
+
+        await model.updateNickname(" ")
+        XCTAssertEqual(model.notice, .nicknameInvalid(.empty))
+        XCTAssertTrue(session.savedNicknames.isEmpty)
+
+        session.nicknameError = NSError(domain: "Settings", code: 3)
+        await model.updateNickname("하루")
+        XCTAssertEqual(model.notice, .nicknameFailed)
+        XCTAssertEqual(model.nickname, "하루", "The name shown stays the saved one")
     }
 
     // MARK: - Observation
@@ -176,6 +221,14 @@ final class FakeAccountSession: AccountSession {
         if let signOutError { throw signOutError }
     }
 
+    private(set) var savedNicknames: [String] = []
+    var nicknameError: Error?
+
+    func updateNickname(_ name: String) async throws {
+        if let nicknameError { throw nicknameError }
+        savedNicknames.append(name)
+    }
+
     func deleteAccount() async throws {
         deleteCount += 1
         if suspendsDeletion {
@@ -195,6 +248,7 @@ final class FakeAccountSession: AccountSession {
 final class UnusedAccountSession: AccountSession {
     func observeAccount() -> AsyncStream<AccountSnapshot?> { AsyncStream { $0.finish() } }
     func signOut() throws { XCTFail("Settings is not used here") }
+    func updateNickname(_ name: String) async throws { XCTFail("Settings is not used here") }
     func deleteAccount() async throws { XCTFail("Settings is not used here") }
 }
 

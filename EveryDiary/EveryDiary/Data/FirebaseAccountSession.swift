@@ -32,6 +32,12 @@ final class FirebaseAccountSession: AccountSession {
         try auth.signOut()
     }
 
+    func updateNickname(_ name: String) async throws {
+        guard let request = auth.currentUser?.createProfileChangeRequest() else { throw AccountDeletionError.notSignedIn }
+        request.displayName = name
+        try await request.commitChanges()
+    }
+
     func deleteAccount() async throws {
         guard let user = auth.currentUser else { throw AccountDeletionError.notSignedIn }
         guard let provider = user.providerData.lazy.compactMap({ SocialProvider(providerID: $0.providerID) }).first else {
@@ -58,21 +64,9 @@ final class FirebaseAccountSession: AccountSession {
         }
     }
 
-    // A guest that links Google/Apple may keep no e-mail or name on the account itself;
-    // the linked sign-in still carries them, so those are shown instead.
     nonisolated private static func snapshot(_ user: User) -> AccountSnapshot {
-        let linked = user.providerData
-        return AccountSnapshot(
-            isEmailVerified: user.isEmailVerified,
-            email: nonEmpty(user.email) ?? linked.lazy.compactMap { nonEmpty($0.email) }.first,
-            displayName: nonEmpty(user.displayName) ?? linked.lazy.compactMap { nonEmpty($0.displayName) }.first,
-            providerIDs: linked.map(\.providerID)
-        )
-    }
-
-    nonisolated private static func nonEmpty(_ value: String?) -> String? {
-        guard let value, !value.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
-        return value
+        AccountSnapshot(isEmailVerified: user.isEmailVerified, email: user.shownEmail, displayName: user.shownName,
+                        providerIDs: user.providerData.map(\.providerID))
     }
 
     // Same Cloud Function and stored refresh token as the previous settings screen. Responses are not logged.

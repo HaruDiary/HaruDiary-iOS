@@ -10,6 +10,7 @@ final class FirebaseSocialSignInGateway: SocialSignInGateway {
     }
 
     var isGuest: Bool? { auth.currentUser.map(\.isAnonymous) }
+    var currentName: String? { auth.currentUser?.shownName }
 
     func linkGuest(with credential: SocialCredential) async throws -> GuestLinkResult {
         guard let user = auth.currentUser else { throw SocialSignInError.notSignedIn }
