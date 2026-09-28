@@ -6,6 +6,7 @@
 //
 
 import Observation
+import SwiftUI
 import UIKit
 
 import SnapKit
@@ -115,7 +116,7 @@ extension SettingVC {
         let profile = viewModel.profile
         let withdrawalIcon = profile.isLoggedIn ? "withdrawal" : "trash"
         dataSource = [
-            .profileItem(email: profile.detail, name: profile.name, image: profile.imageName, isLoggedIn: profile.isLoggedIn),
+            .profileItem(email: profile.detail, name: profile.name, image: profile.avatar?.rawValue, isLoggedIn: profile.isLoggedIn),
             .settingItem(title: "알림", iconImage: "notification", number: 1),
             .settingItem(title: "잠금", iconImage: "lock", number: 2),
             .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
@@ -173,14 +174,14 @@ extension SettingVC {
             presentAlert(title: "회원 탈퇴 실패", message: "일기와 사진을 모두 지우지 못해 탈퇴를 멈췄어요.\n잠시 후 다시 시도해주세요.")
         case .deletionFailed:
             presentAlert(title: "회원 탈퇴 실패", message: "회원 탈퇴를 완료하지 못했습니다.\n잠시 후 다시 시도해주세요.")
-        case .nicknameSaved:
-            TemporaryAlert.presentTemporaryMessage(with: "저장 완료", message: "닉네임을 저장했어요.", interval: 1.0, for: self)
+        case .profileSaved:
+            TemporaryAlert.presentTemporaryMessage(with: "저장 완료", message: "프로필을 저장했어요.", interval: 1.0, for: self)
         case .nicknameInvalid(let problem):
             presentAlert(title: "닉네임을 확인해주세요", message: NicknameAlert.problemMessage(problem)) { [weak self] in
-                self?.editNickname()
+                self?.editProfile()
             }
-        case .nicknameFailed:
-            presentAlert(title: "닉네임 저장 실패", message: "닉네임을 저장하지 못했어요.\n잠시 후 다시 시도해주세요.")
+        case .profileFailed:
+            presentAlert(title: "프로필 저장 실패", message: "프로필을 저장하지 못했어요.\n잠시 후 다시 시도해주세요.")
         }
     }
     
@@ -294,17 +295,24 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
                 print("Error")
             }
         case .profileItem:
-            // 로그인한 경우 프로필을 누르면 닉네임을 바꾼다. 로그인 전에는 로그인 버튼을 사용한다.
-            if viewModel.canManageAccount { editNickname() }
+            // 로그인한 경우 프로필을 누르면 프로필 이미지·닉네임을 바꾼다. 로그인 전에는 로그인 버튼을 사용한다.
+            if viewModel.canManageAccount { editProfile() }
         }
     }
     
-    private func editNickname() {
-        let alert = NicknameAlert.make(title: "닉네임 변경", message: nil, current: viewModel.nickname, cancelTitle: "취소") { [weak self] text in
-            guard let self else { return }
-            Task { await self.viewModel.updateNickname(text) }
-        }
-        present(alert, animated: true)
+    private func editProfile() {
+        let editor = ProfileEditView(
+            nickname: viewModel.nickname, avatar: viewModel.profile.avatar ?? .default,
+            onSave: { [weak self] nickname, avatar in
+                guard let self else { return }
+                self.dismiss(animated: true)
+                Task { await self.viewModel.updateProfile(nickname: nickname, avatar: avatar) }
+            },
+            onCancel: { [weak self] in self?.dismiss(animated: true) }
+        )
+        let controller = UIHostingController(rootView: editor)
+        controller.sheetPresentationController?.detents = [.large()]
+        present(controller, animated: true)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

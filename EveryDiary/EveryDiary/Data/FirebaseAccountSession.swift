@@ -32,9 +32,10 @@ final class FirebaseAccountSession: AccountSession {
         try auth.signOut()
     }
 
-    func updateNickname(_ name: String) async throws {
+    func updateProfile(nickname: String, avatar: ProfileAvatar) async throws {
         guard let request = auth.currentUser?.createProfileChangeRequest() else { throw AccountDeletionError.notSignedIn }
-        request.displayName = name
+        request.displayName = nickname
+        request.photoURL = URL(string: avatar.storedURL)
         try await request.commitChanges()
     }
 
@@ -66,7 +67,7 @@ final class FirebaseAccountSession: AccountSession {
 
     nonisolated private static func snapshot(_ user: User) -> AccountSnapshot {
         AccountSnapshot(isEmailVerified: user.isEmailVerified, email: user.shownEmail, displayName: user.shownName,
-                        providerIDs: user.providerData.map(\.providerID))
+                        providerIDs: user.providerData.map(\.providerID), photoURL: user.photoURL?.absoluteString)
     }
 
     // Same Cloud Function and stored refresh token as the previous settings screen. Responses are not logged.

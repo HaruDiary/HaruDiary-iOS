@@ -16,7 +16,6 @@ class ProfileCell: UITableViewCell {
     private lazy var profileImageView : UIImageView = {
         let profileImageView = UIImageView()
         profileImageView.contentMode = .scaleAspectFit
-        profileImageView.layer.cornerRadius = 5
         return profileImageView
     }()
     
@@ -141,7 +140,9 @@ class ProfileCell: UITableViewCell {
             .foregroundColor: emailLabel.textColor as Any
         ]) }
         self.nameLabel.text = name
-        self.profileImageView.image = UIImage(named: image ?? "profile")
+        // 선택한 프로필 이미지(없으면 손님용 기본 이미지)를 앱 공용 그림으로 그린다.
+        self.profileImageView.image = ProfileAvatarView.image(for: image.flatMap(ProfileAvatar.init(rawValue:)), size: 50,
+                                                              scale: max(traitCollection.displayScale, 3))
         if isLoggedIn {
                 self.loginButton.isHidden = true
                 self.loginButton.isEnabled = false

@@ -6,6 +6,8 @@ struct AccountSnapshot: Equatable {
     var email: String?
     var displayName: String?
     var providerIDs: [String] = []
+    /// Firebase Auth photo URL; holds the chosen `ProfileAvatar`.
+    var photoURL: String?
 }
 
 enum SocialProvider: Equatable {

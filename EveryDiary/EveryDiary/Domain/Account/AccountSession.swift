@@ -6,8 +6,9 @@ protocol AccountSession {
     /// Emits the current account first, then again after sign-in, sign-out or a profile change.
     func observeAccount() -> AsyncStream<AccountSnapshot?>
     func signOut() throws
-    /// Saves the profile name shown in settings (Firebase Auth display name; no diary data changes).
-    func updateNickname(_ name: String) async throws
+    /// Saves the nickname and picture shown in settings (Firebase Auth display name and photo URL;
+    /// no diary data changes).
+    func updateProfile(nickname: String, avatar: ProfileAvatar) async throws
     /// Erases the user's diaries and photos, then deletes the signed-in Google/Apple account.
     /// Apple also revokes its token.
     func deleteAccount() async throws

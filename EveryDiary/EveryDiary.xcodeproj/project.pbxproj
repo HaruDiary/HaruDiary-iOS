@@ -190,6 +190,10 @@
 		33E8CDA28B604D23AB108101 /* Nickname.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD66E8B399BD4328B3E6ECCD /* Nickname.swift */; };
 		635C5FDFC35343C793A8D85C /* FirebaseUser+Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */; };
 		BAD1C41C7BDD48968C553A07 /* NicknameAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31037A4F0D8649B7BF6CBF16 /* NicknameAlert.swift */; };
+		9019F0206139486483334F74 /* ProfileAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */; };
+		A0AECB78FA714980B300D783 /* ProfileAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */; };
+		595C79EEEB5C401CA17BC028 /* ProfileAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */; };
+		DF5B9964C8F04215BC98BE9A /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B470769C0A454C869F7E2BAE /* ProfileEditView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -345,6 +349,9 @@
 		FD66E8B399BD4328B3E6ECCD /* Nickname.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/Nickname.swift"; sourceTree = "<group>"; };
 		68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseUser+Profile.swift"; sourceTree = "<group>"; };
 		31037A4F0D8649B7BF6CBF16 /* NicknameAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NicknameAlert.swift"; sourceTree = "<group>"; };
+		49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/ProfileAvatar.swift"; sourceTree = "<group>"; };
+		62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfileAvatarView.swift"; sourceTree = "<group>"; };
+		B470769C0A454C869F7E2BAE /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfileEditView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -627,6 +634,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */,
 				FD66E8B399BD4328B3E6ECCD /* Nickname.swift */,
 				2883021185774F46B4DB6CA4 /* SocialSignIn.swift */,
 				B474071592B145D8B85309BD /* AccountDeletion.swift */,
@@ -673,6 +681,7 @@
 		BC49A4866C5E0A9951D22E14 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				B470769C0A454C869F7E2BAE /* ProfileEditView.swift */,
 				0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
@@ -709,6 +718,7 @@
 		BDF71909E1ED119D43F0FF4A /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */,
 				DEBC2E2935FB4A6F8D9D09CF /* DiaryListComponents.swift */,
 				8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */,
 				4D68D4420386455C94759513 /* DiaryWriteButton.swift */,
@@ -843,6 +853,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A0AECB78FA714980B300D783 /* ProfileAvatar.swift in Sources */,
 				33E8CDA28B604D23AB108101 /* Nickname.swift in Sources */,
 				42FAC87B502F4227A8387871 /* SocialSignInTests.swift in Sources */,
 				37B63B1F2E694B248905B305 /* SocialSignIn.swift in Sources */,
@@ -893,6 +904,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF5B9964C8F04215BC98BE9A /* ProfileEditView.swift in Sources */,
+				595C79EEEB5C401CA17BC028 /* ProfileAvatarView.swift in Sources */,
+				9019F0206139486483334F74 /* ProfileAvatar.swift in Sources */,
 				BAD1C41C7BDD48968C553A07 /* NicknameAlert.swift in Sources */,
 				635C5FDFC35343C793A8D85C /* FirebaseUser+Profile.swift in Sources */,
 				5B2C3912591A43FA89E7D0DE /* Nickname.swift in Sources */,

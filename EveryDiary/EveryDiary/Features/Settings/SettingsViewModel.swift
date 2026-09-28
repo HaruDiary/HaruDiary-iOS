@@ -7,7 +7,8 @@ final class SettingsViewModel {
     struct Profile: Equatable {
         let name: String
         let detail: String
-        let imageName: String
+        /// nil for guests and signed-out users, who get the placeholder picture.
+        let avatar: ProfileAvatar?
         let isLoggedIn: Bool
     }
 
@@ -19,14 +20,16 @@ final class SettingsViewModel {
         case dataErasureFailed
         case dataErasedNeedsRecentLogin
         case deletionFailed
-        case nicknameSaved
+        case profileSaved
         case nicknameInvalid(Nickname.Problem)
-        case nicknameFailed
+        case profileFailed
     }
 
     private(set) var account: AccountState = .signedOut
     private(set) var isDeletingAccount = false
-    private(set) var isSavingNickname = false
+    private(set) var isSavingProfile = false
+    /// The picture the member picked; nil until one is saved.
+    private(set) var avatar: ProfileAvatar?
     var notice: Notice?
 
     @ObservationIgnored private let session: any AccountSession
@@ -36,7 +39,7 @@ final class SettingsViewModel {
         self.session = session
     }
 
-    var profile: Profile { Self.profile(for: account) }
+    var profile: Profile { Self.profile(for: account, avatar: avatar) }
 
     /// Account deletion is offered only to Google/Apple members, as before.
     var canManageAccount: Bool {
@@ -50,6 +53,7 @@ final class SettingsViewModel {
         observation = Task { [weak self] in
             for await snapshot in accounts {
                 self?.account = AccountState(snapshot)
+                self?.avatar = ProfileAvatar(storedURL: snapshot?.photoURL)
             }
         }
     }
@@ -74,8 +78,8 @@ final class SettingsViewModel {
         return nil
     }
 
-    func updateNickname(_ text: String) async {
-        guard case let .member(email, _, provider) = account, !isSavingNickname else { return }
+    func updateProfile(nickname text: String, avatar: ProfileAvatar) async {
+        guard case let .member(email, _, provider) = account, !isSavingProfile else { return }
         let name: String
         do {
             name = try Nickname.validated(text)
@@ -85,15 +89,16 @@ final class SettingsViewModel {
         } catch {
             return
         }
-        isSavingNickname = true
-        defer { isSavingNickname = false }
+        isSavingProfile = true
+        defer { isSavingProfile = false }
         do {
-            try await session.updateNickname(name)
+            try await session.updateProfile(nickname: name, avatar: avatar)
             // A profile change does not trigger the sign-in listener, so the shown account is updated here.
             account = .member(email: email, name: name, provider: provider)
-            notice = .nicknameSaved
+            self.avatar = avatar
+            notice = .profileSaved
         } catch {
-            notice = .nicknameFailed
+            notice = .profileFailed
         }
     }
 
@@ -116,27 +121,22 @@ final class SettingsViewModel {
     }
 
     // Texts and images are the ones the previous settings screen showed for each state.
-    static func profile(for account: AccountState) -> Profile {
+    static func profile(for account: AccountState, avatar: ProfileAvatar?) -> Profile {
         switch account {
         case .signedOut:
-            return Profile(name: "로그인해주세요", detail: "일기를 저장하려면 로그인하세요", imageName: "profile", isLoggedIn: false)
+            return Profile(name: "로그인해주세요", detail: "일기를 저장하려면 로그인하세요", avatar: nil, isLoggedIn: false)
         case .guest:
-            return Profile(name: "손님", detail: "일기를 저장하려면 로그인하세요", imageName: "profile", isLoggedIn: false)
+            return Profile(name: "손님", detail: "일기를 저장하려면 로그인하세요", avatar: nil, isLoggedIn: false)
         case let .member(email, name, provider):
-            let imageName: String
+            // The sign-in method is written out, so the picture is the member's own choice.
             let method: String
             switch provider {
-            case .google:
-                imageName = "googleProfile"
-                method = "Google로 로그인"
-            case .apple:
-                imageName = "appleProfile"
-                method = "Apple로 로그인"
-            case nil:
-                imageName = "profile"
-                method = "인증 완료"
+            case .google: method = "Google로 로그인"
+            case .apple: method = "Apple로 로그인"
+            case nil: method = "인증 완료"
             }
-            return Profile(name: name ?? "닉네임을 설정해주세요", detail: method + "\n" + shownEmail(email), imageName: imageName, isLoggedIn: true)
+            return Profile(name: name ?? "닉네임을 설정해주세요", detail: method + "\n" + shownEmail(email),
+                           avatar: avatar ?? .default, isLoggedIn: true)
         }
     }
 
