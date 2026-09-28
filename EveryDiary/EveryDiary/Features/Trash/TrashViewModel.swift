@@ -40,6 +40,8 @@ final class TrashViewModel {
     @ObservationIgnored private var entries: [DiaryEntry] = []
     @ObservationIgnored private var workingIDs: Set<String> = []
     @ObservationIgnored private var userGeneration = 0
+    // Expired diaries whose automatic deletion failed stay visible so they can be restored or deleted by hand.
+    @ObservationIgnored private var purgeFailedIDs: Set<String> = []
 
     init(repository: any DiaryReadingRepository, session: any DiaryUserSession, trash: any DiaryTrashing,
          calendar: Calendar, now: @escaping () -> Date = Date.init) {
@@ -139,10 +141,13 @@ final class TrashViewModel {
         DiaryListIndex.sections(from: visibleEntries, calendar: calendar, scope: .trash).flatMap(\.entries)
     }
 
-    // Diaries past their deadline are being purged and are no longer shown.
+    // Diaries past their deadline are hidden while being purged, and shown again if purging failed.
     private var visibleEntries: [DiaryEntry] {
         let current = now()
-        return entries.filter { !DiaryTrashPolicy.isExpired($0, now: current, calendar: calendar) }
+        return entries.filter { entry in
+            if let id = entry.id, purgeFailedIDs.contains(id) { return true }
+            return !DiaryTrashPolicy.isExpired(entry, now: current, calendar: calendar)
+        }
     }
 
     private func apply(_ event: UserDiaryFeed.Event) {
@@ -150,6 +155,7 @@ final class TrashViewModel {
         case .userChanged:
             userGeneration += 1
             workingIDs.removeAll()
+            purgeFailedIDs.removeAll()
             entries = []
             rebuildSections()
         case .loading:
@@ -167,12 +173,16 @@ final class TrashViewModel {
     private func purgeExpired(in snapshot: [DiaryEntry]) {
         guard let userID = feed.currentUserID else { return }
         let current = now()
-        Task { [purger] in
+        let generation = userGeneration
+        Task { [weak self, purger] in
             let result = await purger.purgeExpired(in: snapshot, userID: userID, now: current)
             if result.deletedCount + result.failedCount > 0 {
                 // Counts only: which diaries were removed stays out of the log.
                 print("Expired trash purge: \(result.deletedCount) deleted, \(result.failedCount) failed")
             }
+            guard let self, generation == self.userGeneration, !result.failedIDs.isEmpty else { return }
+            self.purgeFailedIDs.formUnion(result.failedIDs)
+            self.rebuildSections()
         }
     }
 

@@ -63,6 +63,20 @@ final class TrashViewModelTests: XCTestCase {
         XCTAssertEqual(trash.deletions.first?.imageURLs, ["old.jpg"])
     }
 
+    func testExpiredDiaryIsShownAgainWhenAutomaticDeletionFails() async throws {
+        let (model, repository, _, trash) = try makeModel(userID: "user-a")
+        defer { model.stop() }
+        trash.failingIDs = ["expired"]
+        model.start()
+        try await waitUntil { repository.observations.count == 1 }
+        repository.send([entry("recent", trashedDaysAgo: 2), entry("expired", trashedDaysAgo: 45)])
+
+        try await waitUntil { trash.deletions.count == 1 }
+        try await waitUntil { model.trashedCount == 2 }
+        XCTAssertEqual(Set(ids(model)), ["recent", "expired"])
+        XCTAssertEqual(model.daysRemaining(for: entry("expired", trashedDaysAgo: 45)), 0)
+    }
+
     func testDaysRemainingCountsDownFromDeleteDate() async throws {
         let recent = entry("recent", trashedDaysAgo: 2)
         let (model, _, _, _) = try await loaded([recent])

@@ -7,6 +7,7 @@ final class ExpiredTrashPurger {
     struct Result: Equatable {
         var deletedCount = 0
         var failedCount = 0
+        var failedIDs: Set<String> = []
     }
 
     private let trash: any DiaryTrashing
@@ -33,6 +34,7 @@ final class ExpiredTrashPurger {
                 result.deletedCount += 1
             } catch {
                 result.failedCount += 1
+                result.failedIDs.insert(id)
             }
             inFlight.remove(id)
         }
