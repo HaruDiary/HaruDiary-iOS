@@ -5,13 +5,17 @@ struct JourneyYearsView: View {
     let viewModel: JourneyViewModel
     let onSelectYear: (Int) -> Void
 
+    /// The card on screen; only it animates, so the cards above and below cost nothing.
+    @State private var visibleYear: Int?
+
     var body: some View {
         GeometryReader { geometry in
             ScrollView(.vertical) {
                 LazyVStack(spacing: 0) {
                     ForEach(viewModel.years, id: \.self) { year in
                         Button { onSelectYear(year) } label: {
-                            JourneyYearPhotoCard(progress: viewModel.progress(ofYear: year), months: months(of: year))
+                            JourneyYearPhotoCard(progress: viewModel.progress(ofYear: year), months: months(of: year),
+                                                 isAnimating: year == (visibleYear ?? viewModel.years.first))
                         }
                         .buttonStyle(.plain)
                         .padding(.horizontal, DiaryTheme.Spacing.screen)
@@ -23,6 +27,7 @@ struct JourneyYearsView: View {
             }
             // Each card snaps into place, one year per swipe.
             .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
+            .scrollPosition(id: $visibleYear)
             .scrollIndicators(.hidden)
             .clipped()
         }
@@ -49,11 +54,12 @@ struct JourneyYearPhotoCard: View {
 
     let progress: JourneyYearProgress
     let months: [Month]
+    var isAnimating = false
 
     private let monthColumns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 6)
 
     var body: some View {
-        JourneyCityView(stage: progress.stage)
+        JourneyCityView(stage: progress.stage, isAnimating: isAnimating)
             .overlay(alignment: .top) {
                 LinearGradient(colors: [.black.opacity(0.35), .clear], startPoint: .top, endPoint: .bottom)
                     .frame(height: 220)
@@ -154,7 +160,7 @@ struct JourneyYearView: View {
         let progress = viewModel.progress(ofYear: year)
         ScrollView {
             VStack(alignment: .leading, spacing: DiaryTheme.Spacing.section) {
-                JourneyCityView(stage: progress.stage)
+                JourneyCityView(stage: progress.stage, isAnimating: true)
                     .aspectRatio(JourneyCityScene.canvas.width / JourneyCityScene.canvas.height, contentMode: .fit)
                     .clipShape(RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
                 JourneyYearProgressSummary(progress: progress)

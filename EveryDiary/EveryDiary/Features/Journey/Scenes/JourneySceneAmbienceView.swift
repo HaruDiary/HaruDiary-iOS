@@ -4,11 +4,17 @@ import SwiftUI
 /// Every particle follows a fixed path from its index, so nothing is stored between frames.
 struct JourneySceneAmbienceView: View {
     let ambience: [SceneAmbience]
+    /// The drawing's size in design points and where its bottom edge sits; see `JourneySceneRenderer`.
+    var canvas = JourneyScene.canvas
+    /// Stops redrawing, for pictures that are off screen.
+    var isPaused = false
+    /// Caps the frame rate for gentle backgrounds; nil follows the display.
+    var minimumInterval: Double?
 
     var body: some View {
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(minimumInterval: minimumInterval, paused: isPaused)) { timeline in
             Canvas { context, size in
-                let renderer = JourneySceneRenderer(size: size)
+                let renderer = JourneySceneRenderer(size: size, canvas: canvas)
                 let time = timeline.date.timeIntervalSinceReferenceDate
                 for (layer, item) in ambience.enumerated() {
                     for index in 0..<item.count {
@@ -64,6 +70,30 @@ struct JourneySceneAmbienceView: View {
                                        (center.x + cos(angle) * radius, center.y + sin(angle) * radius + progress * 10)])
             })
             renderer.draw(rays, color: item.colors[(index + cycle) % item.colors.count], lineWidth: 1.8, glow: item.glow, in: &layer)
+        case .drift:
+            let travel = fraction(n1 + t * item.speed / area.width)
+            let point = CGPoint(x: area.minX + travel * area.width, y: area.minY + n2 * area.height)
+            if item.particle == .car {
+                drawCar(at: point, facingRight: item.speed > 0, color: color, renderer: renderer, in: &layer)
+            } else {
+                drawParticle(item.particle, at: point, size: size, rotation: 0, time: t, seed: seed,
+                             color: color, glow: item.glow, renderer: renderer, in: &layer)
+            }
+        case .rotate:
+            let center = CGPoint(x: area.midX, y: area.midY)
+            let angle = t * item.speed
+            let spokes = ScenePath.group((0..<8).map { spoke -> CGPath in
+                let a = angle + CGFloat(spoke) * .pi / 4
+                return ScenePath.line([(center.x, center.y), (center.x + cos(a) * size, center.y + sin(a) * size)])
+            })
+            renderer.draw(spokes, color: SceneColor(0xD8D2E6, opacity: 0.8), lineWidth: 1, glow: 0, in: &layer)
+            for cabin in 0..<8 {
+                let a = angle + CGFloat(cabin) * .pi / 4 + .pi / 8
+                let cabinColor = item.colors[cabin % item.colors.count]
+                let point = CGPoint(x: center.x + cos(a) * size, y: center.y + sin(a) * size)
+                renderer.draw(ScenePath.circle(point.x, point.y, 3.2 + item.glow * 0.4), color: cabinColor.withOpacity(0.18), lineWidth: nil, glow: 0, in: &layer)
+                renderer.draw(ScenePath.circle(point.x, point.y, 3.2), color: cabinColor, lineWidth: nil, glow: 0, in: &layer)
+            }
         case .shootingStar:
             let period: CGFloat = 5.5
             let clock = t + CGFloat(index) * 2.7
@@ -113,8 +143,11 @@ struct JourneySceneAmbienceView: View {
             let wings = ScenePath.line([(point.x - size, point.y - lift), (point.x, point.y), (point.x + size, point.y - lift)])
             renderer.draw(wings, color: color, lineWidth: 1.5, glow: 0, in: &context)
             return
-        case .firework:
+        case .firework, .ferrisWheel, .car:
             path = ScenePath.circle(point.x, point.y, size)
+        case .cloud:
+            path = ScenePath.group([ScenePath.ellipse(point.x - 22 * size, point.y - 5 * size, 44 * size, 12 * size),
+                                    ScenePath.ellipse(point.x - 10 * size, point.y - 11 * size, 22 * size, 14 * size)])
         }
         // Soft layered halos instead of a blur filter keep many glowing particles cheap to draw every frame.
         if glow > 0 {
@@ -122,6 +155,17 @@ struct JourneySceneAmbienceView: View {
             renderer.draw(ScenePath.circle(point.x, point.y, size + glow * 0.35), color: color.withOpacity(color.opacity * 0.16), lineWidth: nil, glow: 0, in: &context)
         }
         renderer.draw(path, color: color, lineWidth: nil, glow: 0, in: &context)
+    }
+
+    private func drawCar(at point: CGPoint, facingRight: Bool, color: SceneColor, renderer: JourneySceneRenderer, in context: inout GraphicsContext) {
+        let x = point.x - 10, y = point.y
+        renderer.draw(ScenePath.group([ScenePath.rect(x, y, 20, 6, corner: 2), ScenePath.rect(x + 4, y - 4, 11, 5, corner: 2)]),
+                      color: color, lineWidth: nil, glow: 0, in: &context)
+        renderer.draw(ScenePath.group([ScenePath.circle(x + 4, y + 6.5, 2), ScenePath.circle(x + 16, y + 6.5, 2)]),
+                      color: SceneColor(0x1E1B24), lineWidth: nil, glow: 0, in: &context)
+        let front = facingRight ? x + 20 : x
+        renderer.draw(ScenePath.circle(front, y + 2.5, 3.5), color: SceneColor(0xFFF3B0, opacity: 0.25), lineWidth: nil, glow: 0, in: &context)
+        renderer.draw(ScenePath.circle(front, y + 2.5, 1.3), color: SceneColor(0xFFF3B0), lineWidth: nil, glow: 0, in: &context)
     }
 
     private func fraction(_ value: CGFloat) -> CGFloat {

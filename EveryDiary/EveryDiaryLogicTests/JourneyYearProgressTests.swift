@@ -30,6 +30,15 @@ final class JourneyYearProgressTests: XCTestCase {
         XCTAssertEqual(progress(365).stageProgress, 1)
     }
 
+    func testCityMovementGrowsWithTheStage() {
+        let counts = (0...JourneyYearProgress.finalStage).map { JourneyCityScene.ambience(for: $0).count }
+        XCTAssertEqual(counts.first, 1, "the empty land has only drifting clouds")
+        XCTAssertEqual(counts, counts.sorted(), "later stages never lose movement")
+        // Moving cars and the turning Ferris wheel replace their still drawings.
+        XCTAssertTrue(JourneyCityScene.pieces.contains { $0.stage == 6 && $0.element.isStill })
+        XCTAssertTrue(JourneyCityScene.pieces.contains { $0.stage == 11 && $0.element.isStill })
+    }
+
     func testEveryStageHasATitleAndAddsSomething() {
         XCTAssertEqual(JourneyCityScene.stageTitles.count, JourneyYearProgress.finalStage + 1)
         for stage in 0...JourneyYearProgress.finalStage {

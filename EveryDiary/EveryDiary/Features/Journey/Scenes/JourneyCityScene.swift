@@ -121,9 +121,9 @@ enum JourneyCityScene {
             add(6, Layer.buildings, SceneElement(ScenePath.rect(shop.x + 6, top + 1, shop.width - 12, 3.5), SceneColor(0x3E3B45)))
         }
         for (x, y, color) in [(CGFloat(52), CGFloat(265), UInt32(0xE8505B)), (238, 272, 0x4DABF7)] {
-            add(6, Layer.roadDetails, SceneElement(ScenePath.group([ScenePath.rect(x, y, 20, 6, corner: 2), ScenePath.rect(x + 4, y - 4, 11, 5, corner: 2)]), SceneColor(color)))
-            add(6, Layer.roadDetails, SceneElement(ScenePath.group([ScenePath.circle(x + 4, y + 6.5, 2), ScenePath.circle(x + 16, y + 6.5, 2)]), SceneColor(0x1E1B24)))
-            add(6, Layer.roadDetails, SceneElement(ScenePath.circle(x + 20, y + 2.5, 1.3), SceneColor(0xFFF3B0), glow: 4))
+            add(6, Layer.roadDetails, SceneElement(ScenePath.group([ScenePath.rect(x, y, 20, 6, corner: 2), ScenePath.rect(x + 4, y - 4, 11, 5, corner: 2)]), SceneColor(color), still: true))
+            add(6, Layer.roadDetails, SceneElement(ScenePath.group([ScenePath.circle(x + 4, y + 6.5, 2), ScenePath.circle(x + 16, y + 6.5, 2)]), SceneColor(0x1E1B24), still: true))
+            add(6, Layer.roadDetails, SceneElement(ScenePath.circle(x + 20, y + 2.5, 1.3), SceneColor(0xFFF3B0), glow: 4, still: true))
         }
 
         // 7 · 머무는 사람들: mid-rise blocks rise behind the street.
@@ -164,12 +164,12 @@ enum JourneyCityScene {
         add(11, Layer.backBuildings, SceneElement(ScenePath.group((0..<8).map { index -> CGPath in
             let angle = CGFloat(index) * .pi / 4
             return ScenePath.line([(wheel.x, wheel.y), (wheel.x + cos(angle) * 32, wheel.y + sin(angle) * 32)])
-        }), SceneColor(0xD8D2E6, opacity: 0.8), lineWidth: 1))
+        }), SceneColor(0xD8D2E6, opacity: 0.8), lineWidth: 1, still: true))
         add(11, Layer.backBuildings, SceneElement(ScenePath.circle(wheel.x, wheel.y, 32), SceneColor(0xF2A6C8), lineWidth: 2, glow: 4))
         let cabinColors: [UInt32] = [0xFF6B6B, 0xFFD93D, 0x6BCBFF, 0x7CFFB2]
         for index in 0..<8 {
             let angle = CGFloat(index) * .pi / 4 + .pi / 8
-            add(11, Layer.backBuildings, SceneElement(ScenePath.circle(wheel.x + cos(angle) * 32, wheel.y + sin(angle) * 32, 3.2), SceneColor(cabinColors[index % 4]), glow: 3))
+            add(11, Layer.backBuildings, SceneElement(ScenePath.circle(wheel.x + cos(angle) * 32, wheel.y + sin(angle) * 32, 3.2), SceneColor(cabinColors[index % 4]), glow: 3, still: true))
         }
         add(11, Layer.backBuildings, SceneElement(ScenePath.circle(wheel.x, wheel.y, 3), SceneColor(0xFFF3B0)))
 
@@ -194,6 +194,44 @@ enum JourneyCityScene {
         }
         return pieces
     }()
+
+    /// Gentle movement for the city at `stage`, added up stage by stage. Moving versions replace the still cars
+    /// and Ferris wheel cabins (`SceneElement.isStill`) while it plays.
+    static func ambience(for stage: Int) -> [SceneAmbience] {
+        let white = SceneColor(0xFFFFFF)
+        var items: [SceneAmbience] = [
+            SceneAmbience(.drift, .cloud, colors: [SceneColor(0xFFFFFF, opacity: stage < 4 ? 0.7 : 0.18)], count: 3,
+                          area: CGRect(x: -60, y: 58, width: 510, height: 34), size: 0.8...1.3, speed: 5)
+        ]
+        if stage >= 3 {
+            items.append(SceneAmbience(.wander, .bird, colors: [SceneColor(stage < 4 ? 0x4A4458 : 0x1E1B30, opacity: 0.8)], count: 3,
+                                       area: CGRect(x: 40, y: 96, width: 170, height: 40), size: 4...5.5))
+        }
+        if stage >= 4 {
+            items.append(SceneAmbience(.twinkle, .dot, colors: [white], count: 14, area: CGRect(x: 0, y: 44, width: 390, height: 100), size: 0.7...1.4, glow: 2))
+        }
+        if stage >= 5 {
+            items.append(SceneAmbience(.twinkle, .sparkle, colors: [white], count: 4, area: CGRect(x: 28, y: 287, width: 72, height: 6), size: 1.5...2.5))
+        }
+        if stage >= 6 {
+            items.append(SceneAmbience(.drift, .car, colors: [SceneColor(0xE8505B), SceneColor(0xF2B233)], count: 2,
+                                       area: CGRect(x: -30, y: 264, width: 450, height: 1), size: 1...1, speed: 22))
+            items.append(SceneAmbience(.drift, .car, colors: [SceneColor(0x4DABF7), SceneColor(0x7CD37A)], count: 2,
+                                       area: CGRect(x: -30, y: 272, width: 450, height: 1), size: 1...1, speed: -17))
+        }
+        if stage >= 8 {
+            items.append(SceneAmbience(.twinkle, .dot, colors: [SceneColor(0xDFF4FF)], count: 6, area: CGRect(x: 304, y: 284, width: 40, height: 14), size: 0.8...1.4))
+        }
+        if stage >= 11 {
+            items.append(SceneAmbience(.rotate, .ferrisWheel, colors: [SceneColor(0xFF6B6B), SceneColor(0xFFD93D), SceneColor(0x6BCBFF), SceneColor(0x7CFFB2)],
+                                       count: 1, area: CGRect(x: 110, y: 165, width: 0, height: 0), size: 32...32, speed: 0.18, glow: 6))
+        }
+        if stage >= 12 {
+            items.append(SceneAmbience(.burst, .firework, colors: [SceneColor(0xFFD93D), SceneColor(0xB388FF), SceneColor(0xFF8FAB)], count: 2,
+                                       area: CGRect(x: 40, y: 50, width: 310, height: 60), size: 14...22, glow: 6))
+        }
+        return items
+    }
 
     private static func windowGrid(x: CGFloat, width: CGFloat, top: CGFloat, bottom: CGFloat, spacing: CGSize, size: CGSize) -> CGPath {
         let columns = max(Int((width - 4) / spacing.width), 1)

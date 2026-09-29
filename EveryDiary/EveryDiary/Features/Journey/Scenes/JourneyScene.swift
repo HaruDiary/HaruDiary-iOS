@@ -54,11 +54,13 @@ struct JourneyScene {
 /// A moving layer over a completed picture, such as falling snow or rising lanterns. Positions use the design canvas.
 struct SceneAmbience {
     enum Motion {
-        case fall, rise, wander, twinkle, burst, shootingStar
+        /// `drift` moves across `area` and wraps around (a negative speed goes right to left);
+        /// `rotate` turns the particle at the center of `area` by `speed` radians per second.
+        case fall, rise, wander, twinkle, burst, shootingStar, drift, rotate
     }
 
     enum Particle {
-        case dot, snowflake, petal, mapleLeaf, sparkle, lantern, butterfly, bird, firework
+        case dot, snowflake, petal, mapleLeaf, sparkle, lantern, butterfly, bird, firework, cloud, car, ferrisWheel
     }
 
     let motion: Motion
