@@ -6,9 +6,12 @@ import UIKit
 @MainActor
 final class TrashHostingController: UIHostingController<TrashView>, DiaryUpdateDelegate {
     private let viewModel: TrashViewModel
+    private let makeWriteDiary: MakeWriteDiary
 
-    init(viewModel: TrashViewModel, imageLoader: any CalendarImageLoading) {
+    init(viewModel: TrashViewModel, imageLoader: any CalendarImageLoading,
+         makeWriteDiary: @escaping MakeWriteDiary) {
         self.viewModel = viewModel
+        self.makeWriteDiary = makeWriteDiary
         super.init(rootView: TrashView(viewModel: viewModel, imageLoader: imageLoader, onSelectDiary: { _ in }))
         rootView = TrashView(viewModel: viewModel, imageLoader: imageLoader,
                              onSelectDiary: { [weak self] in self?.openDiary($0) })
@@ -80,7 +83,7 @@ final class TrashHostingController: UIHostingController<TrashView>, DiaryUpdateD
 
     private func openDiary(_ entry: DiaryEntry) {
         guard presentedViewController == nil else { return }
-        let controller = WriteDiaryVC()
+        let controller = makeWriteDiary()
         controller.enterDiary(to: .showDiary, with: entry)
         controller.delegate = self
         controller.modalPresentationStyle = .automatic

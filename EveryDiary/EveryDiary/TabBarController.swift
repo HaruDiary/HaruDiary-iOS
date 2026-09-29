@@ -14,7 +14,7 @@ class TabBarController: UITabBarController {
 
     init(dependencies: AppDependencies) {
         let makeWriteDiary: MakeWriteDiary = { WriteDiaryVC(saver: dependencies.diarySaving) }
-        let makeSettings = { dependencies.makeSettingsModule().makeViewController() }
+        let makeSettings = { dependencies.makeSettingsModule().makeViewController(makeWriteDiary: makeWriteDiary) }
         firstVC = UINavigationController(rootViewController: dependencies.makeDiaryListModule().makeViewController(makeWriteDiary: makeWriteDiary, makeSettings: makeSettings))
         let motivation = MotivationVC(makeWriteDiary: makeWriteDiary)
         motivation.makeSettings = makeSettings

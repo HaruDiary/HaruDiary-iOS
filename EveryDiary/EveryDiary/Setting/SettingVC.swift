@@ -39,15 +39,20 @@ class SettingVC: UIViewController {
         return indicator
     }()
     
-    init(module: SettingsModule) {
+    private let makeWriteDiary: MakeWriteDiary
+
+    init(module: SettingsModule, makeWriteDiary: @escaping MakeWriteDiary) {
         self.module = module
+        self.makeWriteDiary = makeWriteDiary
         super.init(nibName: nil, bundle: nil)
     }
     
     // The replaced UIKit tabs (DiaryListVC, CalendarVC) still create settings without dependencies.
     // Remove with those screens; live tabs pass a module from AppDependencies.
     convenience init() {
-        self.init(module: AppDependencies.live().makeSettingsModule())
+        let dependencies = AppDependencies.live()
+        self.init(module: dependencies.makeSettingsModule(),
+                  makeWriteDiary: { WriteDiaryVC(saver: dependencies.diarySaving) })
     }
     
     required init?(coder: NSCoder) { return nil }
@@ -263,7 +268,7 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
                 let lockVC = LockVC()
                 navigationController?.pushViewController(lockVC, animated: true)
             case 3:
-                let trashVC = module.makeTrashModule().makeViewController()
+                let trashVC = module.makeTrashModule().makeViewController(makeWriteDiary: makeWriteDiary)
                 navigationController?.pushViewController(trashVC, animated: true)
             default:
                 print("error")

@@ -1,7 +1,7 @@
 import UIKit
 
 extension SettingsModule {
-    func makeViewController() -> UIViewController {
-        SettingVC(module: self)
+    func makeViewController(makeWriteDiary: @escaping MakeWriteDiary) -> UIViewController {
+        SettingVC(module: self, makeWriteDiary: makeWriteDiary)
     }
 }
