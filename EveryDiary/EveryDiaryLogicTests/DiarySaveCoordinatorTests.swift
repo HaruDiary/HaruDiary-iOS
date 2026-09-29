@@ -120,10 +120,14 @@ final class DiarySaveCoordinatorTests: XCTestCase {
         }
         storage.completeUpload(at: 0, url: nil)
         storage.completeUpload(at: 1, url: "second")
-        storage.completeDeletion(at: 0)
-        await fulfillment(of: [finished], timeout: 3)
+        let deletionReady = expectation(description: "Partial upload is removed")
+        DispatchQueue.main.async {
+            XCTAssertEqual(storage.deletions.map(\.url), ["second"])
+            storage.completeDeletion(at: 0)
+            deletionReady.fulfill()
+        }
+        await fulfillment(of: [finished, deletionReady], timeout: 3)
         XCTAssertTrue(writer.updated.isEmpty)
-        XCTAssertEqual(storage.deletions.map(\.url), ["second"])
     }
 
     func testSignedOutUpdateNeverDeletesPhotos() {
