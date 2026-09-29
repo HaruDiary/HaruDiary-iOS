@@ -14,14 +14,18 @@ struct JourneyScene {
     /// One slot per possible day of the month (29 for February). Only the first `numberOfDays` are shown.
     let lights: [SceneLight]
     let foreground: [SceneElement]
+    /// Added to the picture once every day of the month is filled.
+    let completion: [SceneElement]
 
-    init(month: Int, title: String, sky: [SceneColor], background: [SceneElement], lights: [SceneLight], foreground: [SceneElement] = []) {
+    init(month: Int, title: String, sky: [SceneColor], background: [SceneElement], lights: [SceneLight],
+         foreground: [SceneElement] = [], completion: [SceneElement] = []) {
         self.month = month
         self.title = title
         self.sky = sky
         self.background = background
         self.lights = lights
         self.foreground = foreground
+        self.completion = completion
     }
 }
 
@@ -44,11 +48,13 @@ struct SceneElement {
     let color: SceneColor
     /// nil fills the path; a width strokes it.
     let lineWidth: CGFloat?
+    let glow: CGFloat
 
-    init(_ path: CGPath, _ color: SceneColor, lineWidth: CGFloat? = nil) {
+    init(_ path: CGPath, _ color: SceneColor, lineWidth: CGFloat? = nil, glow: CGFloat = 0) {
         self.path = path
         self.color = color
         self.lineWidth = lineWidth
+        self.glow = glow
     }
 }
 
@@ -60,14 +66,18 @@ struct SceneLight {
     let offColor: SceneColor
     let glow: CGFloat
     let lineWidth: CGFloat?
+    /// Details drawn over the light only while it is on, such as a flower's center or a window frame.
+    let accents: [SceneElement]
 
-    init(_ path: CGPath, on: SceneColor, off: SceneColor, offPath: CGPath? = nil, glow: CGFloat = 0, lineWidth: CGFloat? = nil) {
+    init(_ path: CGPath, on: SceneColor, off: SceneColor, offPath: CGPath? = nil, glow: CGFloat = 0, lineWidth: CGFloat? = nil,
+         accents: [SceneElement] = []) {
         self.path = path
         self.offPath = offPath
         onColor = on
         offColor = off
         self.glow = glow
         self.lineWidth = lineWidth
+        self.accents = accents
     }
 }
 
@@ -85,6 +95,11 @@ enum ScenePath {
 
     static func ellipse(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat) -> CGPath {
         CGPath(ellipseIn: CGRect(x: x, y: y, width: width, height: height), transform: nil)
+    }
+
+    static func ellipse(center: CGPoint, width: CGFloat, height: CGFloat, angle: CGFloat) -> CGPath {
+        var transform = CGAffineTransform(translationX: center.x, y: center.y).rotated(by: angle)
+        return CGPath(ellipseIn: CGRect(x: -width / 2, y: -height / 2, width: width, height: height), transform: &transform)
     }
 
     static func polygon(_ points: [(CGFloat, CGFloat)]) -> CGPath {
@@ -107,7 +122,13 @@ enum ScenePath {
         return path
     }
 
-    /// A star with `points` tips; also used for maple leaves and sparkles.
+    static func arc(_ x: CGFloat, _ y: CGFloat, radius: CGFloat, from start: CGFloat, to end: CGFloat) -> CGPath {
+        let path = CGMutablePath()
+        path.addArc(center: CGPoint(x: x, y: y), radius: radius, startAngle: start, endAngle: end, clockwise: false)
+        return path
+    }
+
+    /// A star with `points` tips.
     static func star(_ x: CGFloat, _ y: CGFloat, outer: CGFloat, inner: CGFloat, points: Int, rotation: CGFloat = -.pi / 2) -> CGPath {
         let corners = (0..<(points * 2)).map { index -> (CGFloat, CGFloat) in
             let radius = index.isMultiple(of: 2) ? outer : inner
@@ -115,6 +136,54 @@ enum ScenePath {
             return (x + cos(angle) * radius, y + sin(angle) * radius)
         }
         return polygon(corners)
+    }
+
+    /// A pointed petal or leaf from `base` toward `angle`.
+    static func petal(from base: CGPoint, length: CGFloat, width: CGFloat, angle: CGFloat) -> CGPath {
+        let direction = CGPoint(x: cos(angle), y: sin(angle))
+        let normal = CGPoint(x: -direction.y, y: direction.x)
+        let tip = CGPoint(x: base.x + direction.x * length, y: base.y + direction.y * length)
+        let middle = CGPoint(x: base.x + direction.x * length * 0.5, y: base.y + direction.y * length * 0.5)
+        let path = CGMutablePath()
+        path.move(to: base)
+        path.addQuadCurve(to: tip, control: CGPoint(x: middle.x + normal.x * width, y: middle.y + normal.y * width))
+        path.addQuadCurve(to: base, control: CGPoint(x: middle.x - normal.x * width, y: middle.y - normal.y * width))
+        path.closeSubpath()
+        return path
+    }
+
+    /// A five-petal cherry blossom.
+    static func blossom(_ x: CGFloat, _ y: CGFloat, radius: CGFloat, rotation: CGFloat = 0) -> CGPath {
+        group((0..<5).map { index in
+            let angle = rotation - .pi / 2 + CGFloat(index) * 2 * .pi / 5
+            let center = CGPoint(x: x + cos(angle) * radius * 0.52, y: y + sin(angle) * radius * 0.52)
+            return ellipse(center: center, width: radius * 0.98, height: radius * 0.78, angle: angle)
+        })
+    }
+
+    /// A polygon given in unit coordinates (about -1...1), placed at `x, y`.
+    static func outline(_ points: [(CGFloat, CGFloat)], _ x: CGFloat, _ y: CGFloat, size: CGFloat, rotation: CGFloat = 0) -> CGPath {
+        polygon(points.map { px, py in
+            (x + (px * cos(rotation) - py * sin(rotation)) * size, y + (px * sin(rotation) + py * cos(rotation)) * size)
+        })
+    }
+
+    static let mapleLeaf: [(CGFloat, CGFloat)] = {
+        let right: [(CGFloat, CGFloat)] = [(0.14, -0.62), (0.42, -0.8), (0.33, -0.4), (0.78, -0.52), (0.6, -0.18), (0.98, -0.06),
+                                           (0.62, 0.12), (0.72, 0.4), (0.3, 0.26), (0.06, 0.45)]
+        return [(0, -1)] + right + right.reversed().map { (-$0.0, $0.1) }
+    }()
+
+    /// A soft curved band across the sky, for auroras and the Milky Way.
+    static func band(from start: CGPoint, to end: CGPoint, bend: CGFloat, thickness: CGFloat) -> CGPath {
+        let control = CGPoint(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 + bend)
+        let path = CGMutablePath()
+        path.move(to: start)
+        path.addQuadCurve(to: end, control: control)
+        path.addLine(to: CGPoint(x: end.x, y: end.y + thickness))
+        path.addQuadCurve(to: CGPoint(x: start.x, y: start.y + thickness), control: CGPoint(x: control.x, y: control.y + thickness * 1.6))
+        path.closeSubpath()
+        return path
     }
 
     /// Several shapes drawn as one.

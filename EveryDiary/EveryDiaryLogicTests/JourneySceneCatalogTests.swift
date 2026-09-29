@@ -15,6 +15,12 @@ final class JourneySceneCatalogTests: XCTestCase {
         XCTAssertEqual(titles.count, 12)
     }
 
+    func testEveryMonthAddsSomethingWhenCompleted() {
+        for month in 1...12 {
+            XCTAssertFalse(JourneySceneCatalog.scene(for: month).completion.isEmpty, "month \(month)")
+        }
+    }
+
     func testLightsStayInsideTheCanvasAndDoNotShareAPlace() {
         let canvas = CGRect(origin: .zero, size: JourneyScene.canvas).insetBy(dx: -12, dy: -12)
         for month in 1...12 {
