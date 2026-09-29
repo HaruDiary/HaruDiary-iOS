@@ -215,7 +215,7 @@ extension DiaryListVC {
     }
     // 설정 화면(SettingVC)으로 이동
     @objc private func tabSettingBTN() {
-        let settingVC = SettingVC(makeWriteDiary: makeWriteDiary)
+        let settingVC = SettingVC()
         settingVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(settingVC, animated: true)
     }

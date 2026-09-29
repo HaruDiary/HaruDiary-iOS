@@ -67,7 +67,7 @@ class CalendarVC: UIViewController {
     }
     
     @objc private func tabSettingBTN() {
-        let settingVC = SettingVC(makeWriteDiary: makeWriteDiary)
+        let settingVC = SettingVC()
         settingVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(settingVC, animated: true)
     }
