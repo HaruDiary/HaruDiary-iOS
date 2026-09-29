@@ -156,14 +156,14 @@ final class SettingsViewModel {
             case .apple: method = "Apple로 로그인"
             case nil: method = "인증 완료"
             }
-            return Profile(name: name ?? "닉네임을 설정해주세요", detail: method + "\n" + shownEmail(email),
+            return Profile(name: name ?? "닉네임을 설정해주세요", detail: shownEmail(email).map { method + "\n" + $0 } ?? method,
                            picture: picture ?? .avatar(.default(for: provider)), isLoggedIn: true)
         }
     }
 
-    // Apple's "Hide My Email" relay address is not meaningful to show.
-    private static func shownEmail(_ email: String?) -> String {
-        guard let email else { return "이메일 정보 없음" }
+    // Apple's "Hide My Email" relay address is not meaningful to show; without an e-mail only the sign-in method is shown.
+    private static func shownEmail(_ email: String?) -> String? {
+        guard let email else { return nil }
         return email.hasSuffix("@privaterelay.appleid.com") ? "이메일 가림" : email
     }
 }

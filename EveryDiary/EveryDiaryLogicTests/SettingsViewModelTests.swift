@@ -45,7 +45,7 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertEqual(SettingsViewModel.profile(for: .member(email: "x1@privaterelay.appleid.com", name: nil, provider: .apple), picture: nil),
                        .init(name: "닉네임을 설정해주세요", detail: "Apple로 로그인\n이메일 가림", picture: .avatar(.apple), isLoggedIn: true))
         XCTAssertEqual(SettingsViewModel.profile(for: .member(email: nil, name: "하루", provider: .apple), picture: nil).detail,
-                       "Apple로 로그인\n이메일 정보 없음")
+                       "Apple로 로그인")
     }
 
     // MARK: - Profile picture
