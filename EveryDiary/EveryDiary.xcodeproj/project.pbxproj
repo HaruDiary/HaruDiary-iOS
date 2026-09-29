@@ -197,6 +197,11 @@
 		B7E9964B7E694588B368F017 /* ProfilePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95117A90CD30494982CCDC18 /* ProfilePicture.swift */; };
 		9E1625C7409A4297A620A04B /* ProfilePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95117A90CD30494982CCDC18 /* ProfilePicture.swift */; };
 		C472E74E38494FB582D4D1C3 /* ProfilePhotoPreparation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */; };
+		2B14163B939C4B3F8AF3F16D /* AppleRefreshTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */; };
+		FE8BFE908EBB4782994D2CE5 /* AppleRefreshTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */; };
+		16FB74D484FB444E84926326 /* KeychainSecretStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */; };
+		ABDF27ADC7F74F4BBFDA0610 /* AppleTokenRevocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156963BA02984F9DB97C4979 /* AppleTokenRevocation.swift */; };
+		AEBC3933AC39407393EA46C6 /* AppleRefreshTokenStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -357,6 +362,10 @@
 		B470769C0A454C869F7E2BAE /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfileEditView.swift"; sourceTree = "<group>"; };
 		95117A90CD30494982CCDC18 /* ProfilePicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/ProfilePicture.swift"; sourceTree = "<group>"; };
 		B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoPreparation.swift"; sourceTree = "<group>"; };
+		55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleRefreshTokenStore.swift"; sourceTree = "<group>"; };
+		47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainSecretStore.swift"; sourceTree = "<group>"; };
+		156963BA02984F9DB97C4979 /* AppleTokenRevocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleTokenRevocation.swift"; sourceTree = "<group>"; };
+		09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleRefreshTokenStoreTests.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -596,6 +605,7 @@
 		CE00DB6416F6564570F700F0 /* EveryDiaryLogicTests */ = {
 			isa = PBXGroup;
 			children = (
+				09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */,
 				E953C47FF7CA4523A7534FBC /* SocialSignInTests.swift */,
 				8A6612B31B0240059B2D34EE /* SettingsViewModelTests.swift */,
 				FE0B8AACB301466AAE9D2BA6 /* TrashViewModelTests.swift */,
@@ -639,6 +649,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */,
 				95117A90CD30494982CCDC18 /* ProfilePicture.swift */,
 				49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */,
 				FD66E8B399BD4328B3E6ECCD /* Nickname.swift */,
@@ -673,6 +684,8 @@
 		9987856AA8934E3BE9726639 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				156963BA02984F9DB97C4979 /* AppleTokenRevocation.swift */,
+				47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */,
 				68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */,
 				BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */,
 				1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */,
@@ -860,6 +873,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AEBC3933AC39407393EA46C6 /* AppleRefreshTokenStoreTests.swift in Sources */,
+				FE8BFE908EBB4782994D2CE5 /* AppleRefreshTokenStore.swift in Sources */,
 				9E1625C7409A4297A620A04B /* ProfilePicture.swift in Sources */,
 				A0AECB78FA714980B300D783 /* ProfileAvatar.swift in Sources */,
 				33E8CDA28B604D23AB108101 /* Nickname.swift in Sources */,
@@ -912,6 +927,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABDF27ADC7F74F4BBFDA0610 /* AppleTokenRevocation.swift in Sources */,
+				16FB74D484FB444E84926326 /* KeychainSecretStore.swift in Sources */,
+				2B14163B939C4B3F8AF3F16D /* AppleRefreshTokenStore.swift in Sources */,
 				C472E74E38494FB582D4D1C3 /* ProfilePhotoPreparation.swift in Sources */,
 				B7E9964B7E694588B368F017 /* ProfilePicture.swift in Sources */,
 				DF5B9964C8F04215BC98BE9A /* ProfileEditView.swift in Sources */,

@@ -24,6 +24,8 @@ protocol SocialSignInGateway {
     /// Signs in to the existing account, then removes the guest account left behind.
     func switchFromGuest(to credential: SocialCredential) async throws
     func updateDisplayName(_ name: String) async throws
+    /// Keeps what is needed to revoke Sign in with Apple when the member later withdraws.
+    func rememberAppleAuthorization(code: String)
 }
 
 /// Which sign-in happens for the current account. Previously any failure while linking a guest deleted the guest

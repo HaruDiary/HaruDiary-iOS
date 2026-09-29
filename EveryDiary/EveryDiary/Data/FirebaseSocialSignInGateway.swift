@@ -4,9 +4,15 @@ import Foundation
 @MainActor
 final class FirebaseSocialSignInGateway: SocialSignInGateway {
     private let auth: Auth
+    private let appleTokens: AppleTokenRevocation
 
-    init(auth: Auth) {
+    init(auth: Auth, appleTokens: AppleTokenRevocation) {
         self.auth = auth
+        self.appleTokens = appleTokens
+    }
+
+    func rememberAppleAuthorization(code: String) {
+        appleTokens.storeRefreshToken(authorizationCode: code)
     }
 
     var isGuest: Bool? { auth.currentUser.map(\.isAnonymous) }

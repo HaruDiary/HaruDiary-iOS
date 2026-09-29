@@ -7,11 +7,13 @@ final class FirebaseAccountSession: AccountSession {
     private let auth: Auth
     private let dataEraser: any UserDataErasing
     private let storage: Storage
+    private let appleTokens: AppleTokenRevocation
 
-    init(auth: Auth, dataEraser: any UserDataErasing, storage: Storage) {
+    init(auth: Auth, dataEraser: any UserDataErasing, storage: Storage, appleTokens: AppleTokenRevocation) {
         self.auth = auth
         self.dataEraser = dataEraser
         self.storage = storage
+        self.appleTokens = appleTokens
     }
 
     func observeAccount() -> AsyncStream<AccountSnapshot?> {
@@ -100,7 +102,7 @@ final class FirebaseAccountSession: AccountSession {
         )
         // The Apple token is revoked only after the account is gone, so a failed deletion keeps Sign in with Apple working.
         if provider == .apple {
-            revokeAppleToken()
+            appleTokens.revoke()
             try? auth.signOut()
         }
     }
@@ -108,19 +110,5 @@ final class FirebaseAccountSession: AccountSession {
     nonisolated private static func snapshot(_ user: User) -> AccountSnapshot {
         AccountSnapshot(isEmailVerified: user.isEmailVerified, email: user.shownEmail, displayName: user.shownName,
                         providerIDs: user.providerData.map(\.providerID), photoURL: user.photoURL?.absoluteString)
-    }
-
-    // Same Cloud Function and stored refresh token as the previous settings screen. Responses are not logged.
-    private func revokeAppleToken() {
-        guard let token = UserDefaults.standard.string(forKey: "refreshToken"),
-              let query = "refresh_token=\(token)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/revokeToken?\(query)") else { return }
-        URLSession.shared.dataTask(with: url) { _, response, error in
-            if let error {
-                print("Apple token revoke failed: \(error.localizedDescription)")
-            } else if let status = (response as? HTTPURLResponse)?.statusCode {
-                print("Apple token revoke status: \(status)")
-            }
-        }.resume()
     }
 }

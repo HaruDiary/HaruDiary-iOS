@@ -347,17 +347,10 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
         }
     }
     
-    // 회원 탈퇴 시 Apple 토큰 철회에 필요한 refresh token을 로그인 때 미리 받아 둔다(기존과 동일).
+    // 회원 탈퇴 시 Apple 토큰 철회에 필요한 refresh token을 로그인 때 미리 받아 Keychain에 둔다.
     private func storeAppleRefreshToken(from credential: ASAuthorizationAppleIDCredential) {
         guard let authorizationCode = credential.authorizationCode,
-              let codeString = String(data: authorizationCode, encoding: .utf8),
-              let query = "code=\(codeString)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/getRefreshToken?\(query)") else { return }
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            if let data {
-                let refreshToken = String(data: data, encoding: .utf8) ?? ""
-                UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
-            }
-        }.resume()
+              let code = String(data: authorizationCode, encoding: .utf8) else { return }
+        gateway.rememberAppleAuthorization(code: code)
     }
 }
