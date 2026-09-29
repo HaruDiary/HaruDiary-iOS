@@ -124,7 +124,9 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
   일기·사진·계정을 삭제한다. 철회가 실패하면 아무것도 지우지 않는다. 기존 Cloud Function(`getRefreshToken`·`revokeToken`) 호출과
   기기의 refresh token 보관은 없앴다(남아 있던 토큰은 앱 시작 시 삭제). Apple 사용자 ID만 Keychain에 보관한다.
   필요한 설정: Apple Developer의 Sign in with Apple 키(.p8)와 Firebase Authentication › Apple › "OAuth 코드 흐름 구성".
-  기존 함수는 새 방식 확인·옛 버전 사용자 감소 후 Google Cloud 콘솔에서 삭제한다.
+  2026-09-29 휴대폰에서 Apple 계정 탈퇴·연결 해제를 확인한 뒤 기존 함수 두 개를 Google Cloud 콘솔에서 삭제했다(주소가 404 응답).
+- 프로젝트에는 Firebase "Delete User Data" 확장(`ext-delete-user-data-*`, asia-northeast3)이 설치돼 있다. 계정 삭제 시 서버에서
+  사용자 데이터를 정리하므로, 앱의 탈퇴 전 삭제와 겹쳐도 문제가 없다. 확장의 삭제 대상 경로 설정은 콘솔 Extensions에서 확인한다.
 
 ## 구성
 
