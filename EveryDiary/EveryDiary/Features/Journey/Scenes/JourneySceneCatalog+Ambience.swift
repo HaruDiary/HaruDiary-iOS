@@ -63,7 +63,7 @@ extension JourneySceneCatalog {
                     SceneAmbience(.fall, .mapleLeaf, colors: leaves, count: 40, area: CGRect(x: 0, y: 220, width: 390, height: 480), size: 7...10, speed: 30),
                     SceneAmbience(.wander, .bird, colors: [SceneColor(0x2A1A3D, opacity: 0.8)], count: 5, area: CGRect(x: 50, y: 200, width: 150, height: 70), size: 6...8)]
         case 11:
-            return [SceneAmbience(.twinkle, .dot, colors: [white], count: 50, area: CGRect(x: 0, y: 70, width: 390, height: 260), size: 1...2, glow: 3),
+            return [SceneAmbience(.twinkle, .dot, colors: [white], count: 50, area: CGRect(x: 0, y: 70, width: 390, height: 200), size: 1...2, glow: 3),
                     SceneAmbience(.shootingStar, .dot, colors: [white], count: 2, area: CGRect(x: 60, y: 80, width: 330, height: 160), size: 1...1)]
         default:
             return [SceneAmbience(.fall, .dot, colors: [faintWhite], count: 70, area: wholeSky, size: 0.8...1.6, speed: 16),

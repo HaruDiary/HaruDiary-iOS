@@ -563,25 +563,35 @@ enum JourneySceneCatalog {
                 }
             }
         }
-        // Windows only where the back buildings show above the front ones.
-        var random = SceneRandom(seed: 1111)
-        let backAreas: [(ClosedRange<CGFloat>, ClosedRange<CGFloat>)] = [(8...48, 362...410), (74...128, 396...444), (166...190, 452...512), (318...380, 346...410)]
-        var backWindows: [CGPath] = []
-        for (xs, ys) in backAreas {
-            for y in stride(from: ys.lowerBound, through: ys.upperBound, by: 16) {
-                for x in stride(from: xs.lowerBound, through: xs.upperBound, by: 12) where random.next() > 0.45 {
-                    backWindows.append(ScenePath.rect(x, y, 5, 8))
+        // When the month is full, distant towers rise behind the existing rooftops. Each stands in open sky and ends
+        // exactly on the roof line in front of it, so it reads as further back; its windows sit in a regular grid.
+        let towers: [(x: CGFloat, width: CGFloat, top: CGFloat, roof: CGFloat)] = [
+            (18, 36, 282, 350), (78, 36, 318, 385), (208, 44, 318, 525), (320, 40, 300, 385)
+        ]
+        var towerWindows: [CGPath] = []
+        for tower in towers {
+            let columns = Int((tower.width - 6) / 10)
+            let left = tower.x + (tower.width - CGFloat(columns) * 10 + 5) / 2
+            for y in stride(from: tower.top + 9, through: tower.roof - 14, by: 12) {
+                for column in 0..<columns {
+                    towerWindows.append(ScenePath.rect(left + CGFloat(column) * 10, y, 5, 7))
                 }
             }
         }
-        let stars = ScenePath.group((0..<22).map { _ in ScenePath.circle(random.next(10...380), random.next(90...300), random.next(0.8...1.6)) })
+        let towerShapes = ScenePath.group(towers.map { ScenePath.rect($0.x, $0.top, $0.width, $0.roof - $0.top) }
+                                          + [ScenePath.polygon([(222, 318), (230, 296), (238, 318)])])
+        var random = SceneRandom(seed: 1111)
+        let stars = ScenePath.group((0..<22).map { _ in ScenePath.circle(random.next(10...380), random.next(90...270), random.next(0.8...1.6)) })
         return JourneyScene(
             month: 11, title: "도시의 밤", sky: [SceneColor(0x7D2493), SceneColor(0xB4419A), SceneColor(0xEA5DA2)],
             background: [SceneElement(back, SceneColor(0x555555)), SceneElement(front, SceneColor(0x000000))], lights: lights,
             completion: [
                 SceneElement(ScenePath.circle(312, 150, 20), SceneColor(0xFFF4D6), glow: 16),
                 SceneElement(stars, SceneColor(0xFFFFFF, opacity: 0.85), still: true),
-                SceneElement(ScenePath.group(backWindows), SceneColor(0xFFE9A0, opacity: 0.85), glow: 3),
+                SceneElement(towerShapes, SceneColor(0x6E5B85)),
+                SceneElement(ScenePath.line([(230, 296), (230, 284)]), SceneColor(0x6E5B85), lineWidth: 1.5),
+                SceneElement(ScenePath.circle(230, 283, 2.2), SceneColor(0xFF4D4D), glow: 6),
+                SceneElement(ScenePath.group(towerWindows), SceneColor(0xFFE9A0, opacity: 0.9), glow: 3),
                 SceneElement(ScenePath.group([ScenePath.line([(351, 420), (351, 398)]), ScenePath.line([(95, 455), (95, 436)])]), SceneColor(0x000000), lineWidth: 1.5),
                 SceneElement(ScenePath.group([ScenePath.circle(351, 397, 2.4), ScenePath.circle(95, 435, 2.4)]), SceneColor(0xFF4D4D), glow: 6)
             ],
