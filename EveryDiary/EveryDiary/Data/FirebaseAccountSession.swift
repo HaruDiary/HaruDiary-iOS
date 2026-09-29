@@ -56,7 +56,13 @@ final class FirebaseAccountSession: AccountSession {
             metadata.contentType = "image/jpeg"
             _ = try await reference.putDataAsync(data, metadata: metadata)
             uploaded = reference
-            saved = .photo(try await reference.downloadURL())
+            do {
+                saved = .photo(try await reference.downloadURL())
+            } catch {
+                // The uploaded file is not linked to the profile yet; remove it so a retry leaves nothing behind.
+                try? await reference.delete()
+                throw error
+            }
         }
 
         // 2. The profile changes only for the account that asked; a sign-out or switch meanwhile cancels it.
