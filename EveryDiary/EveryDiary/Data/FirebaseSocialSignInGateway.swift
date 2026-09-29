@@ -11,8 +11,9 @@ final class FirebaseSocialSignInGateway: SocialSignInGateway {
         self.appleTokens = appleTokens
     }
 
-    func rememberAppleAuthorization(code: String) {
-        appleTokens.storeRefreshToken(authorizationCode: code)
+    func rememberAppleAuthorization(code: String?, appleUserID: String) {
+        appleTokens.rememberAppleUserID(appleUserID)
+        if let code { appleTokens.storeRefreshToken(authorizationCode: code) }
     }
 
     var isGuest: Bool? { auth.currentUser.map(\.isAnonymous) }

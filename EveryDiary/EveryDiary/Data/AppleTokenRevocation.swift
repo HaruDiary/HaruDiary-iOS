@@ -12,6 +12,12 @@ final class AppleTokenRevocation {
         store.moveLegacyToken()
     }
 
+    var appleUserID: String? { store.appleUserID }
+
+    func rememberAppleUserID(_ id: String) {
+        try? store.saveAppleUserID(id)
+    }
+
     func storeRefreshToken(authorizationCode code: String) {
         guard let query = "code=\(code)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "\(baseURL)/getRefreshToken?\(query)") else { return }

@@ -12,6 +12,7 @@ protocol SecretStore: AnyObject {
 final class AppleRefreshTokenStore {
     static let key = "appleRefreshToken"
     static let legacyKey = "refreshToken"
+    static let userIDKey = "appleUserID"
 
     private let secrets: any SecretStore
     private let legacy: UserDefaults
@@ -33,7 +34,16 @@ final class AppleRefreshTokenStore {
 
     func remove() {
         secrets.remove(Self.key)
+        secrets.remove(Self.userIDKey)
         legacy.removeObject(forKey: Self.legacyKey)
+    }
+
+    /// The user identifier Apple returned at sign-in (`ASAuthorizationAppleIDCredential.user`),
+    /// the value Apple expects when asking whether the sign-in is still allowed.
+    var appleUserID: String? { secrets.string(for: Self.userIDKey) }
+
+    func saveAppleUserID(_ id: String) throws {
+        try secrets.set(id, for: Self.userIDKey)
     }
 
     /// Called when the app starts so a plain-text copy does not wait until the next withdrawal.

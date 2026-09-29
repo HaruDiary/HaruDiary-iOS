@@ -47,8 +47,11 @@ final class AppleRefreshTokenStoreTests: XCTestCase {
         XCTAssertNil(defaults.string(forKey: AppleRefreshTokenStore.legacyKey))
 
         defaults.set("old-token", forKey: AppleRefreshTokenStore.legacyKey)
+        try store.saveAppleUserID("001234.abc.0001")
+        XCTAssertEqual(store.appleUserID, "001234.abc.0001")
         store.remove()
         XCTAssertNil(store.token)
+        XCTAssertNil(store.appleUserID)
         XCTAssertNil(defaults.string(forKey: AppleRefreshTokenStore.legacyKey))
     }
 }
@@ -58,4 +61,13 @@ final class MemorySecretStore: SecretStore {
     func string(for key: String) -> String? { values[key] }
     func set(_ value: String, for key: String) throws { values[key] = value }
     func remove(_ key: String) { values[key] = nil }
+}
+
+final class AppleCredentialStatusTests: XCTestCase {
+    func testOnlyAnExplicitRevocationEndsTheSession() {
+        XCTAssertTrue(AppleCredentialStatus.revoked.endsSession)
+        XCTAssertFalse(AppleCredentialStatus.authorized.endsSession)
+        XCTAssertFalse(AppleCredentialStatus.notFound.endsSession)
+        XCTAssertFalse(AppleCredentialStatus.transferred.endsSession)
+    }
 }

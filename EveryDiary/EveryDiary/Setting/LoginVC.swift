@@ -348,9 +348,9 @@ extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationController
     }
     
     // 회원 탈퇴 시 Apple 토큰 철회에 필요한 refresh token을 로그인 때 미리 받아 Keychain에 둔다.
+    // Apple 로그인 사용 여부 확인에는 Apple이 준 사용자 ID(credential.user)를 써야 해서 함께 보관한다.
     private func storeAppleRefreshToken(from credential: ASAuthorizationAppleIDCredential) {
-        guard let authorizationCode = credential.authorizationCode,
-              let code = String(data: authorizationCode, encoding: .utf8) else { return }
-        gateway.rememberAppleAuthorization(code: code)
+        let code = credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
+        gateway.rememberAppleAuthorization(code: code, appleUserID: credential.user)
     }
 }

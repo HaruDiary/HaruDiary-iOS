@@ -202,6 +202,9 @@
 		16FB74D484FB444E84926326 /* KeychainSecretStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */; };
 		ABDF27ADC7F74F4BBFDA0610 /* AppleTokenRevocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156963BA02984F9DB97C4979 /* AppleTokenRevocation.swift */; };
 		AEBC3933AC39407393EA46C6 /* AppleRefreshTokenStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */; };
+		B0271179CB6A40FC8E7D043F /* AppleCredentialStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */; };
+		3761782D1E9541648610A4DF /* AppleCredentialStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */; };
+		AE80E87C8AF34C86A074B4FD /* AppleCredentialMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -366,6 +369,8 @@
 		47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainSecretStore.swift"; sourceTree = "<group>"; };
 		156963BA02984F9DB97C4979 /* AppleTokenRevocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleTokenRevocation.swift"; sourceTree = "<group>"; };
 		09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleRefreshTokenStoreTests.swift"; sourceTree = "<group>"; };
+		1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleCredentialStatus.swift"; sourceTree = "<group>"; };
+		832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleCredentialMonitor.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -649,6 +654,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */,
 				55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */,
 				95117A90CD30494982CCDC18 /* ProfilePicture.swift */,
 				49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */,
@@ -684,6 +690,7 @@
 		9987856AA8934E3BE9726639 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */,
 				156963BA02984F9DB97C4979 /* AppleTokenRevocation.swift */,
 				47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */,
 				68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */,
@@ -873,6 +880,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3761782D1E9541648610A4DF /* AppleCredentialStatus.swift in Sources */,
 				AEBC3933AC39407393EA46C6 /* AppleRefreshTokenStoreTests.swift in Sources */,
 				FE8BFE908EBB4782994D2CE5 /* AppleRefreshTokenStore.swift in Sources */,
 				9E1625C7409A4297A620A04B /* ProfilePicture.swift in Sources */,
@@ -927,6 +935,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AE80E87C8AF34C86A074B4FD /* AppleCredentialMonitor.swift in Sources */,
+				B0271179CB6A40FC8E7D043F /* AppleCredentialStatus.swift in Sources */,
 				ABDF27ADC7F74F4BBFDA0610 /* AppleTokenRevocation.swift in Sources */,
 				16FB74D484FB444E84926326 /* KeychainSecretStore.swift in Sources */,
 				2B14163B939C4B3F8AF3F16D /* AppleRefreshTokenStore.swift in Sources */,
