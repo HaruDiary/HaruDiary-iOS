@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F2BC974B5C02A70BB0C2596 /* JourneyYearProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */; };
+		22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */; };
+		D57875793289C9FDEE8CEBFA /* JourneyCityScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */; };
+		524E6639EAF11484AA7BD7DB /* JourneyCityScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */; };
+		ED2FEF69EA27FEC3DF665BCA /* JourneyYearProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */; };
+		3A14FE2DE5453BCF575BE284 /* JourneyYearProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */; };
 		7F6627D60329BD93D9C2F43C /* JourneySceneAmbienceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */; };
 		446379991A32541C65DB4BCE /* JourneySceneCatalog+Ambience.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */; };
 		BEF14E9CB671D00A37FA7A82 /* JourneySceneCatalog+Ambience.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */; };
@@ -231,6 +237,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyYearProgressTests.swift"; sourceTree = "<group>"; };
+		72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyCityView.swift"; sourceTree = "<group>"; };
+		B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyCityScene.swift"; sourceTree = "<group>"; };
+		67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyYearProgress.swift"; sourceTree = "<group>"; };
 		4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneAmbienceView.swift"; sourceTree = "<group>"; };
 		E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneCatalog+Ambience.swift"; sourceTree = "<group>"; };
 		A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneySceneCatalogTests.swift"; sourceTree = "<group>"; };
@@ -663,6 +673,7 @@
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */,
 				A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */,
 				28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */,
 				971A43FC69DAC48606710BEC /* JourneyViewModelTests.swift */,
@@ -714,6 +725,7 @@
 				6324AE064574465A82455BD2 /* DayKind.swift */,
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */,
 				A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */,
 				62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */,
 				A8DC8C0509FE561B652A305B /* OnboardingProgressStore.swift */,
@@ -783,6 +795,8 @@
 				FFAAE9B7D18137751417D1D9 /* CalendarImageLoader.swift */,
 				77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */,
 				7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */,
+				72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */,
+				B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */,
 				4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */,
 				E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */,
 				65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */,
@@ -935,6 +949,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F2BC974B5C02A70BB0C2596 /* JourneyYearProgressTests.swift in Sources */,
+				D57875793289C9FDEE8CEBFA /* JourneyCityScene.swift in Sources */,
+				ED2FEF69EA27FEC3DF665BCA /* JourneyYearProgress.swift in Sources */,
 				446379991A32541C65DB4BCE /* JourneySceneCatalog+Ambience.swift in Sources */,
 				ABB6B1D2CE08894005309E5D /* JourneySceneCatalogTests.swift in Sources */,
 				19681167A51C2C077F5C3BED /* JourneySceneCatalog.swift in Sources */,
@@ -1000,6 +1017,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */,
+				524E6639EAF11484AA7BD7DB /* JourneyCityScene.swift in Sources */,
+				3A14FE2DE5453BCF575BE284 /* JourneyYearProgress.swift in Sources */,
 				7F6627D60329BD93D9C2F43C /* JourneySceneAmbienceView.swift in Sources */,
 				BEF14E9CB671D00A37FA7A82 /* JourneySceneCatalog+Ambience.swift in Sources */,
 				0CAEEE01FB33A11D99DF2DDD /* JourneyCollectionHostingController.swift in Sources */,

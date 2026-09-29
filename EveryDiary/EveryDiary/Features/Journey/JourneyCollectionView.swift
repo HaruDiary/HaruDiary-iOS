@@ -1,33 +1,107 @@
 import SwiftUI
 
-/// Every month of a year as its own picture, filled by that month's diary days.
-struct JourneyCollectionView: View {
+/// Every year as a city that grows with the days written that year.
+struct JourneyYearsView: View {
     let viewModel: JourneyViewModel
-    let onSelect: (JourneyMonth) -> Void
-
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: DiaryTheme.Spacing.medium), count: 3)
+    let onSelectYear: (Int) -> Void
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: DiaryTheme.Spacing.section) {
+            LazyVStack(spacing: DiaryTheme.Spacing.section) {
                 ForEach(viewModel.years, id: \.self) { year in
-                    section(for: year)
+                    Button { onSelectYear(year) } label: {
+                        JourneyYearCard(progress: viewModel.progress(ofYear: year))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(DiaryTheme.Spacing.screen)
         }
         .background(DiaryTheme.Colors.background.ignoresSafeArea())
     }
+}
 
-    private func section(for year: Int) -> some View {
+private struct JourneyYearCard: View {
+    let progress: JourneyYearProgress
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DiaryTheme.Spacing.medium) {
+            JourneyCityView(stage: progress.stage)
+                .aspectRatio(JourneyCityScene.canvas.width / JourneyCityScene.canvas.height, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
+            HStack(alignment: .firstTextBaseline) {
+                Text(verbatim: "\(progress.year)년")
+                    .font(DiaryTheme.Fonts.title)
+                    .foregroundStyle(DiaryTheme.Colors.text)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(DiaryTheme.Colors.secondaryText)
+            }
+            JourneyYearProgressSummary(progress: progress)
+        }
+        .padding(DiaryTheme.Spacing.medium)
+        .background(DiaryTheme.Colors.surface, in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card + 4))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Stage, days written and the way to the next stage.
+struct JourneyYearProgressSummary: View {
+    let progress: JourneyYearProgress
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DiaryTheme.Spacing.small) {
+            HStack {
+                Text("\(progress.stage)단계 · \(JourneyCityScene.stageTitles[progress.stage])")
+                    .font(DiaryTheme.Fonts.section)
+                    .foregroundStyle(DiaryTheme.Colors.brand)
+                Spacer()
+                Text("\(progress.daysWritten)일 기록")
+                    .font(DiaryTheme.Fonts.caption)
+                    .foregroundStyle(DiaryTheme.Colors.secondaryText)
+            }
+            ProgressView(value: progress.stageProgress)
+                .tint(DiaryTheme.Colors.brand)
+            Text(progress.daysToNextStage.map { "다음 단계까지 \($0)일" } ?? "도시가 모두 완성됐어요")
+                .font(DiaryTheme.Fonts.caption)
+                .foregroundStyle(DiaryTheme.Colors.secondaryText)
+        }
+    }
+}
+
+/// One year: its city on top, then the twelve monthly pictures.
+struct JourneyYearView: View {
+    let viewModel: JourneyViewModel
+    let year: Int
+    let onSelectMonth: (JourneyMonth) -> Void
+
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: DiaryTheme.Spacing.medium), count: 3)
+
+    var body: some View {
+        let progress = viewModel.progress(ofYear: year)
+        ScrollView {
+            VStack(alignment: .leading, spacing: DiaryTheme.Spacing.section) {
+                JourneyCityView(stage: progress.stage)
+                    .aspectRatio(JourneyCityScene.canvas.width / JourneyCityScene.canvas.height, contentMode: .fit)
+                    .clipShape(RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
+                JourneyYearProgressSummary(progress: progress)
+                monthSection
+            }
+            .padding(DiaryTheme.Spacing.screen)
+        }
+        .background(DiaryTheme.Colors.background.ignoresSafeArea())
+    }
+
+    private var monthSection: some View {
         let completed = (1...12).filter { month in
             let days = viewModel.numberOfDays(year: year, month: month)
             return !viewModel.isUpcoming(year: year, month: month) && days > 0 && viewModel.month(year: year, month: month).days.count >= days
         }.count
         return VStack(alignment: .leading, spacing: DiaryTheme.Spacing.medium) {
             HStack(alignment: .firstTextBaseline) {
-                Text(verbatim: "\(year)년")
-                    .font(DiaryTheme.Fonts.title)
+                Text("월별 여정")
+                    .font(DiaryTheme.Fonts.section)
                     .foregroundStyle(DiaryTheme.Colors.text)
                 Spacer()
                 Text("완성한 그림 \(completed) / 12")
@@ -36,14 +110,14 @@ struct JourneyCollectionView: View {
             }
             LazyVGrid(columns: columns, spacing: DiaryTheme.Spacing.medium) {
                 ForEach(1...12, id: \.self) { month in
-                    card(year: year, month: month)
+                    card(month: month)
                 }
             }
         }
     }
 
     @ViewBuilder
-    private func card(year: Int, month: Int) -> some View {
+    private func card(month: Int) -> some View {
         let record = viewModel.month(year: year, month: month)
         let days = viewModel.numberOfDays(year: year, month: month)
         let isUpcoming = viewModel.isUpcoming(year: year, month: month)
@@ -52,7 +126,7 @@ struct JourneyCollectionView: View {
         if isUpcoming {
             label
         } else {
-            Button { onSelect(record) } label: { label }
+            Button { onSelectMonth(record) } label: { label }
                 .buttonStyle(.plain)
         }
     }

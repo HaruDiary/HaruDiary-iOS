@@ -92,10 +92,10 @@ struct JourneySceneRenderer {
     let transform: CGAffineTransform
     let size: CGSize
 
-    init(size: CGSize) {
+    init(size: CGSize, canvas: CGSize = JourneyScene.canvas) {
         self.size = size
-        scale = size.width / JourneyScene.canvas.width
-        transform = CGAffineTransform(a: scale, b: 0, c: 0, d: scale, tx: 0, ty: size.height - JourneyScene.canvas.height * scale)
+        scale = size.width / canvas.width
+        transform = CGAffineTransform(a: scale, b: 0, c: 0, d: scale, tx: 0, ty: size.height - canvas.height * scale)
     }
 
     func fillSky(_ colors: [SceneColor], in context: inout GraphicsContext) {

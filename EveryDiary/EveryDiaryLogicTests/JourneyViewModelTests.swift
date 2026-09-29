@@ -134,6 +134,21 @@ final class JourneyViewModelTests: XCTestCase {
         XCTAssertTrue(model.month(year: 2025, month: 1).days.isEmpty)
     }
 
+    func testYearProgressCountsDaysWrittenThatYear() async throws {
+        let (model, repository, _) = makeModel { self.date(month: 9, day: 20) }
+        model.start()
+        defer { model.stop() }
+        try await waitUntil { repository.observations.count == 1 }
+        var lastYear = entry(3, month: 5)
+        lastYear.dateString = "2025-05-03 09:00:00 +0900"
+        // Two diaries on 3 September count as one day; trashed diaries and other years do not count.
+        repository.send([entry(3), entry(3), entry(4, month: 8), entry(5, isDeleted: true), lastYear])
+        try await waitUntil { model.state == .loaded }
+        XCTAssertEqual(model.progress(ofYear: 2026).daysWritten, 2)
+        XCTAssertEqual(model.progress(ofYear: 2025).daysWritten, 1)
+        XCTAssertEqual(model.progress(ofYear: 2024).daysWritten, 0)
+    }
+
     func testMonthLengthsAndUpcomingMonths() {
         let (model, _, _) = makeModel { self.date(month: 9, day: 20) }
         XCTAssertEqual(model.numberOfDays(year: 2026, month: 2), 28)

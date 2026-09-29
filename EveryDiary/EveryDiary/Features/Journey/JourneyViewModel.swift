@@ -45,6 +45,10 @@ final class JourneyViewModel {
         record.month(year: year, month: month)
     }
 
+    func progress(ofYear year: Int) -> JourneyYearProgress {
+        record.progress(ofYear: year)
+    }
+
     func numberOfDays(year: Int, month: Int) -> Int {
         guard let date = calendar.date(from: DateComponents(year: year, month: month, day: 1)) else { return 0 }
         return calendar.range(of: .day, in: .month, for: date)?.count ?? 0
