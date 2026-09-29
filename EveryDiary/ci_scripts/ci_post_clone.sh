@@ -12,7 +12,7 @@ if [ -z "${GOOGLE_SERVICE_INFO_PLIST_BASE64:-}" ]; then
   exit 1
 fi
 
-printf '%s' "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > "$TARGET"
+printf '%s' "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 -D > "$TARGET"
 
 # Fail early on a broken value instead of shipping an app that cannot reach Firebase.
 if ! plutil -lint "$TARGET" > /dev/null; then
