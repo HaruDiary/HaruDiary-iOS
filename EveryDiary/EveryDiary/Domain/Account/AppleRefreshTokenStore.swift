@@ -46,6 +46,20 @@ final class AppleRefreshTokenStore {
         try secrets.set(id, for: Self.userIDKey)
     }
 
+    /// Reads the token from the Cloud Function's answer. Apple refresh tokens are printable text without
+    /// spaces; error pages (HTML/JSON) or empty bodies were previously stored as if they were tokens.
+    static func token(from data: Data) -> String? {
+        // The Cloud Function's source is not in this repository; a JSON answer with `refresh_token` is read too.
+        if let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let value = object["refresh_token"] as? String {
+            return token(from: Data(value.utf8))
+        }
+        guard let text = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !text.isEmpty, text.count <= 1024,
+              text.unicodeScalars.allSatisfy({ $0.value > 0x20 && $0.value < 0x7F && $0 != "<" && $0 != "{" }) else { return nil }
+        return text
+    }
+
     /// Called when the app starts so a plain-text copy does not wait until the next withdrawal.
     func moveLegacyToken() {
         guard let old = legacy.string(forKey: Self.legacyKey) else { return }

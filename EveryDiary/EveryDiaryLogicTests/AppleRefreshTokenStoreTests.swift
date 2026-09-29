@@ -56,6 +56,19 @@ final class AppleRefreshTokenStoreTests: XCTestCase {
     }
 }
 
+final class AppleRefreshTokenResponseTests: XCTestCase {
+    func testOnlyATokenLikeAnswerIsAccepted() {
+        XCTAssertEqual(AppleRefreshTokenStore.token(from: Data("r1a2b3.0.abc-DEF_4\n".utf8)), "r1a2b3.0.abc-DEF_4")
+        XCTAssertNil(AppleRefreshTokenStore.token(from: Data()))
+        XCTAssertNil(AppleRefreshTokenStore.token(from: Data("   ".utf8)))
+        XCTAssertNil(AppleRefreshTokenStore.token(from: Data("<html>Error: could not handle the request</html>".utf8)))
+        XCTAssertNil(AppleRefreshTokenStore.token(from: Data("{\"error\":\"invalid_grant\"}".utf8)))
+        XCTAssertEqual(AppleRefreshTokenStore.token(from: Data("{\"refresh_token\":\"r9.0.xyz\"}".utf8)), "r9.0.xyz")
+        XCTAssertNil(AppleRefreshTokenStore.token(from: Data("Error: invalid grant".utf8)), "Text with spaces is not a token")
+        XCTAssertNil(AppleRefreshTokenStore.token(from: Data(String(repeating: "a", count: 1025).utf8)))
+    }
+}
+
 final class MemorySecretStore: SecretStore {
     private(set) var values: [String: String] = [:]
     func string(for key: String) -> String? { values[key] }
