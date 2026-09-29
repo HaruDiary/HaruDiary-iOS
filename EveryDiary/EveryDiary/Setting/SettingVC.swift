@@ -19,6 +19,9 @@ class SettingVC: UIViewController {
     private var loginStatus: Bool { viewModel.profile.isLoggedIn }
     
     private var dataSource = [CellModel]()
+    // 올린 프로필 사진은 한 번 받아 두고, 주소가 바뀔 때만 다시 받는다. 주소에는 접근 토큰이 있어 기록하지 않는다.
+    private var profilePhoto: (url: URL, image: UIImage)?
+    private var profilePhotoTask: Task<Void, Never>?
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -116,7 +119,7 @@ extension SettingVC {
         let profile = viewModel.profile
         let withdrawalIcon = profile.isLoggedIn ? "withdrawal" : "trash"
         dataSource = [
-            .profileItem(email: profile.detail, name: profile.name, image: profile.avatar?.rawValue, isLoggedIn: profile.isLoggedIn),
+            .profileItem(email: profile.detail, name: profile.name, image: nil, isLoggedIn: profile.isLoggedIn),
             .settingItem(title: "알림", iconImage: "notification", number: 1),
             .settingItem(title: "잠금", iconImage: "lock", number: 2),
             .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
@@ -124,6 +127,31 @@ extension SettingVC {
             .signOutItem(title: "회원 탈퇴", iconImage: withdrawalIcon, number: 2, isLoggedIn: profile.isLoggedIn)
         ]
         tableView.reloadData()
+        loadProfilePhotoIfNeeded()
+    }
+    
+    private func profileImage() -> UIImage? {
+        let scale = max(traitCollection.displayScale, 3)
+        switch viewModel.profile.picture {
+        case .photo(let url):
+            if let profilePhoto, profilePhoto.url == url { return profilePhoto.image }
+            return ProfileAvatarView.image(for: .default, size: 50, scale: scale)
+        case .avatar(let avatar):
+            return ProfileAvatarView.image(for: avatar, size: 50, scale: scale)
+        case nil:
+            return ProfileAvatarView.image(for: nil, size: 50, scale: scale)
+        }
+    }
+    
+    private func loadProfilePhotoIfNeeded() {
+        guard case .photo(let url) = viewModel.profile.picture, profilePhoto?.url != url else { return }
+        profilePhotoTask?.cancel()
+        profilePhotoTask = Task { [weak self] in
+            guard let (data, _) = try? await URLSession.shared.data(from: url), let image = UIImage(data: data),
+                  let self, !Task.isCancelled else { return }
+            self.profilePhoto = (url, image)
+            self.tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
+        }
     }
     
     private func observeAccount() {
@@ -180,8 +208,6 @@ extension SettingVC {
             presentAlert(title: "닉네임을 확인해주세요", message: NicknameAlert.problemMessage(problem)) { [weak self] in
                 self?.editProfile()
             }
-        case .profileFailed:
-            presentAlert(title: "프로필 저장 실패", message: "프로필을 저장하지 못했어요.\n잠시 후 다시 시도해주세요.")
         }
     }
     
@@ -240,7 +266,7 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
             
         case let .profileItem(email, name, image, _):
             let cell = tableView.dequeueReusableCell(withIdentifier: ProfileCell.id, for: indexPath) as! ProfileCell
-            cell.prapare(email: email, name: name, image: image, isLoggedIn: loginStatus)
+            cell.prapare(email: email, name: name, image: profileImage(), isLoggedIn: loginStatus)
             cell.backgroundColor = .mainBackground
             cell.loginButton.addTarget(self, action: #selector(didTapLoginButton), for: .touchUpInside)
             return cell
@@ -302,13 +328,12 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
     
     private func editProfile() {
         let editor = ProfileEditView(
-            nickname: viewModel.nickname, avatar: viewModel.profile.avatar ?? .default,
-            onSave: { [weak self] nickname, avatar in
-                guard let self else { return }
-                self.dismiss(animated: true)
-                Task { await self.viewModel.updateProfile(nickname: nickname, avatar: avatar) }
+            nickname: viewModel.nickname, picture: viewModel.profile.picture,
+            onSave: { [weak self] nickname, picture in
+                guard let self else { return false }
+                return await self.viewModel.updateProfile(nickname: nickname, picture: picture)
             },
-            onCancel: { [weak self] in self?.dismiss(animated: true) }
+            onClose: { [weak self] in self?.dismiss(animated: true) }
         )
         let controller = UIHostingController(rootView: editor)
         controller.sheetPresentationController?.detents = [.large()]

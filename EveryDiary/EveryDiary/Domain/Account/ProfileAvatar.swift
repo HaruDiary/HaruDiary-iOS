@@ -22,7 +22,13 @@ enum ProfileAvatar: String, CaseIterable, Equatable {
     /// Photo URLs set by Google or other apps are not avatars and fall back to the default.
     init?(storedURL: String?) {
         guard let storedURL, let url = URL(string: storedURL), url.scheme == Self.scheme,
-              let host = url.host, let avatar = ProfileAvatar(rawValue: host) else { return nil }
+              let id = url.host, let avatar = ProfileAvatar(rawValue: id) ?? Self.previousIDs[id] else { return nil }
         self = avatar
     }
+
+    // IDs saved by the earlier icon set; kept readable so a chosen picture is not reset.
+    private static let previousIDs: [String: ProfileAvatar] = [
+        "moon": .purple, "sparkles": .violet, "book": .lavender, "leaf": .green,
+        "cloud": .blue, "sun": .orange, "cup": .brown, "heart": .pink,
+    ]
 }

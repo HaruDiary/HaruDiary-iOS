@@ -15,7 +15,9 @@ class ProfileCell: UITableViewCell {
 
     private lazy var profileImageView : UIImageView = {
         let profileImageView = UIImageView()
-        profileImageView.contentMode = .scaleAspectFit
+        profileImageView.contentMode = .scaleAspectFill
+        profileImageView.layer.cornerRadius = 25
+        profileImageView.clipsToBounds = true
         return profileImageView
     }()
     
@@ -129,7 +131,7 @@ class ProfileCell: UITableViewCell {
         contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 10, left: 4, bottom: 10, right: 4))
     }
     
-    func prapare(email: String?, name: String?, image: String?, isLoggedIn: Bool) {
+    func prapare(email: String?, name: String?, image: UIImage?, isLoggedIn: Bool) {
         // 로그인 방식과 이메일 두 줄 사이를 띄운다.
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineSpacing = 6
@@ -140,9 +142,7 @@ class ProfileCell: UITableViewCell {
             .foregroundColor: emailLabel.textColor as Any
         ]) }
         self.nameLabel.text = name
-        // 선택한 프로필 이미지(없으면 손님용 기본 이미지)를 앱 공용 그림으로 그린다.
-        self.profileImageView.image = ProfileAvatarView.image(for: image.flatMap(ProfileAvatar.init(rawValue:)), size: 50,
-                                                              scale: max(traitCollection.displayScale, 3))
+        self.profileImageView.image = image
         if isLoggedIn {
                 self.loginButton.isHidden = true
                 self.loginButton.isEnabled = false

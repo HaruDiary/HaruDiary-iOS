@@ -10,7 +10,8 @@ extension AppDependencies {
             userSession: FirebaseDiaryUserSession(auth: .auth()),
             accountSession: FirebaseAccountSession(
                 auth: .auth(),
-                dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage())
+                dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage()),
+                storage: .storage()
             ),
             signInGateway: FirebaseSocialSignInGateway(auth: .auth()),
             diaryTrash: FirebaseDiaryTrash(database: .firestore()),

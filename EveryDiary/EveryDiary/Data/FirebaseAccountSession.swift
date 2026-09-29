@@ -1,14 +1,17 @@
 import FirebaseAuth
+import FirebaseStorage
 import Foundation
 
 @MainActor
 final class FirebaseAccountSession: AccountSession {
     private let auth: Auth
     private let dataEraser: any UserDataErasing
+    private let storage: Storage
 
-    init(auth: Auth, dataEraser: any UserDataErasing) {
+    init(auth: Auth, dataEraser: any UserDataErasing, storage: Storage) {
         self.auth = auth
         self.dataEraser = dataEraser
+        self.storage = storage
     }
 
     func observeAccount() -> AsyncStream<AccountSnapshot?> {
@@ -32,11 +35,48 @@ final class FirebaseAccountSession: AccountSession {
         try auth.signOut()
     }
 
-    func updateProfile(nickname: String, avatar: ProfileAvatar) async throws {
-        guard let request = auth.currentUser?.createProfileChangeRequest() else { throw AccountDeletionError.notSignedIn }
-        request.displayName = nickname
-        request.photoURL = URL(string: avatar.storedURL)
-        try await request.commitChanges()
+    func updateProfile(nickname: String, picture: ProfilePictureSelection) async throws -> ProfilePicture {
+        guard let user = auth.currentUser else { throw AccountDeletionError.notSignedIn }
+        let userID = user.uid
+        let previousPhoto = user.photoURL.flatMap { ProfilePicture.isUploadedPhoto($0) ? $0 : nil }
+
+        // 1. A new photo gets its own file next to the diary photos, so account deletion removes it too.
+        var uploaded: StorageReference?
+        let saved: ProfilePicture
+        switch picture {
+        case .avatar(let avatar):
+            saved = .avatar(avatar)
+        case .currentPhoto(let url):
+            saved = .photo(url)
+        case .newPhoto(let data):
+            let reference = storage.reference().child("\(userID)/\(ProfilePicture.photoFilePrefix)\(UUID().uuidString).jpg")
+            let metadata = StorageMetadata()
+            metadata.contentType = "image/jpeg"
+            _ = try await reference.putDataAsync(data, metadata: metadata)
+            uploaded = reference
+            saved = .photo(try await reference.downloadURL())
+        }
+
+        // 2. The profile changes only for the account that asked; a sign-out or switch meanwhile cancels it.
+        do {
+            guard auth.currentUser?.uid == userID else { throw AccountDeletionError.notSignedIn }
+            let request = user.createProfileChangeRequest()
+            request.displayName = nickname
+            switch saved {
+            case .avatar(let avatar): request.photoURL = URL(string: avatar.storedURL)
+            case .photo(let url): request.photoURL = url
+            }
+            try await request.commitChanges()
+        } catch {
+            try? await uploaded?.delete()
+            throw error
+        }
+
+        // 3. The replaced upload is no longer shown anywhere. A failure only leaves a file that account deletion removes.
+        if let previousPhoto, saved != .photo(previousPhoto) {
+            _ = await FirebasePhotoFiles.delete(urlString: previousPhoto.absoluteString)
+        }
+        return saved
     }
 
     func deleteAccount() async throws {

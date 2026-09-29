@@ -46,3 +46,32 @@ struct ProfileAvatarView: View {
         Color(red: Double((hex >> 16) & 0xFF) / 255, green: Double((hex >> 8) & 0xFF) / 255, blue: Double(hex & 0xFF) / 255)
     }
 }
+
+/// The profile picture: a photo (just picked or already uploaded) or a built-in avatar.
+struct ProfilePictureView: View {
+    let picture: ProfilePicture?
+    /// A photo picked in the editor but not uploaded yet.
+    var pickedPhoto: UIImage?
+    var size: CGFloat = 50
+
+    var body: some View {
+        Group {
+            if let pickedPhoto {
+                Image(uiImage: pickedPhoto).resizable().scaledToFill()
+            } else if case .photo(let url) = picture {
+                AsyncImage(url: url) { image in
+                    image.resizable().scaledToFill()
+                } placeholder: {
+                    ProfileAvatarView(avatar: .default, size: size).overlay { ProgressView().tint(.white) }
+                }
+            } else if case .avatar(let avatar) = picture {
+                ProfileAvatarView(avatar: avatar, size: size)
+            } else {
+                ProfileAvatarView(avatar: nil, size: size)
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .accessibilityHidden(true)
+    }
+}

@@ -194,6 +194,9 @@
 		A0AECB78FA714980B300D783 /* ProfileAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */; };
 		595C79EEEB5C401CA17BC028 /* ProfileAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */; };
 		DF5B9964C8F04215BC98BE9A /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B470769C0A454C869F7E2BAE /* ProfileEditView.swift */; };
+		B7E9964B7E694588B368F017 /* ProfilePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95117A90CD30494982CCDC18 /* ProfilePicture.swift */; };
+		9E1625C7409A4297A620A04B /* ProfilePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95117A90CD30494982CCDC18 /* ProfilePicture.swift */; };
+		C472E74E38494FB582D4D1C3 /* ProfilePhotoPreparation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -352,6 +355,8 @@
 		49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/ProfileAvatar.swift"; sourceTree = "<group>"; };
 		62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfileAvatarView.swift"; sourceTree = "<group>"; };
 		B470769C0A454C869F7E2BAE /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfileEditView.swift"; sourceTree = "<group>"; };
+		95117A90CD30494982CCDC18 /* ProfilePicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/ProfilePicture.swift"; sourceTree = "<group>"; };
+		B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoPreparation.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -634,6 +639,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				95117A90CD30494982CCDC18 /* ProfilePicture.swift */,
 				49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */,
 				FD66E8B399BD4328B3E6ECCD /* Nickname.swift */,
 				2883021185774F46B4DB6CA4 /* SocialSignIn.swift */,
@@ -681,6 +687,7 @@
 		BC49A4866C5E0A9951D22E14 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */,
 				B470769C0A454C869F7E2BAE /* ProfileEditView.swift */,
 				0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
@@ -853,6 +860,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E1625C7409A4297A620A04B /* ProfilePicture.swift in Sources */,
 				A0AECB78FA714980B300D783 /* ProfileAvatar.swift in Sources */,
 				33E8CDA28B604D23AB108101 /* Nickname.swift in Sources */,
 				42FAC87B502F4227A8387871 /* SocialSignInTests.swift in Sources */,
@@ -904,6 +912,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C472E74E38494FB582D4D1C3 /* ProfilePhotoPreparation.swift in Sources */,
+				B7E9964B7E694588B368F017 /* ProfilePicture.swift in Sources */,
 				DF5B9964C8F04215BC98BE9A /* ProfileEditView.swift in Sources */,
 				595C79EEEB5C401CA17BC028 /* ProfileAvatarView.swift in Sources */,
 				9019F0206139486483334F74 /* ProfileAvatar.swift in Sources */,

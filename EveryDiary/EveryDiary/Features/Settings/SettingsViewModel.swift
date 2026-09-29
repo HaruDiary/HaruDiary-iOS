@@ -8,7 +8,7 @@ final class SettingsViewModel {
         let name: String
         let detail: String
         /// nil for guests and signed-out users, who get the placeholder picture.
-        let avatar: ProfileAvatar?
+        let picture: ProfilePicture?
         let isLoggedIn: Bool
     }
 
@@ -22,14 +22,13 @@ final class SettingsViewModel {
         case deletionFailed
         case profileSaved
         case nicknameInvalid(Nickname.Problem)
-        case profileFailed
     }
 
     private(set) var account: AccountState = .signedOut
     private(set) var isDeletingAccount = false
     private(set) var isSavingProfile = false
     /// The picture the member picked; nil until one is saved.
-    private(set) var avatar: ProfileAvatar?
+    private(set) var picture: ProfilePicture?
     var notice: Notice?
 
     @ObservationIgnored private let session: any AccountSession
@@ -39,7 +38,7 @@ final class SettingsViewModel {
         self.session = session
     }
 
-    var profile: Profile { Self.profile(for: account, avatar: avatar) }
+    var profile: Profile { Self.profile(for: account, picture: picture) }
 
     /// Account deletion is offered only to Google/Apple members, as before.
     var canManageAccount: Bool {
@@ -53,7 +52,7 @@ final class SettingsViewModel {
         observation = Task { [weak self] in
             for await snapshot in accounts {
                 self?.account = AccountState(snapshot)
-                self?.avatar = ProfileAvatar(storedURL: snapshot?.photoURL)
+                self?.picture = ProfilePicture(storedURL: snapshot?.photoURL)
             }
         }
     }
@@ -78,27 +77,31 @@ final class SettingsViewModel {
         return nil
     }
 
-    func updateProfile(nickname text: String, avatar: ProfileAvatar) async {
-        guard case let .member(email, _, provider) = account, !isSavingProfile else { return }
+    /// Returns whether the profile was saved; the editor stays open to retry when it was not,
+    /// and the profile shown keeps its previous nickname and picture.
+    @discardableResult
+    func updateProfile(nickname text: String, picture selection: ProfilePictureSelection) async -> Bool {
+        guard case let .member(email, _, provider) = account, !isSavingProfile else { return false }
         let name: String
         do {
             name = try Nickname.validated(text)
         } catch let problem as Nickname.Problem {
             notice = .nicknameInvalid(problem)
-            return
+            return false
         } catch {
-            return
+            return false
         }
         isSavingProfile = true
         defer { isSavingProfile = false }
         do {
-            try await session.updateProfile(nickname: name, avatar: avatar)
+            let saved = try await session.updateProfile(nickname: name, picture: selection)
             // A profile change does not trigger the sign-in listener, so the shown account is updated here.
             account = .member(email: email, name: name, provider: provider)
-            self.avatar = avatar
+            picture = saved
             notice = .profileSaved
+            return true
         } catch {
-            notice = .profileFailed
+            return false
         }
     }
 
@@ -121,12 +124,12 @@ final class SettingsViewModel {
     }
 
     // Texts and images are the ones the previous settings screen showed for each state.
-    static func profile(for account: AccountState, avatar: ProfileAvatar?) -> Profile {
+    static func profile(for account: AccountState, picture: ProfilePicture?) -> Profile {
         switch account {
         case .signedOut:
-            return Profile(name: "로그인해주세요", detail: "일기를 저장하려면 로그인하세요", avatar: nil, isLoggedIn: false)
+            return Profile(name: "로그인해주세요", detail: "일기를 저장하려면 로그인하세요", picture: nil, isLoggedIn: false)
         case .guest:
-            return Profile(name: "손님", detail: "일기를 저장하려면 로그인하세요", avatar: nil, isLoggedIn: false)
+            return Profile(name: "손님", detail: "일기를 저장하려면 로그인하세요", picture: nil, isLoggedIn: false)
         case let .member(email, name, provider):
             // The sign-in method is written out, so the picture is the member's own choice.
             let method: String
@@ -136,7 +139,7 @@ final class SettingsViewModel {
             case nil: method = "인증 완료"
             }
             return Profile(name: name ?? "닉네임을 설정해주세요", detail: method + "\n" + shownEmail(email),
-                           avatar: avatar ?? .default, isLoggedIn: true)
+                           picture: picture ?? .avatar(.default), isLoggedIn: true)
         }
     }
 

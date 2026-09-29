@@ -32,23 +32,25 @@ final class SettingsViewModelTests: XCTestCase {
     }
 
     func testProfileTextsMatchPreviousSettingsScreen() {
-        XCTAssertEqual(SettingsViewModel.profile(for: .signedOut, avatar: nil),
-                       .init(name: "로그인해주세요", detail: "일기를 저장하려면 로그인하세요", avatar: nil, isLoggedIn: false))
-        XCTAssertEqual(SettingsViewModel.profile(for: .guest, avatar: nil),
-                       .init(name: "손님", detail: "일기를 저장하려면 로그인하세요", avatar: nil, isLoggedIn: false))
-        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: "a@example.com", name: "하루", provider: .google), avatar: .green),
-                       .init(name: "하루", detail: "Google로 로그인\na@example.com", avatar: .green, isLoggedIn: true))
+        XCTAssertEqual(SettingsViewModel.profile(for: .signedOut, picture: nil),
+                       .init(name: "로그인해주세요", detail: "일기를 저장하려면 로그인하세요", picture: nil, isLoggedIn: false))
+        XCTAssertEqual(SettingsViewModel.profile(for: .guest, picture: nil),
+                       .init(name: "손님", detail: "일기를 저장하려면 로그인하세요", picture: nil, isLoggedIn: false))
+        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: "a@example.com", name: "하루", provider: .google), picture: .avatar(.green)),
+                       .init(name: "하루", detail: "Google로 로그인\na@example.com", picture: .avatar(.green), isLoggedIn: true))
     }
 
     // Apple sends a name only on the first sign-in and may hide the e-mail, so the profile says how the user signed in.
     func testProfileShowsSignInMethodAndAsksForMissingNickname() {
-        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: "x1@privaterelay.appleid.com", name: nil, provider: .apple), avatar: nil),
-                       .init(name: "닉네임을 설정해주세요", detail: "Apple로 로그인\n이메일 가림", avatar: .default, isLoggedIn: true))
-        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: nil, name: "하루", provider: .apple), avatar: nil).detail,
+        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: "x1@privaterelay.appleid.com", name: nil, provider: .apple), picture: nil),
+                       .init(name: "닉네임을 설정해주세요", detail: "Apple로 로그인\n이메일 가림", picture: .avatar(.default), isLoggedIn: true))
+        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: nil, name: "하루", provider: .apple), picture: nil).detail,
                        "Apple로 로그인\n이메일 정보 없음")
     }
 
     // MARK: - Profile picture
+
+    private let uploadedPhoto = URL(string: "https://firebasestorage.googleapis.com/v0/b/app.appspot.com/o/uid123%2Fprofile-A1.jpg?alt=media&token=t")!
 
     func testAvatarIsStoredAsPhotoURLAndOtherPhotosFallBack() {
         for avatar in ProfileAvatar.allCases {
@@ -59,7 +61,25 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertNil(ProfileAvatar(storedURL: nil))
     }
 
-    func testSavedAvatarIsShownFromTheAccount() async throws {
+    // Values saved by the earlier icon set keep the member's choice instead of resetting to the default.
+    func testPreviousAvatarIDsAreStillRead() {
+        let expected: [String: ProfileAvatar] = ["moon": .purple, "sparkles": .violet, "book": .lavender, "leaf": .green,
+                                                  "cloud": .blue, "sun": .orange, "cup": .brown, "heart": .pink]
+        for (id, avatar) in expected {
+            XCTAssertEqual(ProfileAvatar(storedURL: "harudiary-avatar://\(id)"), avatar)
+        }
+    }
+
+    func testOnlyTheMembersUploadedProfilePhotoIsReadAsAPhoto() {
+        XCTAssertEqual(ProfilePicture(storedURL: uploadedPhoto.absoluteString), .photo(uploadedPhoto))
+        XCTAssertEqual(ProfilePicture(storedURL: ProfileAvatar.blue.storedURL), .avatar(.blue))
+        // Google's account photo and diary photos are not profile uploads.
+        XCTAssertNil(ProfilePicture(storedURL: "https://lh3.googleusercontent.com/a/photo.jpg"))
+        XCTAssertNil(ProfilePicture(storedURL: "https://firebasestorage.googleapis.com/v0/b/app.appspot.com/o/uid123%2FDIARY_1.jpg?alt=media"))
+        XCTAssertNil(ProfilePicture(storedURL: nil))
+    }
+
+    func testSavedPictureIsShownFromTheAccount() async throws {
         let session = FakeAccountSession()
         let model = SettingsViewModel(session: session)
         model.start()
@@ -67,7 +87,10 @@ final class SettingsViewModelTests: XCTestCase {
         var snapshot = member()
         snapshot.photoURL = ProfileAvatar.brown.storedURL
         session.send(snapshot)
-        try await waitUntil { model.profile.avatar == .brown }
+        try await waitUntil { model.profile.picture == .avatar(.brown) }
+        snapshot.photoURL = uploadedPhoto.absoluteString
+        session.send(snapshot)
+        try await waitUntil { model.profile.picture == .photo(self.uploadedPhoto) }
     }
 
     // MARK: - Nickname
@@ -86,14 +109,28 @@ final class SettingsViewModelTests: XCTestCase {
         let model = try await signedInModel(session)
         defer { model.stop() }
 
-        await model.updateProfile(nickname: "  새 이름 ", avatar: .pink)
+        let saved = await model.updateProfile(nickname: "  새 이름 ", picture: .avatar(.pink))
 
+        XCTAssertTrue(saved)
         XCTAssertEqual(session.savedProfiles.map(\.nickname), ["새 이름"])
-        XCTAssertEqual(session.savedProfiles.map(\.avatar), [.pink])
+        XCTAssertEqual(session.savedProfiles.map(\.picture), [.avatar(.pink)])
         XCTAssertEqual(model.nickname, "새 이름")
         XCTAssertEqual(model.profile.name, "새 이름")
-        XCTAssertEqual(model.profile.avatar, .pink)
+        XCTAssertEqual(model.profile.picture, .avatar(.pink))
         XCTAssertEqual(model.notice, .profileSaved)
+    }
+
+    func testNewPhotoIsShownAfterItIsSaved() async throws {
+        let session = FakeAccountSession()
+        let model = try await signedInModel(session)
+        defer { model.stop() }
+        session.photoURLAfterUpload = uploadedPhoto
+
+        let saved = await model.updateProfile(nickname: "하루", picture: .newPhoto(Data([1, 2, 3])))
+
+        XCTAssertTrue(saved)
+        XCTAssertEqual(session.savedProfiles.map(\.picture), [.newPhoto(Data([1, 2, 3]))])
+        XCTAssertEqual(model.profile.picture, .photo(uploadedPhoto))
     }
 
     func testInvalidOrFailedNicknameIsNotShown() async throws {
@@ -101,15 +138,20 @@ final class SettingsViewModelTests: XCTestCase {
         let model = try await signedInModel(session)
         defer { model.stop() }
 
-        await model.updateProfile(nickname: " ", avatar: .orange)
+        let invalid = await model.updateProfile(nickname: " ", picture: .avatar(.orange))
+        XCTAssertFalse(invalid)
         XCTAssertEqual(model.notice, .nicknameInvalid(.empty))
         XCTAssertTrue(session.savedProfiles.isEmpty)
 
+        // A failed upload or profile change keeps the previous nickname and picture; the editor stays open to retry.
+        model.notice = nil
         session.profileError = NSError(domain: "Settings", code: 3)
-        await model.updateProfile(nickname: "다른 이름", avatar: .orange)
-        XCTAssertEqual(model.notice, .profileFailed)
+        let failed = await model.updateProfile(nickname: "다른 이름", picture: .newPhoto(Data([9])))
+        XCTAssertFalse(failed)
+        XCTAssertNil(model.notice)
         XCTAssertEqual(model.nickname, "하루", "The name shown stays the saved one")
-        XCTAssertEqual(model.profile.avatar, .default)
+        XCTAssertEqual(model.profile.picture, .avatar(.default))
+        XCTAssertFalse(model.isSavingProfile)
     }
 
     // MARK: - Observation
@@ -246,12 +288,18 @@ final class FakeAccountSession: AccountSession {
         if let signOutError { throw signOutError }
     }
 
-    private(set) var savedProfiles: [(nickname: String, avatar: ProfileAvatar)] = []
+    private(set) var savedProfiles: [(nickname: String, picture: ProfilePictureSelection)] = []
     var profileError: Error?
+    var photoURLAfterUpload = URL(string: "https://firebasestorage.googleapis.com/v0/b/a/o/u%2Fprofile-x.jpg")!
 
-    func updateProfile(nickname: String, avatar: ProfileAvatar) async throws {
+    func updateProfile(nickname: String, picture: ProfilePictureSelection) async throws -> ProfilePicture {
         if let profileError { throw profileError }
-        savedProfiles.append((nickname, avatar))
+        savedProfiles.append((nickname, picture))
+        switch picture {
+        case .avatar(let avatar): return .avatar(avatar)
+        case .currentPhoto(let url): return .photo(url)
+        case .newPhoto: return .photo(photoURLAfterUpload)
+        }
     }
 
     func deleteAccount() async throws {
@@ -273,7 +321,10 @@ final class FakeAccountSession: AccountSession {
 final class UnusedAccountSession: AccountSession {
     func observeAccount() -> AsyncStream<AccountSnapshot?> { AsyncStream { $0.finish() } }
     func signOut() throws { XCTFail("Settings is not used here") }
-    func updateProfile(nickname: String, avatar: ProfileAvatar) async throws { XCTFail("Settings is not used here") }
+    func updateProfile(nickname: String, picture: ProfilePictureSelection) async throws -> ProfilePicture {
+        XCTFail("Settings is not used here")
+        return .avatar(.default)
+    }
     func deleteAccount() async throws { XCTFail("Settings is not used here") }
 }
 
