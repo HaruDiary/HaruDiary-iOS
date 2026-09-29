@@ -22,7 +22,7 @@ struct JourneyCollectionView: View {
     private func section(for year: Int) -> some View {
         let completed = (1...12).filter { month in
             let days = viewModel.numberOfDays(year: year, month: month)
-            return days > 0 && viewModel.month(year: year, month: month).days.count >= days
+            return !viewModel.isUpcoming(year: year, month: month) && days > 0 && viewModel.month(year: year, month: month).days.count >= days
         }.count
         return VStack(alignment: .leading, spacing: DiaryTheme.Spacing.medium) {
             HStack(alignment: .firstTextBaseline) {
@@ -47,7 +47,7 @@ struct JourneyCollectionView: View {
         let record = viewModel.month(year: year, month: month)
         let days = viewModel.numberOfDays(year: year, month: month)
         let isUpcoming = viewModel.isUpcoming(year: year, month: month)
-        let label = JourneyMonthCard(scene: JourneySceneCatalog.scene(for: month), month: month,
+        let label = JourneyMonthCard(scene: JourneySceneCatalog.scene(for: month), year: year, month: month,
                                      litCount: record.days.count, numberOfDays: days, isUpcoming: isUpcoming)
         if isUpcoming {
             label
@@ -60,15 +60,16 @@ struct JourneyCollectionView: View {
 
 private struct JourneyMonthCard: View {
     let scene: JourneyScene
+    let year: Int
     let month: Int
     let litCount: Int
     let numberOfDays: Int
     let isUpcoming: Bool
 
-    private var isComplete: Bool { numberOfDays > 0 && litCount >= numberOfDays }
+    private var isComplete: Bool { !isUpcoming && numberOfDays > 0 && litCount >= numberOfDays }
 
     var body: some View {
-        JourneySceneView(scene: scene, litCount: isUpcoming ? 0 : litCount, slotCount: numberOfDays)
+        JourneySceneView(scene: scene, year: year, litCount: isUpcoming ? 0 : litCount, slotCount: numberOfDays)
             .aspectRatio(JourneyScene.canvas.width / JourneyScene.canvas.height, contentMode: .fit)
             .overlay {
                 if isUpcoming {
@@ -118,7 +119,7 @@ struct JourneyMonthDetailView: View {
     private var scene: JourneyScene { JourneySceneCatalog.scene(for: month.month) }
 
     var body: some View {
-        JourneySceneView(scene: scene, litCount: month.days.count, slotCount: numberOfDays, animatesLighting: true)
+        JourneySceneView(scene: scene, year: month.year, litCount: month.days.count, slotCount: numberOfDays, animatesLighting: true)
             .ignoresSafeArea()
             .overlay(alignment: .top) {
                 VStack(spacing: DiaryTheme.Spacing.small) {

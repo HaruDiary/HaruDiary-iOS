@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7F6627D60329BD93D9C2F43C /* JourneySceneAmbienceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */; };
+		446379991A32541C65DB4BCE /* JourneySceneCatalog+Ambience.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */; };
+		BEF14E9CB671D00A37FA7A82 /* JourneySceneCatalog+Ambience.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */; };
 		ABB6B1D2CE08894005309E5D /* JourneySceneCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */; };
 		0CAEEE01FB33A11D99DF2DDD /* JourneyCollectionHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */; };
 		B3CACE6E3757D5413CF66839 /* JourneyCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */; };
@@ -228,6 +231,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneAmbienceView.swift"; sourceTree = "<group>"; };
+		E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneCatalog+Ambience.swift"; sourceTree = "<group>"; };
 		A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneySceneCatalogTests.swift"; sourceTree = "<group>"; };
 		65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyCollectionHostingController.swift"; sourceTree = "<group>"; };
 		54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyCollectionView.swift"; sourceTree = "<group>"; };
@@ -778,6 +783,8 @@
 				FFAAE9B7D18137751417D1D9 /* CalendarImageLoader.swift */,
 				77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */,
 				7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */,
+				4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */,
+				E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */,
 				65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */,
 				54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */,
 				571F283CAF625F37A8908670 /* JourneySceneView.swift */,
@@ -928,6 +935,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				446379991A32541C65DB4BCE /* JourneySceneCatalog+Ambience.swift in Sources */,
 				ABB6B1D2CE08894005309E5D /* JourneySceneCatalogTests.swift in Sources */,
 				19681167A51C2C077F5C3BED /* JourneySceneCatalog.swift in Sources */,
 				F72439A15ECAB2F5CC9A618F /* JourneyScene.swift in Sources */,
@@ -992,6 +1000,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7F6627D60329BD93D9C2F43C /* JourneySceneAmbienceView.swift in Sources */,
+				BEF14E9CB671D00A37FA7A82 /* JourneySceneCatalog+Ambience.swift in Sources */,
 				0CAEEE01FB33A11D99DF2DDD /* JourneyCollectionHostingController.swift in Sources */,
 				B3CACE6E3757D5413CF66839 /* JourneyCollectionView.swift in Sources */,
 				C8B2E124D44589724E349D10 /* JourneySceneView.swift in Sources */,

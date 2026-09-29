@@ -102,7 +102,7 @@ class MotivationVC: UIViewController {
     
     private func makeSceneView() -> JourneySceneView {
         let month = viewModel.currentMonth
-        return JourneySceneView(scene: JourneySceneCatalog.scene(for: month.month), litCount: month.days.count,
+        return JourneySceneView(scene: JourneySceneCatalog.scene(for: month.month), year: month.year, litCount: month.days.count,
                                 slotCount: viewModel.numberOfDaysInCurrentMonth, animatesLighting: true)
     }
     

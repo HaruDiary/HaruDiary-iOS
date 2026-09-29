@@ -81,7 +81,7 @@ enum JourneySceneCatalog {
             SceneElement(ScenePath.polygon([(370, 673), (377, 674.5), (370, 676)]), SceneColor(0xFF9A3C))
         ]
         return JourneyScene(month: 1, title: "눈 내린 마을", sky: [SceneColor(0x0E1B3D), SceneColor(0x3B4F7F), SceneColor(0x7C8DB5)],
-                            background: background, lights: lights, completion: completion)
+                            background: background, lights: lights, completion: completion, ambience: ambience(for: 1))
     }()
 
     // MARK: 2월 · 설날 청사초롱 — blue-and-red lanterns; when full, the moon, a kite and lit hanok windows
@@ -130,7 +130,7 @@ enum JourneySceneCatalog {
             SceneElement(lattice, SceneColor(0x9C6A2A), lineWidth: 1.2)
         ]
         return JourneyScene(month: 2, title: "설날 청사초롱", sky: [SceneColor(0x1C1440), SceneColor(0x4B2E6B), SceneColor(0xC9738A)],
-                            background: background, lights: lights, completion: completion)
+                            background: background, lights: lights, completion: completion, ambience: ambience(for: 2))
     }()
 
     // MARK: 3월 · 봄 들판 — buds bloom into flowers; when full, a rainbow and butterflies
@@ -178,7 +178,8 @@ enum JourneySceneCatalog {
             ],
             lights: lights,
             completion: rainbow + [SceneElement(rays, SceneColor(0xFFF4C9, opacity: 0.85), lineWidth: 2)]
-                + butterfly(118, 480, 0xFFD43B) + butterfly(272, 452, 0xFF8FAB) + butterfly(330, 520, 0x9BE7FF)
+                + butterfly(118, 480, 0xFFD43B) + butterfly(272, 452, 0xFF8FAB) + butterfly(330, 520, 0x9BE7FF),
+            ambience: ambience(for: 3)
         )
     }()
 
@@ -216,7 +217,8 @@ enum JourneySceneCatalog {
                 SceneElement(ScenePath.ellipse(-40, 660, 470, 44), SceneColor(0xFFC4D6, opacity: 0.55)),
                 SceneElement(carpet, SceneColor(0xFFD9E4)),
                 SceneElement(fallingPetals, SceneColor(0xFFD1DF, opacity: 0.95))
-            ]
+            ],
+            ambience: ambience(for: 4)
         )
     }()
 
@@ -261,7 +263,8 @@ enum JourneySceneCatalog {
                 SceneElement(ScenePath.group([ScenePath.rect(92, 628, 40, 26, corner: 2), ScenePath.rect(258, 628, 40, 26, corner: 2), ScenePath.rect(150, 538, 90, 18, corner: 2)]),
                              SceneColor(0xFFCF7A), glow: 10),
                 SceneElement(ScenePath.rect(170, 640, 50, 60, corner: 3), SceneColor(0xFFB65C), glow: 14)
-            ]
+            ],
+            ambience: ambience(for: 5)
         )
     }()
 
@@ -304,7 +307,8 @@ enum JourneySceneCatalog {
                 SceneElement(ScenePath.ellipse(96, 660, 30, 5), SceneColor(0xF3F0D0, opacity: 0.45)),
                 SceneElement(smallFlies, SceneColor(0xE9FF8C, opacity: 0.75), glow: 5),
                 SceneElement(grass, SceneColor(0x041510))
-            ]
+            ],
+            ambience: ambience(for: 6)
         )
     }()
 
@@ -352,7 +356,8 @@ enum JourneySceneCatalog {
                 SceneElement(ScenePath.polygon([(169, 548), (169, 584), (188, 584)]), SceneColor(0xE8E6F0, opacity: 0.8)),
                 SceneElement(ScenePath.polygon([(134, 587), (194, 587), (184, 598), (144, 598)]), SceneColor(0x07152C)),
                 SceneElement(ScenePath.circle(167, 535, 2), SceneColor(0xFFD27A), glow: 6)
-            ]
+            ],
+            ambience: ambience(for: 7)
         )
     }()
 
@@ -412,7 +417,8 @@ enum JourneySceneCatalog {
                 SceneElement(finaleInner.rays, SceneColor(0xFF9FD0), lineWidth: 1.8, glow: 8),
                 SceneElement(ScenePath.group(cityWindows), SceneColor(0xFFD27A, opacity: 0.9)),
                 SceneElement(reflections, SceneColor(0xFFC46B, opacity: 0.35))
-            ]
+            ],
+            ambience: ambience(for: 8)
         )
     }()
 
@@ -463,7 +469,8 @@ enum JourneySceneCatalog {
                              SceneColor(0xE3CC8F)),
                 SceneElement(villageWindows, SceneColor(0xFFCF7A), glow: 8),
                 SceneElement(farLanterns, SceneColor(0xFFB65C, opacity: 0.7), glow: 3)
-            ]
+            ],
+            ambience: ambience(for: 9)
         )
     }()
 
@@ -509,7 +516,8 @@ enum JourneySceneCatalog {
                 SceneElement(carpetYellow, SceneColor(0xF2B233)),
                 SceneElement(fallingLeaves, SceneColor(0xF28C28, opacity: 0.95)),
                 SceneElement(birds, SceneColor(0x2A1A3D, opacity: 0.75), lineWidth: 1.6)
-            ]
+            ],
+            ambience: ambience(for: 10)
         )
     }()
 
@@ -576,7 +584,8 @@ enum JourneySceneCatalog {
                 SceneElement(ScenePath.group(backWindows), SceneColor(0xFFE9A0, opacity: 0.85), glow: 3),
                 SceneElement(ScenePath.group([ScenePath.line([(351, 420), (351, 398)]), ScenePath.line([(95, 455), (95, 436)])]), SceneColor(0x000000), lineWidth: 1.5),
                 SceneElement(ScenePath.group([ScenePath.circle(351, 397, 2.4), ScenePath.circle(95, 435, 2.4)]), SceneColor(0xFF4D4D), glow: 6)
-            ]
+            ],
+            ambience: ambience(for: 11)
         )
     }()
 
@@ -637,7 +646,9 @@ enum JourneySceneCatalog {
             ] + gifts.map { SceneElement(ScenePath.rect($0.0, $0.1, $0.2, $0.3, corner: 2), SceneColor($0.4)) } + [
                 SceneElement(ribbons, SceneColor(0xFFD43B), lineWidth: 2.2),
                 SceneElement(bows, SceneColor(0xFFD43B))
-            ]
+            ],
+            ambience: ambience(for: 12),
+            keepsLastLightLast: true
         )
     }()
 

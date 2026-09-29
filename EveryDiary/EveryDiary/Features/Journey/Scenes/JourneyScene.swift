@@ -16,9 +16,13 @@ struct JourneyScene {
     let foreground: [SceneElement]
     /// Added to the picture once every day of the month is filled.
     let completion: [SceneElement]
+    /// Moving details shown over a completed picture.
+    let ambience: [SceneAmbience]
+    /// The last light (such as the star on top of the tree) stays the last one to turn on.
+    let keepsLastLightLast: Bool
 
     init(month: Int, title: String, sky: [SceneColor], background: [SceneElement], lights: [SceneLight],
-         foreground: [SceneElement] = [], completion: [SceneElement] = []) {
+         foreground: [SceneElement] = [], completion: [SceneElement] = [], ambience: [SceneAmbience] = [], keepsLastLightLast: Bool = false) {
         self.month = month
         self.title = title
         self.sky = sky
@@ -26,6 +30,57 @@ struct JourneyScene {
         self.lights = lights
         self.foreground = foreground
         self.completion = completion
+        self.ambience = ambience
+        self.keepsLastLightLast = keepsLastLightLast
+    }
+
+    /// The slot each diary day lights, in order: the n-th day written lights `order[n - 1]`.
+    /// A shuffle that stays the same for a given month and year, so a light never moves once it is on.
+    func lightingOrder(slotCount: Int, year: Int) -> [Int] {
+        let count = min(max(slotCount, 0), lights.count)
+        var slots = Array(0..<count)
+        let pinned = keepsLastLightLast && count == lights.count ? slots.popLast() : nil
+        var random = SceneRandom(seed: UInt64(max(year, 0) * 100 + month) &* 2_654_435_761)
+        if slots.count > 1 {
+            for index in stride(from: slots.count - 1, to: 0, by: -1) {
+                slots.swapAt(index, min(Int(random.next() * CGFloat(index + 1)), index))
+            }
+        }
+        if let pinned { slots.append(pinned) }
+        return slots
+    }
+}
+
+/// A moving layer over a completed picture, such as falling snow or rising lanterns. Positions use the design canvas.
+struct SceneAmbience {
+    enum Motion {
+        case fall, rise, wander, twinkle, burst, shootingStar
+    }
+
+    enum Particle {
+        case dot, snowflake, petal, mapleLeaf, sparkle, lantern, butterfly, firework
+    }
+
+    let motion: Motion
+    let particle: Particle
+    let colors: [SceneColor]
+    let count: Int
+    let area: CGRect
+    let size: ClosedRange<CGFloat>
+    /// Points per second for moving particles.
+    let speed: CGFloat
+    let glow: CGFloat
+
+    init(_ motion: Motion, _ particle: Particle, colors: [SceneColor], count: Int, area: CGRect,
+         size: ClosedRange<CGFloat>, speed: CGFloat = 20, glow: CGFloat = 0) {
+        self.motion = motion
+        self.particle = particle
+        self.colors = colors
+        self.count = count
+        self.area = area
+        self.size = size
+        self.speed = speed
+        self.glow = glow
     }
 }
 

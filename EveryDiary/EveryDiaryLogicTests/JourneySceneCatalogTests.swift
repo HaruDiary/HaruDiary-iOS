@@ -17,8 +17,37 @@ final class JourneySceneCatalogTests: XCTestCase {
 
     func testEveryMonthAddsSomethingWhenCompleted() {
         for month in 1...12 {
-            XCTAssertFalse(JourneySceneCatalog.scene(for: month).completion.isEmpty, "month \(month)")
+            let scene = JourneySceneCatalog.scene(for: month)
+            XCTAssertFalse(scene.completion.isEmpty, "month \(month)")
+            XCTAssertFalse(scene.ambience.isEmpty, "month \(month)")
         }
+    }
+
+    func testLightsTurnOnInAShuffledOrderThatStaysTheSame() {
+        for month in 1...12 {
+            let scene = JourneySceneCatalog.scene(for: month)
+            let days = longestMonth[month]!
+            let order = scene.lightingOrder(slotCount: days, year: 2026)
+            XCTAssertEqual(order.sorted(), Array(0..<days), "month \(month) must use every slot once")
+            XCTAssertEqual(order, scene.lightingOrder(slotCount: days, year: 2026), "month \(month) must not reshuffle")
+            XCTAssertNotEqual(order, Array(0..<days), "month \(month) should not light in drawing order")
+        }
+    }
+
+    func testEachYearGetsItsOwnOrder() {
+        let scene = JourneySceneCatalog.scene(for: 5)
+        XCTAssertNotEqual(scene.lightingOrder(slotCount: 31, year: 2026), scene.lightingOrder(slotCount: 31, year: 2027))
+    }
+
+    func testFebruaryOnlyUsesTheDaysOfThatYear() {
+        let scene = JourneySceneCatalog.scene(for: 2)
+        XCTAssertEqual(scene.lightingOrder(slotCount: 28, year: 2026).sorted(), Array(0..<28))
+        XCTAssertEqual(scene.lightingOrder(slotCount: 29, year: 2028).sorted(), Array(0..<29))
+    }
+
+    func testTheStarOnTheTreeStaysLast() {
+        let order = JourneySceneCatalog.scene(for: 12).lightingOrder(slotCount: 31, year: 2026)
+        XCTAssertEqual(order.last, 30)
     }
 
     func testLightsStayInsideTheCanvasAndDoNotShareAPlace() {
