@@ -32,10 +32,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        let deviceToken: String = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-        print("Device token is: \(deviceToken)")
-    }
+    // The push token identifies this device; it is not written to the console or logs.
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {}
     
     // MARK: UISceneSession Lifecycle
 
