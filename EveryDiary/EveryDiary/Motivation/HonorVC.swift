@@ -7,17 +7,20 @@
 
 import UIKit
 
+import Observation
 import SnapKit
-import Firebase
-import FirebaseAuth
-import FirebaseFirestore
 
 class HonorVC: UIViewController {
-    let db = Firestore.firestore()
+    // Shares the journey tab's model, so this screen adds no diary subscription of its own.
+    private let viewModel: JourneyViewModel
+    private var months: [JourneyMonth] = []
     
-    private var dataByYearMonth = [String: Set<Int>]()
-    private var sortedYearMonths: [String] = []
-    var listener: ListenerRegistration?
+    init(viewModel: JourneyViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) { return nil }
     
     private lazy var backgroundImage: UIImageView = {
         let backgroundImage = UIImageView()
@@ -48,7 +51,7 @@ class HonorVC: UIViewController {
         setNavigationBar()
         addSubView()
         autoLayout()
-        fetchDiariesButtonData()
+        observeViewModel()
     }
 }
 
@@ -69,28 +72,15 @@ extension HonorVC {
     }
 }
 
-//MARK: - firebase
+//MARK: - 데이터
 extension HonorVC {
-    private func fetchDiariesButtonData() {
-        DiaryManager.shared.fetchDiaries { [weak self] (diaries, error) in
-            guard let self = self, let diaries = diaries, error == nil else {
-                return
-            }
-            
-            self.dataByYearMonth.removeAll()
-            
-            let filteredDiaries = diaries.filter { !$0.isDeleted }
-            for diary in filteredDiaries {
-                let yearMonth = DateFormatter.yyyyMM.string(from: diary.date)
-                let day = Calendar.current.component(.day, from: diary.date)
-                dataByYearMonth[yearMonth, default: []].insert(day)
-            }
-            
-            sortedYearMonths = self.dataByYearMonth.keys.sorted(by: >)
-            DispatchQueue.main.async {
-                self.honorCollectionView.reloadData()
-            }
+    private func observeViewModel() {
+        withObservationTracking {
+            months = viewModel.record.months
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in self?.observeViewModel() }
         }
+        honorCollectionView.reloadData()
     }
     
     private func setNavigationBar() {
@@ -102,7 +92,7 @@ extension HonorVC {
 extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     //섹션 설정
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        if dataByYearMonth.isEmpty {
+        if months.isEmpty {
             let message = UILabel(frame: CGRect(x: 0, y: 0, width: honorCollectionView.bounds.width, height: honorCollectionView.bounds.height))
             message.text = "당신의 여정을 시작하세요."
             message.font = UIFont(name: "SFProDisplay-Bold", size: 20)
@@ -112,7 +102,7 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
             return 0
         } else {
             honorCollectionView.backgroundView = nil
-            return sortedYearMonths.count
+            return months.count
         }
     }
     
@@ -127,21 +117,17 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
         }
         cell.images.image = nil
         
-        let yearMonth = sortedYearMonths[indexPath.section]
-        let numberOfDays = dataByYearMonth[yearMonth]?.count ?? 0
-        
-        cell.configureImage(withNumberOfDays: numberOfDays)
+        cell.configureImage(withNumberOfDays: months[indexPath.section].days.count)
         
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let yearMonthKey = sortedYearMonths[indexPath.section]
-        let daysSet = dataByYearMonth[yearMonthKey]
+        let month = months[indexPath.section]
         
         let VC = DetailVC()
-        VC.yearMonthKey = yearMonthKey // 연-월 문자열을 전달합니다.
-        VC.selectedData = daysSet ?? Set<Int>() // 해당하는 일자 세트를 전달합니다.
+        VC.yearMonthKey = month.title // 연-월 문자열을 전달합니다.
+        VC.selectedData = month.days // 해당하는 일자 세트를 전달합니다.
         VC.modalPresentationStyle = .fullScreen
         self.present(VC, animated: true)
 
@@ -153,8 +139,7 @@ extension HonorVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSourc
             fatalError("Failed to dequeue honor header view")
         }
         // 정렬된 연-월 데이터를 사용
-        let yearMonth = sortedYearMonths[indexPath.section]
-        headerView.headerLabel.text = yearMonth
+        headerView.headerLabel.text = months[indexPath.section].title
         return headerView
     }
     

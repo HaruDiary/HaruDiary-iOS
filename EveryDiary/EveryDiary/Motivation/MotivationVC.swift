@@ -7,12 +7,21 @@
 
 import UIKit
 
+import Observation
 import SnapKit
 
 class MotivationVC: UIViewController {
     private let buildings = BuildingView()
-    // Set by TabBarController with the app's dependencies.
-    var makeSettings: () -> UIViewController = { SettingVC() }
+    private let viewModel: JourneyViewModel
+    private let makeSettings: () -> UIViewController
+    
+    init(viewModel: JourneyViewModel, makeSettings: @escaping () -> UIViewController) {
+        self.viewModel = viewModel
+        self.makeSettings = makeSettings
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) { return nil }
     
     private lazy var background : UIImageView = {
         let background = UIImageView(image: UIImage(named: "View.Background"))
@@ -39,8 +48,6 @@ class MotivationVC: UIViewController {
     
     private lazy var monthLabel: UILabel = {
         let monthLabel = UILabel()
-        let currentMonth = Calendar.current.component(.month, from: Date())
-        monthLabel.text = "\(currentMonth)월"
         monthLabel.font = UIFont(name: "SFProDisplay-Bold", size: 25)
         monthLabel.textColor = .white
         return monthLabel
@@ -53,36 +60,39 @@ class MotivationVC: UIViewController {
         return countLabel
     }()
     
-    func updateCountLabel() {
-        let diaryCount = buildings.diaryDays.count
-        let date = Date()
-        let calendar = Calendar.current
-        let range = calendar.range(of: .day, in: .month, for: date)
-        if let numberOfDays = range?.count {
-            countLabel.text = "\(numberOfDays)일 중 \(diaryCount)개 작성했어요."
-        } else {
-            print("error: diaryCount error")
-        }
-    }
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setNavigationBar()
+        // The month is read again here, so it moves on while the app stays open.
+        render()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        buildings.delegate = self
-        diaryDidUpdate()
-        updateCountLabel()
         addSubview()
         autoLayout()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
+        observeViewModel()
+        viewModel.start()
     }
     
-    deinit {
-        NotificationCenter.default.removeObserver(self)
+    // The tab lives as long as the signed-in app, so the subscription stays until the view model is released.
+    private func observeViewModel() {
+        withObservationTracking {
+            _ = viewModel.record
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.render()
+                self?.observeViewModel()
+            }
+        }
+        render()
+    }
+    
+    private func render() {
+        let month = viewModel.currentMonth
+        monthLabel.text = "\(month.month)월"
+        countLabel.text = "\(viewModel.numberOfDaysInCurrentMonth)일 중 \(month.days.count)개 작성했어요."
+        buildings.showWindows(for: month.days)
     }
     
     @objc private func tabSettingBTN() {
@@ -100,13 +110,9 @@ class MotivationVC: UIViewController {
     }
     
     @objc private func honorVCBTN() {
-        let honorVC = HonorVC()
+        let honorVC = HonorVC(viewModel: viewModel)
         honorVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(honorVC, animated: true)
-    }
-    
-    @objc private func loginStatusChanged() {
-        buildings.windowsInBuildingData()
     }
     
     func addSubview() {
@@ -145,14 +151,9 @@ class MotivationVC: UIViewController {
     }
 }
 
-extension MotivationVC : BuildingViewDelegate {
-    func didUpdateDiaryCount(_ diaryCount: Int) {
-        updateCountLabel()
-    }
-}
-
 extension MotivationVC : DiaryUpdateDelegate {
     func diaryDidUpdate() {
-        buildings.windowsInBuildingData()
+        // The live subscription already reflects the saved diary; only a failed one needs a new start.
+        if viewModel.state == .failed { viewModel.retry() }
     }
 }
