@@ -63,7 +63,7 @@ struct JourneyYearProgressSummary: View {
             }
             ProgressView(value: progress.stageProgress)
                 .tint(DiaryTheme.Colors.brand)
-            Text(progress.daysToNextStage.map { "다음 단계까지 \($0)일" } ?? "도시가 모두 완성됐어요")
+            Text(progress.daysToNextStage.map { "다음 단계까지 \($0)일" } ?? "올해의 여정을 모두 완주했어요")
                 .font(DiaryTheme.Fonts.caption)
                 .foregroundStyle(DiaryTheme.Colors.secondaryText)
         }

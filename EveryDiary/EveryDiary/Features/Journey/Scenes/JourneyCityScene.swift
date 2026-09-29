@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// The year's city. It starts as a wasteland and gains a part at every stage (see `JourneyYearProgress`);
+/// The year's city. It starts as empty land and gains a part at every stage (see `JourneyYearProgress`);
 /// some early parts, such as the dead tree, disappear once the city turns green.
 /// Coordinates run 0...390 × 40...300 (y grows downward, horizon near y 205); `canvas` shows the lower 260 points.
 enum JourneyCityScene {
@@ -10,9 +10,10 @@ enum JourneyCityScene {
     /// The bottom edge of the drawing, which lines up with the bottom of the view.
     static let bottom: CGFloat = 300
 
+    /// Stage names follow the journey: from setting out to arriving.
     static let stageTitles = [
-        "황무지", "첫 도로", "가로수길", "작은 마을", "가로등 거리", "푸른 공원", "상점가",
-        "아파트 단지", "강과 다리", "시계탑 광장", "빌딩 숲", "놀이공원", "빛나는 도시"
+        "여정의 시작", "첫걸음", "길을 따라", "작은 쉼터", "밤길을 밝히며", "푸르게 물든 길", "북적이는 거리",
+        "머무는 사람들", "강을 건너", "시간이 쌓인 광장", "높아지는 꿈", "설레는 하루", "빛나는 도착"
     ]
 
     /// Day sky while the land is empty, evening once the street lights are up, night for the finished city.
@@ -52,7 +53,7 @@ enum JourneyCityScene {
             pieces.append(Piece(stage: stage, until: until, layer: layer, element: element))
         }
 
-        // 0 · 황무지: dry hills, cracked ground, rocks and a dead tree under a day sky.
+        // 0 · 여정의 시작 (empty land): dry hills, cracked ground, rocks and a dead tree under a day sky.
         add(0, Layer.sky, SceneElement(ScenePath.circle(320, 70, 18), SceneColor(0xFFE9B0), glow: 12), until: 4)
         add(4, Layer.sky, SceneElement(ScenePath.circle(332, 66, 11), SceneColor(0xFFF4D6), glow: 10))
         add(0, Layer.hills, SceneElement(ScenePath.ellipse(-60, 170, 260, 80), SceneColor(0xB08466)))
@@ -68,18 +69,18 @@ enum JourneyCityScene {
             ScenePath.line([(362, 298), (362, 262)]), ScenePath.line([(362, 276), (374, 266)]), ScenePath.line([(362, 270), (352, 258)])
         ]), SceneColor(0x5E4636), lineWidth: 2.5), until: 5)
 
-        // 1 · 첫 도로
+        // 1 · 첫걸음 (the first road)
         add(1, Layer.road, SceneElement(ScenePath.rect(0, 262, 390, 18), SceneColor(0x3E3B45)))
         add(1, Layer.roadDetails, SceneElement(ScenePath.group(stride(from: CGFloat(6), to: 390, by: 24).map { ScenePath.line([($0, 271), ($0 + 12, 271)]) }),
                                                SceneColor(0xF2D16B), lineWidth: 1.5))
 
-        // 2 · 가로수길
+        // 2 · 길을 따라 (street trees)
         let treeXs: [CGFloat] = [12, 56, 100, 144, 188, 232, 276, 366]
         add(2, Layer.trees, SceneElement(ScenePath.group(treeXs.map { ScenePath.rect($0 - 1.5, 248, 3, 14) }), SceneColor(0x6B4A35)))
         add(2, Layer.trees, SceneElement(ScenePath.group(treeXs.map { ScenePath.circle($0, 243, 9) }), SceneColor(0x4E9A5A)))
         add(2, Layer.trees, SceneElement(ScenePath.group(treeXs.map { ScenePath.circle($0 - 3, 240, 4) }), SceneColor(0x6DB86F)))
 
-        // 3 · 작은 마을
+        // 3 · 작은 쉼터 (houses)
         let houses: [(x: CGFloat, width: CGFloat, height: CGFloat, wall: UInt32, roof: UInt32)] = [
             (20, 34, 24, 0xF2E3C6, 0xC0563F), (62, 30, 20, 0xE8D5B5, 0x4F6D9A), (234, 34, 24, 0xF2E3C6, 0x4F6D9A), (276, 26, 20, 0xE8D5B5, 0xC0563F)
         ]
@@ -92,12 +93,12 @@ enum JourneyCityScene {
             add(3, Layer.buildings, SceneElement(ScenePath.rect(house.x + house.width / 2 - 3, 258 - 9, 6, 9), SceneColor(0x7A5238)))
         }
 
-        // 4 · 가로등 거리: lamps between the trees; the sky turns to evening.
+        // 4 · 밤길을 밝히며: lamps between the trees; the sky turns to evening.
         let lampXs: [CGFloat] = [34, 78, 122, 166, 210, 254, 352]
         add(4, Layer.lamps, SceneElement(ScenePath.group(lampXs.map { ScenePath.line([($0, 262), ($0, 236), ($0 + 4, 236)]) }), SceneColor(0x2E2A36), lineWidth: 1.5))
         add(4, Layer.lamps, SceneElement(ScenePath.group(lampXs.map { ScenePath.circle($0 + 4, 238, 2.6) }), SceneColor(0xFFE08A), glow: 6))
 
-        // 5 · 푸른 공원: the land turns green, a pond and bushes appear; the wasteland is gone.
+        // 5 · 푸르게 물든 길: the land turns green, a pond and bushes appear; the wasteland is gone.
         add(5, Layer.hills, SceneElement(ScenePath.ellipse(-60, 170, 260, 80), SceneColor(0x5E8E50)))
         add(5, Layer.hills, SceneElement(ScenePath.ellipse(150, 178, 300, 70), SceneColor(0x4F7E45)))
         add(5, Layer.groundCover, SceneElement(ScenePath.rect(0, 205, 390, 95), SceneColor(0x7DB26A)))
@@ -108,7 +109,7 @@ enum JourneyCityScene {
         add(5, Layer.front, SceneElement(ScenePath.group([ScenePath.circle(124, 289, 1.6), ScenePath.circle(142, 291, 1.6), ScenePath.circle(208, 290, 1.6),
                                                           ScenePath.circle(374, 289, 1.6)]), SceneColor(0xFF9EB5)))
 
-        // 6 · 상점가: shops with striped awnings between the houses, and cars on the road.
+        // 6 · 북적이는 거리: shops with striped awnings between the houses, and cars on the road.
         let shops: [(x: CGFloat, width: CGFloat, height: CGFloat, awning: UInt32)] = [(112, 34, 22, 0xE8505B), (150, 36, 26, 0x2FA7A0), (190, 34, 22, 0xF2B233)]
         for shop in shops {
             let top = 258 - shop.height
@@ -125,14 +126,14 @@ enum JourneyCityScene {
             add(6, Layer.roadDetails, SceneElement(ScenePath.circle(x + 20, y + 2.5, 1.3), SceneColor(0xFFF3B0), glow: 4))
         }
 
-        // 7 · 아파트 단지: mid-rise blocks rise behind the street.
+        // 7 · 머무는 사람들: mid-rise blocks rise behind the street.
         for (x, width, top) in [(CGFloat(8), CGFloat(40), CGFloat(150)), (150, 46, 140), (236, 40, 160)] {
             add(7, Layer.backBuildings, SceneElement(ScenePath.rect(x, top, width, 258 - top), SceneColor(0x6F6488)))
             add(7, Layer.backBuildings, SceneElement(windowGrid(x: x, width: width, top: top + 6, bottom: 222, spacing: CGSize(width: 9, height: 11), size: CGSize(width: 4, height: 6)),
                                                      SceneColor(0xFFE08A, opacity: 0.9), glow: 2))
         }
 
-        // 8 · 강과 다리: a river widens toward the front and the road crosses it on a bridge.
+        // 8 · 강을 건너: a river widens toward the front and the road crosses it on a bridge.
         add(8, Layer.water, SceneElement(ScenePath.polygon([(310, 205), (326, 205), (352, 300), (296, 300)]), SceneColor(0x5B9FD0)))
         add(8, Layer.water, SceneElement(ScenePath.group([ScenePath.line([(314, 222), (320, 222)]), ScenePath.line([(306, 292), (320, 292)]), ScenePath.line([(328, 288), (338, 288)])]),
                                          SceneColor(0xBFE6F5, opacity: 0.7), lineWidth: 1))
@@ -141,7 +142,7 @@ enum JourneyCityScene {
                                                SceneColor(0xE8E4F0), lineWidth: 1.4))
         add(8, Layer.roadDetails, SceneElement(ScenePath.line([(296, 258), (350, 258)]), SceneColor(0xE8E4F0), lineWidth: 1))
 
-        // 9 · 시계탑 광장
+        // 9 · 시간이 쌓인 광장 (clock tower)
         add(9, Layer.buildings, SceneElement(ScenePath.rect(356, 188, 22, 70), SceneColor(0xD8C3A0)))
         add(9, Layer.buildings, SceneElement(ScenePath.polygon([(352, 188), (367, 170), (382, 188)]), SceneColor(0x8E3B2F)))
         add(9, Layer.buildings, SceneElement(ScenePath.circle(367, 203, 7), SceneColor(0xFFF8E6), glow: 4))
@@ -149,14 +150,14 @@ enum JourneyCityScene {
         add(9, Layer.buildings, SceneElement(ScenePath.group([ScenePath.rect(361, 220, 4, 7), ScenePath.rect(369, 220, 4, 7), ScenePath.rect(361, 234, 4, 7), ScenePath.rect(369, 234, 4, 7)]),
                                              SceneColor(0xFFD27A), glow: 2))
 
-        // 10 · 빌딩 숲: a skyline of towers behind the hills.
+        // 10 · 높아지는 꿈: a skyline of towers behind the hills.
         for (x, width, top) in [(CGFloat(26), CGFloat(24), CGFloat(110)), (54, 30, 88), (92, 22, 120), (248, 28, 98), (282, 24, 124), (338, 30, 112)] {
             add(10, Layer.skyline, SceneElement(ScenePath.rect(x, top, width, 205 - top), SceneColor(0x4A3F6B)))
             add(10, Layer.skyline, SceneElement(windowGrid(x: x, width: width, top: top + 5, bottom: 175, spacing: CGSize(width: 7, height: 9), size: CGSize(width: 3, height: 4)),
                                                 SceneColor(0xFFD98A, opacity: 0.8)))
         }
 
-        // 11 · 놀이공원: a Ferris wheel.
+        // 11 · 설레는 하루: a Ferris wheel.
         let wheel = CGPoint(x: 110, y: 165)
         add(11, Layer.backBuildings, SceneElement(ScenePath.group([ScenePath.line([(wheel.x, wheel.y), (94, 222)]), ScenePath.line([(wheel.x, wheel.y), (126, 222)])]),
                                                   SceneColor(0xD8D2E6), lineWidth: 2))
@@ -172,7 +173,7 @@ enum JourneyCityScene {
         }
         add(11, Layer.backBuildings, SceneElement(ScenePath.circle(wheel.x, wheel.y, 3), SceneColor(0xFFF3B0)))
 
-        // 12 · 빛나는 도시: a landmark tower, hot-air balloons and fireworks in the night sky.
+        // 12 · 빛나는 도착: a landmark tower, hot-air balloons and fireworks in the night sky.
         add(12, Layer.skyline, SceneElement(ScenePath.polygon([(182, 205), (187, 82), (203, 82), (208, 205)]), SceneColor(0x5B4E86)))
         add(12, Layer.skyline, SceneElement(ScenePath.ellipse(178, 68, 34, 16), SceneColor(0x7A6CA6)))
         add(12, Layer.skyline, SceneElement(ScenePath.rect(182, 73, 26, 4, corner: 2), SceneColor(0xFFE08A), glow: 6))
