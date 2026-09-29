@@ -235,7 +235,8 @@ final class DiaryListViewModelTests: XCTestCase {
         let trash = ListTrash()
         let fixedNow = now
         let dependencies = AppDependencies(
-            diaryRepository: repository, userSession: session, accountSession: UnusedAccountSession(), diaryTrash: trash,
+            diaryRepository: repository, userSession: session, accountSession: UnusedAccountSession(),
+            diaryTrash: trash, diarySaving: UnusedDiarySaving(),
             calendarImageLoader: ListImageLoader(), calendar: calendar, now: { fixedNow }
         )
         let module = dependencies.makeDiaryListModule()

@@ -12,10 +12,12 @@ import SnapKit
 
 class CalendarListVC: UIViewController {
     private let viewModel: CalendarViewModel
+    private let makeWriteDiary: MakeWriteDiary
     private var selectedDiaries: [DiaryEntry] { viewModel.selectedEntries }
 
-    init(viewModel: CalendarViewModel) {
+    init(viewModel: CalendarViewModel, makeWriteDiary: @escaping MakeWriteDiary) {
         self.viewModel = viewModel
+        self.makeWriteDiary = makeWriteDiary
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -127,7 +129,7 @@ extension CalendarListVC : UICollectionViewDataSource,  UICollectionViewDelegate
     // Cell 선택
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let diary = selectedDiaries[indexPath.row]
-        let writeDiaryVC = WriteDiaryVC()
+        let writeDiaryVC = makeWriteDiary()
         
         // 선택된 일기 정보를 전달하고, 수정 버튼을 활성화
         writeDiaryVC.enterDiary(to: .showDiary, with: diary)

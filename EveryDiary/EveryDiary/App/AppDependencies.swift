@@ -6,6 +6,7 @@ struct AppDependencies {
     let userSession: any DiaryUserSession
     let accountSession: any AccountSession
     let diaryTrash: any DiaryTrashing
+    let diarySaving: any DiarySaving
     let calendarImageLoader: any CalendarImageLoading
     let calendar: Calendar
     let now: () -> Date

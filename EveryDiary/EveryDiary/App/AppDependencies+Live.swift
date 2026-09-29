@@ -13,6 +13,11 @@ extension AppDependencies {
                 dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage())
             ),
             diaryTrash: FirebaseDiaryTrash(database: .firestore()),
+            diarySaving: DiarySaveCoordinator(
+                authentication: LiveDiarySaveAuthentication(),
+                images: LiveDiaryImageStore(),
+                entries: LiveDiaryEntryWriter()
+            ),
             calendarImageLoader: CachedCalendarImageLoader(cache: .shared),
             calendar: .current,
             now: Date.init

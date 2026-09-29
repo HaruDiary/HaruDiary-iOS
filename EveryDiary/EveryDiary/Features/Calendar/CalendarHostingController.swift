@@ -7,11 +7,14 @@ import UIKit
 final class CalendarHostingController: UIHostingController<CalendarView>, DiaryUpdateDelegate {
     private let viewModel: CalendarViewModel
     private let imageLoader: any CalendarImageLoading
+    private let makeWriteDiary: MakeWriteDiary
     private let makeSettings: () -> UIViewController
 
-    init(viewModel: CalendarViewModel, imageLoader: any CalendarImageLoading, makeSettings: @escaping () -> UIViewController) {
+    init(viewModel: CalendarViewModel, imageLoader: any CalendarImageLoading,
+         makeWriteDiary: @escaping MakeWriteDiary, makeSettings: @escaping () -> UIViewController) {
         self.viewModel = viewModel
         self.imageLoader = imageLoader
+        self.makeWriteDiary = makeWriteDiary
         self.makeSettings = makeSettings
         super.init(rootView: CalendarView(
             viewModel: viewModel, imageLoader: imageLoader,
@@ -69,7 +72,7 @@ final class CalendarHostingController: UIHostingController<CalendarView>, DiaryU
     private func openDiary(_ entry: DiaryEntry?) {
         let presenter = navigationController?.topViewController ?? self
         guard presenter.presentedViewController == nil else { return }
-        let controller = WriteDiaryVC()
+        let controller = makeWriteDiary()
         if let entry {
             controller.enterDiary(to: .showDiary, with: entry)
         } else {

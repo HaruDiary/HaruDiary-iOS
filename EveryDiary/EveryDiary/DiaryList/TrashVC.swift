@@ -12,6 +12,14 @@ import FirebaseFirestore
 import SnapKit
 
 class TrashVC: UIViewController {
+    private let makeWriteDiary: MakeWriteDiary
+
+    init(makeWriteDiary: @escaping MakeWriteDiary) {
+        self.makeWriteDiary = makeWriteDiary
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { return nil }
     // fetchDiaries 관련 변수
     private var diaryManager = DiaryManager()
     private var monthlyDiaries: [String: [DiaryEntry]] = [:]
@@ -349,7 +357,7 @@ extension TrashVC: UICollectionViewDataSource {
         let month = months[indexPath.section]
         guard let diary = monthlyDiaries[month]?[indexPath.row] else { return }
         
-        let writeDiaryVC = WriteDiaryVC()
+        let writeDiaryVC = makeWriteDiary()
         
         // 선택된 일기 정보를 전달하고, 수정 버튼을 활성화
         writeDiaryVC.enterDiary(to: .showDiary, with: diary)
@@ -377,7 +385,7 @@ extension TrashVC {
                 // "수정" 선택 시 실행할 코드
                 let month = self.months[indexPath.section]
                 if let diary = self.monthlyDiaries[month]?[indexPath.row] {
-                    let writeDiaryVC = WriteDiaryVC()
+                    let writeDiaryVC = self.makeWriteDiary()
                     writeDiaryVC.enterDiary(to: .editDiary, with: diary)
                     writeDiaryVC.delegate = self
                     writeDiaryVC.modalPresentationStyle = .automatic

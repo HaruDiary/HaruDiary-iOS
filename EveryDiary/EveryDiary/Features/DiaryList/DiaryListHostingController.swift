@@ -6,10 +6,13 @@ import UIKit
 @MainActor
 final class DiaryListHostingController: UIHostingController<DiaryListView>, DiaryUpdateDelegate, WriteDiaryDelegate {
     private let viewModel: DiaryListViewModel
+    private let makeWriteDiary: MakeWriteDiary
     private let makeSettings: () -> UIViewController
 
-    init(viewModel: DiaryListViewModel, imageLoader: any CalendarImageLoading, makeSettings: @escaping () -> UIViewController) {
+    init(viewModel: DiaryListViewModel, imageLoader: any CalendarImageLoading,
+         makeWriteDiary: @escaping MakeWriteDiary, makeSettings: @escaping () -> UIViewController) {
         self.viewModel = viewModel
+        self.makeWriteDiary = makeWriteDiary
         self.makeSettings = makeSettings
         super.init(rootView: DiaryListView(
             viewModel: viewModel, imageLoader: imageLoader,
@@ -89,7 +92,7 @@ final class DiaryListHostingController: UIHostingController<DiaryListView>, Diar
 
     private func openEditor(_ status: UIstatus, with entry: DiaryEntry?) {
         guard presentedViewController == nil else { return }
-        let controller = WriteDiaryVC()
+        let controller = makeWriteDiary()
         controller.enterDiary(to: status, with: entry)
         controller.delegate = self
         // Same as the previous list: only a new diary reports upload progress back to the list.

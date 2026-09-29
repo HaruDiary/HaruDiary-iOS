@@ -12,7 +12,8 @@ final class CalendarViewModelTests: XCTestCase {
         let repository = FakeDiaryRepository()
         let session = FakeDiarySession(userID: nil)
         let dependencies = AppDependencies(
-            diaryRepository: repository, userSession: session, accountSession: UnusedAccountSession(), diaryTrash: UnusedDiaryTrash(),
+            diaryRepository: repository, userSession: session, accountSession: UnusedAccountSession(),
+            diaryTrash: UnusedDiaryTrash(), diarySaving: UnusedDiarySaving(),
             calendarImageLoader: imageLoader, calendar: calendar, now: { now }
         )
         let module = dependencies.makeCalendarModule()
@@ -39,7 +40,8 @@ final class CalendarViewModelTests: XCTestCase {
         calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
         let today = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 9, day: 15)))
         let module = AppDependencies(
-            diaryRepository: repository, userSession: session, accountSession: UnusedAccountSession(), diaryTrash: UnusedDiaryTrash(),
+            diaryRepository: repository, userSession: session, accountSession: UnusedAccountSession(),
+            diaryTrash: UnusedDiaryTrash(), diarySaving: UnusedDiarySaving(),
             calendarImageLoader: FakeCalendarImageLoader(), calendar: calendar, now: { today }
         ).makeCalendarModule()
         let model = module.viewModel
@@ -61,7 +63,8 @@ final class CalendarViewModelTests: XCTestCase {
         calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
         var today = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 12, day: 31)))
         let model = AppDependencies(
-            diaryRepository: repository, userSession: session, accountSession: UnusedAccountSession(), diaryTrash: UnusedDiaryTrash(),
+            diaryRepository: repository, userSession: session, accountSession: UnusedAccountSession(),
+            diaryTrash: UnusedDiaryTrash(), diarySaving: UnusedDiarySaving(),
             calendarImageLoader: FakeCalendarImageLoader(), calendar: calendar, now: { today }
         ).makeCalendarModule().viewModel
         model.start()

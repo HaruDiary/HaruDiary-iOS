@@ -11,8 +11,15 @@ import SnapKit
 
 class MotivationVC: UIViewController {
     private let buildings = BuildingView()
-    // Set by TabBarController with the app's dependencies.
+    private let makeWriteDiary: MakeWriteDiary
     var makeSettings: () -> UIViewController = { SettingVC() }
+
+    init(makeWriteDiary: @escaping MakeWriteDiary) {
+        self.makeWriteDiary = makeWriteDiary
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { return nil }
     
     private lazy var background : UIImageView = {
         let background = UIImageView(image: UIImage(named: "View.Background"))
@@ -92,7 +99,7 @@ class MotivationVC: UIViewController {
     }
     
     @objc private func tabWriteDiaryBTN() {
-        let writeDiaryVC = WriteDiaryVC()
+        let writeDiaryVC = makeWriteDiary()
         writeDiaryVC.enterDiary(to: .writeNewDiary)
         writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
