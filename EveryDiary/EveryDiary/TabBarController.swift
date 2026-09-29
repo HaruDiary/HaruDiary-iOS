@@ -15,9 +15,7 @@ class TabBarController: UITabBarController {
     init(dependencies: AppDependencies) {
         let makeSettings = { dependencies.makeSettingsModule().makeViewController() }
         firstVC = UINavigationController(rootViewController: dependencies.makeDiaryListModule().makeViewController(makeSettings: makeSettings))
-        let motivation = MotivationVC()
-        motivation.makeSettings = makeSettings
-        secondVC = UINavigationController(rootViewController: motivation)
+        secondVC = UINavigationController(rootViewController: dependencies.makeJourneyModule().makeViewController(makeSettings: makeSettings))
         thirdVC = UINavigationController(rootViewController: dependencies.makeCalendarModule().makeViewController(makeSettings: makeSettings))
         super.init(nibName: nil, bundle: nil)
     }

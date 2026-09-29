@@ -7,6 +7,32 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F2BC974B5C02A70BB0C2596 /* JourneyYearProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */; };
+		22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */; };
+		D57875793289C9FDEE8CEBFA /* JourneyCityScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */; };
+		524E6639EAF11484AA7BD7DB /* JourneyCityScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */; };
+		ED2FEF69EA27FEC3DF665BCA /* JourneyYearProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */; };
+		3A14FE2DE5453BCF575BE284 /* JourneyYearProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */; };
+		7F6627D60329BD93D9C2F43C /* JourneySceneAmbienceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */; };
+		446379991A32541C65DB4BCE /* JourneySceneCatalog+Ambience.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */; };
+		BEF14E9CB671D00A37FA7A82 /* JourneySceneCatalog+Ambience.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */; };
+		ABB6B1D2CE08894005309E5D /* JourneySceneCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */; };
+		0CAEEE01FB33A11D99DF2DDD /* JourneyCollectionHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */; };
+		B3CACE6E3757D5413CF66839 /* JourneyCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */; };
+		C8B2E124D44589724E349D10 /* JourneySceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571F283CAF625F37A8908670 /* JourneySceneView.swift */; };
+		19681167A51C2C077F5C3BED /* JourneySceneCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */; };
+		A30D49B72C7E565B6233ED6C /* JourneySceneCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */; };
+		F72439A15ECAB2F5CC9A618F /* JourneyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */; };
+		7F1C103276CEB16536BBD9B0 /* JourneyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */; };
+		5726EE1D911AD6B7CF85E6BC /* JourneyRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */; };
+		47A1D73818A174E2E92CA355 /* JourneyViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A43FC69DAC48606710BEC /* JourneyViewModelTests.swift */; };
+		3589A1C10B61E2393F77C32C /* JourneyModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABDF1929F8B6A84C65A6D972 /* JourneyModule+UIKit.swift */; };
+		ED84689D753A8F4437C7080C /* JourneyModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734B318BE5B0AC77B3E75A97 /* JourneyModule.swift */; };
+		5D80395DC7BFE411ED4D9F33 /* JourneyModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734B318BE5B0AC77B3E75A97 /* JourneyModule.swift */; };
+		2FD7A0614EEA22D572A51DBB /* JourneyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009F241D5F03A6D48F9E0BB5 /* JourneyViewModel.swift */; };
+		C4EF7430388972D925EC3F52 /* JourneyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009F241D5F03A6D48F9E0BB5 /* JourneyViewModel.swift */; };
+		6613C80DE1799C65DDEF1D0A /* JourneyRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */; };
+		A749FBFCA05C0A232F6650ED /* JourneyRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */; };
 		0CB52698AD69A166131CE76A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 633089E86841517C8CBC55A6 /* Foundation.framework */; };
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
 		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
@@ -211,6 +237,24 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyYearProgressTests.swift"; sourceTree = "<group>"; };
+		72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyCityView.swift"; sourceTree = "<group>"; };
+		B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyCityScene.swift"; sourceTree = "<group>"; };
+		67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyYearProgress.swift"; sourceTree = "<group>"; };
+		4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneAmbienceView.swift"; sourceTree = "<group>"; };
+		E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneCatalog+Ambience.swift"; sourceTree = "<group>"; };
+		A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneySceneCatalogTests.swift"; sourceTree = "<group>"; };
+		65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyCollectionHostingController.swift"; sourceTree = "<group>"; };
+		54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyCollectionView.swift"; sourceTree = "<group>"; };
+		571F283CAF625F37A8908670 /* JourneySceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneView.swift"; sourceTree = "<group>"; };
+		720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneCatalog.swift"; sourceTree = "<group>"; };
+		0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyScene.swift"; sourceTree = "<group>"; };
+		28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyRecordTests.swift"; sourceTree = "<group>"; };
+		971A43FC69DAC48606710BEC /* JourneyViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyViewModelTests.swift"; sourceTree = "<group>"; };
+		ABDF1929F8B6A84C65A6D972 /* JourneyModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyModule+UIKit.swift"; sourceTree = "<group>"; };
+		734B318BE5B0AC77B3E75A97 /* JourneyModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyModule.swift"; sourceTree = "<group>"; };
+		009F241D5F03A6D48F9E0BB5 /* JourneyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyViewModel.swift"; sourceTree = "<group>"; };
+		A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyRecord.swift"; sourceTree = "<group>"; };
 		00B31F32A3F08AD9CD188D48 /* DiaryEntryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaryEntryTests.swift; sourceTree = "<group>"; };
 		0EC03C7CA06E85F659010A76 /* EveryDiaryLogicTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EveryDiaryLogicTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A03BDA32B92FA7D008C13DC /* FirebaseStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseStorageManager.swift; sourceTree = "<group>"; };
@@ -629,6 +673,10 @@
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */,
+				A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */,
+				28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */,
+				971A43FC69DAC48606710BEC /* JourneyViewModelTests.swift */,
 				394F66EE9A24302500E6BAF0 /* CalendarDiaryIndexTests.swift */,
 				00B31F32A3F08AD9CD188D48 /* DiaryEntryTests.swift */,
 			);
@@ -677,6 +725,8 @@
 				6324AE064574465A82455BD2 /* DayKind.swift */,
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */,
+				A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */,
 				62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */,
 				A8DC8C0509FE561B652A305B /* OnboardingProgressStore.swift */,
 				4B344B95B910CC4E92228FFD /* DiaryReadingRepository.swift */,
@@ -745,6 +795,18 @@
 				FFAAE9B7D18137751417D1D9 /* CalendarImageLoader.swift */,
 				77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */,
 				7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */,
+				72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */,
+				B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */,
+				4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */,
+				E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */,
+				65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */,
+				54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */,
+				571F283CAF625F37A8908670 /* JourneySceneView.swift */,
+				720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */,
+				0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */,
+				ABDF1929F8B6A84C65A6D972 /* JourneyModule+UIKit.swift */,
+				734B318BE5B0AC77B3E75A97 /* JourneyModule.swift */,
+				009F241D5F03A6D48F9E0BB5 /* JourneyViewModel.swift */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -887,6 +949,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F2BC974B5C02A70BB0C2596 /* JourneyYearProgressTests.swift in Sources */,
+				D57875793289C9FDEE8CEBFA /* JourneyCityScene.swift in Sources */,
+				ED2FEF69EA27FEC3DF665BCA /* JourneyYearProgress.swift in Sources */,
+				446379991A32541C65DB4BCE /* JourneySceneCatalog+Ambience.swift in Sources */,
+				ABB6B1D2CE08894005309E5D /* JourneySceneCatalogTests.swift in Sources */,
+				19681167A51C2C077F5C3BED /* JourneySceneCatalog.swift in Sources */,
+				F72439A15ECAB2F5CC9A618F /* JourneyScene.swift in Sources */,
+				5726EE1D911AD6B7CF85E6BC /* JourneyRecordTests.swift in Sources */,
+				47A1D73818A174E2E92CA355 /* JourneyViewModelTests.swift in Sources */,
+				ED84689D753A8F4437C7080C /* JourneyModule.swift in Sources */,
+				2FD7A0614EEA22D572A51DBB /* JourneyViewModel.swift in Sources */,
+				6613C80DE1799C65DDEF1D0A /* JourneyRecord.swift in Sources */,
 				0B67131882814099B395D5CA /* AppleAuthorization.swift in Sources */,
 				3761782D1E9541648610A4DF /* AppleCredentialStatus.swift in Sources */,
 				AEBC3933AC39407393EA46C6 /* AppleRefreshTokenStoreTests.swift in Sources */,
@@ -943,6 +1017,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */,
+				524E6639EAF11484AA7BD7DB /* JourneyCityScene.swift in Sources */,
+				3A14FE2DE5453BCF575BE284 /* JourneyYearProgress.swift in Sources */,
+				7F6627D60329BD93D9C2F43C /* JourneySceneAmbienceView.swift in Sources */,
+				BEF14E9CB671D00A37FA7A82 /* JourneySceneCatalog+Ambience.swift in Sources */,
+				0CAEEE01FB33A11D99DF2DDD /* JourneyCollectionHostingController.swift in Sources */,
+				B3CACE6E3757D5413CF66839 /* JourneyCollectionView.swift in Sources */,
+				C8B2E124D44589724E349D10 /* JourneySceneView.swift in Sources */,
+				A30D49B72C7E565B6233ED6C /* JourneySceneCatalog.swift in Sources */,
+				7F1C103276CEB16536BBD9B0 /* JourneyScene.swift in Sources */,
+				3589A1C10B61E2393F77C32C /* JourneyModule+UIKit.swift in Sources */,
+				5D80395DC7BFE411ED4D9F33 /* JourneyModule.swift in Sources */,
+				C4EF7430388972D925EC3F52 /* JourneyViewModel.swift in Sources */,
+				A749FBFCA05C0A232F6650ED /* JourneyRecord.swift in Sources */,
 				8CE10AD94F264F07A3FC33BF /* AppleAuthorizationRequest.swift in Sources */,
 				526E31BBACBE4FD3BE3362A4 /* AppleAuthorization.swift in Sources */,
 				AE80E87C8AF34C86A074B4FD /* AppleCredentialMonitor.swift in Sources */,

@@ -1,18 +1,20 @@
 import SwiftUI
 
 /// Floating button that opens the diary editor. Shared by the list and calendar screens.
+/// Uses the original `write` artwork and sits where the journey tab's write button does.
 struct DiaryWriteButton: View {
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "square.and.pencil")
-                .font(.system(size: DiaryTheme.Size.icon))
-                .foregroundStyle(DiaryTheme.Colors.surface)
+            Image("write")
+                .resizable()
                 .frame(width: DiaryTheme.Size.floatingButton, height: DiaryTheme.Size.floatingButton)
-                .background(DiaryTheme.Colors.brand, in: Circle())
-                .shadow(color: DiaryTheme.Colors.brand.opacity(0.2), radius: 8, y: 4)
+                .shadow(color: .black.opacity(0.3), radius: 3)
         }
+        .buttonStyle(.plain)
         .accessibilityLabel("일기 작성")
+        .padding(.trailing, DiaryTheme.Size.floatingButtonTrailing)
+        .padding(.bottom, DiaryTheme.Size.floatingButtonBottom)
     }
 }

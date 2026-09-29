@@ -40,7 +40,12 @@ enum DiaryTheme {
     enum Size {
         static let icon: CGFloat = 24
         static let touchTarget: CGFloat = 44
-        static let floatingButton: CGFloat = 56
+        /// The write button uses the original `write` artwork at the size and place of the journey tab's button.
+        static let floatingButton: CGFloat = 65
+        static let floatingButtonTrailing: CGFloat = 22
+        static let floatingButtonBottom: CGFloat = 39
+        /// Space scrolling content leaves at the bottom so the write button never covers the last item.
+        static let floatingButtonClearance: CGFloat = floatingButton + floatingButtonBottom + 12
         static let thumbnail: CGFloat = 80
     }
 

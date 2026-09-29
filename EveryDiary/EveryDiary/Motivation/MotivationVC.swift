@@ -7,17 +7,23 @@
 
 import UIKit
 
+import Observation
 import SnapKit
+import SwiftUI
 
 class MotivationVC: UIViewController {
-    private let buildings = BuildingView()
-    // Set by TabBarController with the app's dependencies.
-    var makeSettings: () -> UIViewController = { SettingVC() }
+    // This month's picture; each diary day turns on one more light.
+    private lazy var scene = UIHostingController(rootView: makeSceneView())
+    private let viewModel: JourneyViewModel
+    private let makeSettings: () -> UIViewController
     
-    private lazy var background : UIImageView = {
-        let background = UIImageView(image: UIImage(named: "View.Background"))
-        return background
-    }()
+    init(viewModel: JourneyViewModel, makeSettings: @escaping () -> UIViewController) {
+        self.viewModel = viewModel
+        self.makeSettings = makeSettings
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) { return nil }
     
     private lazy var settingButton : UIBarButtonItem = {
         let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
@@ -39,8 +45,6 @@ class MotivationVC: UIViewController {
     
     private lazy var monthLabel: UILabel = {
         let monthLabel = UILabel()
-        let currentMonth = Calendar.current.component(.month, from: Date())
-        monthLabel.text = "\(currentMonth)월"
         monthLabel.font = UIFont(name: "SFProDisplay-Bold", size: 25)
         monthLabel.textColor = .white
         return monthLabel
@@ -53,36 +57,72 @@ class MotivationVC: UIViewController {
         return countLabel
     }()
     
-    func updateCountLabel() {
-        let diaryCount = buildings.diaryDays.count
-        let date = Date()
-        let calendar = Calendar.current
-        let range = calendar.range(of: .day, in: .month, for: date)
-        if let numberOfDays = range?.count {
-            countLabel.text = "\(numberOfDays)일 중 \(diaryCount)개 작성했어요."
-        } else {
-            print("error: diaryCount error")
-        }
-    }
+    // Shown when the diary subscription fails, so the journey can be loaded again once the network is back.
+    private lazy var retryButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.title = "다시 불러오기"
+        config.image = UIImage(systemName: "arrow.clockwise")
+        config.imagePadding = 6
+        config.cornerStyle = .capsule
+        config.baseBackgroundColor = UIColor.white.withAlphaComponent(0.25)
+        config.baseForegroundColor = .white
+        let button = UIButton(configuration: config)
+        button.addTarget(self, action: #selector(tapRetry), for: .touchUpInside)
+        button.isHidden = true
+        return button
+    }()
+    
+    private lazy var sceneLabel: UILabel = {
+        let sceneLabel = UILabel()
+        sceneLabel.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        sceneLabel.textColor = UIColor.white.withAlphaComponent(0.85)
+        return sceneLabel
+    }()
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setNavigationBar()
+        // The month is read again here, so it moves on while the app stays open.
+        render()
+        if viewModel.state == .failed { viewModel.retry() }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        buildings.delegate = self
-        diaryDidUpdate()
-        updateCountLabel()
         addSubview()
         autoLayout()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(loginStatusChanged), name: .loginstatusChanged, object: nil)
+        observeViewModel()
+        viewModel.start()
     }
     
-    deinit {
-        NotificationCenter.default.removeObserver(self)
+    // The tab lives as long as the signed-in app, so the subscription stays until the view model is released.
+    private func observeViewModel() {
+        withObservationTracking {
+            _ = viewModel.record
+            _ = viewModel.state
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.render()
+                self?.observeViewModel()
+            }
+        }
+        render()
+    }
+    
+    private func render() {
+        let month = viewModel.currentMonth
+        monthLabel.text = "\(month.month)월"
+        let failed = viewModel.state == .failed
+        countLabel.text = failed ? "여정을 불러오지 못했어요." : "\(viewModel.numberOfDaysInCurrentMonth)일 중 \(month.days.count)개 작성했어요."
+        retryButton.isHidden = !failed
+        sceneLabel.text = JourneySceneCatalog.scene(for: month.month).title
+        scene.rootView = makeSceneView()
+    }
+    
+    private func makeSceneView() -> JourneySceneView {
+        let month = viewModel.currentMonth
+        return JourneySceneView(scene: JourneySceneCatalog.scene(for: month.month), year: month.year, litCount: month.days.count,
+                                slotCount: viewModel.numberOfDaysInCurrentMonth, animatesLighting: true)
     }
     
     @objc private func tabSettingBTN() {
@@ -99,34 +139,44 @@ class MotivationVC: UIViewController {
         self.present(writeDiaryVC, animated: true)
     }
     
+    @objc private func tapRetry() {
+        viewModel.retry()
+    }
+    
     @objc private func honorVCBTN() {
-        let honorVC = HonorVC()
+        let honorVC = JourneyCollectionHostingController(viewModel: viewModel)
         honorVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(honorVC, animated: true)
     }
     
-    @objc private func loginStatusChanged() {
-        buildings.windowsInBuildingData()
-    }
-    
     func addSubview() {
-        view.addSubview(background)
-        view.addSubview(buildings)
+        addChild(scene)
+        view.addSubview(scene.view)
+        scene.didMove(toParent: self)
+        scene.view.backgroundColor = .clear
+        // The sky fills the screen behind the navigation bar, as the old background image did.
+        scene.safeAreaRegions = []
         view.addSubview(writeDiaryButton)
         view.addSubview(monthLabel)
         view.addSubview(countLabel)
+        view.addSubview(sceneLabel)
+        view.addSubview(retryButton)
+        [monthLabel, countLabel, sceneLabel].forEach {
+            $0.layer.shadowColor = UIColor.black.cgColor
+            $0.layer.shadowOpacity = 0.3
+            $0.layer.shadowRadius = 3
+            $0.layer.shadowOffset = .zero
+        }
     }
     
     func autoLayout() {
-        background.snp.makeConstraints{ make in
-            make.top.bottom.leading.trailing.equalToSuperview()
+        scene.view.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         writeDiaryButton.snp.makeConstraints { make in
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
-        }
-        buildings.snp.makeConstraints { make in
-            make.top.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
         }
         monthLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
@@ -134,6 +184,14 @@ class MotivationVC: UIViewController {
         }
         countLabel.snp.makeConstraints { make in
             make.top.equalTo(monthLabel.snp.bottom).offset(16)
+            make.centerX.equalToSuperview()
+        }
+        sceneLabel.snp.makeConstraints { make in
+            make.top.equalTo(countLabel.snp.bottom).offset(6)
+            make.centerX.equalToSuperview()
+        }
+        retryButton.snp.makeConstraints { make in
+            make.top.equalTo(sceneLabel.snp.bottom).offset(12)
             make.centerX.equalToSuperview()
         }
     }
@@ -145,14 +203,9 @@ class MotivationVC: UIViewController {
     }
 }
 
-extension MotivationVC : BuildingViewDelegate {
-    func didUpdateDiaryCount(_ diaryCount: Int) {
-        updateCountLabel()
-    }
-}
-
 extension MotivationVC : DiaryUpdateDelegate {
     func diaryDidUpdate() {
-        buildings.windowsInBuildingData()
+        // The live subscription already reflects the saved diary; only a failed one needs a new start.
+        if viewModel.state == .failed { viewModel.retry() }
     }
 }
