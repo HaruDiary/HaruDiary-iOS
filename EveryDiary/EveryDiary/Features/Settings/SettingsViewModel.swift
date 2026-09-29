@@ -19,6 +19,8 @@ final class SettingsViewModel {
         case deletionNeedsRecentLogin
         case dataErasureFailed
         case dataErasedNeedsRecentLogin
+        case appleConfirmationFailed
+        case appleRevocationFailed
         case deletionFailed
         case profileSaved
         case nicknameInvalid(Nickname.Problem)
@@ -111,12 +113,18 @@ final class SettingsViewModel {
         }
     }
 
-    func deleteAccount() async {
+    /// Apple members confirm with Sign in with Apple before deleting; the screen asks for it.
+    var needsAppleConfirmationToDelete: Bool {
+        if case .member(_, _, .apple) = account { return true }
+        return false
+    }
+
+    func deleteAccount(appleAuthorization: AppleAuthorization? = nil) async {
         guard canManageAccount, !isDeletingAccount else { return }
         isDeletingAccount = true
         defer { isDeletingAccount = false }
         do {
-            try await session.deleteAccount()
+            try await session.deleteAccount(appleAuthorization: appleAuthorization)
             notice = .accountDeleted
         } catch AccountDeletionError.requiresRecentLogin {
             notice = .deletionNeedsRecentLogin
@@ -124,6 +132,10 @@ final class SettingsViewModel {
             notice = .dataErasureFailed
         } catch AccountDeletionError.dataErasedNeedsRecentLogin {
             notice = .dataErasedNeedsRecentLogin
+        } catch AccountDeletionError.appleConfirmationRequired {
+            notice = .appleConfirmationFailed
+        } catch AccountDeletionError.appleRevocationFailed {
+            notice = .appleRevocationFailed
         } catch {
             notice = .deletionFailed
         }

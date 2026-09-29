@@ -200,11 +200,14 @@
 		2B14163B939C4B3F8AF3F16D /* AppleRefreshTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */; };
 		FE8BFE908EBB4782994D2CE5 /* AppleRefreshTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */; };
 		16FB74D484FB444E84926326 /* KeychainSecretStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */; };
-		ABDF27ADC7F74F4BBFDA0610 /* AppleTokenRevocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156963BA02984F9DB97C4979 /* AppleTokenRevocation.swift */; };
+		ABDF27ADC7F74F4BBFDA0610 /* AppleSignInRecords.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */; };
 		AEBC3933AC39407393EA46C6 /* AppleRefreshTokenStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */; };
 		B0271179CB6A40FC8E7D043F /* AppleCredentialStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */; };
 		3761782D1E9541648610A4DF /* AppleCredentialStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */; };
 		AE80E87C8AF34C86A074B4FD /* AppleCredentialMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */; };
+		526E31BBACBE4FD3BE3362A4 /* AppleAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 980D440F9AED465DB3E2447A /* AppleAuthorization.swift */; };
+		0B67131882814099B395D5CA /* AppleAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 980D440F9AED465DB3E2447A /* AppleAuthorization.swift */; };
+		8CE10AD94F264F07A3FC33BF /* AppleAuthorizationRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6805BED9148E487D92B6E608 /* AppleAuthorizationRequest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -367,10 +370,12 @@
 		B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoPreparation.swift"; sourceTree = "<group>"; };
 		55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleRefreshTokenStore.swift"; sourceTree = "<group>"; };
 		47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainSecretStore.swift"; sourceTree = "<group>"; };
-		156963BA02984F9DB97C4979 /* AppleTokenRevocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleTokenRevocation.swift"; sourceTree = "<group>"; };
+		156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleSignInRecords.swift"; sourceTree = "<group>"; };
 		09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleRefreshTokenStoreTests.swift"; sourceTree = "<group>"; };
 		1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleCredentialStatus.swift"; sourceTree = "<group>"; };
 		832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleCredentialMonitor.swift"; sourceTree = "<group>"; };
+		980D440F9AED465DB3E2447A /* AppleAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleAuthorization.swift"; sourceTree = "<group>"; };
+		6805BED9148E487D92B6E608 /* AppleAuthorizationRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleAuthorizationRequest.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -578,6 +583,7 @@
 		6BB3CE392B85F081005BC3E1 /* Setting */ = {
 			isa = PBXGroup;
 			children = (
+				6805BED9148E487D92B6E608 /* AppleAuthorizationRequest.swift */,
 				31037A4F0D8649B7BF6CBF16 /* NicknameAlert.swift */,
 				6BB3CE3D2B85F66E005BC3E1 /* SettingVC.swift */,
 				D26E2F9E2B90239A0083FEAC /* SignOutCell.swift */,
@@ -654,6 +660,7 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				980D440F9AED465DB3E2447A /* AppleAuthorization.swift */,
 				1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */,
 				55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */,
 				95117A90CD30494982CCDC18 /* ProfilePicture.swift */,
@@ -691,7 +698,7 @@
 			isa = PBXGroup;
 			children = (
 				832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */,
-				156963BA02984F9DB97C4979 /* AppleTokenRevocation.swift */,
+				156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */,
 				47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */,
 				68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */,
 				BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */,
@@ -880,6 +887,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B67131882814099B395D5CA /* AppleAuthorization.swift in Sources */,
 				3761782D1E9541648610A4DF /* AppleCredentialStatus.swift in Sources */,
 				AEBC3933AC39407393EA46C6 /* AppleRefreshTokenStoreTests.swift in Sources */,
 				FE8BFE908EBB4782994D2CE5 /* AppleRefreshTokenStore.swift in Sources */,
@@ -935,9 +943,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CE10AD94F264F07A3FC33BF /* AppleAuthorizationRequest.swift in Sources */,
+				526E31BBACBE4FD3BE3362A4 /* AppleAuthorization.swift in Sources */,
 				AE80E87C8AF34C86A074B4FD /* AppleCredentialMonitor.swift in Sources */,
 				B0271179CB6A40FC8E7D043F /* AppleCredentialStatus.swift in Sources */,
-				ABDF27ADC7F74F4BBFDA0610 /* AppleTokenRevocation.swift in Sources */,
+				ABDF27ADC7F74F4BBFDA0610 /* AppleSignInRecords.swift in Sources */,
 				16FB74D484FB444E84926326 /* KeychainSecretStore.swift in Sources */,
 				2B14163B939C4B3F8AF3F16D /* AppleRefreshTokenStore.swift in Sources */,
 				C472E74E38494FB582D4D1C3 /* ProfilePhotoPreparation.swift in Sources */,

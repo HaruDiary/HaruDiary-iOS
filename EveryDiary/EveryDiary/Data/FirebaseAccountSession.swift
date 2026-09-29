@@ -7,13 +7,13 @@ final class FirebaseAccountSession: AccountSession {
     private let auth: Auth
     private let dataEraser: any UserDataErasing
     private let storage: Storage
-    private let appleTokens: AppleTokenRevocation
+    private let appleRecords: AppleSignInRecords
 
-    init(auth: Auth, dataEraser: any UserDataErasing, storage: Storage, appleTokens: AppleTokenRevocation) {
+    init(auth: Auth, dataEraser: any UserDataErasing, storage: Storage, appleRecords: AppleSignInRecords) {
         self.auth = auth
         self.dataEraser = dataEraser
         self.storage = storage
-        self.appleTokens = appleTokens
+        self.appleRecords = appleRecords
     }
 
     func observeAccount() -> AsyncStream<AccountSnapshot?> {
@@ -81,16 +81,40 @@ final class FirebaseAccountSession: AccountSession {
         return saved
     }
 
-    func deleteAccount() async throws {
+    func deleteAccount(appleAuthorization: AppleAuthorization?) async throws {
         guard let user = auth.currentUser else { throw AccountDeletionError.notSignedIn }
         guard let provider = user.providerData.lazy.compactMap({ SocialProvider(providerID: $0.providerID) }).first else {
             throw AccountDeletionError.unsupportedAccount
         }
         let userID = user.uid
-        // Both dates come from a freshly issued token, so the device clock does not matter.
-        let token = try await user.getIDTokenResult(forcingRefresh: true)
+        let signedInFor: TimeInterval
+        if provider == .apple {
+            // Apple members confirm with Sign in with Apple right before deleting. The fresh sign-in satisfies
+            // Firebase's recent-login rule, and its single-use code lets Firebase revoke the Apple token.
+            guard let apple = appleAuthorization, let code = apple.authorizationCode else {
+                throw AccountDeletionError.appleConfirmationRequired
+            }
+            do {
+                _ = try await user.reauthenticate(with: FirebaseSocialSignInGateway.firebaseCredential(for: apple))
+            } catch {
+                throw AccountDeletionError.appleConfirmationRequired
+            }
+            // Revoked before anything is erased: if Apple cannot be reached, the account and diaries stay as they were.
+            do {
+                try await auth.revokeToken(withAuthorizationCode: code)
+            } catch {
+                let error = error as NSError
+                print("Apple token revoke failed: \(error.domain) \(error.code)")
+                throw AccountDeletionError.appleRevocationFailed
+            }
+            signedInFor = 0
+        } else {
+            // Both dates come from a freshly issued token, so the device clock does not matter.
+            let token = try await user.getIDTokenResult(forcingRefresh: true)
+            signedInFor = token.issuedAtDate.timeIntervalSince(token.authDate)
+        }
         try await AccountDeletion.run(
-            signedInFor: token.issuedAtDate.timeIntervalSince(token.authDate),
+            signedInFor: signedInFor,
             eraseData: { try await dataEraser.eraseAllData(userID: userID) },
             deleteAccount: {
                 do {
@@ -100,9 +124,8 @@ final class FirebaseAccountSession: AccountSession {
                 }
             }
         )
-        // The Apple token is revoked only after the account is gone, so a failed deletion keeps Sign in with Apple working.
         if provider == .apple {
-            appleTokens.revoke()
+            appleRecords.forget()
             try? auth.signOut()
         }
     }

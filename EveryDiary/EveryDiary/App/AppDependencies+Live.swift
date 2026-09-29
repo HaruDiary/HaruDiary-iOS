@@ -5,7 +5,7 @@ import Foundation
 
 extension AppDependencies {
     static func live() -> AppDependencies {
-        let appleTokens = AppleTokenRevocation(store: AppleRefreshTokenStore(secrets: KeychainSecretStore(), legacy: .standard))
+        let appleRecords = AppleSignInRecords(secrets: AppleSignInSecrets(secrets: KeychainSecretStore(), legacy: .standard))
         return AppDependencies(
             diaryRepository: FirebaseDiaryReadingRepository(database: .firestore()),
             userSession: FirebaseDiaryUserSession(auth: .auth()),
@@ -13,9 +13,9 @@ extension AppDependencies {
                 auth: .auth(),
                 dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage()),
                 storage: .storage(),
-                appleTokens: appleTokens
+                appleRecords: appleRecords
             ),
-            signInGateway: FirebaseSocialSignInGateway(auth: .auth(), appleTokens: appleTokens),
+            signInGateway: FirebaseSocialSignInGateway(auth: .auth(), appleRecords: appleRecords),
             diaryTrash: FirebaseDiaryTrash(database: .firestore()),
             calendarImageLoader: CachedCalendarImageLoader(cache: .shared),
             calendar: .current,

@@ -111,19 +111,20 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 
 | 항목 | 이전 | 변경 |
 |---|---|---|
-| Apple refresh token 보관 | `UserDefaults` 평문(`refreshToken`) | Keychain(이 기기 전용·첫 잠금 해제 후, 백업 제외). 앱 시작 시 평문 사본을 옮기고 삭제 |
-| refresh token 응답 | 응답 본문을 그대로 저장(오류 페이지도 저장) | HTTP 200이고 토큰 형식(또는 `refresh_token` JSON)일 때만 저장 |
-| 탈퇴 후 토큰 | 기기에 남음 | 철회 요청 후 refresh token·Apple 사용자 ID 삭제 |
+| Apple refresh token 보관 | `UserDefaults` 평문(`refreshToken`) | 보관하지 않음(Firebase가 탈퇴 시 새 인증 코드로 철회). 남은 토큰은 앱 시작 시 삭제 |
+| 탈퇴 시 Apple 연결 해제 | URL 쿼리로 토큰을 직접 만든 함수에 전송 | Apple 재확인 후 Firebase `revokeToken`, 탈퇴 후 Apple 사용자 ID 삭제 |
 | iPhone 설정에서 Apple 로그인 "삭제" | 앱은 계속 로그인 상태 | 앱 활성화·해제 알림 시 Apple에 확인해 "해제됨"이면 로그아웃. 개발팀 서명이 없는 시뮬레이터 빌드는 Apple이 항상 "해제됨"으로 답해 건너뜀 |
 | 푸시 기기 토큰 | 콘솔 출력 | 출력하지 않음 |
 
 남은 항목:
 - Firestore·Storage 보안 규칙은 2026-09-29 "자기 uid 경로만 허용, 나머지 차단"으로 게시하고 규칙 플레이그라운드에서
   자기 경로 허용·다른 사용자 경로 거부를 확인했다(이전 규칙은 로그인한 누구나 모든 데이터 접근 가능).
-- Apple 토큰 철회는 Cloud Function(`getRefreshToken`·`revokeToken`, us-central1에 배포돼 있으나 소스는 저장소에 없음)이
-  인증 코드·토큰을 URL 쿼리로 받는다. Firebase 기본 기능(`Auth.auth().revokeToken(withAuthorizationCode:)`, 탈퇴 시 Apple 재인증)으로
-  바꾸면 함수·기기 토큰 보관이 필요 없어진다. Apple 비공개 키(.p8)와 Firebase "OAuth 코드 흐름 구성"이 필요한데,
-  Apple Developer Program 멤버십이 만료된 상태라 갱신·App Store 출시 준비 때 진행한다(출시 심사 요구 사항).
+- Apple 토큰 철회는 Firebase 기본 기능으로 바꿨다. Apple 회원이 탈퇴하면 Apple 로그인 창으로 한 번 더 확인하고
+  (Firebase 재인증), 받은 일회용 인증 코드로 `Auth.auth().revokeToken(withAuthorizationCode:)`를 호출해 Apple 연결을 끊은 뒤
+  일기·사진·계정을 삭제한다. 철회가 실패하면 아무것도 지우지 않는다. 기존 Cloud Function(`getRefreshToken`·`revokeToken`) 호출과
+  기기의 refresh token 보관은 없앴다(남아 있던 토큰은 앱 시작 시 삭제). Apple 사용자 ID만 Keychain에 보관한다.
+  필요한 설정: Apple Developer의 Sign in with Apple 키(.p8)와 Firebase Authentication › Apple › "OAuth 코드 흐름 구성".
+  기존 함수는 새 방식 확인·옛 버전 사용자 감소 후 Google Cloud 콘솔에서 삭제한다.
 
 ## 구성
 
@@ -144,9 +145,10 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 | `Features/Settings/ProfilePhotoPreparation.swift` | 앨범 사진 정사각형·크기 제한·JPEG 재인코딩 |
 | `DesignSystem/ProfileAvatarView.swift` | 프로필 이미지 그림(SwiftUI, 설정 셀용 이미지 변환) |
 | `Features/Settings/ProfileEditView.swift` | 프로필 이미지·닉네임 편집 화면(SwiftUI) |
-| `Domain/Account/AppleRefreshTokenStore.swift` | Apple 토큰·사용자 ID 보관 규칙(평문 이전, 응답 검사) |
+| `Domain/Account/AppleRefreshTokenStore.swift` | Apple 사용자 ID 보관 규칙(`AppleSignInSecrets`), 예전 토큰 삭제 |
 | `Data/KeychainSecretStore.swift` | Keychain 저장 |
-| `Data/AppleTokenRevocation.swift` | refresh token 받기·철회·삭제 |
+| `Setting/AppleAuthorizationRequest.swift` | Apple 로그인 창(로그인·탈퇴 확인 공용, nonce 1회 사용) |
+| `Data/AppleSignInRecords.swift` | Apple 사용자 ID 보관·삭제, 예전 refresh token 정리 |
 | `Data/AppleCredentialMonitor.swift` | Apple 로그인 해제 감지와 로그아웃 |
 | `Features/Settings/SettingsViewModel.swift` | 프로필 표시, 로그아웃·탈퇴 결과, 중복 탈퇴 방지 |
 | `Features/Settings/SettingsModule.swift`, `+UIKit.swift` | 설정 상태와 휴지통 생성 연결 |

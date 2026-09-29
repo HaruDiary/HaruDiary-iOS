@@ -4,16 +4,24 @@ import Foundation
 @MainActor
 final class FirebaseSocialSignInGateway: SocialSignInGateway {
     private let auth: Auth
-    private let appleTokens: AppleTokenRevocation
+    private let appleRecords: AppleSignInRecords
 
-    init(auth: Auth, appleTokens: AppleTokenRevocation) {
+    init(auth: Auth, appleRecords: AppleSignInRecords) {
         self.auth = auth
-        self.appleTokens = appleTokens
+        self.appleRecords = appleRecords
     }
 
-    func rememberAppleAuthorization(code: String?, appleUserID: String) {
-        appleTokens.rememberAppleUserID(appleUserID)
-        if let code { appleTokens.storeRefreshToken(authorizationCode: code) }
+    func appleCredential(for authorization: AppleAuthorization) -> SocialCredential {
+        SocialCredential(provider: .apple, raw: Self.firebaseCredential(for: authorization))
+    }
+
+    func rememberAppleUserID(_ id: String) {
+        appleRecords.remember(appleUserID: id)
+    }
+
+    nonisolated static func firebaseCredential(for authorization: AppleAuthorization) -> AuthCredential {
+        OAuthProvider.appleCredential(withIDToken: authorization.identityToken, rawNonce: authorization.rawNonce,
+                                      fullName: authorization.fullName)
     }
 
     var isGuest: Bool? { auth.currentUser.map(\.isAnonymous) }

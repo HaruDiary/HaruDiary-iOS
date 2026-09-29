@@ -6,8 +6,6 @@
 //
 
 import UIKit
-import CryptoKit
-import AuthenticationServices
 
 import SnapKit
 import FirebaseAuth
@@ -17,7 +15,7 @@ import GoogleSignIn
 class LoginVC: UIViewController {
     
     private let gateway: any SocialSignInGateway
-    fileprivate var currentNonce: String?
+    private let appleRequest = AppleAuthorizationRequest()
     private var isSigningIn = false {
         didSet {
             signGoogleButton.isEnabled = !isSigningIn
@@ -257,100 +255,20 @@ extension LoginVC {
 
 // MARK: - Apple로 로그인 및 Firebase 인증
 extension LoginVC {
-    // 로그인 요청마다 임의의 문자열 'nonce' 생성
-    // 'nonce'는 앱의 인증 요청에 대한 응답 -> ID 토큰이 명시적으로 부여되었는지 확인하는 데 사용
-    // 재전송 공격을 방지하기 위한 함수
-    private func randomNonceString(length: Int = 32) -> String {
-        precondition(length > 0)
-        var randomBytes = [UInt8](repeating: 0, count: length)
-        let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
-        if errorCode != errSecSuccess {
-            fatalError(
-                "Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)"
-            )
-        }
-        let charset: [Character] =
-        Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
-        
-        let nonce = randomBytes.map { byte in
-            // Pick a random character from the set, wrapping around if needed.
-            charset[Int(byte) % charset.count]
-        }
-        return String(nonce)
-    }
-    
-    // 'nonce'의 SHA256 해시를 전송하면 Apple은 이에 대한 응답으로 원래의 값 전달
-    // Firebase는 원래의 nonce를 해싱하고 Apple에서 전달한 값과 비교하여 응답을 검증
-    @available(iOS 13, *)
-    private func sha256(_ input: String) -> String {
-        let inputData = Data(input.utf8)
-        let hashedData = SHA256.hash(data: inputData)
-        let hashString = hashedData.compactMap {
-            String(format: "%02x", $0)
-        }.joined()
-        return hashString
-    }
-    
-    // Apple의 응답을 처리하는 대리자 클래스와 nonce의 SHA256 해시를 요청에 포함하는 것으로 Apple의 로그인 과정 시작
-    @available(iOS 13, *)
     private func startSignInWithAppleFlow() {
         guard !isSigningIn else { return }
-        let nonce = randomNonceString()
-        currentNonce = nonce
-        let appleIDProvider = ASAuthorizationAppleIDProvider()
-        let request = appleIDProvider.createRequest()
-        request.requestedScopes = [.fullName, .email]
-        request.nonce = sha256(nonce)
-        
-        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
-        authorizationController.delegate = self
-        authorizationController.presentationContextProvider = self
-        authorizationController.performRequests()
-    }
-}
-
-// MARK: - Delegate 패턴을 이용한 Apple 로그인 처리
-// delegate를 구현하여 Apple의 응답을 처리.
-// 로그인에 성공했으면 해시되지 않는 nonce가 포함된 Apple의 응답에서 ID 토큰을 이용하여 Firebase에 인증
-@available(iOS 13.0, *)
-extension LoginVC : ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return self.view.window!
-    }
-    
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
-              let nonce = currentNonce,
-              let appleIDToken = appleIDCredential.identityToken,
-              let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-            showSignInFailure(nil)
-            return
+        appleRequest.start(from: self) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let apple):
+                // Apple 로그인 사용 여부 확인에 쓰는 Apple 사용자 ID를 보관한다.
+                self.gateway.rememberAppleUserID(apple.appleUserID)
+                self.completeSignIn(self.gateway.appleCredential(for: apple), displayName: apple.displayName)
+            case .failure(AppleAuthorizationRequest.Failure.canceled):
+                break
+            case .failure(let error):
+                self.showSignInFailure(error)
+            }
         }
-        currentNonce = nil
-        
-        // 변환한 identityToken을 Firebase 로그인 인증에 맞게 할당
-        let credential = OAuthProvider.appleCredential(withIDToken: idTokenString,
-                                                       rawNonce: nonce,
-                                                       fullName: appleIDCredential.fullName)
-        let displayName = [appleIDCredential.fullName?.givenName, appleIDCredential.fullName?.familyName]
-            .compactMap { $0 }
-            .joined(separator: " ")
-        completeSignIn(SocialCredential(provider: .apple, raw: credential), displayName: displayName)
-        storeAppleRefreshToken(from: appleIDCredential)
-    }
-    
-    // 로그인이 제대로 되지 않았을 경우, 사용자가 닫은 경우가 아니면 알린다.
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        currentNonce = nil
-        if (error as? ASAuthorizationError)?.code != .canceled {
-            showSignInFailure(error)
-        }
-    }
-    
-    // 회원 탈퇴 시 Apple 토큰 철회에 필요한 refresh token을 로그인 때 미리 받아 Keychain에 둔다.
-    // Apple 로그인 사용 여부 확인에는 Apple이 준 사용자 ID(credential.user)를 써야 해서 함께 보관한다.
-    private func storeAppleRefreshToken(from credential: ASAuthorizationAppleIDCredential) {
-        let code = credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
-        gateway.rememberAppleAuthorization(code: code, appleUserID: credential.user)
     }
 }

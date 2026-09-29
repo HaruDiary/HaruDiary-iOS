@@ -6,12 +6,12 @@ import Foundation
 @MainActor
 final class AppleCredentialMonitor {
     private let auth: Auth
-    private let appleTokens: AppleTokenRevocation
+    private let appleRecords: AppleSignInRecords
     private var revokedObserver: NSObjectProtocol?
 
-    init(auth: Auth, appleTokens: AppleTokenRevocation) {
+    init(auth: Auth, appleRecords: AppleSignInRecords) {
         self.auth = auth
-        self.appleTokens = appleTokens
+        self.appleRecords = appleRecords
         // Sent while the app runs when the member stops Sign in with Apple for it.
         revokedObserver = NotificationCenter.default.addObserver(
             forName: ASAuthorizationAppleIDProvider.credentialRevokedNotification, object: nil, queue: .main
@@ -35,7 +35,7 @@ final class AppleCredentialMonitor {
         // the linked Apple sign-in (checked to be identical on a device).
         guard let user = auth.currentUser,
               let linkedAppleID = user.providerData.first(where: { $0.providerID == "apple.com" })?.uid else { return }
-        let appleUserID = appleTokens.appleUserID ?? linkedAppleID
+        let appleUserID = appleRecords.appleUserID ?? linkedAppleID
         let firebaseUserID = user.uid
         ASAuthorizationAppleIDProvider().getCredentialState(forUserID: appleUserID) { state, _ in
             let status: AppleCredentialStatus

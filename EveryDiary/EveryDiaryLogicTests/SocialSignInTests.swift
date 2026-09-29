@@ -106,7 +106,8 @@ private final class FakeSignInGateway: SocialSignInGateway {
         calls.append("name:\(name)")
     }
 
-    func rememberAppleAuthorization(code: String?, appleUserID: String) {}
+    func appleCredential(for authorization: AppleAuthorization) -> SocialCredential { SocialCredential(provider: .apple, raw: NSObject()) }
+    func rememberAppleUserID(_ id: String) {}
 }
 
 /// For dependency-assembly tests that never open the login screen.
@@ -118,5 +119,6 @@ final class UnusedSignInGateway: SocialSignInGateway {
     func signIn(with credential: SocialCredential) async throws { XCTFail("Login is not used here") }
     func switchFromGuest(to credential: SocialCredential) async throws { XCTFail("Login is not used here") }
     func updateDisplayName(_ name: String) async throws {}
-    func rememberAppleAuthorization(code: String?, appleUserID: String) {}
+    func appleCredential(for authorization: AppleAuthorization) -> SocialCredential { SocialCredential(provider: .apple, raw: NSObject()) }
+    func rememberAppleUserID(_ id: String) {}
 }

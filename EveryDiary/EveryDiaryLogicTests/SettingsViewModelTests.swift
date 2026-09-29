@@ -239,6 +239,37 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertEqual(model.notice, .deletionFailed)
     }
 
+    // Apple members confirm with Sign in with Apple; its result is what lets Firebase revoke the Apple token.
+    func testAppleMemberConfirmsWithAppleBeforeDeleting() async throws {
+        let session = FakeAccountSession()
+        let model = SettingsViewModel(session: session)
+        model.start()
+        defer { model.stop() }
+        session.send(member(provider: "apple.com"))
+        try await waitUntil { model.canManageAccount }
+        XCTAssertTrue(model.needsAppleConfirmationToDelete)
+
+        let apple = AppleAuthorization(identityToken: "t", rawNonce: "n", authorizationCode: "c", appleUserID: "apple-1", fullName: nil)
+        await model.deleteAccount(appleAuthorization: apple)
+        XCTAssertEqual(session.appleAuthorizations, ["apple-1"])
+        XCTAssertEqual(model.notice, .accountDeleted)
+
+        session.deleteError = AccountDeletionError.appleRevocationFailed
+        await model.deleteAccount(appleAuthorization: apple)
+        XCTAssertEqual(model.notice, .appleRevocationFailed)
+
+        session.deleteError = AccountDeletionError.appleConfirmationRequired
+        await model.deleteAccount(appleAuthorization: apple)
+        XCTAssertEqual(model.notice, .appleConfirmationFailed)
+    }
+
+    func testGoogleMemberDeletesWithoutAppleConfirmation() async throws {
+        let session = FakeAccountSession()
+        let model = try await signedInModel(session)
+        defer { model.stop() }
+        XCTAssertFalse(model.needsAppleConfirmationToDelete)
+    }
+
     func testGuestCannotDeleteAndRepeatedTapsDeleteOnce() async throws {
         let guestSession = FakeAccountSession()
         let guest = SettingsViewModel(session: guestSession)
@@ -309,8 +340,11 @@ final class FakeAccountSession: AccountSession {
         }
     }
 
-    func deleteAccount() async throws {
+    private(set) var appleAuthorizations: [String] = []
+
+    func deleteAccount(appleAuthorization: AppleAuthorization?) async throws {
         deleteCount += 1
+        if let appleAuthorization { appleAuthorizations.append(appleAuthorization.appleUserID) }
         if suspendsDeletion {
             await withCheckedContinuation { pendingDeletion = $0 }
         }
@@ -332,7 +366,7 @@ final class UnusedAccountSession: AccountSession {
         XCTFail("Settings is not used here")
         return .avatar(.google)
     }
-    func deleteAccount() async throws { XCTFail("Settings is not used here") }
+    func deleteAccount(appleAuthorization: AppleAuthorization?) async throws { XCTFail("Settings is not used here") }
 }
 
 @MainActor

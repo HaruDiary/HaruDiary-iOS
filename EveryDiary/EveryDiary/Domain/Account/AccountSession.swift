@@ -12,8 +12,9 @@ protocol AccountSession {
     /// Returns the picture now on the profile.
     func updateProfile(nickname: String, picture: ProfilePictureSelection) async throws -> ProfilePicture
     /// Erases the user's diaries and photos, then deletes the signed-in Google/Apple account.
-    /// Apple also revokes its token.
-    func deleteAccount() async throws
+    /// Apple members pass a fresh Sign in with Apple result: it confirms the member and lets Firebase
+    /// revoke the Apple token before anything is erased.
+    func deleteAccount(appleAuthorization: AppleAuthorization?) async throws
 }
 
 enum AccountDeletionError: Error, Equatable {
@@ -26,4 +27,8 @@ enum AccountDeletionError: Error, Equatable {
     case dataErasureFailed
     /// Diaries and photos were erased, but the account needs a new sign-in before it can be deleted.
     case dataErasedNeedsRecentLogin
+    /// An Apple member must confirm with Sign in with Apple (the same Apple ID) before deleting.
+    case appleConfirmationRequired
+    /// Firebase could not revoke the Apple token; nothing was erased.
+    case appleRevocationFailed
 }

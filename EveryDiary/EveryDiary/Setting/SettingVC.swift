@@ -22,6 +22,7 @@ class SettingVC: UIViewController {
     // 올린 프로필 사진은 한 번 받아 두고, 주소가 바뀔 때만 다시 받는다. 주소에는 접근 토큰이 있어 기록하지 않는다.
     private var profilePhoto: (url: URL, image: UIImage)?
     private var profilePhotoTask: Task<Void, Never>?
+    private let appleRequest = AppleAuthorizationRequest()
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -200,6 +201,10 @@ extension SettingVC {
             presentAlert(title: "다시 로그인이 필요해요", message: "보안을 위해 로그아웃 후 다시 로그인한 뒤\n바로 탈퇴해주세요.")
         case .dataErasedNeedsRecentLogin:
             presentAlert(title: "탈퇴를 마치려면 다시 로그인해주세요", message: "일기와 사진은 모두 삭제되었어요.\n로그아웃 후 다시 로그인한 뒤 탈퇴를 한 번 더 눌러주세요.")
+        case .appleConfirmationFailed:
+            presentAlert(title: "회원 탈퇴 실패", message: "로그인한 Apple 계정으로 확인해주세요.\n다른 Apple 계정으로는 탈퇴할 수 없어요.")
+        case .appleRevocationFailed:
+            presentAlert(title: "회원 탈퇴 실패", message: "Apple 로그인 연결을 해제하지 못해 탈퇴를 멈췄어요.\n일기와 사진은 그대로예요. 잠시 후 다시 시도해주세요.")
         case .dataErasureFailed:
             presentAlert(title: "회원 탈퇴 실패", message: "일기와 사진을 모두 지우지 못해 탈퇴를 멈췄어요.\n잠시 후 다시 시도해주세요.")
         case .deletionFailed:
@@ -238,13 +243,32 @@ extension SettingVC {
         self.present(loginVC, animated: true)
     }
     
+    // Apple 회원은 탈퇴 직전에 Apple로 한 번 더 확인한다. 이 확인으로 Firebase가 Apple 연결을 끊는다.
+    private func confirmWithAppleThenDelete() {
+        appleRequest.start(from: self) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let apple):
+                Task { await self.viewModel.deleteAccount(appleAuthorization: apple) }
+            case .failure(AppleAuthorizationRequest.Failure.canceled):
+                break
+            case .failure:
+                self.presentAlert(title: "Apple 확인 실패", message: "Apple 계정을 확인하지 못했어요.\n잠시 후 다시 시도해주세요.")
+            }
+        }
+    }
+    
     // 회원 탈퇴 재차 확인
     func showDeleteAccountMessage() {
         let alert = UIAlertController(title: "회원 탈퇴하시겠습니까?", message: "작성한 일기와 사진이 모두 삭제되며 복구할 수 없습니다.\n그래도 진행하시겠습니까?", preferredStyle: .actionSheet)
         
         let deleteAction = UIAlertAction(title: "회원 탈퇴", style: .destructive) { [weak self] _ in
             guard let self else { return }
-            Task { await self.viewModel.deleteAccount() }
+            if self.viewModel.needsAppleConfirmationToDelete {
+                self.confirmWithAppleThenDelete()
+            } else {
+                Task { await self.viewModel.deleteAccount() }
+            }
         }
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         

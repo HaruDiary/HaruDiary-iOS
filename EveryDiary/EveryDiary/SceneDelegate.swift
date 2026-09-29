@@ -15,7 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     // Created after FirebaseApp.configure() in AppDelegate.
     private lazy var appleCredentialMonitor = AppleCredentialMonitor(
         auth: .auth(),
-        appleTokens: AppleTokenRevocation(store: AppleRefreshTokenStore(secrets: KeychainSecretStore(), legacy: .standard))
+        appleRecords: AppleSignInRecords(secrets: AppleSignInSecrets(secrets: KeychainSecretStore(), legacy: .standard))
     )
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
