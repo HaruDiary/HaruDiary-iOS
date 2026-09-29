@@ -18,7 +18,7 @@ final class DiarySaveCoordinatorTests: XCTestCase {
         let storage = SaveTestImages()
         let writer = SaveTestWriter()
         let coordinator = DiarySaveCoordinator(authentication: auth, images: storage, entries: writer)
-        var results: [Result<Void, Error>] = []
+        var results: [Result<DiarySaveOutcome, Error>] = []
 
         coordinator.create(entry(), images: []) { results.append($0) }
 
@@ -57,7 +57,7 @@ final class DiarySaveCoordinatorTests: XCTestCase {
         let storage = SaveTestImages()
         let writer = SaveTestWriter()
         let coordinator = DiarySaveCoordinator(authentication: auth, images: storage, entries: writer)
-        var results: [Result<Void, Error>] = []
+        var results: [Result<DiarySaveOutcome, Error>] = []
 
         coordinator.create(entry(), images: [image(1)]) { results.append($0) }
 
@@ -108,13 +108,13 @@ final class DiarySaveCoordinatorTests: XCTestCase {
         let coordinator = DiarySaveCoordinator(authentication: auth, images: storage, entries: writer)
         let finished = expectation(description: "Upload failure delivered")
 
-        coordinator.update(entry(), diaryID: "diary-1", expectedUserID: "user-a",
+        var updated = entry()
+        updated.title = "바꾼 제목"
+        coordinator.update(updated, diaryID: "diary-1", expectedUserID: "user-a",
                            existingImageURLs: ["old"],
                            images: [image(1), image(2)]) { result in
-            if case .failure(let error) = result {
-                XCTAssertEqual(error as? DiarySaveError, .photoUploadFailed(1))
-            } else {
-                XCTFail("A failed photo must not be saved over the existing diary")
+            if case .success(.savedWithMissingPhotos(1)) = result {} else {
+                XCTFail("Text must be saved and the missing photo reported")
             }
             finished.fulfill()
         }
@@ -127,7 +127,78 @@ final class DiarySaveCoordinatorTests: XCTestCase {
             deletionReady.fulfill()
         }
         await fulfillment(of: [finished, deletionReady], timeout: 3)
-        XCTAssertTrue(writer.updated.isEmpty)
+        XCTAssertEqual(writer.updated.first?.entry.title, "바꾼 제목")
+        XCTAssertEqual(writer.updated.first?.entry.imageURL, ["old"])
+    }
+
+    func testCreateReportsMissingPhotosAndStillWritesTheDiary() async {
+        let auth = SaveTestAuthentication()
+        let storage = SaveTestImages()
+        let writer = SaveTestWriter()
+        let coordinator = DiarySaveCoordinator(authentication: auth, images: storage, entries: writer)
+        let finished = expectation(description: "Partial create saved")
+
+        coordinator.create(entry(), images: [image(1), image(2)], unreadablePhotoCount: 1) { result in
+            if case .success(.savedWithMissingPhotos(2)) = result {} else {
+                XCTFail("A missing photo must be reported after the diary is saved")
+            }
+            finished.fulfill()
+        }
+        storage.completeUpload(at: 0, url: nil)
+        storage.completeUpload(at: 1, url: "kept")
+        await fulfillment(of: [finished], timeout: 3)
+        XCTAssertEqual(writer.created.first?.entry.imageURL, ["kept"])
+    }
+
+    func testCreateDeletesUploadedPhotosWhenTheDiaryWriteFails() async {
+        let auth = SaveTestAuthentication()
+        let storage = SaveTestImages()
+        let writer = SaveTestWriter()
+        writer.error = SaveTestError.failed
+        let coordinator = DiarySaveCoordinator(authentication: auth, images: storage, entries: writer)
+        let finished = expectation(description: "Create failure delivered")
+
+        coordinator.create(entry(), images: [image(1)]) { result in
+            if case .failure = result {} else { XCTFail("Writer failure must be reported") }
+            finished.fulfill()
+        }
+        storage.completeUpload(at: 0, url: "orphan")
+        let deletionReady = expectation(description: "Orphan upload removed")
+        DispatchQueue.main.async {
+            XCTAssertEqual(storage.deletions.map(\.url), ["orphan"])
+            storage.completeDeletion(at: 0)
+            deletionReady.fulfill()
+        }
+        await fulfillment(of: [finished, deletionReady], timeout: 3)
+    }
+
+    func testUpdateKeepsExistingPhotosWhenAPhotoCannotBeRead() async {
+        let auth = SaveTestAuthentication()
+        let storage = SaveTestImages()
+        let writer = SaveTestWriter()
+        let coordinator = DiarySaveCoordinator(authentication: auth, images: storage, entries: writer)
+        let finished = expectation(description: "Unreadable photo reported")
+        var updated = entry()
+        updated.content = "바꾼 본문"
+
+        coordinator.update(updated, diaryID: "diary-1", expectedUserID: "user-a",
+                           existingImageURLs: ["old"], images: [image(1)],
+                           unreadablePhotoCount: 1) { result in
+            if case .success(.savedWithMissingPhotos(1)) = result {} else {
+                XCTFail("An unreadable photo must stop replacement")
+            }
+            finished.fulfill()
+        }
+        storage.completeUpload(at: 0, url: "new")
+        let deletionReady = expectation(description: "New upload removed")
+        DispatchQueue.main.async {
+            storage.completeDeletion(at: 0)
+            deletionReady.fulfill()
+        }
+        await fulfillment(of: [finished, deletionReady], timeout: 3)
+        XCTAssertEqual(writer.updated.first?.entry.content, "바꾼 본문")
+        XCTAssertEqual(writer.updated.first?.entry.imageURL, ["old"])
+        XCTAssertEqual(storage.deletions.map(\.url), ["new"])
     }
 
     func testSignedOutUpdateNeverDeletesPhotos() {
@@ -136,7 +207,7 @@ final class DiarySaveCoordinatorTests: XCTestCase {
         let storage = SaveTestImages()
         let writer = SaveTestWriter()
         let coordinator = DiarySaveCoordinator(authentication: auth, images: storage, entries: writer)
-        var results: [Result<Void, Error>] = []
+        var results: [Result<DiarySaveOutcome, Error>] = []
 
         coordinator.update(entry(), diaryID: "diary-1", expectedUserID: "user-a",
                            existingImageURLs: ["old"],
@@ -159,7 +230,7 @@ final class DiarySaveCoordinatorTests: XCTestCase {
         let storage = SaveTestImages()
         let writer = SaveTestWriter()
         let coordinator = DiarySaveCoordinator(authentication: auth, images: storage, entries: writer)
-        var result: Result<Void, Error>?
+        var result: Result<DiarySaveOutcome, Error>?
 
         coordinator.update(entry(), diaryID: "diary-1", expectedUserID: "user-a",
                            existingImageURLs: ["old"], images: [image(1)]) { result = $0 }
@@ -183,14 +254,16 @@ private enum SaveTestError: Error {
 final class UnusedDiarySaving: DiarySaving {
     var currentUserID: String? { "test-user" }
     func create(_ entry: DiaryEntry, images uploads: [DiaryImageUpload],
-                completion: @escaping (Result<Void, Error>) -> Void) {
+                unreadablePhotoCount: Int,
+                completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         XCTFail("Composition must not save a diary")
     }
 
     func update(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
                 existingImageURLs: [String],
                 images uploads: [DiaryImageUpload],
-                completion: @escaping (Result<Void, Error>) -> Void) {
+                unreadablePhotoCount: Int,
+                completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         XCTFail("Composition must not update a diary")
     }
 }

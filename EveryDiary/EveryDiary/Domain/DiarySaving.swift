@@ -28,18 +28,24 @@ protocol DiaryEntryWriting {
 enum DiarySaveError: Error, Equatable {
     case signedOut
     case accountChanged
-    case photoUploadFailed(Int)
+}
+
+enum DiarySaveOutcome: Equatable {
+    case saved
+    case savedWithMissingPhotos(Int)
 }
 
 @MainActor
 protocol DiarySaving {
     var currentUserID: String? { get }
     func create(_ entry: DiaryEntry, images uploads: [DiaryImageUpload],
-                completion: @escaping (Result<Void, Error>) -> Void)
+                unreadablePhotoCount: Int,
+                completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void)
     func update(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
                 existingImageURLs: [String],
                 images uploads: [DiaryImageUpload],
-                completion: @escaping (Result<Void, Error>) -> Void)
+                unreadablePhotoCount: Int,
+                completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void)
 }
 
 @MainActor
@@ -57,17 +63,23 @@ final class DiarySaveCoordinator: DiarySaving {
     }
 
     func create(_ entry: DiaryEntry, images uploads: [DiaryImageUpload],
-                completion: @escaping (Result<Void, Error>) -> Void) {
+                unreadablePhotoCount: Int = 0,
+                completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         authentication.authenticateIfNeeded { result in
             switch result {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let userID):
                 self.upload(uploads, userID: userID) { urls in
+                    let missing = unreadablePhotoCount + uploads.count - urls.count
                     var entry = entry
                     entry.imageURL = urls
                     self.entries.create(entry, userID: userID) { error in
-                        completion(error.map(Result.failure) ?? .success(()))
+                        if let error {
+                            self.delete(urls) { completion(.failure(error)) }
+                            return
+                        }
+                        completion(.success(missing > 0 ? .savedWithMissingPhotos(missing) : .saved))
                     }
                 }
             }
@@ -77,7 +89,8 @@ final class DiarySaveCoordinator: DiarySaving {
     func update(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
                 existingImageURLs: [String],
                 images uploads: [DiaryImageUpload],
-                completion: @escaping (Result<Void, Error>) -> Void) {
+                unreadablePhotoCount: Int = 0,
+                completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         guard let userID = authentication.currentUserID else {
             completion(.failure(DiarySaveError.signedOut))
             return
@@ -87,10 +100,18 @@ final class DiarySaveCoordinator: DiarySaving {
             return
         }
         upload(uploads, userID: userID) { urls in
-            let failedCount = uploads.count - urls.count
-            guard failedCount == 0 else {
+            let missing = unreadablePhotoCount + uploads.count - urls.count
+            if missing > 0 {
                 self.delete(urls) {
-                    completion(.failure(DiarySaveError.photoUploadFailed(failedCount)))
+                    var kept = entry
+                    kept.imageURL = existingImageURLs.isEmpty ? nil : existingImageURLs
+                    self.entries.update(kept, diaryID: diaryID, userID: userID) { error in
+                        if let error {
+                            completion(.failure(error))
+                            return
+                        }
+                        completion(.success(.savedWithMissingPhotos(missing)))
+                    }
                 }
                 return
             }
@@ -102,7 +123,7 @@ final class DiarySaveCoordinator: DiarySaving {
                     return
                 }
                 let replaced = existingImageURLs.filter { !urls.contains($0) }
-                self.delete(replaced) { completion(.success(())) }
+                self.delete(replaced) { completion(.success(.saved)) }
             }
         }
     }

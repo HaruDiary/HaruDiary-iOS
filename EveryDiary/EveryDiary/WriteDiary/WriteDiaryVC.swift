@@ -231,7 +231,6 @@ extension WriteDiaryVC {
         loadingDiaryDelegate?.diaryUploadDidStart()
         DiaryWriteRetention.shared.retain(self)
 
-        let presenter = presentingViewController
         let newEntry = DiaryEntry(
             title: titleTextField.text ?? "",
             content: contentTextView.text == textViewPlaceHolder ? "" : contentTextView.text ?? "",
@@ -242,38 +241,49 @@ extension WriteDiaryVC {
             useMetadataLocation: useMetadataLocation,
             currentLocationInfo: currentLocationInfo ?? ""
         )
-        let uploads = preparedImageUploads()
+        let prepared = preparedImageUploads()
         self.dismiss(animated: true) { [weak self] in
             guard let self = self else { return }
-            self.saver.create(newEntry, images: uploads) { [weak self] result in
-                self?.finishSave(result, failureTitle: "업로드 실패", presenter: presenter)
+            self.saver.create(newEntry, images: prepared.uploads,
+                              unreadablePhotoCount: prepared.unreadableCount) { [weak self] result in
+                self?.finishSave(result, failureTitle: "업로드 실패")
             }
         }
     }
 
-    private func preparedImageUploads() -> [DiaryImageUpload] {
-        imagesLocationInfo.compactMap { image in
+    private func preparedImageUploads() -> (uploads: [DiaryImageUpload], unreadableCount: Int) {
+        var uploads: [DiaryImageUpload] = []
+        var unreadableCount = 0
+        for image in imagesLocationInfo {
             guard let assetIdentifier = image.assetIdentifier,
-                  let data = image.image.jpegData(compressionQuality: 0.4) else { return nil }
-            return DiaryImageUpload(data: data, assetIdentifier: assetIdentifier,
-                                    captureTime: image.captureTime, location: image.location)
+                  let data = image.image.jpegData(compressionQuality: 0.4) else {
+                unreadableCount += 1
+                continue
+            }
+            uploads.append(DiaryImageUpload(data: data, assetIdentifier: assetIdentifier,
+                                            captureTime: image.captureTime, location: image.location))
         }
+        return (uploads, unreadableCount)
     }
 
-    private func finishSave(_ result: Result<Void, Error>, failureTitle: String,
-                            presenter: UIViewController?) {
+    private func finishSave(_ result: Result<DiarySaveOutcome, Error>, failureTitle: String) {
         isSavingDiary = false
         switch result {
-        case .success:
+        case .success(.saved):
             delegate?.diaryDidUpdate()
+        case .success(.savedWithMissingPhotos(let count)):
+            delegate?.diaryDidUpdate()
+            TemporaryAlert.presentOnTopScreen(
+                with: "사진 저장 실패",
+                message: "글은 저장했습니다. 사진 \(count)장은 저장하지 못했습니다.",
+                interval: 2.0
+            )
         case .failure(let error):
             print("Error saving diary: \(error.localizedDescription)")
-            if let presenter {
-                TemporaryAlert.presentTemporaryMessage(
-                    with: failureTitle, message: "일기를 저장하지 못했습니다.\n잠시 후 다시 시도해주세요.",
-                    interval: 2.0, for: presenter
-                )
-            }
+            TemporaryAlert.presentOnTopScreen(
+                with: failureTitle, message: "일기를 저장하지 못했습니다.\n잠시 후 다시 시도해주세요.",
+                interval: 2.0
+            )
         }
         loadingDiaryDelegate?.diaryUploadDidFinish()
         DiaryWriteRetention.shared.release(self)
@@ -310,15 +320,15 @@ extension WriteDiaryVC {
         updatedEntry.weather = selectedWeather
         updatedEntry.useMetadataLocation = useMetadataLocation
         updatedEntry.currentLocationInfo = currentLocationInfo
-        let uploads = preparedImageUploads()
+        let prepared = preparedImageUploads()
         let existingURLs = existingImageURLs
-        let presenter = presentingViewController
         dismiss(animated: true) { [weak self] in
             guard let self else { return }
             self.saver.update(updatedEntry, diaryID: diaryID, expectedUserID: editingUserID,
                               existingImageURLs: existingURLs,
-                              images: uploads) { [weak self] result in
-                self?.finishSave(result, failureTitle: "업데이트 실패", presenter: presenter)
+                              images: prepared.uploads,
+                              unreadablePhotoCount: prepared.unreadableCount) { [weak self] result in
+                self?.finishSave(result, failureTitle: "업데이트 실패")
             }
         }
     }
