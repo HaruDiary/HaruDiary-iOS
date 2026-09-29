@@ -117,8 +117,13 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 | iPhone 설정에서 Apple 로그인 "삭제" | 앱은 계속 로그인 상태 | 앱 활성화·해제 알림 시 Apple에 확인해 "해제됨"이면 로그아웃. 개발팀 서명이 없는 시뮬레이터 빌드는 Apple이 항상 "해제됨"으로 답해 건너뜀 |
 | 푸시 기기 토큰 | 콘솔 출력 | 출력하지 않음 |
 
-남은 항목: Cloud Function(`getRefreshToken`·`revokeToken`)이 인증 코드·토큰을 URL 쿼리로 받는다. 함수 코드가 저장소에 없어
-POST 본문으로 바꾸려면 서버와 함께 수정해야 한다. Firestore·Storage 보안 규칙도 콘솔에서 별도 점검이 필요하다.
+남은 항목:
+- Firestore·Storage 보안 규칙은 2026-09-29 "자기 uid 경로만 허용, 나머지 차단"으로 게시하고 규칙 플레이그라운드에서
+  자기 경로 허용·다른 사용자 경로 거부를 확인했다(이전 규칙은 로그인한 누구나 모든 데이터 접근 가능).
+- Apple 토큰 철회는 Cloud Function(`getRefreshToken`·`revokeToken`, us-central1에 배포돼 있으나 소스는 저장소에 없음)이
+  인증 코드·토큰을 URL 쿼리로 받는다. Firebase 기본 기능(`Auth.auth().revokeToken(withAuthorizationCode:)`, 탈퇴 시 Apple 재인증)으로
+  바꾸면 함수·기기 토큰 보관이 필요 없어진다. Apple 비공개 키(.p8)와 Firebase "OAuth 코드 흐름 구성"이 필요한데,
+  Apple Developer Program 멤버십이 만료된 상태라 갱신·App Store 출시 준비 때 진행한다(출시 심사 요구 사항).
 
 ## 구성
 
