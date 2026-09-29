@@ -31,6 +31,22 @@ struct JourneyYearsView: View {
             .scrollIndicators(.hidden)
             .clipped()
         }
+        .overlay(alignment: .top) {
+            if viewModel.state == .failed {
+                // Same recovery as the calendar: the subscription can be started again once the network is back.
+                HStack(spacing: DiaryTheme.Spacing.small) {
+                    Text("여정을 불러오지 못했어요")
+                    Button("다시 시도") { viewModel.retry() }
+                        .fontWeight(.semibold)
+                        .frame(minHeight: DiaryTheme.Size.touchTarget)
+                }
+                .font(DiaryTheme.Fonts.body)
+                .foregroundStyle(DiaryTheme.Colors.error)
+                .padding(.horizontal, DiaryTheme.Spacing.screen)
+                .background(DiaryTheme.Colors.surface, in: Capsule())
+                .padding(.top, DiaryTheme.Spacing.small)
+            }
+        }
         .background(DiaryTheme.Colors.background.ignoresSafeArea())
     }
 

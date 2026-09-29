@@ -57,6 +57,21 @@ class MotivationVC: UIViewController {
         return countLabel
     }()
     
+    // Shown when the diary subscription fails, so the journey can be loaded again once the network is back.
+    private lazy var retryButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.title = "다시 불러오기"
+        config.image = UIImage(systemName: "arrow.clockwise")
+        config.imagePadding = 6
+        config.cornerStyle = .capsule
+        config.baseBackgroundColor = UIColor.white.withAlphaComponent(0.25)
+        config.baseForegroundColor = .white
+        let button = UIButton(configuration: config)
+        button.addTarget(self, action: #selector(tapRetry), for: .touchUpInside)
+        button.isHidden = true
+        return button
+    }()
+    
     private lazy var sceneLabel: UILabel = {
         let sceneLabel = UILabel()
         sceneLabel.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
@@ -69,6 +84,7 @@ class MotivationVC: UIViewController {
         setNavigationBar()
         // The month is read again here, so it moves on while the app stays open.
         render()
+        if viewModel.state == .failed { viewModel.retry() }
     }
     
     override func viewDidLoad() {
@@ -83,6 +99,7 @@ class MotivationVC: UIViewController {
     private func observeViewModel() {
         withObservationTracking {
             _ = viewModel.record
+            _ = viewModel.state
         } onChange: { [weak self] in
             Task { @MainActor [weak self] in
                 self?.render()
@@ -95,7 +112,9 @@ class MotivationVC: UIViewController {
     private func render() {
         let month = viewModel.currentMonth
         monthLabel.text = "\(month.month)월"
-        countLabel.text = "\(viewModel.numberOfDaysInCurrentMonth)일 중 \(month.days.count)개 작성했어요."
+        let failed = viewModel.state == .failed
+        countLabel.text = failed ? "여정을 불러오지 못했어요." : "\(viewModel.numberOfDaysInCurrentMonth)일 중 \(month.days.count)개 작성했어요."
+        retryButton.isHidden = !failed
         sceneLabel.text = JourneySceneCatalog.scene(for: month.month).title
         scene.rootView = makeSceneView()
     }
@@ -120,6 +139,10 @@ class MotivationVC: UIViewController {
         self.present(writeDiaryVC, animated: true)
     }
     
+    @objc private func tapRetry() {
+        viewModel.retry()
+    }
+    
     @objc private func honorVCBTN() {
         let honorVC = JourneyCollectionHostingController(viewModel: viewModel)
         honorVC.hidesBottomBarWhenPushed = true
@@ -137,6 +160,7 @@ class MotivationVC: UIViewController {
         view.addSubview(monthLabel)
         view.addSubview(countLabel)
         view.addSubview(sceneLabel)
+        view.addSubview(retryButton)
         [monthLabel, countLabel, sceneLabel].forEach {
             $0.layer.shadowColor = UIColor.black.cgColor
             $0.layer.shadowOpacity = 0.3
@@ -164,6 +188,10 @@ class MotivationVC: UIViewController {
         }
         sceneLabel.snp.makeConstraints { make in
             make.top.equalTo(countLabel.snp.bottom).offset(6)
+            make.centerX.equalToSuperview()
+        }
+        retryButton.snp.makeConstraints { make in
+            make.top.equalTo(sceneLabel.snp.bottom).offset(12)
             make.centerX.equalToSuperview()
         }
     }
