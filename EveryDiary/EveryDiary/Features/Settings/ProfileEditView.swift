@@ -56,7 +56,7 @@ struct ProfileEditView: View {
 
     private var avatarGrid: some View {
         VStack(alignment: .leading, spacing: DiaryTheme.Spacing.medium) {
-            Text("프로필 이미지")
+            Text("프로필 색상")
                 .font(DiaryTheme.Fonts.section)
                 .foregroundStyle(DiaryTheme.Colors.text)
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: DiaryTheme.Spacing.medium), count: 4),
@@ -108,14 +108,14 @@ struct ProfileEditView: View {
 
     private static func label(for avatar: ProfileAvatar) -> String {
         switch avatar {
-        case .moon: "달과 별"
-        case .sparkles: "반짝임"
-        case .leaf: "나뭇잎"
-        case .cloud: "구름"
-        case .sun: "해"
-        case .book: "책"
-        case .cup: "커피잔"
-        case .heart: "하트"
+        case .purple: "보라"
+        case .violet: "바이올렛"
+        case .lavender: "라벤더"
+        case .green: "초록"
+        case .blue: "파랑"
+        case .orange: "주황"
+        case .brown: "갈색"
+        case .pink: "분홍"
         }
     }
 }

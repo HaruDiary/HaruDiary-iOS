@@ -82,8 +82,8 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
   `이메일 가림`, 이메일이 없으면 `이메일 정보 없음`. 닉네임이 없으면 `닉네임을 설정해주세요`.
 - 로그인 상태에서 프로필 카드(연필 아이콘)를 누르면 "프로필 편집" 화면에서 프로필 이미지와 닉네임을 함께 바꾼다.
   닉네임은 앞뒤 공백을 빼고 1~20자(보이는 글자 기준). 잘못된 닉네임이면 저장 버튼이 꺼지고 이유를 표시한다.
-- 프로필 이미지는 앱 보라색 계열 그라데이션 위 흰 아이콘 8종(달과 별·반짝임·나뭇잎·구름·해·책·커피잔·하트).
-  로그인 방식을 글자로 표시하므로 Google·Apple 전용 프로필 이미지는 쓰지 않는다. 고르지 않았으면 달과 별, 손님은 기본 사람 모양.
+- 프로필 이미지는 흰 사람 모양에 배경색만 다른 8종(보라·바이올렛·라벤더·초록·파랑·주황·갈색·분홍). 꾸밈 없이 단색이다.
+  로그인 방식을 글자로 표시하므로 Google·Apple 전용 프로필 이미지는 쓰지 않는다. 고르지 않았으면 보라, 손님은 회색.
   선택값은 Firebase Auth 사진 URL(`harudiary-avatar://…`)에 저장한다. Google 계정 사진 등 다른 주소는 기본 이미지로 본다.
 - 기존 `googleProfile`·`appleProfile` 이미지 자산은 참조를 없앴고, 앱 확인 후 별도로 삭제한다.
 - 손님에서 가입(연결)한 직후에는 항상, 그 외 로그인은 닉네임이 없을 때 닉네임 입력을 묻는다. "나중에"로 건너뛸 수 있다.
@@ -111,7 +111,7 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 | `Data/FirebaseSocialSignInGateway.swift` | Firebase 로그인·연결·전환·이름 저장 |
 | `Domain/Account/Nickname.swift` | 닉네임 규칙(공백 제거, 1~20자) |
 | `Setting/NicknameAlert.swift` | 로그인 직후 닉네임 입력 창 |
-| `Domain/Account/ProfileAvatar.swift` | 프로필 이미지 종류와 저장 값 |
+| `Domain/Account/ProfileAvatar.swift` | 프로필 색상 종류와 저장 값 |
 | `DesignSystem/ProfileAvatarView.swift` | 프로필 이미지 그림(SwiftUI, 설정 셀용 이미지 변환) |
 | `Features/Settings/ProfileEditView.swift` | 프로필 이미지·닉네임 편집 화면(SwiftUI) |
 | `Features/Settings/SettingsViewModel.swift` | 프로필 표시, 로그아웃·탈퇴 결과, 중복 탈퇴 방지 |

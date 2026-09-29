@@ -1,19 +1,19 @@
 import Foundation
 
 /// The profile picture a member picks. Stored as the Firebase Auth photo URL
-/// (`harudiary-avatar://moon`), so it follows the account without a new diary field.
+/// (`harudiary-avatar://purple`), so it follows the account without a new diary field.
 enum ProfileAvatar: String, CaseIterable, Equatable {
-    case moon
-    case sparkles
-    case leaf
-    case cloud
-    case sun
-    case book
-    case cup
-    case heart
+    case purple
+    case violet
+    case lavender
+    case green
+    case blue
+    case orange
+    case brown
+    case pink
 
     /// Shown until the member picks one.
-    static let `default` = ProfileAvatar.moon
+    static let `default` = ProfileAvatar.purple
 
     private static let scheme = "harudiary-avatar"
 

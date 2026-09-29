@@ -36,8 +36,8 @@ final class SettingsViewModelTests: XCTestCase {
                        .init(name: "로그인해주세요", detail: "일기를 저장하려면 로그인하세요", avatar: nil, isLoggedIn: false))
         XCTAssertEqual(SettingsViewModel.profile(for: .guest, avatar: nil),
                        .init(name: "손님", detail: "일기를 저장하려면 로그인하세요", avatar: nil, isLoggedIn: false))
-        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: "a@example.com", name: "하루", provider: .google), avatar: .leaf),
-                       .init(name: "하루", detail: "Google로 로그인\na@example.com", avatar: .leaf, isLoggedIn: true))
+        XCTAssertEqual(SettingsViewModel.profile(for: .member(email: "a@example.com", name: "하루", provider: .google), avatar: .green),
+                       .init(name: "하루", detail: "Google로 로그인\na@example.com", avatar: .green, isLoggedIn: true))
     }
 
     // Apple sends a name only on the first sign-in and may hide the e-mail, so the profile says how the user signed in.
@@ -65,9 +65,9 @@ final class SettingsViewModelTests: XCTestCase {
         model.start()
         defer { model.stop() }
         var snapshot = member()
-        snapshot.photoURL = ProfileAvatar.cup.storedURL
+        snapshot.photoURL = ProfileAvatar.brown.storedURL
         session.send(snapshot)
-        try await waitUntil { model.profile.avatar == .cup }
+        try await waitUntil { model.profile.avatar == .brown }
     }
 
     // MARK: - Nickname
@@ -86,13 +86,13 @@ final class SettingsViewModelTests: XCTestCase {
         let model = try await signedInModel(session)
         defer { model.stop() }
 
-        await model.updateProfile(nickname: "  새 이름 ", avatar: .heart)
+        await model.updateProfile(nickname: "  새 이름 ", avatar: .pink)
 
         XCTAssertEqual(session.savedProfiles.map(\.nickname), ["새 이름"])
-        XCTAssertEqual(session.savedProfiles.map(\.avatar), [.heart])
+        XCTAssertEqual(session.savedProfiles.map(\.avatar), [.pink])
         XCTAssertEqual(model.nickname, "새 이름")
         XCTAssertEqual(model.profile.name, "새 이름")
-        XCTAssertEqual(model.profile.avatar, .heart)
+        XCTAssertEqual(model.profile.avatar, .pink)
         XCTAssertEqual(model.notice, .profileSaved)
     }
 
@@ -101,12 +101,12 @@ final class SettingsViewModelTests: XCTestCase {
         let model = try await signedInModel(session)
         defer { model.stop() }
 
-        await model.updateProfile(nickname: " ", avatar: .sun)
+        await model.updateProfile(nickname: " ", avatar: .orange)
         XCTAssertEqual(model.notice, .nicknameInvalid(.empty))
         XCTAssertTrue(session.savedProfiles.isEmpty)
 
         session.profileError = NSError(domain: "Settings", code: 3)
-        await model.updateProfile(nickname: "다른 이름", avatar: .sun)
+        await model.updateProfile(nickname: "다른 이름", avatar: .orange)
         XCTAssertEqual(model.notice, .profileFailed)
         XCTAssertEqual(model.nickname, "하루", "The name shown stays the saved one")
         XCTAssertEqual(model.profile.avatar, .default)
