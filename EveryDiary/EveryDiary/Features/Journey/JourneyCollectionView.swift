@@ -1,48 +1,120 @@
 import SwiftUI
 
-/// Every year as a city that grows with the days written that year.
+/// Every year as a full-screen photo card of its city; swiping up brings the previous year's card.
 struct JourneyYearsView: View {
     let viewModel: JourneyViewModel
     let onSelectYear: (Int) -> Void
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: DiaryTheme.Spacing.section) {
-                ForEach(viewModel.years, id: \.self) { year in
-                    Button { onSelectYear(year) } label: {
-                        JourneyYearCard(progress: viewModel.progress(ofYear: year))
+        GeometryReader { geometry in
+            ScrollView(.vertical) {
+                LazyVStack(spacing: 0) {
+                    ForEach(viewModel.years, id: \.self) { year in
+                        Button { onSelectYear(year) } label: {
+                            JourneyYearPhotoCard(progress: viewModel.progress(ofYear: year), months: months(of: year))
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, DiaryTheme.Spacing.screen)
+                        .padding(.vertical, DiaryTheme.Spacing.medium)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
                     }
-                    .buttonStyle(.plain)
                 }
+                .scrollTargetLayout()
             }
-            .padding(DiaryTheme.Spacing.screen)
+            // Each card snaps into place, one year per swipe.
+            .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
+            .scrollIndicators(.hidden)
+            .clipped()
         }
         .background(DiaryTheme.Colors.background.ignoresSafeArea())
     }
+
+    private func months(of year: Int) -> [JourneyYearPhotoCard.Month] {
+        (1...12).map { month in
+            JourneyYearPhotoCard.Month(month: month, litCount: viewModel.month(year: year, month: month).days.count,
+                                       numberOfDays: viewModel.numberOfDays(year: year, month: month),
+                                       isUpcoming: viewModel.isUpcoming(year: year, month: month))
+        }
+    }
 }
 
-private struct JourneyYearCard: View {
+/// One year's city filling the card, with the year, its progress and the twelve monthly pictures in the sky.
+struct JourneyYearPhotoCard: View {
+    struct Month {
+        let month: Int
+        let litCount: Int
+        let numberOfDays: Int
+        let isUpcoming: Bool
+    }
+
     let progress: JourneyYearProgress
+    let months: [Month]
+
+    private let monthColumns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 6)
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DiaryTheme.Spacing.medium) {
-            JourneyCityView(stage: progress.stage)
-                .aspectRatio(JourneyCityScene.canvas.width / JourneyCityScene.canvas.height, contentMode: .fit)
-                .clipShape(RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
-            HStack(alignment: .firstTextBaseline) {
-                Text(verbatim: "\(progress.year)년")
-                    .font(DiaryTheme.Fonts.title)
-                    .foregroundStyle(DiaryTheme.Colors.text)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(DiaryTheme.Colors.secondaryText)
+        JourneyCityView(stage: progress.stage)
+            .overlay(alignment: .top) {
+                LinearGradient(colors: [.black.opacity(0.35), .clear], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 220)
             }
-            JourneyYearProgressSummary(progress: progress)
+            .overlay(alignment: .topLeading) {
+                VStack(alignment: .leading, spacing: DiaryTheme.Spacing.small) {
+                    Text(verbatim: "\(progress.year)")
+                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                    Text("\(progress.stage)단계 · \(JourneyCityScene.stageTitles[progress.stage])")
+                        .font(.title3.weight(.semibold))
+                    ProgressView(value: progress.stageProgress)
+                        .tint(.white)
+                        .frame(maxWidth: 220)
+                        .padding(.top, DiaryTheme.Spacing.small)
+                    Text("\(progress.daysWritten)일 기록 · " + (progress.daysToNextStage.map { "다음 단계까지 \($0)일" } ?? "올해의 여정을 모두 완주했어요"))
+                        .font(.subheadline)
+                        .opacity(0.9)
+                    monthStrip
+                        .padding(.top, DiaryTheme.Spacing.medium)
+                }
+                .foregroundStyle(.white)
+                .shadow(color: .black.opacity(0.25), radius: 4)
+                .padding(24)
+            }
+            .overlay(alignment: .topTrailing) {
+                HStack(spacing: 4) {
+                    Text("12개월 보기")
+                    Image(systemName: "chevron.right")
+                }
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(.white.opacity(0.18), in: Capsule())
+                .padding(.top, 34)
+                .padding(.trailing, 20)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 28))
+            .shadow(color: .black.opacity(0.15), radius: 12, y: 6)
+            .accessibilityElement(children: .combine)
+            .accessibilityHint("그해 12개월 여정을 봅니다")
+    }
+
+    /// The year at a glance: each month's picture as far as it was filled.
+    private var monthStrip: some View {
+        LazyVGrid(columns: monthColumns, spacing: 6) {
+            ForEach(months, id: \.month) { month in
+                JourneySceneView(scene: JourneySceneCatalog.scene(for: month.month), year: progress.year,
+                                 litCount: month.isUpcoming ? 0 : month.litCount, slotCount: month.numberOfDays)
+                    .aspectRatio(JourneyScene.canvas.width / JourneyScene.canvas.height, contentMode: .fit)
+                    .overlay { if month.isUpcoming { Color.black.opacity(0.5) } }
+                    .overlay(alignment: .bottomLeading) {
+                        Text("\(month.month)")
+                            .font(.caption2.weight(.bold))
+                            .padding(4)
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(.white.opacity(0.25), lineWidth: 0.5))
+            }
         }
-        .padding(DiaryTheme.Spacing.medium)
-        .background(DiaryTheme.Colors.surface, in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card + 4))
-        .accessibilityElement(children: .combine)
+        .accessibilityHidden(true)
     }
 }
 
