@@ -22,6 +22,8 @@ struct JourneySceneView: View {
         visibleSlots > 0 && target >= visibleSlots && (!animatesLighting || (sweepStart == nil && shownBeforeSweep >= Double(target)))
     }
 
+    private var isAmbiencePlaying: Bool { animatesLighting && isComplete && !scene.ambience.isEmpty }
+
     var body: some View {
         let order = scene.lightingOrder(slotCount: visibleSlots, year: year)
         let rank = Dictionary(uniqueKeysWithValues: order.enumerated().map { ($1, $0) })
@@ -31,7 +33,7 @@ struct JourneySceneView: View {
                     let renderer = JourneySceneRenderer(size: size)
                     let shown = shownCount(at: timeline.date)
                     renderer.fillSky(scene.sky, in: &context)
-                    scene.background.forEach { renderer.draw($0, in: &context) }
+                    scene.background.filter { !$0.isStill }.forEach { renderer.draw($0, in: &context) }
                     for (index, light) in scene.lights.prefix(visibleSlots).enumerated() {
                         // Each light fades in over the moment the sweep passes its turn.
                         let amount = min(max(shown - Double(rank[index] ?? index), 0), 1)
@@ -40,17 +42,23 @@ struct JourneySceneView: View {
                     scene.foreground.forEach { renderer.draw($0, in: &context) }
                 }
             }
+            // Still stand-ins give way to the moving version once it plays.
             Canvas { context, size in
                 let renderer = JourneySceneRenderer(size: size)
-                scene.completion.forEach { renderer.draw($0, in: &context) }
+                scene.background.filter(\.isStill).forEach { renderer.draw($0, in: &context) }
+            }
+            .opacity(isAmbiencePlaying ? 0 : 1)
+            Canvas { context, size in
+                let renderer = JourneySceneRenderer(size: size)
+                scene.completion.filter { !$0.isStill || !isAmbiencePlaying }.forEach { renderer.draw($0, in: &context) }
             }
             .opacity(isComplete ? 1 : 0)
-            .animation(.easeIn(duration: animatesLighting ? 0.8 : 0), value: isComplete)
-            if animatesLighting && isComplete && !scene.ambience.isEmpty {
+            if isAmbiencePlaying {
                 JourneySceneAmbienceView(ambience: scene.ambience)
                     .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: animatesLighting ? 0.8 : 0), value: isComplete)
         .task(id: target) {
             guard animatesLighting else { return }
             // Continue from what is on screen if a sweep was still running.

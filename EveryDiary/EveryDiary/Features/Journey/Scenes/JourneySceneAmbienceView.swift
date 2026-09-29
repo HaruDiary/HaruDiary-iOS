@@ -107,10 +107,21 @@ struct JourneySceneAmbienceView: View {
                 ScenePath.ellipse(center: CGPoint(x: point.x - 4 * flap, y: point.y + 4), width: 6 * flap, height: 5, angle: 0.4),
                 ScenePath.ellipse(center: CGPoint(x: point.x + 4 * flap, y: point.y + 4), width: 6 * flap, height: 5, angle: -0.4)
             ])
+        case .bird:
+            // A flapping V.
+            let lift = size * (0.2 + 0.5 * abs(sin(time * 6 + CGFloat(seed))))
+            let wings = ScenePath.line([(point.x - size, point.y - lift), (point.x, point.y), (point.x + size, point.y - lift)])
+            renderer.draw(wings, color: color, lineWidth: 1.5, glow: 0, in: &context)
+            return
         case .firework:
             path = ScenePath.circle(point.x, point.y, size)
         }
-        renderer.draw(path, color: color, lineWidth: nil, glow: glow, in: &context)
+        // Soft layered halos instead of a blur filter keep many glowing particles cheap to draw every frame.
+        if glow > 0 {
+            renderer.draw(ScenePath.circle(point.x, point.y, size + glow * 0.7), color: color.withOpacity(color.opacity * 0.08), lineWidth: nil, glow: 0, in: &context)
+            renderer.draw(ScenePath.circle(point.x, point.y, size + glow * 0.35), color: color.withOpacity(color.opacity * 0.16), lineWidth: nil, glow: 0, in: &context)
+        }
+        renderer.draw(path, color: color, lineWidth: nil, glow: 0, in: &context)
     }
 
     private func fraction(_ value: CGFloat) -> CGFloat {

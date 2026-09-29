@@ -33,7 +33,7 @@ enum JourneySceneCatalog {
         ]
         var background: [SceneElement] = [
             SceneElement(ScenePath.circle(300, 190, 28), SceneColor(0xF4F1DE), glow: 12),
-            SceneElement(snow, SceneColor(0xFFFFFF, opacity: 0.75)),
+            SceneElement(snow, SceneColor(0xFFFFFF, opacity: 0.75), still: true),
             SceneElement(ScenePath.ellipse(-120, 560, 640, 300), SceneColor(0xB9C4DE)),
             SceneElement(ScenePath.ellipse(-60, 650, 510, 140), SceneColor(0xEEF2FA)),
             SceneElement(ScenePath.rect(0, 672, 390, 28), SceneColor(0xEEF2FA))
@@ -67,11 +67,11 @@ enum JourneySceneCatalog {
             ScenePath.star(flakes.next(0...390), flakes.next(100...560), outer: flakes.next(2.5...4), inner: 1.1, points: 6)
         })
         let completion: [SceneElement] = [
-            // Aurora to the left of the moon, so the moon stays clear.
-            SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 150), to: CGPoint(x: 250, y: 96), bend: 40, thickness: 40), SceneColor(0x6CFFC8, opacity: 0.2), glow: 18),
-            SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 212), to: CGPoint(x: 240, y: 160), bend: -30, thickness: 22), SceneColor(0xA394FF, opacity: 0.18), glow: 14),
-            SceneElement(bigSnow, SceneColor(0xFFFFFF, opacity: 0.9)),
-            SceneElement(ScenePath.group(smoke), SceneColor(0xFFFFFF, opacity: 0.45)),
+            // Aurora above the moon, so the moon stays clear.
+            SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 140), to: CGPoint(x: 410, y: 70), bend: 20, thickness: 34), SceneColor(0x6CFFC8, opacity: 0.2), glow: 18),
+            SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 200), to: CGPoint(x: 410, y: 105), bend: -10, thickness: 18), SceneColor(0xA394FF, opacity: 0.18), glow: 14),
+            SceneElement(bigSnow, SceneColor(0xFFFFFF, opacity: 0.9), still: true),
+            SceneElement(ScenePath.group(smoke), SceneColor(0xFFFFFF, opacity: 0.45), still: true),
             // Snowman in the lower right corner.
             SceneElement(ScenePath.group([ScenePath.circle(370, 688, 10), ScenePath.circle(370, 672, 7)]), SceneColor(0xFFFFFF)),
             SceneElement(ScenePath.group([ScenePath.rect(363, 663, 14, 3), ScenePath.rect(365, 654, 10, 10),
@@ -157,8 +157,8 @@ enum JourneySceneCatalog {
             [SceneElement(ScenePath.group([ScenePath.ellipse(center: CGPoint(x: x - 5, y: y - 3), width: 10, height: 8, angle: -0.5),
                                            ScenePath.ellipse(center: CGPoint(x: x + 5, y: y - 3), width: 10, height: 8, angle: 0.5),
                                            ScenePath.ellipse(center: CGPoint(x: x - 4, y: y + 4), width: 6, height: 5, angle: 0.4),
-                                           ScenePath.ellipse(center: CGPoint(x: x + 4, y: y + 4), width: 6, height: 5, angle: -0.4)]), SceneColor(hex)),
-             SceneElement(ScenePath.line([(x, y - 6), (x, y + 7)]), SceneColor(0x3B2A20), lineWidth: 1.4)]
+                                           ScenePath.ellipse(center: CGPoint(x: x + 4, y: y + 4), width: 6, height: 5, angle: -0.4)]), SceneColor(hex), still: true),
+             SceneElement(ScenePath.line([(x, y - 6), (x, y + 7)]), SceneColor(0x3B2A20), lineWidth: 1.4, still: true)]
         }
         let rays = ScenePath.group((0..<12).map { index -> CGPath in
             let angle = CGFloat(index) * .pi / 6
@@ -210,13 +210,13 @@ enum JourneySceneCatalog {
             background: [SceneElement(ScenePath.ellipse(-80, 630, 550, 160), SceneColor(0x5A3A5C)),
                          SceneElement(ScenePath.rect(0, 670, 390, 30), SceneColor(0x5A3A5C))]
                 + tree(color: SceneColor(0x4A2C3A))
-                + [SceneElement(petals, SceneColor(0xFFC4D6, opacity: 0.7))],
+                + [SceneElement(petals, SceneColor(0xFFC4D6, opacity: 0.7), still: true)],
             lights: lights,
             completion: [
                 SceneElement(ScenePath.circle(76, 190, 22), SceneColor(0xFFF1F4), glow: 16),
                 SceneElement(ScenePath.ellipse(-40, 660, 470, 44), SceneColor(0xFFC4D6, opacity: 0.55)),
                 SceneElement(carpet, SceneColor(0xFFD9E4)),
-                SceneElement(fallingPetals, SceneColor(0xFFD1DF, opacity: 0.95))
+                SceneElement(fallingPetals, SceneColor(0xFFD1DF, opacity: 0.95), still: true)
             ],
             ambience: ambience(for: 4)
         )
@@ -259,7 +259,7 @@ enum JourneySceneCatalog {
             background: background, lights: lights,
             completion: [
                 SceneElement(ScenePath.circle(322, 150, 22), SceneColor(0xFFF4D6), glow: 16),
-                SceneElement(sparkles, SceneColor(0xFFFFFF, opacity: 0.85), glow: 4),
+                SceneElement(sparkles, SceneColor(0xFFFFFF, opacity: 0.85), glow: 4, still: true),
                 SceneElement(ScenePath.group([ScenePath.rect(92, 628, 40, 26, corner: 2), ScenePath.rect(258, 628, 40, 26, corner: 2), ScenePath.rect(150, 538, 90, 18, corner: 2)]),
                              SceneColor(0xFFCF7A), glow: 10),
                 SceneElement(ScenePath.rect(170, 640, 50, 60, corner: 3), SceneColor(0xFFB65C), glow: 14)
@@ -305,7 +305,7 @@ enum JourneySceneCatalog {
                 SceneElement(ScenePath.circle(310, 200, 46), SceneColor(0xF3F0D0, opacity: 0.1), glow: 20),
                 SceneElement(ScenePath.ellipse(20, 652, 180, 30), SceneColor(0x0D3444)),
                 SceneElement(ScenePath.ellipse(96, 660, 30, 5), SceneColor(0xF3F0D0, opacity: 0.45)),
-                SceneElement(smallFlies, SceneColor(0xE9FF8C, opacity: 0.75), glow: 5),
+                SceneElement(smallFlies, SceneColor(0xE9FF8C, opacity: 0.75), glow: 5, still: true),
                 SceneElement(grass, SceneColor(0x041510))
             ],
             ambience: ambience(for: 6)
@@ -349,8 +349,8 @@ enum JourneySceneCatalog {
             completion: [
                 SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 300), to: CGPoint(x: 410, y: 95), bend: -30, thickness: 62), SceneColor(0xC9D6FF, opacity: 0.1), glow: 22),
                 SceneElement(milkyDots, SceneColor(0xFFFFFF, opacity: 0.6)),
-                SceneElement(ScenePath.polygon([(160, 176), (58, 120), (55, 126)]), SceneColor(0xFFFFFF, opacity: 0.85), glow: 6),
-                SceneElement(ScenePath.circle(160, 176, 2.4), SceneColor(0xFFFFFF), glow: 6),
+                SceneElement(ScenePath.polygon([(160, 176), (58, 120), (55, 126)]), SceneColor(0xFFFFFF, opacity: 0.85), glow: 6, still: true),
+                SceneElement(ScenePath.circle(160, 176, 2.4), SceneColor(0xFFFFFF), glow: 6, still: true),
                 SceneElement(ScenePath.polygon([(330, 463), (160, 405), (160, 510)]), SceneColor(0xFFF2A8, opacity: 0.2)),
                 SceneElement(ScenePath.polygon([(165, 538), (165, 584), (138, 584)]), SceneColor(0xE8E6F0, opacity: 0.95)),
                 SceneElement(ScenePath.polygon([(169, 548), (169, 584), (188, 584)]), SceneColor(0xE8E6F0, opacity: 0.8)),
@@ -412,9 +412,9 @@ enum JourneySceneCatalog {
                          SceneElement(ScenePath.line([(0, 612), (390, 612)]), SceneColor(0x1B1840), lineWidth: 4)],
             lights: lights,
             completion: [
-                SceneElement(finale.rays, SceneColor(0xFFE08A), lineWidth: 2.2, glow: 12),
-                SceneElement(finale.tips, SceneColor(0xFFF6D5), glow: 6),
-                SceneElement(finaleInner.rays, SceneColor(0xFF9FD0), lineWidth: 1.8, glow: 8),
+                SceneElement(finale.rays, SceneColor(0xFFE08A), lineWidth: 2.2, glow: 12, still: true),
+                SceneElement(finale.tips, SceneColor(0xFFF6D5), glow: 6, still: true),
+                SceneElement(finaleInner.rays, SceneColor(0xFF9FD0), lineWidth: 1.8, glow: 8, still: true),
                 SceneElement(ScenePath.group(cityWindows), SceneColor(0xFFD27A, opacity: 0.9)),
                 SceneElement(reflections, SceneColor(0xFFC46B, opacity: 0.35))
             ],
@@ -468,7 +468,7 @@ enum JourneySceneCatalog {
                                               ScenePath.rect(300, 210, 14, 10, corner: 2), ScenePath.polygon([(297, 200), (312, 190), (314, 192), (299, 202)])]),
                              SceneColor(0xE3CC8F)),
                 SceneElement(villageWindows, SceneColor(0xFFCF7A), glow: 8),
-                SceneElement(farLanterns, SceneColor(0xFFB65C, opacity: 0.7), glow: 3)
+                SceneElement(farLanterns, SceneColor(0xFFB65C, opacity: 0.7), glow: 3, still: true)
             ],
             ambience: ambience(for: 9)
         )
@@ -514,8 +514,8 @@ enum JourneySceneCatalog {
             completion: [
                 SceneElement(carpetRed, SceneColor(0xD9432A)),
                 SceneElement(carpetYellow, SceneColor(0xF2B233)),
-                SceneElement(fallingLeaves, SceneColor(0xF28C28, opacity: 0.95)),
-                SceneElement(birds, SceneColor(0x2A1A3D, opacity: 0.75), lineWidth: 1.6)
+                SceneElement(fallingLeaves, SceneColor(0xF28C28, opacity: 0.95), still: true),
+                SceneElement(birds, SceneColor(0x2A1A3D, opacity: 0.75), lineWidth: 1.6, still: true)
             ],
             ambience: ambience(for: 10)
         )
@@ -580,7 +580,7 @@ enum JourneySceneCatalog {
             background: [SceneElement(back, SceneColor(0x555555)), SceneElement(front, SceneColor(0x000000))], lights: lights,
             completion: [
                 SceneElement(ScenePath.circle(312, 150, 20), SceneColor(0xFFF4D6), glow: 16),
-                SceneElement(stars, SceneColor(0xFFFFFF, opacity: 0.85)),
+                SceneElement(stars, SceneColor(0xFFFFFF, opacity: 0.85), still: true),
                 SceneElement(ScenePath.group(backWindows), SceneColor(0xFFE9A0, opacity: 0.85), glow: 3),
                 SceneElement(ScenePath.group([ScenePath.line([(351, 420), (351, 398)]), ScenePath.line([(95, 455), (95, 436)])]), SceneColor(0x000000), lineWidth: 1.5),
                 SceneElement(ScenePath.group([ScenePath.circle(351, 397, 2.4), ScenePath.circle(95, 435, 2.4)]), SceneColor(0xFF4D4D), glow: 6)
@@ -598,7 +598,7 @@ enum JourneySceneCatalog {
             (490, 645, 120, 0x174A2F), (420, 560, 100, 0x1F5B3A), (350, 480, 80, 0x174A2F), (300, 400, 55, 0x1F5B3A)
         ]
         var background: [SceneElement] = [
-            SceneElement(snow, SceneColor(0xFFFFFF, opacity: 0.7)),
+            SceneElement(snow, SceneColor(0xFFFFFF, opacity: 0.7), still: true),
             SceneElement(ScenePath.group([ScenePath.rect(10, 606, 60, 50), ScenePath.polygon([(4, 608), (40, 580), (76, 608)]),
                                           ScenePath.rect(320, 612, 60, 44), ScenePath.polygon([(314, 614), (350, 588), (386, 614)])]), SceneColor(0x1A2447)),
             SceneElement(ScenePath.ellipse(-60, 640, 510, 140), SceneColor(0xE8EEF8)),
@@ -642,7 +642,7 @@ enum JourneySceneCatalog {
                 SceneElement(ScenePath.circle(195, 290, 34), SceneColor(0xFFE9A0, opacity: 0.16), glow: 18),
                 SceneElement(ScenePath.group([ScenePath.rect(26, 620, 12, 12), ScenePath.rect(44, 620, 12, 12), ScenePath.rect(336, 624, 12, 12), ScenePath.rect(354, 624, 12, 12)]),
                              SceneColor(0xFFD27A), glow: 8),
-                SceneElement(bigSnow, SceneColor(0xFFFFFF, opacity: 0.9))
+                SceneElement(bigSnow, SceneColor(0xFFFFFF, opacity: 0.9), still: true)
             ] + gifts.map { SceneElement(ScenePath.rect($0.0, $0.1, $0.2, $0.3, corner: 2), SceneColor($0.4)) } + [
                 SceneElement(ribbons, SceneColor(0xFFD43B), lineWidth: 2.2),
                 SceneElement(bows, SceneColor(0xFFD43B))

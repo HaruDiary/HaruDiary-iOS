@@ -58,7 +58,7 @@ struct SceneAmbience {
     }
 
     enum Particle {
-        case dot, snowflake, petal, mapleLeaf, sparkle, lantern, butterfly, firework
+        case dot, snowflake, petal, mapleLeaf, sparkle, lantern, butterfly, bird, firework
     }
 
     let motion: Motion
@@ -96,6 +96,17 @@ struct SceneColor: Equatable {
         blue = Double(hex & 0xFF) / 255
         self.opacity = opacity
     }
+
+    init(red: Double, green: Double, blue: Double, opacity: Double) {
+        self.red = red
+        self.green = green
+        self.blue = blue
+        self.opacity = opacity
+    }
+
+    func withOpacity(_ opacity: Double) -> SceneColor {
+        SceneColor(red: red, green: green, blue: blue, opacity: opacity)
+    }
 }
 
 struct SceneElement {
@@ -104,12 +115,16 @@ struct SceneElement {
     /// nil fills the path; a width strokes it.
     let lineWidth: CGFloat?
     let glow: CGFloat
+    /// A still stand-in for the ambience (settled snow, a frozen shooting star …).
+    /// Shown in still pictures and faded out while the ambience plays.
+    let isStill: Bool
 
-    init(_ path: CGPath, _ color: SceneColor, lineWidth: CGFloat? = nil, glow: CGFloat = 0) {
+    init(_ path: CGPath, _ color: SceneColor, lineWidth: CGFloat? = nil, glow: CGFloat = 0, still: Bool = false) {
         self.path = path
         self.color = color
         self.lineWidth = lineWidth
         self.glow = glow
+        isStill = still
     }
 }
 

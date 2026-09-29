@@ -23,6 +23,17 @@ final class JourneySceneCatalogTests: XCTestCase {
         }
     }
 
+    func testStillStandInsGiveWayToTheAnimation() {
+        // February has no still copy of its animation; every other month hides one while it moves.
+        for month in [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] {
+            let scene = JourneySceneCatalog.scene(for: month)
+            XCTAssertTrue((scene.background + scene.completion).contains(where: \.isStill), "month \(month)")
+        }
+        // Light slots and the picture itself are never still stand-ins.
+        let january = JourneySceneCatalog.scene(for: 1)
+        XCTAssertEqual(january.background.filter { !$0.isStill }.count, january.background.count - 1)
+    }
+
     func testLightsTurnOnInAShuffledOrderThatStaysTheSame() {
         for month in 1...12 {
             let scene = JourneySceneCatalog.scene(for: month)
