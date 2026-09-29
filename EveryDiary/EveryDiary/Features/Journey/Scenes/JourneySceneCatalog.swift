@@ -565,7 +565,7 @@ enum JourneySceneCatalog {
         }
         // Windows only where the back buildings show above the front ones.
         var random = SceneRandom(seed: 1111)
-        let backAreas: [(ClosedRange<CGFloat>, ClosedRange<CGFloat>)] = [(8...48, 362...444), (74...128, 396...444), (166...190, 452...512), (318...380, 346...410)]
+        let backAreas: [(ClosedRange<CGFloat>, ClosedRange<CGFloat>)] = [(8...48, 362...410), (74...128, 396...444), (166...190, 452...512), (318...380, 346...410)]
         var backWindows: [CGPath] = []
         for (xs, ys) in backAreas {
             for y in stride(from: ys.lowerBound, through: ys.upperBound, by: 16) {
@@ -639,7 +639,8 @@ enum JourneySceneCatalog {
             month: 12, title: "크리스마스트리", sky: [SceneColor(0x0B1430), SceneColor(0x1D2B5A), SceneColor(0x3E4E86)],
             background: background, lights: lights,
             completion: [
-                SceneElement(ScenePath.circle(195, 290, 34), SceneColor(0xFFE9A0, opacity: 0.16), glow: 18),
+                SceneElement(ScenePath.circle(195, 290, 30), SceneColor(0xFFE9A0, opacity: 0.06)),
+                SceneElement(ScenePath.circle(195, 290, 21), SceneColor(0xFFE9A0, opacity: 0.1)),
                 SceneElement(ScenePath.group([ScenePath.rect(26, 620, 12, 12), ScenePath.rect(44, 620, 12, 12), ScenePath.rect(336, 624, 12, 12), ScenePath.rect(354, 624, 12, 12)]),
                              SceneColor(0xFFD27A), glow: 8),
                 SceneElement(bigSnow, SceneColor(0xFFFFFF, opacity: 0.9), still: true)
