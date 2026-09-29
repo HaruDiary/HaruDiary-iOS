@@ -18,7 +18,6 @@ struct DiaryListView: View {
                 content
             }
             DiaryWriteButton { leaveSearch(then: onWriteDiary) }
-                .padding(DiaryTheme.Spacing.screen)
         }
     }
 
@@ -77,7 +76,7 @@ struct DiaryListView: View {
             }
         }
         .diaryCardList()
-        .contentMargins(.bottom, DiaryTheme.Size.floatingButton + DiaryTheme.Spacing.section, for: .scrollContent)
+        .contentMargins(.bottom, DiaryTheme.Size.floatingButtonClearance, for: .scrollContent)
         .refreshable { viewModel.retry() }
     }
 
