@@ -107,6 +107,19 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 같은 이메일로 Google·Apple 계정을 하나씩 만들 수 없는 Firebase 설정("이메일당 계정 하나")에서는, Apple 계정을 탈퇴한 뒤
 같은 이메일의 Google 계정이 남아 있으면 Apple로 새로 가입할 수 없다. 이때 안내 문구로 기존 방식 로그인을 요청한다.
 
+## 보안 보강
+
+| 항목 | 이전 | 변경 |
+|---|---|---|
+| Apple refresh token 보관 | `UserDefaults` 평문(`refreshToken`) | Keychain(이 기기 전용·첫 잠금 해제 후, 백업 제외). 앱 시작 시 평문 사본을 옮기고 삭제 |
+| refresh token 응답 | 응답 본문을 그대로 저장(오류 페이지도 저장) | HTTP 200이고 토큰 형식(또는 `refresh_token` JSON)일 때만 저장 |
+| 탈퇴 후 토큰 | 기기에 남음 | 철회 요청 후 refresh token·Apple 사용자 ID 삭제 |
+| iPhone 설정에서 Apple 로그인 "삭제" | 앱은 계속 로그인 상태 | 앱 활성화·해제 알림 시 Apple에 확인해 "해제됨"이면 로그아웃. 개발팀 서명이 없는 시뮬레이터 빌드는 Apple이 항상 "해제됨"으로 답해 건너뜀 |
+| 푸시 기기 토큰 | 콘솔 출력 | 출력하지 않음 |
+
+남은 항목: Cloud Function(`getRefreshToken`·`revokeToken`)이 인증 코드·토큰을 URL 쿼리로 받는다. 함수 코드가 저장소에 없어
+POST 본문으로 바꾸려면 서버와 함께 수정해야 한다. Firestore·Storage 보안 규칙도 콘솔에서 별도 점검이 필요하다.
+
 ## 구성
 
 | 파일 | 책임 |
@@ -126,6 +139,10 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 | `Features/Settings/ProfilePhotoPreparation.swift` | 앨범 사진 정사각형·크기 제한·JPEG 재인코딩 |
 | `DesignSystem/ProfileAvatarView.swift` | 프로필 이미지 그림(SwiftUI, 설정 셀용 이미지 변환) |
 | `Features/Settings/ProfileEditView.swift` | 프로필 이미지·닉네임 편집 화면(SwiftUI) |
+| `Domain/Account/AppleRefreshTokenStore.swift` | Apple 토큰·사용자 ID 보관 규칙(평문 이전, 응답 검사) |
+| `Data/KeychainSecretStore.swift` | Keychain 저장 |
+| `Data/AppleTokenRevocation.swift` | refresh token 받기·철회·삭제 |
+| `Data/AppleCredentialMonitor.swift` | Apple 로그인 해제 감지와 로그아웃 |
 | `Features/Settings/SettingsViewModel.swift` | 프로필 표시, 로그아웃·탈퇴 결과, 중복 탈퇴 방지 |
 | `Features/Settings/SettingsModule.swift`, `+UIKit.swift` | 설정 상태와 휴지통 생성 연결 |
 
@@ -137,7 +154,7 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 
 ## 검증
 
-- 로직 테스트 125개 통과: 계정 분류·프로필 문구 2개, 구독·로그아웃·탈퇴 결과 5개, 탈퇴 순서 4개, 로그인 흐름 6개, 손님 Apple 연결 분류 1개, 닉네임·로그인 방식 표시 5개, 프로필 이미지·사진 6개 추가.
+- 로직 테스트 130개 통과: 계정 분류·프로필 문구 2개, 구독·로그아웃·탈퇴 결과 5개, 탈퇴 순서 4개, 로그인 흐름 6개, 손님 Apple 연결 분류 1개, 닉네임·로그인 방식 표시 5개, 프로필 이미지·사진 6개, 토큰 보관·응답·Apple 상태 5개 추가.
 - 실제 앱(시뮬레이터, 로그인된 Google 계정)에서 확인: 나의 일기·여정 탭에서 설정 진입, 프로필 표시,
   최근 삭제한 항목 → 휴지통 표시, 뒤로 가기.
 - 확인하지 못한 것: 실제 계정의 로그아웃·회원 탈퇴와 데이터 삭제(운영 계정 변경), 손님·로그아웃 상태의 설정 화면,
