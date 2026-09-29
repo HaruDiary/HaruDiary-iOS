@@ -9,6 +9,13 @@ import UIKit
 
 import SnapKit
 
+private struct PhotoEncodeSource {
+    let image: UIImage
+    let assetIdentifier: String?
+    let captureTime: String?
+    let location: String?
+}
+
 protocol WriteDiaryDelegate: AnyObject {
     func diaryUploadDidStart()
     func diaryUploadDidFinish()
@@ -241,27 +248,40 @@ extension WriteDiaryVC {
             useMetadataLocation: useMetadataLocation,
             currentLocationInfo: currentLocationInfo ?? ""
         )
-        let prepared = preparedImageUploads()
-        self.dismiss(animated: true) { [weak self] in
-            guard let self = self else { return }
-            self.saver.create(newEntry, images: prepared.uploads,
-                              unreadablePhotoCount: prepared.unreadableCount) { [weak self] result in
+        saveAfterDismiss { [weak self] prepared in
+            self?.saver.create(newEntry, images: prepared.uploads,
+                               unreadablePhotoCount: prepared.unreadableCount) { [weak self] result in
                 self?.finishSave(result, failureTitle: "업로드 실패")
             }
         }
     }
 
-    private func preparedImageUploads() -> (uploads: [DiaryImageUpload], unreadableCount: Int) {
+    private func saveAfterDismiss(_ save: @escaping ((uploads: [DiaryImageUpload], unreadableCount: Int)) -> Void) {
+        let sources = imagesLocationInfo.map {
+            PhotoEncodeSource(image: $0.image, assetIdentifier: $0.assetIdentifier,
+                              captureTime: $0.captureTime, location: $0.location)
+        }
+        dismiss(animated: true) {
+            DispatchQueue.global(qos: .userInitiated).async {
+                let prepared = Self.encodePhotos(sources)
+                DispatchQueue.main.async {
+                    save(prepared)
+                }
+            }
+        }
+    }
+
+    private static func encodePhotos(_ sources: [PhotoEncodeSource]) -> (uploads: [DiaryImageUpload], unreadableCount: Int) {
         var uploads: [DiaryImageUpload] = []
         var unreadableCount = 0
-        for image in imagesLocationInfo {
-            guard let assetIdentifier = image.assetIdentifier,
-                  let data = image.image.jpegData(compressionQuality: 0.4) else {
+        for source in sources {
+            guard let assetIdentifier = source.assetIdentifier,
+                  let data = source.image.jpegData(compressionQuality: 0.4) else {
                 unreadableCount += 1
                 continue
             }
             uploads.append(DiaryImageUpload(data: data, assetIdentifier: assetIdentifier,
-                                            captureTime: image.captureTime, location: image.location))
+                                            captureTime: source.captureTime, location: source.location))
         }
         return (uploads, unreadableCount)
     }
@@ -320,14 +340,12 @@ extension WriteDiaryVC {
         updatedEntry.weather = selectedWeather
         updatedEntry.useMetadataLocation = useMetadataLocation
         updatedEntry.currentLocationInfo = currentLocationInfo
-        let prepared = preparedImageUploads()
         let existingURLs = existingImageURLs
-        dismiss(animated: true) { [weak self] in
-            guard let self else { return }
-            self.saver.update(updatedEntry, diaryID: diaryID, expectedUserID: editingUserID,
-                              existingImageURLs: existingURLs,
-                              images: prepared.uploads,
-                              unreadablePhotoCount: prepared.unreadableCount) { [weak self] result in
+        saveAfterDismiss { [weak self] prepared in
+            self?.saver.update(updatedEntry, diaryID: diaryID, expectedUserID: editingUserID,
+                               existingImageURLs: existingURLs,
+                               images: prepared.uploads,
+                               unreadablePhotoCount: prepared.unreadableCount) { [weak self] result in
                 self?.finishSave(result, failureTitle: "업데이트 실패")
             }
         }
