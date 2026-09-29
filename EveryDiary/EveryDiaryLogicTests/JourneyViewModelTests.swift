@@ -119,6 +119,32 @@ final class JourneyViewModelTests: XCTestCase {
         try await waitUntil { repository.terminated.contains(0) }
     }
 
+    func testCollectionShowsEveryYearWithADiaryAndTheCurrentYear() async throws {
+        let (model, repository, _) = makeModel { self.date(month: 9, day: 20) }
+        model.start()
+        defer { model.stop() }
+        XCTAssertEqual(model.years, [2026])
+        try await waitUntil { repository.observations.count == 1 }
+        var old = entry(3, month: 5)
+        old.dateString = "2024-05-03 09:00:00 +0900"
+        repository.send([entry(3), old])
+        try await waitUntil { model.state == .loaded }
+        XCTAssertEqual(model.years, [2026, 2024])
+        XCTAssertEqual(model.month(year: 2024, month: 5).days, [3])
+        XCTAssertTrue(model.month(year: 2025, month: 1).days.isEmpty)
+    }
+
+    func testMonthLengthsAndUpcomingMonths() {
+        let (model, _, _) = makeModel { self.date(month: 9, day: 20) }
+        XCTAssertEqual(model.numberOfDays(year: 2026, month: 2), 28)
+        XCTAssertEqual(model.numberOfDays(year: 2028, month: 2), 29)
+        XCTAssertEqual(model.numberOfDays(year: 2026, month: 11), 30)
+        XCTAssertFalse(model.isUpcoming(year: 2026, month: 9))
+        XCTAssertTrue(model.isUpcoming(year: 2026, month: 10))
+        XCTAssertFalse(model.isUpcoming(year: 2025, month: 12))
+        XCTAssertTrue(model.isUpcoming(year: 2027, month: 1))
+    }
+
     func testFailureCanBeRetried() async throws {
         let (model, repository, _) = makeModel { self.date(month: 9, day: 20) }
         model.start()

@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ABB6B1D2CE08894005309E5D /* JourneySceneCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */; };
+		0CAEEE01FB33A11D99DF2DDD /* JourneyCollectionHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */; };
+		B3CACE6E3757D5413CF66839 /* JourneyCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */; };
+		C8B2E124D44589724E349D10 /* JourneySceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571F283CAF625F37A8908670 /* JourneySceneView.swift */; };
+		19681167A51C2C077F5C3BED /* JourneySceneCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */; };
+		A30D49B72C7E565B6233ED6C /* JourneySceneCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */; };
+		F72439A15ECAB2F5CC9A618F /* JourneyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */; };
+		7F1C103276CEB16536BBD9B0 /* JourneyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */; };
 		5726EE1D911AD6B7CF85E6BC /* JourneyRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */; };
 		47A1D73818A174E2E92CA355 /* JourneyViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A43FC69DAC48606710BEC /* JourneyViewModelTests.swift */; };
 		3589A1C10B61E2393F77C32C /* JourneyModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABDF1929F8B6A84C65A6D972 /* JourneyModule+UIKit.swift */; };
@@ -220,6 +228,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneySceneCatalogTests.swift"; sourceTree = "<group>"; };
+		65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyCollectionHostingController.swift"; sourceTree = "<group>"; };
+		54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyCollectionView.swift"; sourceTree = "<group>"; };
+		571F283CAF625F37A8908670 /* JourneySceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneView.swift"; sourceTree = "<group>"; };
+		720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneCatalog.swift"; sourceTree = "<group>"; };
+		0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyScene.swift"; sourceTree = "<group>"; };
 		28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyRecordTests.swift"; sourceTree = "<group>"; };
 		971A43FC69DAC48606710BEC /* JourneyViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyViewModelTests.swift"; sourceTree = "<group>"; };
 		ABDF1929F8B6A84C65A6D972 /* JourneyModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyModule+UIKit.swift"; sourceTree = "<group>"; };
@@ -644,6 +658,7 @@
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */,
 				28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */,
 				971A43FC69DAC48606710BEC /* JourneyViewModelTests.swift */,
 				394F66EE9A24302500E6BAF0 /* CalendarDiaryIndexTests.swift */,
@@ -763,6 +778,11 @@
 				FFAAE9B7D18137751417D1D9 /* CalendarImageLoader.swift */,
 				77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */,
 				7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */,
+				65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */,
+				54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */,
+				571F283CAF625F37A8908670 /* JourneySceneView.swift */,
+				720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */,
+				0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */,
 				ABDF1929F8B6A84C65A6D972 /* JourneyModule+UIKit.swift */,
 				734B318BE5B0AC77B3E75A97 /* JourneyModule.swift */,
 				009F241D5F03A6D48F9E0BB5 /* JourneyViewModel.swift */,
@@ -908,6 +928,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABB6B1D2CE08894005309E5D /* JourneySceneCatalogTests.swift in Sources */,
+				19681167A51C2C077F5C3BED /* JourneySceneCatalog.swift in Sources */,
+				F72439A15ECAB2F5CC9A618F /* JourneyScene.swift in Sources */,
 				5726EE1D911AD6B7CF85E6BC /* JourneyRecordTests.swift in Sources */,
 				47A1D73818A174E2E92CA355 /* JourneyViewModelTests.swift in Sources */,
 				ED84689D753A8F4437C7080C /* JourneyModule.swift in Sources */,
@@ -969,6 +992,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0CAEEE01FB33A11D99DF2DDD /* JourneyCollectionHostingController.swift in Sources */,
+				B3CACE6E3757D5413CF66839 /* JourneyCollectionView.swift in Sources */,
+				C8B2E124D44589724E349D10 /* JourneySceneView.swift in Sources */,
+				A30D49B72C7E565B6233ED6C /* JourneySceneCatalog.swift in Sources */,
+				7F1C103276CEB16536BBD9B0 /* JourneyScene.swift in Sources */,
 				3589A1C10B61E2393F77C32C /* JourneyModule+UIKit.swift in Sources */,
 				5D80395DC7BFE411ED4D9F33 /* JourneyModule.swift in Sources */,
 				C4EF7430388972D925EC3F52 /* JourneyViewModel.swift in Sources */,

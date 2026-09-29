@@ -36,6 +36,27 @@ final class JourneyViewModel {
         calendar.range(of: .day, in: .month, for: now())?.count ?? 0
     }
 
+    /// Years in the collection: every year with a diary and the current year, newest first.
+    var years: [Int] {
+        Set(record.months.map(\.year) + [calendar.component(.year, from: now())]).sorted(by: >)
+    }
+
+    func month(year: Int, month: Int) -> JourneyMonth {
+        record.month(year: year, month: month)
+    }
+
+    func numberOfDays(year: Int, month: Int) -> Int {
+        guard let date = calendar.date(from: DateComponents(year: year, month: month, day: 1)) else { return 0 }
+        return calendar.range(of: .day, in: .month, for: date)?.count ?? 0
+    }
+
+    /// A month that has not started yet; its picture is kept hidden.
+    func isUpcoming(year: Int, month: Int) -> Bool {
+        let today = now()
+        let currentYear = calendar.component(.year, from: today)
+        return (year, month) > (currentYear, calendar.component(.month, from: today))
+    }
+
     func start() {
         feed.start()
     }

@@ -38,9 +38,11 @@ struct JourneyRecord: Equatable {
 
     /// The month containing `date`; a month without diaries has no days.
     func month(containing date: Date, calendar: Calendar) -> JourneyMonth {
-        let year = calendar.component(.year, from: date)
-        let month = calendar.component(.month, from: date)
-        return months.first { $0.year == year && $0.month == month } ?? JourneyMonth(year: year, month: month, days: [])
+        month(year: calendar.component(.year, from: date), month: calendar.component(.month, from: date))
+    }
+
+    func month(year: Int, month: Int) -> JourneyMonth {
+        months.first { $0.year == year && $0.month == month } ?? JourneyMonth(year: year, month: month, days: [])
     }
 
     private struct MonthKey: Hashable {

@@ -1,0 +1,150 @@
+import CoreGraphics
+import Foundation
+
+/// A month's picture on the journey tab. Each diary day lights one of `lights`, in order, until the month is full.
+/// Drawn in a fixed design canvas and scaled to the view width, anchored to the bottom.
+struct JourneyScene {
+    static let canvas = CGSize(width: 390, height: 700)
+
+    let month: Int
+    let title: String
+    /// Sky colors from top to bottom; they fill the whole view.
+    let sky: [SceneColor]
+    let background: [SceneElement]
+    /// One slot per possible day of the month (29 for February). Only the first `numberOfDays` are shown.
+    let lights: [SceneLight]
+    let foreground: [SceneElement]
+
+    init(month: Int, title: String, sky: [SceneColor], background: [SceneElement], lights: [SceneLight], foreground: [SceneElement] = []) {
+        self.month = month
+        self.title = title
+        self.sky = sky
+        self.background = background
+        self.lights = lights
+        self.foreground = foreground
+    }
+}
+
+struct SceneColor: Equatable {
+    let red: Double
+    let green: Double
+    let blue: Double
+    let opacity: Double
+
+    init(_ hex: UInt32, opacity: Double = 1) {
+        red = Double((hex >> 16) & 0xFF) / 255
+        green = Double((hex >> 8) & 0xFF) / 255
+        blue = Double(hex & 0xFF) / 255
+        self.opacity = opacity
+    }
+}
+
+struct SceneElement {
+    let path: CGPath
+    let color: SceneColor
+    /// nil fills the path; a width strokes it.
+    let lineWidth: CGFloat?
+
+    init(_ path: CGPath, _ color: SceneColor, lineWidth: CGFloat? = nil) {
+        self.path = path
+        self.color = color
+        self.lineWidth = lineWidth
+    }
+}
+
+struct SceneLight {
+    let path: CGPath
+    /// Shape while the day is still empty; nil draws `path` in `offColor`.
+    let offPath: CGPath?
+    let onColor: SceneColor
+    let offColor: SceneColor
+    let glow: CGFloat
+    let lineWidth: CGFloat?
+
+    init(_ path: CGPath, on: SceneColor, off: SceneColor, offPath: CGPath? = nil, glow: CGFloat = 0, lineWidth: CGFloat? = nil) {
+        self.path = path
+        self.offPath = offPath
+        onColor = on
+        offColor = off
+        self.glow = glow
+        self.lineWidth = lineWidth
+    }
+}
+
+// MARK: - Shape helpers used by the catalog
+
+enum ScenePath {
+    static func rect(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat, corner: CGFloat = 0) -> CGPath {
+        let rect = CGRect(x: x, y: y, width: width, height: height)
+        return corner > 0 ? CGPath(roundedRect: rect, cornerWidth: corner, cornerHeight: corner, transform: nil) : CGPath(rect: rect, transform: nil)
+    }
+
+    static func circle(_ x: CGFloat, _ y: CGFloat, _ radius: CGFloat) -> CGPath {
+        CGPath(ellipseIn: CGRect(x: x - radius, y: y - radius, width: radius * 2, height: radius * 2), transform: nil)
+    }
+
+    static func ellipse(_ x: CGFloat, _ y: CGFloat, _ width: CGFloat, _ height: CGFloat) -> CGPath {
+        CGPath(ellipseIn: CGRect(x: x, y: y, width: width, height: height), transform: nil)
+    }
+
+    static func polygon(_ points: [(CGFloat, CGFloat)]) -> CGPath {
+        let path = CGMutablePath()
+        path.addLines(between: points.map { CGPoint(x: $0.0, y: $0.1) })
+        path.closeSubpath()
+        return path
+    }
+
+    static func line(_ points: [(CGFloat, CGFloat)]) -> CGPath {
+        let path = CGMutablePath()
+        path.addLines(between: points.map { CGPoint(x: $0.0, y: $0.1) })
+        return path
+    }
+
+    static func curve(from start: CGPoint, to end: CGPoint, control: CGPoint) -> CGPath {
+        let path = CGMutablePath()
+        path.move(to: start)
+        path.addQuadCurve(to: end, control: control)
+        return path
+    }
+
+    /// A star with `points` tips; also used for maple leaves and sparkles.
+    static func star(_ x: CGFloat, _ y: CGFloat, outer: CGFloat, inner: CGFloat, points: Int, rotation: CGFloat = -.pi / 2) -> CGPath {
+        let corners = (0..<(points * 2)).map { index -> (CGFloat, CGFloat) in
+            let radius = index.isMultiple(of: 2) ? outer : inner
+            let angle = rotation + CGFloat(index) * .pi / CGFloat(points)
+            return (x + cos(angle) * radius, y + sin(angle) * radius)
+        }
+        return polygon(corners)
+    }
+
+    /// Several shapes drawn as one.
+    static func group(_ paths: [CGPath]) -> CGPath {
+        let path = CGMutablePath()
+        paths.forEach { path.addPath($0) }
+        return path
+    }
+
+    static func point(onCurveFrom start: CGPoint, to end: CGPoint, control: CGPoint, at t: CGFloat) -> CGPoint {
+        let u = 1 - t
+        return CGPoint(x: u * u * start.x + 2 * u * t * control.x + t * t * end.x,
+                       y: u * u * start.y + 2 * u * t * control.y + t * t * end.y)
+    }
+}
+
+/// Deterministic numbers so a scene looks the same on every launch and device.
+struct SceneRandom {
+    private var state: UInt64
+
+    init(seed: UInt64) {
+        state = seed
+    }
+
+    mutating func next() -> CGFloat {
+        state = state &* 6364136223846793005 &+ 1442695040888963407
+        return CGFloat((state >> 33) % 10_000) / 10_000
+    }
+
+    mutating func next(_ range: ClosedRange<CGFloat>) -> CGFloat {
+        range.lowerBound + next() * (range.upperBound - range.lowerBound)
+    }
+}
