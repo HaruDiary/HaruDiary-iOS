@@ -15,8 +15,9 @@ class ProfileCell: UITableViewCell {
 
     private lazy var profileImageView : UIImageView = {
         let profileImageView = UIImageView()
-        profileImageView.contentMode = .scaleAspectFit
-        profileImageView.layer.cornerRadius = 5
+        profileImageView.contentMode = .scaleAspectFill
+        profileImageView.layer.cornerRadius = 25
+        profileImageView.clipsToBounds = true
         return profileImageView
     }()
     
@@ -24,6 +25,9 @@ class ProfileCell: UITableViewCell {
         let emailLabel = UILabel()
         emailLabel.textColor = .subText
         emailLabel.font = UIFont(name: "SFProRounded-Regular", size: 14)
+        // 로그인 방식과 이메일을 두 줄로 표시한다. 긴 이메일은 가운데를 줄인다.
+        emailLabel.numberOfLines = 2
+        emailLabel.lineBreakMode = .byTruncatingMiddle
         return emailLabel
     }()
     
@@ -32,6 +36,16 @@ class ProfileCell: UITableViewCell {
         nameLabel.textColor = .mainTheme
         nameLabel.font = UIFont(name: "SFProRounded-Bold", size: 24)
         return nameLabel
+    }()
+    
+    // 로그인한 경우 프로필을 눌러 닉네임을 바꿀 수 있음을 알린다.
+    private lazy var editImageView: UIImageView = {
+        let symbol = UIImage.SymbolConfiguration(pointSize: 22, weight: .semibold)
+        let imageView = UIImageView(image: UIImage(systemName: "pencil", withConfiguration: symbol))
+        // 이름·아이콘과 같은 앱 기본 색
+        imageView.tintColor = .mainTheme
+        imageView.contentMode = .scaleAspectFit
+        return imageView
     }()
     
     lazy var loginButton : UIButton = {
@@ -79,6 +93,7 @@ class ProfileCell: UITableViewCell {
         addSubview(nameLabel)
         addSubview(profileImageView)
         addSubview(loginButton)
+        addSubview(editImageView)
     }
     
     private func autoLayoutProfileCell() {
@@ -88,7 +103,7 @@ class ProfileCell: UITableViewCell {
             make.width.height.equalTo(50)
         }
         nameLabel.snp.makeConstraints { make in
-            make.centerY.equalToSuperview().offset(-15)
+            make.centerY.equalToSuperview().offset(-20)
             make.leading.equalTo(profileImageView.snp.trailing).offset(16)
             make.trailing.equalTo(loginButton.snp.leading).inset(16)
             make.bottom.equalTo(emailLabel.snp.top).offset(-10)
@@ -97,7 +112,11 @@ class ProfileCell: UITableViewCell {
         emailLabel.snp.makeConstraints { make in
             make.leading.equalTo(profileImageView.snp.trailing).offset(16)
             make.trailing.equalTo(loginButton.snp.leading).inset(16)
-            make.height.equalTo(20)
+        }
+        editImageView.snp.makeConstraints { make in
+            make.centerY.equalTo(loginButton)
+            make.trailing.equalToSuperview().inset(24)
+            make.width.height.equalTo(28)
         }
         loginButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(16)
@@ -112,10 +131,18 @@ class ProfileCell: UITableViewCell {
         contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 10, left: 4, bottom: 10, right: 4))
     }
     
-    func prapare(email: String?, name: String?, image: String?, isLoggedIn: Bool) {
-        self.emailLabel.text = email
+    func prapare(email: String?, name: String?, image: UIImage?, isLoggedIn: Bool) {
+        // 로그인 방식과 이메일 두 줄 사이를 띄운다.
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.lineSpacing = 6
+        paragraph.lineBreakMode = .byTruncatingMiddle
+        self.emailLabel.attributedText = email.map { NSAttributedString(string: $0, attributes: [
+            .paragraphStyle: paragraph,
+            .font: emailLabel.font as Any,
+            .foregroundColor: emailLabel.textColor as Any
+        ]) }
         self.nameLabel.text = name
-        self.profileImageView.image = UIImage(named: image ?? "profile")
+        self.profileImageView.image = image
         if isLoggedIn {
                 self.loginButton.isHidden = true
                 self.loginButton.isEnabled = false
@@ -123,5 +150,7 @@ class ProfileCell: UITableViewCell {
                 self.loginButton.isHidden = false
                 self.loginButton.isEnabled = true
         }
+        editImageView.isHidden = !isLoggedIn
+        accessibilityHint = isLoggedIn ? "닉네임을 변경합니다" : nil
     }
 }

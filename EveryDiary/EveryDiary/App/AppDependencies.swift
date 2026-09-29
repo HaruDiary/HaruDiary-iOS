@@ -5,6 +5,7 @@ struct AppDependencies {
     let diaryRepository: any DiaryReadingRepository
     let userSession: any DiaryUserSession
     let accountSession: any AccountSession
+    let signInGateway: any SocialSignInGateway
     let diaryTrash: any DiaryTrashing
     let diarySaving: any DiarySaving
     let calendarImageLoader: any CalendarImageLoading
@@ -22,7 +23,7 @@ struct AppDependencies {
     }
 
     func makeSettingsModule() -> SettingsModule {
-        SettingsModule(session: accountSession, makeTrashModule: makeTrashModule)
+        SettingsModule(session: accountSession, signInGateway: signInGateway, makeTrashModule: makeTrashModule)
     }
 
     func makeDiaryListModule() -> DiaryListModule {
