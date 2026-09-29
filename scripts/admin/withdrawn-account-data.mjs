@@ -1,7 +1,11 @@
 // Finds diaries and photos left by accounts that no longer exist in Firebase Auth
 // (withdrawn before account deletion erased data, or anonymous accounts removed when linking).
 //
-// Default is a dry run that prints counts only. `--delete` erases what the dry run reported.
+// Also reports guest (anonymous) accounts unused for a long time: a guest left behind when switching to an
+// existing Google/Apple account cannot always be deleted by the app (Firebase requires a recent sign-in).
+//
+// Default is a dry run that prints counts only. `--delete` erases the withdrawn accounts' data;
+// `--delete-inactive-guests` also deletes inactive guests (data and the Auth account). `--guest-days=180` sets "inactive".
 // Diary contents, e-mails and names are never printed.
 //
 //   cd scripts/admin && npm install
@@ -16,6 +20,8 @@ import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 
 const shouldDelete = process.argv.includes("--delete");
+const shouldDeleteGuests = process.argv.includes("--delete-inactive-guests");
+const guestDays = Number(process.argv.find((arg) => arg.startsWith("--guest-days="))?.split("=")[1] ?? 180);
 const bucketName = process.env.FIREBASE_STORAGE_BUCKET;
 if (!bucketName) {
   console.error("FIREBASE_STORAGE_BUCKET is required.");
@@ -53,10 +59,20 @@ for (const file of files) {
 
 const candidates = [...new Set([...diariesByUser.keys(), ...filesByOwner.keys()])];
 const existing = new Set();
+const records = new Map();
 for (let i = 0; i < candidates.length; i += 100) {
   const { users } = await auth.getUsers(candidates.slice(i, i + 100).map((uid) => ({ uid })));
-  users.forEach((user) => existing.add(user.uid));
+  users.forEach((user) => {
+    existing.add(user.uid);
+    records.set(user.uid, user);
+  });
 }
+
+// A guest has no Google/Apple sign-in. "Inactive" uses the last token refresh (app use), else the last sign-in.
+const lastActive = (user) => new Date(user.metadata.lastRefreshTime ?? user.metadata.lastSignInTime ?? user.metadata.creationTime);
+const isInactiveGuest = (user) =>
+  user.providerData.length === 0 && Date.now() - lastActive(user).getTime() > guestDays * 24 * 60 * 60 * 1000;
+const inactiveGuests = [...records.values()].filter(isInactiveGuest).map((user) => user.uid);
 const withdrawn = candidates.filter((uid) => !existing.has(uid));
 
 // Photos still shown by an existing account's diary are never deleted, whatever folder they are in.
@@ -88,21 +104,24 @@ withdrawn.forEach((uid, index) => {
 });
 console.log(`Accounts checked: ${candidates.length}, still existing: ${existing.size}`);
 console.log(`Withdrawn accounts with data: ${withdrawn.length} (diaries ${diaryCount}, photo files ${fileCount})`);
+let guestDiaries = 0;
+let guestFiles = 0;
+inactiveGuests.forEach((uid) => {
+  guestDiaries += diariesByUser.get(uid)?.length ?? 0;
+  guestFiles += filesByOwner.get(uid)?.length ?? 0;
+});
+console.log(`Guest accounts unused for ${guestDays}+ days with data: ${inactiveGuests.length} (diaries ${guestDiaries}, photo files ${guestFiles})`);
 for (const [folder, list] of unassigned) {
   const inUse = list.filter((file) => referencedByExisting.has(file.name)).length;
   console.log(`Not tied to an account (kept): ${folder.slice(0, 12)} ${list.length} files, ${inUse} shown in existing diaries`);
 }
 
-if (!shouldDelete) {
-  console.log("Dry run. Nothing was deleted. Run again with --delete to erase the data above.");
+if (!shouldDelete && !shouldDeleteGuests) {
+  console.log("Dry run. Nothing was deleted. --delete erases withdrawn accounts' data; --delete-inactive-guests removes inactive guests.");
   process.exit(0);
 }
 
-let erased = 0;
-for (const uid of withdrawn) {
-  // Recheck right before deleting, in case the account signed in again since the listing.
-  const stillMissing = await auth.getUser(uid).then(() => false, (error) => error.code === "auth/user-not-found");
-  if (!stillMissing) continue;
+const eraseData = async (uid) => {
   for (const file of filesByOwner.get(uid) ?? []) await file.delete({ ignoreNotFound: true });
   const refs = (diariesByUser.get(uid) ?? []).map((doc) => doc.ref);
   for (let i = 0; i < refs.length; i += 400) {
@@ -110,6 +129,28 @@ for (const uid of withdrawn) {
     refs.slice(i, i + 400).forEach((ref) => batch.delete(ref));
     await batch.commit();
   }
+};
+
+if (shouldDeleteGuests) {
+  let removedGuests = 0;
+  for (const uid of inactiveGuests) {
+    // Recheck: the guest may have been used again or linked to Google/Apple since the listing.
+    const current = await auth.getUser(uid).catch(() => null);
+    if (!current || !isInactiveGuest(current)) continue;
+    await eraseData(uid);
+    await auth.deleteUser(uid);
+    removedGuests += 1;
+  }
+  console.log(`Deleted ${removedGuests} inactive guest accounts and their data.`);
+  if (!shouldDelete) process.exit(0);
+}
+
+let erased = 0;
+for (const uid of withdrawn) {
+  // Recheck right before deleting, in case the account signed in again since the listing.
+  const stillMissing = await auth.getUser(uid).then(() => false, (error) => error.code === "auth/user-not-found");
+  if (!stillMissing) continue;
+  await eraseData(uid);
   erased += 1;
 }
 console.log(`Deleted data of ${erased} withdrawn accounts (${withdrawn.length - erased} skipped because the account exists again).`);

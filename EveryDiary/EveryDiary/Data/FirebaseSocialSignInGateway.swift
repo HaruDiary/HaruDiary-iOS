@@ -46,10 +46,16 @@ final class FirebaseSocialSignInGateway: SocialSignInGateway {
     func switchFromGuest(to credential: SocialCredential) async throws {
         let guest = auth.currentUser
         _ = try await auth.signIn(with: try Self.authCredential(credential))
-        // Only after the sign-in succeeded. The guest can no longer be reached, as before; its diaries are
-        // removed with other withdrawn accounts by scripts/admin/withdrawn-account-data.mjs.
+        // Only after the sign-in succeeded. The guest can no longer be reached, as before.
+        // Deleting it often fails because Firebase requires a recent sign-in, and the app cannot sign in to it again.
+        // Such guests are found and removed by scripts/admin/withdrawn-account-data.mjs (--delete-inactive-guests).
         if let guest, guest.isAnonymous {
-            try? await guest.delete()
+            do {
+                try await guest.delete()
+            } catch {
+                let error = error as NSError
+                print("Leftover guest account not deleted: \(error.domain) \(error.code)")
+            }
         }
     }
 
