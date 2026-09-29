@@ -80,8 +80,20 @@ final class FirebaseAccountSession: AccountSession {
             throw error
         }
 
-        // 3. The replaced upload is no longer shown anywhere. A failure only leaves a file that account deletion removes.
-        if let previousPhoto, saved != .photo(previousPhoto) {
+        // 3. Uploaded profile photos other than the one now shown are removed. Sweeping the whole folder also
+        //    retries any photo an earlier save failed to delete; a failure here keeps the saved profile.
+        var keptPath: String?
+        if case .photo(let url) = saved { keptPath = ProfilePicture.storagePath(of: url) }
+        if let items = try? await storage.reference().child(userID).listAll().items {
+            for item in items where item.name.hasPrefix(ProfilePicture.photoFilePrefix) && item.fullPath != keptPath {
+                do {
+                    try await item.delete()
+                } catch {
+                    let error = error as NSError
+                    print("Old profile photo not deleted yet: \(error.domain) \(error.code)")
+                }
+            }
+        } else if let previousPhoto, saved != .photo(previousPhoto) {
             _ = await FirebasePhotoFiles.delete(urlString: previousPhoto.absoluteString)
         }
         return saved

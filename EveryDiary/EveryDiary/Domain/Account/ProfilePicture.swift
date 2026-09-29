@@ -21,12 +21,17 @@ enum ProfilePicture: Equatable {
     }
 
     static func isUploadedPhoto(_ url: URL) -> Bool {
-        guard url.scheme == "https", url.host?.hasSuffix("firebasestorage.googleapis.com") == true,
-              let range = url.path.range(of: "/o/") else { return false }
-        // The object path is percent-encoded after /o/, e.g. `uid%2Fprofile-….jpg`.
-        let objectPath = String(url.path[range.upperBound...]).removingPercentEncoding ?? ""
+        guard let objectPath = storagePath(of: url) else { return false }
         let parts = objectPath.split(separator: "/")
         return parts.count == 2 && parts[1].hasPrefix(photoFilePrefix)
+    }
+
+    /// The Storage object path of a download URL (`uid/profile-….jpg`), or nil for other URLs.
+    static func storagePath(of url: URL) -> String? {
+        guard url.scheme == "https", url.host?.hasSuffix("firebasestorage.googleapis.com") == true,
+              let range = url.path.range(of: "/o/") else { return nil }
+        // The object path is percent-encoded after /o/, e.g. `uid%2Fprofile-….jpg`.
+        return String(url.path[range.upperBound...]).removingPercentEncoding
     }
 }
 

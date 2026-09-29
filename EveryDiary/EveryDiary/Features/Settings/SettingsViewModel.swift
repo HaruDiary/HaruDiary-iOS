@@ -101,8 +101,11 @@ final class SettingsViewModel {
         }
         isSavingProfile = true
         defer { isSavingProfile = false }
+        let requestedFor = account
         do {
             let saved = try await session.updateProfile(nickname: name, picture: selection)
+            // If the account changed meanwhile (sign-out, another account), the result belongs to the previous one.
+            guard account == requestedFor else { return true }
             // A profile change does not trigger the sign-in listener, so the shown account is updated here.
             account = .member(email: email, name: name, provider: provider)
             picture = saved

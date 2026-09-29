@@ -54,7 +54,14 @@ final class AppleCredentialMonitor {
     private func signOut(ifStill userID: String) {
         // A different account may have signed in while Apple answered.
         guard auth.currentUser?.uid == userID else { return }
-        try? auth.signOut()
+        do {
+            try auth.signOut()
+        } catch {
+            // The session stays; the check runs again the next time the app becomes active.
+            let error = error as NSError
+            print("Sign-out after Apple revocation failed, retrying on next activation: \(error.domain) \(error.code)")
+            return
+        }
         NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
         print("Signed out: Sign in with Apple was stopped for this app")
     }

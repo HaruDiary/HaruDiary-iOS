@@ -79,6 +79,7 @@ final class SettingsViewModelTests: XCTestCase {
 
     func testOnlyTheMembersUploadedProfilePhotoIsReadAsAPhoto() {
         XCTAssertEqual(ProfilePicture(storedURL: uploadedPhoto.absoluteString), .photo(uploadedPhoto))
+        XCTAssertEqual(ProfilePicture.storagePath(of: uploadedPhoto), "uid123/profile-A1.jpg")
         XCTAssertEqual(ProfilePicture(storedURL: ProfileAvatar.sky.storedURL), .avatar(.sky))
         // Google's account photo and diary photos are not profile uploads.
         XCTAssertNil(ProfilePicture(storedURL: "https://lh3.googleusercontent.com/a/photo.jpg"))
@@ -138,6 +139,24 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertTrue(saved)
         XCTAssertEqual(session.savedProfiles.map(\.picture), [.newPhoto(Data([1, 2, 3]))])
         XCTAssertEqual(model.profile.picture, .photo(uploadedPhoto))
+    }
+
+    // A save that finishes after the account changed must not show the previous account's profile.
+    func testProfileSavedForAPreviousAccountIsNotShown() async throws {
+        let session = FakeAccountSession()
+        let model = try await signedInModel(session)
+        defer { model.stop() }
+        session.suspendsProfile = true
+
+        async let saved = model.updateProfile(nickname: "A의 이름", picture: .avatar(.mint))
+        try await waitUntil { model.isSavingProfile }
+        session.send(member(provider: "apple.com", email: "b@example.com", name: "B"))
+        try await waitUntil { model.account == .member(email: "b@example.com", name: "B", provider: .apple) }
+        session.resumeProfile()
+        _ = await saved
+
+        XCTAssertEqual(model.account, .member(email: "b@example.com", name: "B", provider: .apple))
+        XCTAssertEqual(model.profile.picture, .avatar(.apple))
     }
 
     func testInvalidOrFailedNicknameIsNotShown() async throws {
@@ -330,7 +349,18 @@ final class FakeAccountSession: AccountSession {
     var profileError: Error?
     var photoURLAfterUpload = URL(string: "https://firebasestorage.googleapis.com/v0/b/a/o/u%2Fprofile-x.jpg")!
 
+    var suspendsProfile = false
+    private var pendingProfile: CheckedContinuation<Void, Never>?
+
+    func resumeProfile() {
+        pendingProfile?.resume()
+        pendingProfile = nil
+    }
+
     func updateProfile(nickname: String, picture: ProfilePictureSelection) async throws -> ProfilePicture {
+        if suspendsProfile {
+            await withCheckedContinuation { pendingProfile = $0 }
+        }
         if let profileError { throw profileError }
         savedProfiles.append((nickname, picture))
         switch picture {
