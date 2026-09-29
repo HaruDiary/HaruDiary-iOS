@@ -1,14 +1,19 @@
 import FirebaseAuth
+import FirebaseStorage
 import Foundation
 
 @MainActor
 final class FirebaseAccountSession: AccountSession {
     private let auth: Auth
     private let dataEraser: any UserDataErasing
+    private let storage: Storage
+    private let appleRecords: AppleSignInRecords
 
-    init(auth: Auth, dataEraser: any UserDataErasing) {
+    init(auth: Auth, dataEraser: any UserDataErasing, storage: Storage, appleRecords: AppleSignInRecords) {
         self.auth = auth
         self.dataEraser = dataEraser
+        self.storage = storage
+        self.appleRecords = appleRecords
     }
 
     func observeAccount() -> AsyncStream<AccountSnapshot?> {
@@ -32,16 +37,102 @@ final class FirebaseAccountSession: AccountSession {
         try auth.signOut()
     }
 
-    func deleteAccount() async throws {
+    func updateProfile(nickname: String, picture: ProfilePictureSelection) async throws -> ProfilePicture {
+        guard let user = auth.currentUser else { throw AccountDeletionError.notSignedIn }
+        let userID = user.uid
+        let previousPhoto = user.photoURL.flatMap { ProfilePicture.isUploadedPhoto($0) ? $0 : nil }
+
+        // 1. A new photo gets its own file next to the diary photos, so account deletion removes it too.
+        var uploaded: StorageReference?
+        let saved: ProfilePicture
+        switch picture {
+        case .avatar(let avatar):
+            saved = .avatar(avatar)
+        case .currentPhoto(let url):
+            saved = .photo(url)
+        case .newPhoto(let data):
+            let reference = storage.reference().child("\(userID)/\(ProfilePicture.photoFilePrefix)\(UUID().uuidString).jpg")
+            let metadata = StorageMetadata()
+            metadata.contentType = "image/jpeg"
+            _ = try await reference.putDataAsync(data, metadata: metadata)
+            uploaded = reference
+            do {
+                saved = .photo(try await reference.downloadURL())
+            } catch {
+                // The uploaded file is not linked to the profile yet; remove it so a retry leaves nothing behind.
+                try? await reference.delete()
+                throw error
+            }
+        }
+
+        // 2. The profile changes only for the account that asked; a sign-out or switch meanwhile cancels it.
+        do {
+            guard auth.currentUser?.uid == userID else { throw AccountDeletionError.notSignedIn }
+            let request = user.createProfileChangeRequest()
+            request.displayName = nickname
+            switch saved {
+            case .avatar(let avatar): request.photoURL = URL(string: avatar.storedURL)
+            case .photo(let url): request.photoURL = url
+            }
+            try await request.commitChanges()
+        } catch {
+            try? await uploaded?.delete()
+            throw error
+        }
+
+        // 3. Uploaded profile photos other than the one now shown are removed. Sweeping the whole folder also
+        //    retries any photo an earlier save failed to delete; a failure here keeps the saved profile.
+        var keptPath: String?
+        if case .photo(let url) = saved { keptPath = ProfilePicture.storagePath(of: url) }
+        if let items = try? await storage.reference().child(userID).listAll().items {
+            for item in items where item.name.hasPrefix(ProfilePicture.photoFilePrefix) && item.fullPath != keptPath {
+                do {
+                    try await item.delete()
+                } catch {
+                    let error = error as NSError
+                    print("Old profile photo not deleted yet: \(error.domain) \(error.code)")
+                }
+            }
+        } else if let previousPhoto, saved != .photo(previousPhoto) {
+            _ = await FirebasePhotoFiles.delete(urlString: previousPhoto.absoluteString)
+        }
+        return saved
+    }
+
+    func deleteAccount(appleAuthorization: AppleAuthorization?) async throws {
         guard let user = auth.currentUser else { throw AccountDeletionError.notSignedIn }
         guard let provider = user.providerData.lazy.compactMap({ SocialProvider(providerID: $0.providerID) }).first else {
             throw AccountDeletionError.unsupportedAccount
         }
         let userID = user.uid
-        // Both dates come from a freshly issued token, so the device clock does not matter.
-        let token = try await user.getIDTokenResult(forcingRefresh: true)
+        let signedInFor: TimeInterval
+        if provider == .apple {
+            // Apple members confirm with Sign in with Apple right before deleting. The fresh sign-in satisfies
+            // Firebase's recent-login rule, and its single-use code lets Firebase revoke the Apple token.
+            guard let apple = appleAuthorization, let code = apple.authorizationCode else {
+                throw AccountDeletionError.appleConfirmationRequired
+            }
+            do {
+                _ = try await user.reauthenticate(with: FirebaseSocialSignInGateway.firebaseCredential(for: apple))
+            } catch {
+                throw AccountDeletionError.appleConfirmationRequired
+            }
+            // Revoked before anything is erased: if Apple cannot be reached, the account and diaries stay as they were.
+            do {
+                try await auth.revokeToken(withAuthorizationCode: code)
+            } catch {
+                let error = error as NSError
+                print("Apple token revoke failed: \(error.domain) \(error.code)")
+                throw AccountDeletionError.appleRevocationFailed
+            }
+            signedInFor = 0
+        } else {
+            // Both dates come from a freshly issued token, so the device clock does not matter.
+            let token = try await user.getIDTokenResult(forcingRefresh: true)
+            signedInFor = token.issuedAtDate.timeIntervalSince(token.authDate)
+        }
         try await AccountDeletion.run(
-            signedInFor: token.issuedAtDate.timeIntervalSince(token.authDate),
+            signedInFor: signedInFor,
             eraseData: { try await dataEraser.eraseAllData(userID: userID) },
             deleteAccount: {
                 do {
@@ -51,29 +142,14 @@ final class FirebaseAccountSession: AccountSession {
                 }
             }
         )
-        // The Apple token is revoked only after the account is gone, so a failed deletion keeps Sign in with Apple working.
         if provider == .apple {
-            revokeAppleToken()
+            appleRecords.forget()
             try? auth.signOut()
         }
     }
 
     nonisolated private static func snapshot(_ user: User) -> AccountSnapshot {
-        AccountSnapshot(isEmailVerified: user.isEmailVerified, email: user.email, displayName: user.displayName,
-                        providerIDs: user.providerData.map(\.providerID))
-    }
-
-    // Same Cloud Function and stored refresh token as the previous settings screen. Responses are not logged.
-    private func revokeAppleToken() {
-        guard let token = UserDefaults.standard.string(forKey: "refreshToken"),
-              let query = "refresh_token=\(token)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://us-central1-everydiary-a9c5e.cloudfunctions.net/revokeToken?\(query)") else { return }
-        URLSession.shared.dataTask(with: url) { _, response, error in
-            if let error {
-                print("Apple token revoke failed: \(error.localizedDescription)")
-            } else if let status = (response as? HTTPURLResponse)?.statusCode {
-                print("Apple token revoke status: \(status)")
-            }
-        }.resume()
+        AccountSnapshot(isEmailVerified: user.isEmailVerified, email: user.shownEmail, displayName: user.shownName,
+                        providerIDs: user.providerData.map(\.providerID), photoURL: user.photoURL?.absoluteString)
     }
 }

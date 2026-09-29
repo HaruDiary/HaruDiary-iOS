@@ -6,6 +6,7 @@
 //
 
 import Observation
+import SwiftUI
 import UIKit
 
 import SnapKit
@@ -18,6 +19,10 @@ class SettingVC: UIViewController {
     private var loginStatus: Bool { viewModel.profile.isLoggedIn }
     
     private var dataSource = [CellModel]()
+    // 올린 프로필 사진은 한 번 받아 두고, 주소가 바뀔 때만 다시 받는다. 주소에는 접근 토큰이 있어 기록하지 않는다.
+    private var profilePhoto: (url: URL, image: UIImage)?
+    private var profilePhotoTask: Task<Void, Never>?
+    private let appleRequest = AppleAuthorizationRequest()
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -96,7 +101,7 @@ class SettingVC: UIViewController {
     }
     
     @objc func didTapLoginButton() {
-        let loginVC = LoginVC()
+        let loginVC = LoginVC(gateway: module.signInGateway)
         loginVC.modalPresentationStyle = .fullScreen
         self.present(loginVC, animated: true)
     }
@@ -115,7 +120,7 @@ extension SettingVC {
         let profile = viewModel.profile
         let withdrawalIcon = profile.isLoggedIn ? "withdrawal" : "trash"
         dataSource = [
-            .profileItem(email: profile.detail, name: profile.name, image: profile.imageName, isLoggedIn: profile.isLoggedIn),
+            .profileItem(email: profile.detail, name: profile.name, image: nil, isLoggedIn: profile.isLoggedIn),
             .settingItem(title: "알림", iconImage: "notification", number: 1),
             .settingItem(title: "잠금", iconImage: "lock", number: 2),
             .settingItem(title: "최근 삭제한 항목", iconImage: "trash", number: 3),
@@ -123,11 +128,38 @@ extension SettingVC {
             .signOutItem(title: "회원 탈퇴", iconImage: withdrawalIcon, number: 2, isLoggedIn: profile.isLoggedIn)
         ]
         tableView.reloadData()
+        loadProfilePhotoIfNeeded()
+    }
+    
+    private func profileImage() -> UIImage? {
+        let scale = max(traitCollection.displayScale, 3)
+        switch viewModel.profile.picture {
+        case .photo(let url):
+            if let profilePhoto, profilePhoto.url == url { return profilePhoto.image }
+            return ProfileAvatarView.image(for: viewModel.defaultAvatar, size: 50, scale: scale)
+        case .avatar(let avatar):
+            return ProfileAvatarView.image(for: avatar, size: 50, scale: scale)
+        case nil:
+            return ProfileAvatarView.image(for: nil, size: 50, scale: scale)
+        }
+    }
+    
+    private func loadProfilePhotoIfNeeded() {
+        guard case .photo(let url) = viewModel.profile.picture, profilePhoto?.url != url else { return }
+        profilePhotoTask?.cancel()
+        profilePhotoTask = Task { [weak self] in
+            guard let (data, _) = try? await URLSession.shared.data(from: url), let image = UIImage(data: data),
+                  let self, !Task.isCancelled else { return }
+            self.profilePhoto = (url, image)
+            self.tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
+        }
     }
     
     private func observeAccount() {
+        // 사진·기본 프로필만 바뀌면 계정 정보는 같아 알림이 오지 않으므로 사진도 함께 관찰한다.
         withObservationTracking {
             _ = viewModel.account
+            _ = viewModel.picture
             _ = viewModel.isDeletingAccount
         } onChange: { [weak self] in
             Task { @MainActor in self?.observeAccount() }
@@ -169,10 +201,20 @@ extension SettingVC {
             presentAlert(title: "다시 로그인이 필요해요", message: "보안을 위해 로그아웃 후 다시 로그인한 뒤\n바로 탈퇴해주세요.")
         case .dataErasedNeedsRecentLogin:
             presentAlert(title: "탈퇴를 마치려면 다시 로그인해주세요", message: "일기와 사진은 모두 삭제되었어요.\n로그아웃 후 다시 로그인한 뒤 탈퇴를 한 번 더 눌러주세요.")
+        case .appleConfirmationFailed:
+            presentAlert(title: "회원 탈퇴 실패", message: "로그인한 Apple 계정으로 확인해주세요.\n다른 Apple 계정으로는 탈퇴할 수 없어요.")
+        case .appleRevocationFailed:
+            presentAlert(title: "회원 탈퇴 실패", message: "Apple 로그인 연결을 해제하지 못해 탈퇴를 멈췄어요.\n일기와 사진은 그대로예요. 잠시 후 다시 시도해주세요.")
         case .dataErasureFailed:
             presentAlert(title: "회원 탈퇴 실패", message: "일기와 사진을 모두 지우지 못해 탈퇴를 멈췄어요.\n잠시 후 다시 시도해주세요.")
         case .deletionFailed:
             presentAlert(title: "회원 탈퇴 실패", message: "회원 탈퇴를 완료하지 못했습니다.\n잠시 후 다시 시도해주세요.")
+        case .profileSaved:
+            TemporaryAlert.presentTemporaryMessage(with: "저장 완료", message: "프로필을 저장했어요.", interval: 1.0, for: self)
+        case .nicknameInvalid(let problem):
+            presentAlert(title: "닉네임을 확인해주세요", message: NicknameAlert.problemMessage(problem)) { [weak self] in
+                self?.editProfile()
+            }
         }
     }
     
@@ -196,9 +238,24 @@ extension SettingVC {
     }
     
     func showMainScreen() {
-        let loginVC = LoginVC()
+        let loginVC = LoginVC(gateway: module.signInGateway)
         loginVC.modalPresentationStyle = .fullScreen
         self.present(loginVC, animated: true)
+    }
+    
+    // Apple 회원은 탈퇴 직전에 Apple로 한 번 더 확인한다. 이 확인으로 Firebase가 Apple 연결을 끊는다.
+    private func confirmWithAppleThenDelete() {
+        appleRequest.start(from: self) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let apple):
+                Task { await self.viewModel.deleteAccount(appleAuthorization: apple) }
+            case .failure(AppleAuthorizationRequest.Failure.canceled):
+                break
+            case .failure:
+                self.presentAlert(title: "Apple 확인 실패", message: "Apple 계정을 확인하지 못했어요.\n잠시 후 다시 시도해주세요.")
+            }
+        }
     }
     
     // 회원 탈퇴 재차 확인
@@ -207,7 +264,11 @@ extension SettingVC {
         
         let deleteAction = UIAlertAction(title: "회원 탈퇴", style: .destructive) { [weak self] _ in
             guard let self else { return }
-            Task { await self.viewModel.deleteAccount() }
+            if self.viewModel.needsAppleConfirmationToDelete {
+                self.confirmWithAppleThenDelete()
+            } else {
+                Task { await self.viewModel.deleteAccount() }
+            }
         }
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         
@@ -231,7 +292,7 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
             
         case let .profileItem(email, name, image, _):
             let cell = tableView.dequeueReusableCell(withIdentifier: ProfileCell.id, for: indexPath) as! ProfileCell
-            cell.prapare(email: email, name: name, image: image, isLoggedIn: loginStatus)
+            cell.prapare(email: email, name: name, image: profileImage(), isLoggedIn: loginStatus)
             cell.backgroundColor = .mainBackground
             cell.loginButton.addTarget(self, action: #selector(didTapLoginButton), for: .touchUpInside)
             return cell
@@ -285,9 +346,31 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
             default:
                 print("Error")
             }
-        default:
-            print("No Any Action")
+        case .profileItem:
+            // 로그인한 경우 프로필을 누르면 프로필 이미지·닉네임을 바꾼다. 로그인 전에는 로그인 버튼을 사용한다.
+            if viewModel.canManageAccount { editProfile() }
         }
+    }
+    
+    private func editProfile() {
+        let editor = ProfileEditView(
+            nickname: viewModel.nickname, picture: viewModel.profile.picture,
+            onSave: { [weak self] nickname, picture in
+                guard let self else { return false }
+                let saved = await self.viewModel.updateProfile(nickname: nickname, picture: picture)
+                // 방금 올린 사진은 이미 가지고 있으므로 다시 받지 않고 바로 보여준다.
+                if saved, case .newPhoto(let data) = picture, case .photo(let url) = self.viewModel.profile.picture,
+                   let image = UIImage(data: data) {
+                    self.profilePhoto = (url, image)
+                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
+                }
+                return saved
+            },
+            onClose: { [weak self] in self?.dismiss(animated: true) }
+        )
+        let controller = UIHostingController(rootView: editor)
+        controller.sheetPresentationController?.detents = [.large()]
+        present(controller, animated: true)
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

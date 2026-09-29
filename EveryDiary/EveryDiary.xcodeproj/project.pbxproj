@@ -182,6 +182,32 @@
 		EB45A794506B49CB96256C4C /* AccountDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B474071592B145D8B85309BD /* AccountDeletion.swift */; };
 		7528378CE0D24F2E8E00CD4A /* FirebaseUserDataEraser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */; };
 		D21F23D03AB8475EA1C33C13 /* FirebasePhotoFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */; };
+		3D9FF83B299545A3935D0D41 /* SocialSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2883021185774F46B4DB6CA4 /* SocialSignIn.swift */; };
+		37B63B1F2E694B248905B305 /* SocialSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2883021185774F46B4DB6CA4 /* SocialSignIn.swift */; };
+		D30888651EB1404FAF59D7C8 /* FirebaseSocialSignInGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */; };
+		42FAC87B502F4227A8387871 /* SocialSignInTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E953C47FF7CA4523A7534FBC /* SocialSignInTests.swift */; };
+		5B2C3912591A43FA89E7D0DE /* Nickname.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD66E8B399BD4328B3E6ECCD /* Nickname.swift */; };
+		33E8CDA28B604D23AB108101 /* Nickname.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD66E8B399BD4328B3E6ECCD /* Nickname.swift */; };
+		635C5FDFC35343C793A8D85C /* FirebaseUser+Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */; };
+		BAD1C41C7BDD48968C553A07 /* NicknameAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31037A4F0D8649B7BF6CBF16 /* NicknameAlert.swift */; };
+		9019F0206139486483334F74 /* ProfileAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */; };
+		A0AECB78FA714980B300D783 /* ProfileAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */; };
+		595C79EEEB5C401CA17BC028 /* ProfileAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */; };
+		DF5B9964C8F04215BC98BE9A /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B470769C0A454C869F7E2BAE /* ProfileEditView.swift */; };
+		B7E9964B7E694588B368F017 /* ProfilePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95117A90CD30494982CCDC18 /* ProfilePicture.swift */; };
+		9E1625C7409A4297A620A04B /* ProfilePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95117A90CD30494982CCDC18 /* ProfilePicture.swift */; };
+		C472E74E38494FB582D4D1C3 /* ProfilePhotoPreparation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */; };
+		2B14163B939C4B3F8AF3F16D /* AppleRefreshTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */; };
+		FE8BFE908EBB4782994D2CE5 /* AppleRefreshTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */; };
+		16FB74D484FB444E84926326 /* KeychainSecretStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */; };
+		ABDF27ADC7F74F4BBFDA0610 /* AppleSignInRecords.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */; };
+		AEBC3933AC39407393EA46C6 /* AppleRefreshTokenStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */; };
+		B0271179CB6A40FC8E7D043F /* AppleCredentialStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */; };
+		3761782D1E9541648610A4DF /* AppleCredentialStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */; };
+		AE80E87C8AF34C86A074B4FD /* AppleCredentialMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */; };
+		526E31BBACBE4FD3BE3362A4 /* AppleAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 980D440F9AED465DB3E2447A /* AppleAuthorization.swift */; };
+		0B67131882814099B395D5CA /* AppleAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 980D440F9AED465DB3E2447A /* AppleAuthorization.swift */; };
+		8CE10AD94F264F07A3FC33BF /* AppleAuthorizationRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6805BED9148E487D92B6E608 /* AppleAuthorizationRequest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -331,6 +357,25 @@
 		B474071592B145D8B85309BD /* AccountDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountDeletion.swift"; sourceTree = "<group>"; };
 		5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseUserDataEraser.swift"; sourceTree = "<group>"; };
 		1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebasePhotoFiles.swift"; sourceTree = "<group>"; };
+		2883021185774F46B4DB6CA4 /* SocialSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/SocialSignIn.swift"; sourceTree = "<group>"; };
+		BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseSocialSignInGateway.swift"; sourceTree = "<group>"; };
+		E953C47FF7CA4523A7534FBC /* SocialSignInTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SocialSignInTests.swift"; sourceTree = "<group>"; };
+		FD66E8B399BD4328B3E6ECCD /* Nickname.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/Nickname.swift"; sourceTree = "<group>"; };
+		68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseUser+Profile.swift"; sourceTree = "<group>"; };
+		31037A4F0D8649B7BF6CBF16 /* NicknameAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NicknameAlert.swift"; sourceTree = "<group>"; };
+		49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/ProfileAvatar.swift"; sourceTree = "<group>"; };
+		62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfileAvatarView.swift"; sourceTree = "<group>"; };
+		B470769C0A454C869F7E2BAE /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfileEditView.swift"; sourceTree = "<group>"; };
+		95117A90CD30494982CCDC18 /* ProfilePicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/ProfilePicture.swift"; sourceTree = "<group>"; };
+		B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoPreparation.swift"; sourceTree = "<group>"; };
+		55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleRefreshTokenStore.swift"; sourceTree = "<group>"; };
+		47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainSecretStore.swift"; sourceTree = "<group>"; };
+		156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleSignInRecords.swift"; sourceTree = "<group>"; };
+		09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleRefreshTokenStoreTests.swift"; sourceTree = "<group>"; };
+		1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleCredentialStatus.swift"; sourceTree = "<group>"; };
+		832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleCredentialMonitor.swift"; sourceTree = "<group>"; };
+		980D440F9AED465DB3E2447A /* AppleAuthorization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleAuthorization.swift"; sourceTree = "<group>"; };
+		6805BED9148E487D92B6E608 /* AppleAuthorizationRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleAuthorizationRequest.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -538,6 +583,8 @@
 		6BB3CE392B85F081005BC3E1 /* Setting */ = {
 			isa = PBXGroup;
 			children = (
+				6805BED9148E487D92B6E608 /* AppleAuthorizationRequest.swift */,
+				31037A4F0D8649B7BF6CBF16 /* NicknameAlert.swift */,
 				6BB3CE3D2B85F66E005BC3E1 /* SettingVC.swift */,
 				D26E2F9E2B90239A0083FEAC /* SignOutCell.swift */,
 				D26E2F9C2B9023400083FEAC /* ProfileCell.swift */,
@@ -569,6 +616,8 @@
 		CE00DB6416F6564570F700F0 /* EveryDiaryLogicTests */ = {
 			isa = PBXGroup;
 			children = (
+				09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */,
+				E953C47FF7CA4523A7534FBC /* SocialSignInTests.swift */,
 				8A6612B31B0240059B2D34EE /* SettingsViewModelTests.swift */,
 				FE0B8AACB301466AAE9D2BA6 /* TrashViewModelTests.swift */,
 				0DA17968AF8E45979D9ADD82 /* ExpiredTrashPurgerTests.swift */,
@@ -611,6 +660,13 @@
 		D54CFC13EC7B939BCF62AC09 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				980D440F9AED465DB3E2447A /* AppleAuthorization.swift */,
+				1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */,
+				55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */,
+				95117A90CD30494982CCDC18 /* ProfilePicture.swift */,
+				49FBBA492A8F4676A11F4222 /* ProfileAvatar.swift */,
+				FD66E8B399BD4328B3E6ECCD /* Nickname.swift */,
+				2883021185774F46B4DB6CA4 /* SocialSignIn.swift */,
 				B474071592B145D8B85309BD /* AccountDeletion.swift */,
 				F393DB3464574FF0991E1DB5 /* AccountSession.swift */,
 				0133FDA9A09046DEA4B34AFA /* AccountState.swift */,
@@ -641,6 +697,11 @@
 		9987856AA8934E3BE9726639 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */,
+				156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */,
+				47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */,
+				68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */,
+				BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */,
 				1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */,
 				5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */,
 				31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */,
@@ -653,6 +714,8 @@
 		BC49A4866C5E0A9951D22E14 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */,
+				B470769C0A454C869F7E2BAE /* ProfileEditView.swift */,
 				0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
@@ -689,6 +752,7 @@
 		BDF71909E1ED119D43F0FF4A /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */,
 				DEBC2E2935FB4A6F8D9D09CF /* DiaryListComponents.swift */,
 				8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */,
 				4D68D4420386455C94759513 /* DiaryWriteButton.swift */,
@@ -823,6 +887,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0B67131882814099B395D5CA /* AppleAuthorization.swift in Sources */,
+				3761782D1E9541648610A4DF /* AppleCredentialStatus.swift in Sources */,
+				AEBC3933AC39407393EA46C6 /* AppleRefreshTokenStoreTests.swift in Sources */,
+				FE8BFE908EBB4782994D2CE5 /* AppleRefreshTokenStore.swift in Sources */,
+				9E1625C7409A4297A620A04B /* ProfilePicture.swift in Sources */,
+				A0AECB78FA714980B300D783 /* ProfileAvatar.swift in Sources */,
+				33E8CDA28B604D23AB108101 /* Nickname.swift in Sources */,
+				42FAC87B502F4227A8387871 /* SocialSignInTests.swift in Sources */,
+				37B63B1F2E694B248905B305 /* SocialSignIn.swift in Sources */,
 				EB45A794506B49CB96256C4C /* AccountDeletion.swift in Sources */,
 				F0F3D5C199B14D369C2F15F1 /* SettingsViewModelTests.swift in Sources */,
 				258FDD3E83A3419891E0AFD6 /* SettingsModule.swift in Sources */,
@@ -870,6 +943,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8CE10AD94F264F07A3FC33BF /* AppleAuthorizationRequest.swift in Sources */,
+				526E31BBACBE4FD3BE3362A4 /* AppleAuthorization.swift in Sources */,
+				AE80E87C8AF34C86A074B4FD /* AppleCredentialMonitor.swift in Sources */,
+				B0271179CB6A40FC8E7D043F /* AppleCredentialStatus.swift in Sources */,
+				ABDF27ADC7F74F4BBFDA0610 /* AppleSignInRecords.swift in Sources */,
+				16FB74D484FB444E84926326 /* KeychainSecretStore.swift in Sources */,
+				2B14163B939C4B3F8AF3F16D /* AppleRefreshTokenStore.swift in Sources */,
+				C472E74E38494FB582D4D1C3 /* ProfilePhotoPreparation.swift in Sources */,
+				B7E9964B7E694588B368F017 /* ProfilePicture.swift in Sources */,
+				DF5B9964C8F04215BC98BE9A /* ProfileEditView.swift in Sources */,
+				595C79EEEB5C401CA17BC028 /* ProfileAvatarView.swift in Sources */,
+				9019F0206139486483334F74 /* ProfileAvatar.swift in Sources */,
+				BAD1C41C7BDD48968C553A07 /* NicknameAlert.swift in Sources */,
+				635C5FDFC35343C793A8D85C /* FirebaseUser+Profile.swift in Sources */,
+				5B2C3912591A43FA89E7D0DE /* Nickname.swift in Sources */,
+				D30888651EB1404FAF59D7C8 /* FirebaseSocialSignInGateway.swift in Sources */,
+				3D9FF83B299545A3935D0D41 /* SocialSignIn.swift in Sources */,
 				D21F23D03AB8475EA1C33C13 /* FirebasePhotoFiles.swift in Sources */,
 				7528378CE0D24F2E8E00CD4A /* FirebaseUserDataEraser.swift in Sources */,
 				F357E15ECC2548EDAC1BB4C1 /* AccountDeletion.swift in Sources */,

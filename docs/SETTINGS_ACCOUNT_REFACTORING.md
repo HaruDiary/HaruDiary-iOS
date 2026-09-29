@@ -19,7 +19,8 @@ Google·Apple 연결 흐름은 다음 PR 범위다.
 
 ## 보존한 동작
 
-- 계정 분류: 로그인 안 함 / 손님(익명 등 이메일 미인증) / 회원(Google·Apple). 기존처럼 `isEmailVerified`로 구분한다.
+- 계정 분류: 로그인 안 함 / 손님(Google·Apple 연결 없음) / 회원. Google·Apple이 연결됐거나 이메일이 인증되면 회원이다.
+  기존에는 이메일 인증만 봐서, 손님이 Apple을 연결한 뒤 이메일이 미인증으로 남으면 계속 손님으로 보였다.
 - 프로필 문구·이미지, 메뉴 순서, 손님일 때 로그아웃·탈퇴 행 숨김, 탈퇴 확인 문구.
 - 로그아웃·탈퇴 후 `.loginstatusChanged` 알림 발송(여정 화면이 아직 사용)과 로그인 화면 표시.
 
@@ -55,6 +56,81 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 - `--delete`를 붙이면 확인 실행에서 나온 계정의 사진 파일과 일기 문서를 지운다. 지우기 직전에 계정이 여전히
   없는지 다시 확인한다. `UnknownUser/` 아래 파일은 개수만 알리고 지우지 않는다.
 - 서비스 계정 키 파일은 커밋하지 않는다.
+- 손님이 이미 가입된 Google·Apple 계정으로 전환하면 앱이 남은 손님 계정을 지우려 하지만, Firebase의 최근 로그인 요구로 실패하는
+  경우가 많다(앱은 그 손님 계정으로 다시 로그인할 수 없다). 스크립트는 Google·Apple 연결이 없고 오래(기본 180일, `--guest-days=`)
+  쓰지 않은 손님 계정도 개수로 보여 주고, `--delete-inactive-guests`를 붙이면 데이터와 Auth 계정을 함께 지운다. 지우기 직전에
+  여전히 쓰지 않는 손님인지 다시 확인한다.
+
+## 로그인 흐름 (Google·Apple)
+
+로그인 화면(`LoginVC`)은 Google·Apple 화면을 띄워 자격 증명만 받고, 계정 연결·전환은 `SocialSignIn`이 정한다.
+
+| 현재 상태 | 동작 |
+|---|---|
+| 로그인 안 함 / 회원 | 해당 Google·Apple 계정으로 로그인 |
+| 손님(익명) | 손님 계정에 Google·Apple을 연결해 일기를 그대로 유지하고 이름을 저장 |
+| 손님인데 그 Google·Apple 계정이 이미 가입됨 | 기존 계정으로 로그인한 뒤 남은 손님 계정 삭제(기존과 동일, 손님 일기는 옮기지 않음) |
+
+| 기존 | 변경 |
+|---|---|
+| Google 연결이 네트워크 오류 등으로 실패해도 손님 계정을 삭제해 손님 일기에 다시 접근할 수 없게 됨 | 이미 가입된 계정일 때만 전환. 그 외 실패는 손님 계정 유지 |
+| 손님 계정을 먼저 지운 뒤 기존 계정 로그인. 로그인이 실패하면 로그아웃 상태로 남음 | 기존 계정 로그인이 성공한 뒤 손님 계정 삭제 |
+| Apple 연결이 실패해도 성공으로 처리하고 화면을 닫음 | 실패로 표시 |
+| 로그인 실패 시 아무 안내 없음(버튼을 눌러도 반응이 없는 것처럼 보임) | 실패 알림과 오류 코드 표시. 같은 이메일의 다른 로그인 방식, 네트워크 오류는 안내 문구 구분 |
+| Apple 응답이 예상과 다르면 앱 종료(`fatalError`) | 실패 알림 |
+| 로그인 중 버튼을 다시 누를 수 있음 | 진행 표시, 버튼 비활성화 |
+
+### 닉네임과 로그인 방식 표시
+
+- 프로필 카드: 닉네임, 그 아래 로그인 방식(`Google로 로그인`/`Apple로 로그인`)과 이메일 두 줄. Apple "이메일 가리기" 주소는
+  `이메일 가림`, 이메일이 없으면 로그인 방식 한 줄만 표시. 닉네임이 없으면 `닉네임을 설정해주세요`.
+- 로그인 상태에서 프로필 카드(연필 아이콘)를 누르면 "프로필 편집" 화면에서 프로필 이미지와 닉네임을 함께 바꾼다.
+  닉네임은 앞뒤 공백을 빼고 1~20자(보이는 글자 기준). 잘못된 닉네임이면 저장 버튼이 꺼지고 이유를 표시한다.
+- 기본 프로필은 처음 만든 Google·Apple 로그인 프로필 그림(남색 테두리, 노란 머리)을 24×24 격자 그대로 벡터로 다시 그리고,
+  배경·몸 색만 다른 6종(라벤더·민트·살구·분홍·하늘·보라)을 더한 8종이다. 사진을 고르지 않으면 Google 로그인은 초록(Google),
+  Apple 로그인은 파랑(Apple) 기본 프로필이 보인다. 손님은 회색.
+  선택값은 Firebase Auth 사진 URL(`harudiary-avatar://…`)에 저장하고, 앞선 테스트 빌드의 저장값(purple·moon 등)도 가까운 색으로 읽는다.
+- 사진·기본 프로필만 바꾸면 계정 정보(닉네임·이메일)는 그대로라, 계정만 관찰하던 설정 화면이 갱신되지 않았다(Swift 6.2
+  Observation은 같은 값이면 알리지 않음). 프로필 사진도 관찰하고, 방금 올린 사진은 다시 받지 않고 바로 표시한다.
+- 앨범 사진: 편집 화면의 "앨범에서 사진 선택"으로 1장을 고르면 가운데 정사각형으로 잘라 최대 512px JPEG로 다시 저장해
+  (위치 등 원본 메타데이터 제거) 미리보기에만 반영하고, "저장"을 누를 때 올린다.
+  순서: `{uid}/profile-<고유값>.jpg` 업로드 → Auth 프로필 변경 → 예전에 올린 프로필 사진 삭제. 업로드나 프로필 변경이
+  실패하면 새 파일을 지우고 이전 프로필을 유지하며, 편집 화면을 닫지 않고 다시 시도하게 한다. 저장 중에는 버튼·닫기를 막는다.
+  사진 파일은 일기 사진과 같은 `{uid}/` 폴더 바로 아래에 두어 탈퇴 시 함께 지워진다.
+- 사진 URL 중 앱 Storage의 `{uid}/profile-…` 파일만 "올린 사진"으로 본다. Google 계정 사진이나 일기 사진 주소는 기본 이미지로 본다.
+  사진 주소에는 접근 토큰이 있어 기록하지 않는다.
+- 기존 `googleProfile`·`appleProfile` 이미지 자산은 참조를 없앴고, 앱 확인 후 별도로 삭제한다.
+- 손님에서 가입(연결)한 직후에는 항상, 그 외 로그인은 닉네임이 없을 때 닉네임 입력을 묻는다. "나중에"로 건너뛸 수 있다.
+- 닉네임은 Firebase Auth 표시 이름에 저장한다. 일기 데이터·스키마는 바뀌지 않는다.
+
+프로필 이름·이메일은 계정 값이 비어 있으면 연결된 Google·Apple 로그인 정보의 값을 사용한다. 손님에 Apple을 연결하면
+계정 자체에는 이메일이 없을 수 있다. Apple은 이름을 처음 로그인할 때만 전달하므로, 이미 이 앱에 Apple 로그인을 허용한 적이
+있으면 이름이 없어 "사용자"로 표시된다(iPhone 설정 → Apple 계정 → 로그인 및 보안 → Apple로 로그인에서 앱 연결을 해제하면
+다음 로그인 때 다시 전달된다).
+
+같은 이메일로 Google·Apple 계정을 하나씩 만들 수 없는 Firebase 설정("이메일당 계정 하나")에서는, Apple 계정을 탈퇴한 뒤
+같은 이메일의 Google 계정이 남아 있으면 Apple로 새로 가입할 수 없다. 이때 안내 문구로 기존 방식 로그인을 요청한다.
+
+## 보안 보강
+
+| 항목 | 이전 | 변경 |
+|---|---|---|
+| Apple refresh token 보관 | `UserDefaults` 평문(`refreshToken`) | 보관하지 않음(Firebase가 탈퇴 시 새 인증 코드로 철회). 남은 토큰은 앱 시작 시 삭제 |
+| 탈퇴 시 Apple 연결 해제 | URL 쿼리로 토큰을 직접 만든 함수에 전송 | Apple 재확인 후 Firebase `revokeToken`, 탈퇴 후 Apple 사용자 ID 삭제 |
+| iPhone 설정에서 Apple 로그인 "삭제" | 앱은 계속 로그인 상태 | 앱 활성화·해제 알림 시 Apple에 확인해 "해제됨"이면 로그아웃. 개발팀 서명이 없는 시뮬레이터 빌드는 Apple이 항상 "해제됨"으로 답해 건너뜀 |
+| 푸시 기기 토큰 | 콘솔 출력 | 출력하지 않음 |
+
+남은 항목:
+- Firestore·Storage 보안 규칙은 2026-09-29 "자기 uid 경로만 허용, 나머지 차단"으로 게시하고 규칙 플레이그라운드에서
+  자기 경로 허용·다른 사용자 경로 거부를 확인했다(이전 규칙은 로그인한 누구나 모든 데이터 접근 가능).
+- Apple 토큰 철회는 Firebase 기본 기능으로 바꿨다. Apple 회원이 탈퇴하면 Apple 로그인 창으로 한 번 더 확인하고
+  (Firebase 재인증), 받은 일회용 인증 코드로 `Auth.auth().revokeToken(withAuthorizationCode:)`를 호출해 Apple 연결을 끊은 뒤
+  일기·사진·계정을 삭제한다. 철회가 실패하면 아무것도 지우지 않는다. 기존 Cloud Function(`getRefreshToken`·`revokeToken`) 호출과
+  기기의 refresh token 보관은 없앴다(남아 있던 토큰은 앱 시작 시 삭제). Apple 사용자 ID만 Keychain에 보관한다.
+  필요한 설정: Apple Developer의 Sign in with Apple 키(.p8)와 Firebase Authentication › Apple › "OAuth 코드 흐름 구성".
+  2026-09-29 휴대폰에서 Apple 계정 탈퇴·연결 해제를 확인한 뒤 기존 함수 두 개를 Google Cloud 콘솔에서 삭제했다(주소가 404 응답).
+- 프로젝트에는 Firebase "Delete User Data" 확장(`ext-delete-user-data-*`, asia-northeast3)이 설치돼 있다. 계정 삭제 시 서버에서
+  사용자 데이터를 정리하므로, 앱의 탈퇴 전 삭제와 겹쳐도 문제가 없다. 확장의 삭제 대상 경로 설정은 콘솔 Extensions에서 확인한다.
 
 ## 구성
 
@@ -66,6 +142,20 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 | `Domain/Account/AccountDeletion.swift` | 최근 로그인 확인 → 데이터 삭제 → 계정 삭제 순서와 단계별 실패 구분 |
 | `Data/FirebaseUserDataEraser.swift` | 사용자 일기 문서·사진 파일 삭제 |
 | `Data/FirebasePhotoFiles.swift` | 사진 파일 삭제(휴지통 영구 삭제와 공유) |
+| `Domain/Account/SocialSignIn.swift` | 로그인·손님 연결·기존 계정 전환 규칙 |
+| `Data/FirebaseSocialSignInGateway.swift` | Firebase 로그인·연결·전환·이름 저장 |
+| `Domain/Account/Nickname.swift` | 닉네임 규칙(공백 제거, 1~20자) |
+| `Setting/NicknameAlert.swift` | 로그인 직후 닉네임 입력 창 |
+| `Domain/Account/ProfileAvatar.swift` | 기본 프로필 색상과 저장 값(이전 값 호환) |
+| `Domain/Account/ProfilePicture.swift` | 기본 아바타/올린 사진 구분, 편집 화면 선택값 |
+| `Features/Settings/ProfilePhotoPreparation.swift` | 앨범 사진 정사각형·크기 제한·JPEG 재인코딩 |
+| `DesignSystem/ProfileAvatarView.swift` | 프로필 이미지 그림(SwiftUI, 설정 셀용 이미지 변환) |
+| `Features/Settings/ProfileEditView.swift` | 프로필 이미지·닉네임 편집 화면(SwiftUI) |
+| `Domain/Account/AppleRefreshTokenStore.swift` | Apple 사용자 ID 보관 규칙(`AppleSignInSecrets`), 예전 토큰 삭제 |
+| `Data/KeychainSecretStore.swift` | Keychain 저장 |
+| `Setting/AppleAuthorizationRequest.swift` | Apple 로그인 창(로그인·탈퇴 확인 공용, nonce 1회 사용) |
+| `Data/AppleSignInRecords.swift` | Apple 사용자 ID 보관·삭제, 예전 refresh token 정리 |
+| `Data/AppleCredentialMonitor.swift` | Apple 로그인 해제 감지와 로그아웃 |
 | `Features/Settings/SettingsViewModel.swift` | 프로필 표시, 로그아웃·탈퇴 결과, 중복 탈퇴 방지 |
 | `Features/Settings/SettingsModule.swift`, `+UIKit.swift` | 설정 상태와 휴지통 생성 연결 |
 
@@ -77,8 +167,8 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 
 ## 검증
 
-- 로직 테스트 107개 통과: 계정 분류·프로필 문구 2개, 구독·로그아웃·탈퇴 결과 5개, 탈퇴 순서 4개 추가.
+- 로직 테스트 130개 통과: 계정 분류·프로필 문구 2개, 구독·로그아웃·탈퇴 결과 5개, 탈퇴 순서 4개, 로그인 흐름 6개, 손님 Apple 연결 분류 1개, 닉네임·로그인 방식 표시 5개, 프로필 이미지·사진 6개, 토큰 보관·응답·Apple 상태 5개 추가.
 - 실제 앱(시뮬레이터, 로그인된 Google 계정)에서 확인: 나의 일기·여정 탭에서 설정 진입, 프로필 표시,
   최근 삭제한 항목 → 휴지통 표시, 뒤로 가기.
 - 확인하지 못한 것: 실제 계정의 로그아웃·회원 탈퇴와 데이터 삭제(운영 계정 변경), 손님·로그아웃 상태의 설정 화면,
-  Storage 규칙에서 폴더 목록 조회 허용 여부, 관리 스크립트 실행(서비스 계정 필요).
+  Storage 규칙에서 폴더 목록 조회·프로필 사진 업로드 허용 여부, 실제 사진 업로드·교체·재시작 후 표시·다른 기기 표시, 관리 스크립트 실행(서비스 계정 필요).

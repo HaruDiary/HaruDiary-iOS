@@ -5,12 +5,18 @@
 //  Created by t2023-m0044 on 2/21/24.
 //
 
+import FirebaseAuth
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     var blurEffectView: UIVisualEffectView?
+    // Created after FirebaseApp.configure() in AppDelegate.
+    private lazy var appleCredentialMonitor = AppleCredentialMonitor(
+        auth: .auth(),
+        appleRecords: AppleSignInRecords(secrets: AppleSignInSecrets(secrets: KeychainSecretStore(), legacy: .standard))
+    )
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
        
@@ -29,6 +35,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func sceneDidBecomeActive(_ scene: UIScene) {
         removeBlurEffect()
+        appleCredentialMonitor.check()
     }
     
     func sceneWillResignActive(_ scene: UIScene) {
