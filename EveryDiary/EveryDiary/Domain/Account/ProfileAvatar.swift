@@ -3,17 +3,20 @@ import Foundation
 /// The profile picture a member picks. Stored as the Firebase Auth photo URL
 /// (`harudiary-avatar://purple`), so it follows the account without a new diary field.
 enum ProfileAvatar: String, CaseIterable, Equatable {
-    case purple
-    case violet
+    // The original Google/Apple sign-in pictures, then color variants of the same drawing.
+    case google
+    case apple
     case lavender
-    case green
-    case blue
-    case orange
-    case brown
+    case mint
+    case peach
     case pink
+    case sky
+    case violet
 
-    /// Shown until the member picks one.
-    static let `default` = ProfileAvatar.purple
+    /// Shown until the member picks a picture: the picture of the sign-in method, as before.
+    static func `default`(for provider: SocialProvider?) -> ProfileAvatar {
+        provider == .apple ? .apple : .google
+    }
 
     private static let scheme = "harudiary-avatar"
 
@@ -26,9 +29,10 @@ enum ProfileAvatar: String, CaseIterable, Equatable {
         self = avatar
     }
 
-    // IDs saved by the earlier icon set; kept readable so a chosen picture is not reset.
+    // IDs saved by earlier test builds; kept readable so a chosen picture is not reset.
     private static let previousIDs: [String: ProfileAvatar] = [
-        "moon": .purple, "sparkles": .violet, "book": .lavender, "leaf": .green,
-        "cloud": .blue, "sun": .orange, "cup": .brown, "heart": .pink,
+        "purple": .violet, "blue": .apple, "green": .google, "orange": .peach, "brown": .peach,
+        "moon": .violet, "sparkles": .lavender, "book": .violet, "leaf": .google,
+        "cloud": .sky, "sun": .peach, "cup": .peach, "heart": .pink,
     ]
 }

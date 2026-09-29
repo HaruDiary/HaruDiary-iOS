@@ -1,22 +1,30 @@
 import SwiftUI
 import UIKit
 
-/// A plain person silhouette on a solid circle; members pick the color.
+/// The app's original profile drawing (outlined head and body in a ring), in color variants.
+/// Drawn as vectors on the original 24 × 24 grid so it stays sharp from 50 pt to 104 pt.
 struct ProfileAvatarView: View {
     /// nil draws the signed-out/guest placeholder.
     let avatar: ProfileAvatar?
     var size: CGFloat = 50
 
     var body: some View {
-        ZStack {
-            Circle().fill(Self.color(for: avatar))
-            Image(systemName: "person.fill")
-                .font(.system(size: size * 0.5, weight: .regular))
-                .foregroundStyle(.white)
-                .offset(y: size * 0.04)
+        let palette = Self.palette(for: avatar)
+        Canvas { context, canvas in
+            let unit = canvas.width / 24
+            func circle(_ x: CGFloat, _ y: CGFloat, _ r: CGFloat) -> Path {
+                Path(ellipseIn: CGRect(x: (x - r) * unit, y: (y - r) * unit, width: 2 * r * unit, height: 2 * r * unit))
+            }
+            let face = circle(12, 12, 11)
+            context.clip(to: face)
+            context.fill(face, with: .color(palette.background))
+            context.fill(circle(12, 22, 8), with: .color(Self.outline))
+            context.fill(circle(12, 22, 6), with: .color(palette.body))
+            context.fill(circle(12, 9, 4), with: .color(Self.outline))
+            context.fill(circle(12, 9, 2), with: .color(palette.head))
+            context.stroke(circle(12, 12, 10), with: .color(Self.outline), lineWidth: 2 * unit)
         }
         .frame(width: size, height: size)
-        .clipShape(Circle())
         .accessibilityHidden(true)
     }
 
@@ -28,17 +36,27 @@ struct ProfileAvatarView: View {
         return renderer.uiImage
     }
 
-    private static func color(for avatar: ProfileAvatar?) -> Color {
+    private static let outline = rgb(0x2C1170)
+    private static let yellow = rgb(0xFAC700)
+
+    private struct Palette {
+        let background: Color
+        let body: Color
+        var head: Color = ProfileAvatarView.yellow
+    }
+
+    // google/apple are the colors of the original assets; the others reuse the same outline and head.
+    private static func palette(for avatar: ProfileAvatar?) -> Palette {
         switch avatar {
-        case .purple: rgb(0x21005D)
-        case .violet: rgb(0x7223D8)
-        case .lavender: rgb(0xA98BE0)
-        case .green: rgb(0x5E8C6A)
-        case .blue: rgb(0x5B7FA6)
-        case .orange: rgb(0xD9825B)
-        case .brown: rgb(0x8A6A57)
-        case .pink: rgb(0xC0698A)
-        case nil: rgb(0xB5B0BC)
+        case .google: Palette(background: rgb(0x39AB54), body: rgb(0x6A91C9))
+        case .apple: Palette(background: rgb(0x6A91C9), body: rgb(0xEA4D35))
+        case .lavender: Palette(background: rgb(0xD0BCFF), body: rgb(0x7223D8))
+        case .mint: Palette(background: rgb(0x7FD1C5), body: rgb(0xEA4D35))
+        case .peach: Palette(background: rgb(0xF6B38E), body: rgb(0x6A91C9))
+        case .pink: Palette(background: rgb(0xF4A3C0), body: rgb(0x39AB54))
+        case .sky: Palette(background: rgb(0x9BD4F5), body: rgb(0x7223D8))
+        case .violet: Palette(background: rgb(0x7223D8), body: rgb(0xF4A3C0))
+        case nil: Palette(background: rgb(0xE4E1EA), body: rgb(0xB7B2C0), head: rgb(0xCFCAD6))
         }
     }
 
@@ -62,7 +80,7 @@ struct ProfilePictureView: View {
                 AsyncImage(url: url) { image in
                     image.resizable().scaledToFill()
                 } placeholder: {
-                    ProfileAvatarView(avatar: .default, size: size).overlay { ProgressView().tint(.white) }
+                    ProfileAvatarView(avatar: nil, size: size).overlay { ProgressView() }
                 }
             } else if case .avatar(let avatar) = picture {
                 ProfileAvatarView(avatar: avatar, size: size)

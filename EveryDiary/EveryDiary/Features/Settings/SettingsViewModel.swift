@@ -71,6 +71,12 @@ final class SettingsViewModel {
         }
     }
 
+    /// The sign-in method's picture, shown until the member picks one or while a photo loads.
+    var defaultAvatar: ProfileAvatar {
+        if case let .member(_, _, provider) = account { return .default(for: provider) }
+        return .google
+    }
+
     /// The current nickname to prefill the editor; nil when none is set.
     var nickname: String? {
         if case let .member(_, name, _) = account { return name }
@@ -139,7 +145,7 @@ final class SettingsViewModel {
             case nil: method = "인증 완료"
             }
             return Profile(name: name ?? "닉네임을 설정해주세요", detail: method + "\n" + shownEmail(email),
-                           picture: picture ?? .avatar(.default), isLoggedIn: true)
+                           picture: picture ?? .avatar(.default(for: provider)), isLoggedIn: true)
         }
     }
 

@@ -135,7 +135,7 @@ extension SettingVC {
         switch viewModel.profile.picture {
         case .photo(let url):
             if let profilePhoto, profilePhoto.url == url { return profilePhoto.image }
-            return ProfileAvatarView.image(for: .default, size: 50, scale: scale)
+            return ProfileAvatarView.image(for: viewModel.defaultAvatar, size: 50, scale: scale)
         case .avatar(let avatar):
             return ProfileAvatarView.image(for: avatar, size: 50, scale: scale)
         case nil:
@@ -155,8 +155,10 @@ extension SettingVC {
     }
     
     private func observeAccount() {
+        // 사진·기본 프로필만 바뀌면 계정 정보는 같아 알림이 오지 않으므로 사진도 함께 관찰한다.
         withObservationTracking {
             _ = viewModel.account
+            _ = viewModel.picture
             _ = viewModel.isDeletingAccount
         } onChange: { [weak self] in
             Task { @MainActor in self?.observeAccount() }
@@ -331,7 +333,14 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
             nickname: viewModel.nickname, picture: viewModel.profile.picture,
             onSave: { [weak self] nickname, picture in
                 guard let self else { return false }
-                return await self.viewModel.updateProfile(nickname: nickname, picture: picture)
+                let saved = await self.viewModel.updateProfile(nickname: nickname, picture: picture)
+                // 방금 올린 사진은 이미 가지고 있으므로 다시 받지 않고 바로 보여준다.
+                if saved, case .newPhoto(let data) = picture, case .photo(let url) = self.viewModel.profile.picture,
+                   let image = UIImage(data: data) {
+                    self.profilePhoto = (url, image)
+                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
+                }
+                return saved
             },
             onClose: { [weak self] in self?.dismiss(animated: true) }
         )

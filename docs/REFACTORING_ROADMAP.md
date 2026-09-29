@@ -141,7 +141,7 @@ Calendar 작업에서 일기 모델·날짜 formatter의 Foundation 분리, Cale
 온보딩은 5페이지 SwiftUI 화면과 진행·완료 상태를 분리했다.
 일기 목록은 조회·검색·휴지통 이동 상태를 분리해 UIKit에서 검증한 뒤 SwiftUI 탭으로 교체했고,
 사용자별 구독 수명을 Calendar와 공유한다. 휴지통은 30일 보관 정책과 복원·영구 삭제 상태를 분리해
-목록과 같은 카드 형식의 SwiftUI로 교체했다. 설정의 계정 상태·로그아웃·탈퇴를 Firebase 직접 호출에서 분리했다. 현재 로직 테스트는 총 124개다.
+목록과 같은 카드 형식의 SwiftUI로 교체했다. 설정의 계정 상태·로그아웃·탈퇴를 Firebase 직접 호출에서 분리했다. 현재 로직 테스트는 총 125개다.
 온보딩의 수동 화면 검증 상태는 [온보딩 리팩토링](ONBOARDING_REFACTORING.md)을 참고한다.
 세부 범위와 남은 통합 검증은 [Calendar 리팩토링](CALENDAR_REFACTORING.md),
 [일기 목록 리팩토링](DIARY_LIST_REFACTORING.md), [휴지통 리팩토링](TRASH_REFACTORING.md), [설정·계정 리팩토링](SETTINGS_ACCOUNT_REFACTORING.md)을 참고한다.

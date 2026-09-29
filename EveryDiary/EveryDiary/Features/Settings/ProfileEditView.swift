@@ -21,7 +21,7 @@ struct ProfileEditView: View {
         switch picture {
         case .photo(let url): _selection = State(initialValue: .currentPhoto(url))
         case .avatar(let avatar): _selection = State(initialValue: .avatar(avatar))
-        case nil: _selection = State(initialValue: .avatar(.default))
+        case nil: _selection = State(initialValue: .avatar(.google))
         }
         self.onSave = onSave
         self.onClose = onClose
@@ -192,14 +192,14 @@ struct ProfileEditView: View {
 
     private static func label(for avatar: ProfileAvatar) -> String {
         switch avatar {
-        case .purple: "보라"
-        case .violet: "바이올렛"
+        case .google: "초록 (Google 기본)"
+        case .apple: "파랑 (Apple 기본)"
         case .lavender: "라벤더"
-        case .green: "초록"
-        case .blue: "파랑"
-        case .orange: "주황"
-        case .brown: "갈색"
+        case .mint: "민트"
+        case .peach: "살구"
         case .pink: "분홍"
+        case .sky: "하늘"
+        case .violet: "보라"
         }
     }
 }
