@@ -15,6 +15,7 @@ struct DiaryListView: View {
             list
             DiaryWriteButton { leaveSearch(then: onWriteDiary) }
         }
+        .diaryStatusBarBackground()
     }
 
     // The title and search field are rows too, so the whole screen scrolls together, like the calendar tab.

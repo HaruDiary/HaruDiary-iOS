@@ -26,6 +26,7 @@ struct CalendarView: View {
             }
             DiaryWriteButton(action: onWriteDiary)
         }
+        .diaryStatusBarBackground()
     }
 
     private var selectedDaySection: some View {

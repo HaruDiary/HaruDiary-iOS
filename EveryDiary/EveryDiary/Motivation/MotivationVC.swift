@@ -173,9 +173,9 @@ class MotivationVC: UIViewController {
     }
     
     func autoLayout() {
+        // The picture fills the whole screen; the floating tab bar sits over its ground.
         scene.view.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
-            make.bottom.equalTo(view.safeAreaLayoutGuide)
+            make.edges.equalToSuperview()
         }
         writeDiaryButton.snp.makeConstraints { make in
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)

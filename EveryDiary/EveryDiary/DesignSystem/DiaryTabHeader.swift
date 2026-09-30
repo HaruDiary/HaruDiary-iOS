@@ -25,3 +25,17 @@ struct DiaryTabHeader: View {
         .padding(.top, DiaryTheme.TabHeader.top)
     }
 }
+
+extension View {
+    /// Content scrolled up passes under the status bar; this keeps the clock readable over the screen's background.
+    func diaryStatusBarBackground() -> some View {
+        overlay(alignment: .top) {
+            GeometryReader { geometry in
+                DiaryTheme.Colors.background
+                    .frame(height: geometry.safeAreaInsets.top)
+                    .offset(y: -geometry.safeAreaInsets.top)
+            }
+            .allowsHitTesting(false)
+        }
+    }
+}
