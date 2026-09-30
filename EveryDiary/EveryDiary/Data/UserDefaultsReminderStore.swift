@@ -8,6 +8,8 @@ final class UserDefaultsReminderStore: ReminderSettingsStore {
     private static let daysKey = "selectedDays"
     private static let skipKey = "ReminderSkipWhenWritten"
     private static let writtenDayKey = "ReminderWrittenDay"
+    private static let awaitingKey = "ReminderAwaitingDiaries"
+    private static let pendingKey = "ReminderRescheduleWhenDiariesArrive"
 
     private let defaults: UserDefaults
     private let calendar: Calendar
@@ -45,5 +47,15 @@ final class UserDefaultsReminderStore: ReminderSettingsStore {
     var writtenDay: String? {
         get { defaults.string(forKey: Self.writtenDayKey) }
         set { defaults.set(newValue, forKey: Self.writtenDayKey) }
+    }
+
+    var awaitingDiaries: Bool {
+        get { defaults.bool(forKey: Self.awaitingKey) }
+        set { defaults.set(newValue, forKey: Self.awaitingKey) }
+    }
+
+    var rescheduleWhenDiariesArrive: Bool {
+        get { defaults.bool(forKey: Self.pendingKey) }
+        set { defaults.set(newValue, forKey: Self.pendingKey) }
     }
 }

@@ -3,6 +3,8 @@ import XCTest
 final class InMemoryReminderStore: ReminderSettingsStore {
     var settings = ReminderSettings()
     var writtenDay: String?
+    var awaitingDiaries = false
+    var rescheduleWhenDiariesArrive = false
 }
 
 @MainActor
@@ -176,6 +178,38 @@ final class DiaryReminderTests: XCTestCase {
 
         await reminders.refresh()
         XCTAssertEqual(scheduler.replaceCount, 2)
+    }
+
+    // The settings screen has its own instance; it must also wait for the new user's diaries.
+    func testSettingsScreenChangesWaitForTheNewUsersDiaries() async {
+        let store = InMemoryReminderStore()
+        store.settings = settings()
+        store.writtenDay = "2026-09-29"
+        let scheduler = FakeReminderScheduler()
+        let appWide = DiaryReminders(store: store, scheduler: scheduler, calendar: calendar, now: { [unowned self] in now })
+        let screen = DiaryReminders(store: store, scheduler: scheduler, calendar: calendar, now: { [unowned self] in now })
+        await appWide.handle(.userChanged(isDifferentUser: true))
+
+        await screen.update(settings(hour: 22))
+        XCTAssertEqual(store.settings.hour, 22)
+        XCTAssertEqual(scheduler.replaceCount, 0)
+
+        await appWide.handle(.received([entry(on: now)]))
+        XCTAssertEqual(scheduler.scheduled.first?.identifier, "diary-reminder-2026-10-01")
+        XCTAssertEqual(scheduler.scheduled.first?.fireDate.hour, 22)
+    }
+
+    func testTurningOffClearsAtOnceEvenWhileWaiting() async {
+        let store = InMemoryReminderStore()
+        let scheduler = FakeReminderScheduler()
+        let reminders = DiaryReminders(store: store, scheduler: scheduler, calendar: calendar, now: { [unowned self] in now })
+        await reminders.update(settings())
+        XCTAssertFalse(scheduler.scheduled.isEmpty)
+        await reminders.handle(.userChanged(isDifferentUser: true))
+        var off = settings()
+        off.isOn = false
+        await reminders.update(off)
+        XCTAssertTrue(scheduler.scheduled.isEmpty)
     }
 
     func testYesterdaysDiaryDoesNotSkipToday() async {

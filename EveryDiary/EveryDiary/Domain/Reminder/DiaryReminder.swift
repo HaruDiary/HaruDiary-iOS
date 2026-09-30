@@ -31,6 +31,11 @@ protocol ReminderSettingsStore: AnyObject {
     var settings: ReminderSettings { get set }
     /// "yyyy-MM-dd" of today when today already has a diary, as last seen by the diary feed.
     var writtenDay: String? { get set }
+    /// After a user change, until that user's first diaries arrive. Kept here so every reminders instance
+    /// (the app-wide one and the settings screen's) holds off rescheduling in the meantime.
+    var awaitingDiaries: Bool { get set }
+    /// A change made while waiting, to be scheduled once the diaries arrive.
+    var rescheduleWhenDiariesArrive: Bool { get set }
 }
 
 @MainActor

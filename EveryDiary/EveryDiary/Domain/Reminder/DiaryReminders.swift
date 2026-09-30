@@ -8,9 +8,6 @@ final class DiaryReminders {
     private let calendar: Calendar
     private let now: () -> Date
     private var feed: UserDiaryFeed?
-    /// Between a user change and that user's first diaries; refreshes wait so an old day is not rescheduled.
-    private var awaitingDiaries = false
-    private var refreshWhenDiariesArrive = false
     /// The last reschedule; each one waits for the previous so an older one never finishes last.
     private var lastReschedule: Task<Void, Never>?
 
@@ -34,7 +31,12 @@ final class DiaryReminders {
 
     func update(_ settings: ReminderSettings) async {
         store.settings = settings
-        await reschedule()
+        // Turning reminders off only removes them, which is safe at any time; adding waits for the diaries.
+        if settings.isOn {
+            await rescheduleUnlessWaiting()
+        } else {
+            await reschedule()
+        }
     }
 
     /// The next reminder that will actually be delivered, for showing in settings.
@@ -45,17 +47,13 @@ final class DiaryReminders {
 
     /// When the app becomes active: moves the four-week window forward and forgets yesterday's diary.
     func refresh() async {
-        guard !awaitingDiaries else {
-            refreshWhenDiariesArrive = true
-            return
-        }
-        await reschedule()
+        await rescheduleUnlessWaiting()
     }
 
     /// Follows the signed-in user's diaries so a reminder is dropped as soon as today's diary is written.
     func watch(_ feed: UserDiaryFeed) {
         self.feed = feed
-        awaitingDiaries = true
+        store.awaitingDiaries = true
         feed.onEvent = { [weak self] event in
             Task { await self?.handle(event) }
         }
@@ -67,11 +65,11 @@ final class DiaryReminders {
     func handle(_ event: UserDiaryFeed.Event) async {
         switch event {
         case .userChanged:
-            awaitingDiaries = true
+            store.awaitingDiaries = true
         case .received(let entries):
-            awaitingDiaries = false
-            let pendingRefresh = refreshWhenDiariesArrive
-            refreshWhenDiariesArrive = false
+            store.awaitingDiaries = false
+            let pendingRefresh = store.rescheduleWhenDiariesArrive
+            store.rescheduleWhenDiariesArrive = false
             if await !diariesChanged(entries), pendingRefresh {
                 await reschedule()
             }
@@ -96,6 +94,15 @@ final class DiaryReminders {
     private var currentWrittenDay: String? {
         let today = ReminderPlan.dayKey(now(), calendar: calendar)
         return store.writtenDay == today ? today : nil
+    }
+
+    /// Between a user change and that user's first diaries the schedule stays; the change is applied on arrival.
+    private func rescheduleUnlessWaiting() async {
+        guard !store.awaitingDiaries else {
+            store.rescheduleWhenDiariesArrive = true
+            return
+        }
+        await reschedule()
     }
 
     /// Runs one at a time, each reading the settings when it starts, so the latest change is what stays scheduled

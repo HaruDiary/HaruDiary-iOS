@@ -18,8 +18,8 @@ final class LiveAppLockStore: AppLockStore {
         self.secrets = secrets
         self.defaults = defaults
         // Keychain items outlive deleting the app, UserDefaults do not: a reinstalled app starts unlocked.
-        if !defaults.bool(forKey: Self.installedKey) {
-            secrets.remove(Self.passcodeKey)
+        // Recorded only once the old passcode is really gone, so a refused delete is tried again next launch.
+        if !defaults.bool(forKey: Self.installedKey), (try? secrets.delete(Self.passcodeKey)) != nil {
             defaults.set(true, forKey: Self.installedKey)
         }
     }
