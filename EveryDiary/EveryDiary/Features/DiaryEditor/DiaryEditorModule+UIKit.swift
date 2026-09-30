@@ -1,7 +1,9 @@
 import CoreLocation
+import ImageIO
 import Photos
 import PhotosUI
 import UIKit
+import UniformTypeIdentifiers
 import WeatherKit
 
 @MainActor
@@ -10,14 +12,6 @@ enum DiaryEditorModule {
         let viewModel = DiaryEditorViewModel(saver: saver, downloader: StoragePhotoDownloader(), weather: LiveDiaryWeather(),
                                              locating: LiveDiaryLocating(), calendar: .current, now: Date.init)
         return DiaryEditorHostingController(viewModel: viewModel)
-    }
-
-    static func open(_ coordinate: DiaryCoordinate, in app: DiaryMapApp) {
-        let maps = MapManager.shared
-        switch app {
-        case .apple: maps.openAppleMaps(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        case .google: maps.openGoogleMapsForPlace(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        }
     }
 }
 
@@ -126,11 +120,11 @@ private final class LiveDiaryLocating: NSObject, DiaryLocating, CLLocationManage
 /// capture time and place, which saving stores with the photo.
 @MainActor
 final class DiaryPhotoLibraryPicker: NSObject, PHPickerViewControllerDelegate {
-    private var onStart: (() -> Void)?
+    private var onStart: (([String]) -> Void)?
     private var onFinish: (([EditorPhoto], [String]) -> Void)?
 
     func pick(from presenter: UIViewController, selection: [String], limit: Int,
-              onStart: @escaping () -> Void, onFinish: @escaping ([EditorPhoto], [String]) -> Void) {
+              onStart: @escaping ([String]) -> Void, onFinish: @escaping ([EditorPhoto], [String]) -> Void) {
         PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
             Task { @MainActor in
                 switch status {
@@ -156,7 +150,7 @@ final class DiaryPhotoLibraryPicker: NSObject, PHPickerViewControllerDelegate {
         Task { @MainActor in
             picker.dismiss(animated: true)
             let ids = results.compactMap(\.assetIdentifier)
-            onStart?()
+            onStart?(ids)
             let photos = await withTaskGroup(of: (Int, EditorPhoto?).self) { group in
                 for (index, result) in results.enumerated() {
                     guard let id = result.assetIdentifier else { continue }
@@ -173,19 +167,56 @@ final class DiaryPhotoLibraryPicker: NSObject, PHPickerViewControllerDelegate {
         }
     }
 
+    /// The capture time and place come from the photo library when the app may read it, otherwise from the file.
+    /// A photo is never dropped for missing metadata (with limited access the library lookup finds nothing).
     private nonisolated static func load(_ result: PHPickerResult, id: String) async -> EditorPhoto? {
-        await withCheckedContinuation { continuation in
+        let image: UIImage? = await withCheckedContinuation { continuation in
             result.itemProvider.loadObject(ofClass: UIImage.self) { object, _ in
-                guard let image = object as? UIImage,
-                      let asset = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject else {
-                    continuation.resume(returning: nil)
-                    return
-                }
-                let location = asset.location.map { "\($0.coordinate.latitude), \($0.coordinate.longitude)" }
-                continuation.resume(returning: EditorPhoto(image: image, assetIdentifier: id,
-                                                           captureTime: asset.creationDate?.description, location: location))
+                continuation.resume(returning: object as? UIImage)
             }
         }
+        guard let image else { return nil }
+        if let asset = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject {
+            let location = asset.location.map { "\($0.coordinate.latitude), \($0.coordinate.longitude)" }
+            return EditorPhoto(image: image, assetIdentifier: id, captureTime: asset.creationDate?.description, location: location)
+        }
+        let file = await fileMetadata(of: result)
+        return EditorPhoto(image: image, assetIdentifier: id, captureTime: file.date?.description, location: file.location?.stored)
+    }
+
+    private nonisolated static func fileMetadata(of result: PHPickerResult) async -> (date: Date?, location: DiaryCoordinate?) {
+        await withCheckedContinuation { continuation in
+            result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.image.identifier) { url, _ in
+                guard let url, let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+                      let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] else {
+                    continuation.resume(returning: (nil, nil))
+                    return
+                }
+                continuation.resume(returning: (captureDate(properties), coordinate(properties)))
+            }
+        }
+    }
+
+    private nonisolated static func captureDate(_ properties: [CFString: Any]) -> Date? {
+        guard let exif = properties[kCGImagePropertyExifDictionary] as? [CFString: Any],
+              let text = exif[kCGImagePropertyExifDateTimeOriginal] as? String else { return nil }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        if let offset = exif[kCGImagePropertyExifOffsetTimeOriginal] as? String {
+            formatter.dateFormat = "yyyy:MM:dd HH:mm:ssXXX"
+            return formatter.date(from: text + offset)
+        }
+        formatter.dateFormat = "yyyy:MM:dd HH:mm:ss"
+        return formatter.date(from: text)
+    }
+
+    private nonisolated static func coordinate(_ properties: [CFString: Any]) -> DiaryCoordinate? {
+        guard let gps = properties[kCGImagePropertyGPSDictionary] as? [CFString: Any],
+              let latitude = gps[kCGImagePropertyGPSLatitude] as? Double,
+              let longitude = gps[kCGImagePropertyGPSLongitude] as? Double else { return nil }
+        let south = (gps[kCGImagePropertyGPSLatitudeRef] as? String) == "S"
+        let west = (gps[kCGImagePropertyGPSLongitudeRef] as? String) == "W"
+        return DiaryCoordinate(latitude: south ? -latitude : latitude, longitude: west ? -longitude : longitude)
     }
 
     private static func askForAccess(from presenter: UIViewController) {

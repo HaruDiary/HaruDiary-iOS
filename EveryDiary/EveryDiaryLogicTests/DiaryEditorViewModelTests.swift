@@ -111,7 +111,9 @@ final class DiaryEditorViewModelTests: XCTestCase {
         model.startComposing()
         try await waitUntil { model.draft.currentLocationInfo == "37.5665, 126.978" }
         XCTAssertFalse(model.hasChanges)
-        XCTAssertEqual(model.mapCoordinates, [DiaryCoordinate(latitude: 37.5665, longitude: 126.978)])
+        // Stored as before, but not shown: only a photo's place is shown, when the user adds it.
+        XCTAssertNil(model.placeCoordinate)
+        XCTAssertNil(model.placeName)
     }
 
     func testEmptyTitleIsRefusedLikeBefore() {
@@ -165,7 +167,8 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(model.photos.map(\.assetIdentifier), ["b", "a"])
         XCTAssertEqual(model.pickerSelection, ["b", "a"])
         XCTAssertTrue(model.hasChanges)
-        XCTAssertEqual(model.notice, .photosWithoutPlace)
+        XCTAssertNil(model.notice)
+        XCTAssertNil(model.photoPlaceQuestion)
         model.draft.title = "사진"
 
         model.save()
@@ -185,9 +188,8 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(model.photos.map(\.assetIdentifier), ["b", "c"])
     }
 
-    func testPhotoWithPlaceAsksToUseItsTimeAndPlace() async throws {
+    func testPhotoWithPlaceAsksToAddItsPlaceOnly() async throws {
         locating.names = ["37.51, 126.99": "한강공원"]
-        let taken = DateFormatter.yyyyMMddHHmmss.date(from: "2026-09-28 18:42:00 +0900")!
         let model = makeModel()
         model.startComposing()
         model.finishPicking([photo("a"), photo("b", location: "37.51, 126.99", captureTime: "2026-09-28 18:42:00 +0900")],
@@ -195,22 +197,56 @@ final class DiaryEditorViewModelTests: XCTestCase {
         try await waitUntil { model.photoPlaceQuestion != nil }
         XCTAssertEqual(model.photoPlaceQuestion?.placeName, "한강공원")
 
-        model.answerPhotoPlace(usePhoto: true)
+        model.answerPhotoPlace(addPlace: true)
         XCTAssertNil(model.photoPlaceQuestion)
-        XCTAssertEqual(model.draft.date, taken)
         XCTAssertTrue(model.draft.useMetadataLocation)
-        XCTAssertEqual(model.weather, .notToday)
-        XCTAssertEqual(model.mapCoordinates, [DiaryCoordinate(latitude: 37.51, longitude: 126.99)])
+        XCTAssertEqual(model.draft.date, today, "Adding the place leaves the date as it is")
+        XCTAssertEqual(model.placeCoordinate, DiaryCoordinate(latitude: 37.51, longitude: 126.99))
+        try await waitUntil { model.placeName == "한강공원" }
+
+        // Asked once: picking another photo with a place does not ask again.
+        model.finishPicking([photo("a"), photo("b"), photo("c", location: "35.1, 129.0")], pickedIDs: ["a", "b", "c"])
+        try await Task.sleep(nanoseconds: 20_000_000)
+        XCTAssertNil(model.photoPlaceQuestion)
     }
 
-    func testDecliningPhotoPlaceKeepsTheDate() async throws {
+    func testDecliningPhotoPlaceAddsNothing() async throws {
+        locating.names = ["37.51, 126.99": "한강공원"]
         let model = makeModel()
         model.startComposing()
-        model.finishPicking([photo("b", location: "37.51, 126.99", captureTime: "2026-09-28 18:42:00 +0900")], pickedIDs: ["b"])
+        model.finishPicking([photo("b", location: "37.51, 126.99")], pickedIDs: ["b"])
         try await waitUntil { model.photoPlaceQuestion != nil }
-        model.answerPhotoPlace(usePhoto: false)
-        XCTAssertEqual(model.draft.date, today)
+        model.answerPhotoPlace(addPlace: false)
         XCTAssertFalse(model.draft.useMetadataLocation)
+        XCTAssertNil(model.placeName)
+    }
+
+    func testPlaceCanBeRemovedAndGoesWithItsPhoto() async throws {
+        locating.names = ["37.51, 126.99": "한강공원"]
+        let model = makeModel()
+        model.startComposing()
+        model.finishPicking([photo("b", location: "37.51, 126.99")], pickedIDs: ["b"])
+        try await waitUntil { model.photoPlaceQuestion != nil }
+        model.answerPhotoPlace(addPlace: true)
+        try await waitUntil { model.placeName != nil }
+
+        model.removePlace()
+        XCTAssertFalse(model.draft.useMetadataLocation)
+        XCTAssertNil(model.placeName)
+
+        model.draft.useMetadataLocation = true
+        model.removePhoto(model.photos[0].id)
+        XCTAssertFalse(model.draft.useMetadataLocation, "No photo is left to take the place from")
+    }
+
+    func testOnlyNewlyPickedPhotosShowPlaceholders() {
+        let model = makeModel()
+        model.startComposing()
+        model.finishPicking([photo("a")], pickedIDs: ["a"])
+        model.pickingStarted(pickedIDs: ["a", "b", "c"])
+        XCTAssertEqual(model.loadingPhotoCount, 2)
+        model.finishPicking([photo("a"), photo("b"), photo("c")], pickedIDs: ["a", "b", "c"])
+        XCTAssertEqual(model.loadingPhotoCount, 0)
     }
 
     func testRemovingPhotoUpdatesPickerSelection() {
@@ -330,6 +366,22 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(saver.keptPhotos.first?.existing, ["u1"])
         XCTAssertEqual(saver.keptPhotos.first?.entry.content, "고친 내용")
         XCTAssertTrue(saver.updated.isEmpty, "Untouched photos are not compressed and uploaded again")
+    }
+
+    func testStoredDiaryShowsPlaceholdersThenItsPhotoPlace() async throws {
+        downloader.photos = [
+            "u1": .init(image: .testPixel, metadata: ["assetIdentifier": "a1", "location": "37.51, 126.99"]),
+            "u2": .init(image: .testPixel, metadata: ["assetIdentifier": "a2"]),
+        ]
+        locating.names = ["37.51, 126.99": "한강공원"]
+        var entry = stored(photos: ["u1", "u2"])
+        entry.useMetadataLocation = true
+        let model = makeModel()
+        model.open(entry, editing: false)
+        XCTAssertEqual(model.loadingPhotoCount, 2, "One placeholder per stored photo")
+        try await waitUntil { model.placeName == "한강공원" }
+        XCTAssertEqual(model.loadingPhotoCount, 0)
+        XCTAssertTrue(model.draft.useMetadataLocation)
     }
 
     func testEditingSignedOutAsksToSignIn() {

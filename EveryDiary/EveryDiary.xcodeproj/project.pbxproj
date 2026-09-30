@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B005F748B1E5517923677A7 /* PhotoSkeleton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */; };
 		2FDFF42697C6012BFA76146A /* DiaryEditorViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E94119F25F06D502A982397 /* DiaryEditorViewModelTests.swift */; };
 		CB9E36BF189F3B465DAB14FA /* DiaryEditor/DiaryEditorModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CC059E79CE3150358018128 /* DiaryEditor/DiaryEditorModule+UIKit.swift */; };
 		69416B9FCE2A0B85CCE3CD23 /* DiaryEditor/DiaryEditorHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1418DC5A4907664FF55A05BA /* DiaryEditor/DiaryEditorHostingController.swift */; };
@@ -446,6 +447,7 @@
 		6324AE064574465A82455BD2 /* DayKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKind.swift"; sourceTree = "<group>"; };
 		7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKindTests.swift"; sourceTree = "<group>"; };
 		8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWeatherIcon.swift"; sourceTree = "<group>"; };
+		31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoSkeleton.swift"; sourceTree = "<group>"; };
 		0E851EEAA92546DAB5CA3FFE /* DiaryDocumentDecoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryDocumentDecoding.swift"; sourceTree = "<group>"; };
 		1FAAA1DC7DFF409D9B8A4315 /* DiaryDocumentDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryDocumentDecodingTests.swift"; sourceTree = "<group>"; };
 		D71EA87682D94703AF9A9F78 /* DiaryPhotoReplacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryPhotoReplacement.swift"; sourceTree = "<group>"; };
@@ -951,6 +953,7 @@
 				62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */,
 				DEBC2E2935FB4A6F8D9D09CF /* DiaryListComponents.swift */,
 				8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */,
+				31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */,
 				4D68D4420386455C94759513 /* DiaryWriteButton.swift */,
 				040BD821321645E60FF1909E /* DiaryTheme.swift */,
 			);
@@ -1174,6 +1177,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B005F748B1E5517923677A7 /* PhotoSkeleton.swift in Sources */,
 				CB9E36BF189F3B465DAB14FA /* DiaryEditor/DiaryEditorModule+UIKit.swift in Sources */,
 				69416B9FCE2A0B85CCE3CD23 /* DiaryEditor/DiaryEditorHostingController.swift in Sources */,
 				17554B1496218ACF09B14AEF /* DiaryEditor/DiaryPhotoViews.swift in Sources */,

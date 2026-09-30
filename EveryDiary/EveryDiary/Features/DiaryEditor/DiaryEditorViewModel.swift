@@ -74,20 +74,18 @@ final class DiaryEditorViewModel {
     enum Notice: Equatable {
         case titleMissing
         case signInRequired
-        case photosWithoutPlace
     }
 
-    /// Asked after picking photos with a place: use the photo's time and place for the diary?
+    /// Asked after picking a photo that has a place: add that place to the diary?
     struct PhotoPlaceQuestion: Equatable {
-        let date: Date?
-        let captureTime: String
         let placeName: String
     }
 
     private(set) var mode: Mode = .compose
     var draft: DiaryDraft
     private(set) var photos: [EditorPhoto] = []
-    private(set) var isLoadingPhotos = false
+    /// Photos still arriving, each shown as a placeholder until all of them are in.
+    private(set) var loadingPhotoCount = 0
     private(set) var weather: WeatherState = .notToday
     private(set) var attribution: WeatherAttribution?
     private(set) var isSaving = false
@@ -143,7 +141,6 @@ final class DiaryEditorViewModel {
             // Kept by the draft only; it does not make the diary count as changed.
             draft.currentLocationInfo = coordinate.stored
             initialDraft.currentLocationInfo = coordinate.stored
-            refreshPlaceName()
         }
         loadAttribution()
     }
@@ -222,38 +219,40 @@ final class DiaryEditorViewModel {
     var pickerSelection: [String] { photos.compactMap(\.assetIdentifier) }
     var pickerLimit: Int { DiaryPhotoPicking.pickerLimit(current: photos) { $0.assetIdentifier } }
 
-    func pickingStarted() {
-        isLoadingPhotos = true
+    var isLoadingPhotos: Bool { loadingPhotoCount > 0 }
+
+    /// `pickedIDs` are what the picker returned; only photos not already in the editor are loaded.
+    func pickingStarted(pickedIDs: [String]) {
+        let current = Set(pickerSelection)
+        loadingPhotoCount = pickedIDs.filter { !current.contains($0) }.count
     }
 
     /// `picked` are the photos the picker returned, in selection order; `pickedIDs` includes photos it could not load.
     func finishPicking(_ picked: [EditorPhoto], pickedIDs: [String]) {
-        isLoadingPhotos = false
+        loadingPhotoCount = 0
         let merged = DiaryPhotoPicking.merge(current: photos, picked: picked, pickedIDs: pickedIDs) { $0.assetIdentifier }
         if merged.map(\.id) != photos.map(\.id) { photosChanged = true }
         photos = merged
-        guard let placed = picked.first(where: { $0.coordinate != nil }), let coordinate = placed.coordinate else {
-            if !picked.isEmpty { notice = .photosWithoutPlace }
-            return
-        }
+        forgetPlaceIfItsPhotoIsGone()
+        // Asked once: a diary that already has its photo's place keeps it.
+        guard !draft.useMetadataLocation, let coordinate = picked.lazy.compactMap(\.coordinate).first else { return }
         Task { [weak self] in
-            guard let self else { return }
-            let name = await locating.placeName(for: coordinate) ?? "Unknown Location"
-            photoPlaceQuestion = PhotoPlaceQuestion(
-                date: placed.captureDate,
-                captureTime: placed.captureTime ?? DateFormatter.yyyyMMddHHmmss.string(from: now()),
-                placeName: name
-            )
+            guard let self, let name = await locating.placeName(for: coordinate) else { return }
+            photoPlaceQuestion = PhotoPlaceQuestion(placeName: name)
         }
     }
 
-    func answerPhotoPlace(usePhoto: Bool) {
-        guard let question = photoPlaceQuestion else { return }
+    /// Yes stores the photos' place (`useMetadataLocation`), shown as a short line; the date is left as it is.
+    func answerPhotoPlace(addPlace: Bool) {
+        guard photoPlaceQuestion != nil else { return }
         photoPlaceQuestion = nil
-        if usePhoto, let date = question.date {
-            selectDate(date)
-        }
-        draft.useMetadataLocation = usePhoto
+        draft.useMetadataLocation = addPlace
+        refreshPlaceName()
+    }
+
+    func removePlace() {
+        guard isEditable else { return }
+        draft.useMetadataLocation = false
         refreshPlaceName()
     }
 
@@ -261,6 +260,13 @@ final class DiaryEditorViewModel {
         guard isEditable, let index = photos.firstIndex(where: { $0.id == id }) else { return }
         photos.remove(at: index)
         photosChanged = true
+        forgetPlaceIfItsPhotoIsGone()
+    }
+
+    private func forgetPlaceIfItsPhotoIsGone() {
+        if draft.useMetadataLocation, !isLoadingPhotos, placeCoordinate == nil {
+            draft.useMetadataLocation = false
+        }
         refreshPlaceName()
     }
 
@@ -270,7 +276,7 @@ final class DiaryEditorViewModel {
         photos = []
         existingPhotoLoad = ExistingPhotoLoad(expected: urls.count)
         guard !urls.isEmpty else { return }
-        isLoadingPhotos = true
+        loadingPhotoCount = urls.count
         var slots = [EditorPhoto?](repeating: nil, count: urls.count)
         for (index, url) in urls.enumerated() {
             Task { [weak self] in
@@ -289,7 +295,7 @@ final class DiaryEditorViewModel {
                 }
                 if existingPhotoLoad.isSettled {
                     photos = slots.compactMap { $0 }
-                    isLoadingPhotos = false
+                    loadingPhotoCount = 0
                     refreshPlaceName()
                 }
             }
@@ -298,24 +304,20 @@ final class DiaryEditorViewModel {
 
     // MARK: - Place
 
-    /// The places the diary shows on its map: its photos' when chosen, otherwise where it was written.
-    var mapCoordinates: [DiaryCoordinate] {
-        if draft.useMetadataLocation {
-            let photoPlaces = photos.compactMap(\.coordinate)
-            if !photoPlaces.isEmpty { return photoPlaces }
-        }
-        return DiaryCoordinate(stored: draft.currentLocationInfo).map { [$0] } ?? []
+    /// The photos' place, when the user chose to add it. Where the diary was written is stored but not shown.
+    var placeCoordinate: DiaryCoordinate? {
+        draft.useMetadataLocation ? photos.lazy.compactMap(\.coordinate).first : nil
     }
 
     private func refreshPlaceName() {
         placeTask?.cancel()
-        guard let first = mapCoordinates.first else {
+        guard let coordinate = placeCoordinate else {
             placeName = nil
             return
         }
         placeTask = Task { [weak self] in
             guard let self else { return }
-            let name = await locating.placeName(for: first)
+            let name = await locating.placeName(for: coordinate)
             guard !Task.isCancelled else { return }
             placeName = name
         }

@@ -160,8 +160,9 @@ private struct DiaryListThumbnail: View {
             DiaryTheme.Colors.selection.opacity(0.5)
             if let image {
                 Image(uiImage: image).resizable().scaledToFill()
+                    .transition(.opacity)
             } else if isLoading {
-                ProgressView()
+                PhotoSkeleton(cornerRadius: 0)
             } else {
                 Image(systemName: "photo").foregroundStyle(DiaryTheme.Colors.secondaryText)
             }
@@ -175,8 +176,10 @@ private struct DiaryListThumbnail: View {
             let loaded = await imageLoader.image(for: url)
             // A reused row may have moved to another URL; its cancelled task must not show the old image.
             guard !Task.isCancelled else { return }
-            image = loaded
-            isLoading = false
+            withAnimation(PhotoSkeleton.fadeIn) {
+                image = loaded
+                isLoading = false
+            }
         }
     }
 }

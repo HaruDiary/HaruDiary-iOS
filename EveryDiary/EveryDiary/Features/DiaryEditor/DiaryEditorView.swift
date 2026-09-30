@@ -5,12 +5,6 @@ struct DiaryEditorActions {
     var close: () -> Void
     var save: () -> Void
     var pickPhotos: () -> Void
-    var openMaps: (DiaryCoordinate, DiaryMapApp) -> Void
-}
-
-enum DiaryMapApp {
-    case apple
-    case google
 }
 
 /// Writing (mockup 04), editing and reading (mockup 03) a diary.
@@ -33,7 +27,7 @@ struct DiaryEditorView: View {
                 if viewModel.isEditable {
                     composer
                 } else {
-                    DiaryReaderContent(viewModel: viewModel, openPhoto: { viewerStart = PhotoViewerRequest(id: $0) }, openMaps: actions.openMaps)
+                    DiaryReaderContent(viewModel: viewModel, openPhoto: { viewerStart = PhotoViewerRequest(id: $0) })
                 }
             }
             .background(DiaryTheme.Colors.background.ignoresSafeArea())
@@ -66,12 +60,11 @@ struct DiaryEditorView: View {
         } message: {
             Text("저장하지 않은 내용은 사라져요.")
         }
-        .confirmationDialog("사진의 날짜와 위치를 쓸까요?", isPresented: photoPlaceQuestionShown, titleVisibility: .visible,
-                            presenting: viewModel.photoPlaceQuestion) { _ in
-            Button("사진의 날짜와 위치 쓰기") { viewModel.answerPhotoPlace(usePhoto: true) }
-            Button("지금 날짜와 위치 쓰기") { viewModel.answerPhotoPlace(usePhoto: false) }
+        .alert("사진의 위치를 넣을까요?", isPresented: photoPlaceQuestionShown, presenting: viewModel.photoPlaceQuestion) { _ in
+            Button("넣지 않기", role: .cancel) { viewModel.answerPhotoPlace(addPlace: false) }
+            Button("넣기") { viewModel.answerPhotoPlace(addPlace: true) }
         } message: { question in
-            Text(Self.questionMessage(question))
+            Text("사진을 찍은 곳: \(question.placeName)")
         }
         .onAppear {
             if viewModel.mode == .compose { focus = .title }
@@ -140,12 +133,11 @@ struct DiaryEditorView: View {
                 titleField
                 contentField
                 if viewModel.isLoadingPhotos || !viewModel.photos.isEmpty {
-                    DiaryPhotoStrip(photos: viewModel.photos, isLoading: viewModel.isLoadingPhotos, isEditable: true,
+                    DiaryPhotoStrip(photos: viewModel.photos, loadingCount: viewModel.loadingPhotoCount, isEditable: true,
                                     onOpen: { viewerStart = PhotoViewerRequest(id: $0) }, onRemove: viewModel.removePhoto, onAdd: actions.pickPhotos)
                 }
-                if !viewModel.mapCoordinates.isEmpty {
-                    DiaryPlaceCard(coordinates: viewModel.mapCoordinates, placeName: viewModel.placeName,
-                                   isPhotoPlace: viewModel.draft.useMetadataLocation, openMaps: actions.openMaps)
+                if let placeName = viewModel.placeName {
+                    DiaryPlaceLine(name: placeName, onRemove: viewModel.removePlace)
                 }
             }
             .padding(.horizontal, DiaryTheme.Spacing.screen)
@@ -224,12 +216,7 @@ struct DiaryEditorView: View {
 
     private var photoPlaceQuestionShown: Binding<Bool> {
         Binding(get: { viewModel.photoPlaceQuestion != nil },
-                set: { shown in if !shown, viewModel.photoPlaceQuestion != nil { viewModel.answerPhotoPlace(usePhoto: false) } })
-    }
-
-    private static func questionMessage(_ question: DiaryEditorViewModel.PhotoPlaceQuestion) -> String {
-        let time = question.date.map { DiaryEditorFormat.dateTime.string(from: $0) } ?? question.captureTime
-        return "\(time)\n\(question.placeName)"
+                set: { shown in if !shown, viewModel.photoPlaceQuestion != nil { viewModel.answerPhotoPlace(addPlace: false) } })
     }
 }
 
@@ -408,7 +395,6 @@ struct DiaryWeatherNote: View {
 struct DiaryReaderContent: View {
     let viewModel: DiaryEditorViewModel
     let openPhoto: (EditorPhoto.ID) -> Void
-    let openMaps: (DiaryCoordinate, DiaryMapApp) -> Void
 
     var body: some View {
         let draft = viewModel.draft
@@ -447,9 +433,8 @@ struct DiaryReaderContent: View {
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                if !viewModel.mapCoordinates.isEmpty {
-                    DiaryPlaceCard(coordinates: viewModel.mapCoordinates, placeName: viewModel.placeName,
-                                   isPhotoPlace: draft.useMetadataLocation, openMaps: openMaps)
+                if let placeName = viewModel.placeName {
+                    DiaryPlaceLine(name: placeName, onRemove: nil)
                 }
             }
             .padding(.horizontal, DiaryTheme.Spacing.section)
@@ -466,5 +451,31 @@ struct DiaryReaderContent: View {
                     .foregroundStyle(DiaryTheme.Colors.text)
             }
         }
+    }
+}
+
+/// The photos' place as one short line, instead of a map.
+struct DiaryPlaceLine: View {
+    let name: String
+    /// Nil on the read screen.
+    let onRemove: (() -> Void)?
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "mappin.and.ellipse")
+                .foregroundStyle(DiaryTheme.Colors.brand)
+            Text(name)
+                .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                .lineLimit(1)
+            if let onRemove {
+                Button(action: onRemove) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(DiaryTheme.Colors.secondaryText.opacity(0.6))
+                        .frame(width: DiaryTheme.Size.touchTarget, height: 28)
+                }
+                .accessibilityLabel("위치 빼기")
+            }
+        }
+        .font(.subheadline)
     }
 }

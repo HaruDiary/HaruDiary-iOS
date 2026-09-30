@@ -1,10 +1,10 @@
-import MapKit
 import SwiftUI
 
 /// The editor's photos, numbered in the order they were picked, with delete and add.
 struct DiaryPhotoStrip: View {
     let photos: [EditorPhoto]
-    let isLoading: Bool
+    /// Photos still arriving, each shown as a placeholder where it will appear.
+    let loadingCount: Int
     let isEditable: Bool
     let onOpen: (EditorPhoto.ID) -> Void
     let onRemove: (EditorPhoto.ID) -> Void
@@ -24,6 +24,7 @@ struct DiaryPhotoStrip: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .buttonStyle(.plain)
+                    .transition(.opacity)
                     .overlay(alignment: .topLeading) {
                         Text("\(index + 1)")
                             .font(.caption.weight(.bold))
@@ -48,11 +49,12 @@ struct DiaryPhotoStrip: View {
                     }
                     .accessibilityLabel("사진 \(index + 1)")
                 }
-                if isLoading {
-                    ProgressView()
+                ForEach(0..<loadingCount, id: \.self) { _ in
+                    PhotoSkeleton(cornerRadius: 12)
                         .frame(width: size, height: size)
-                        .background(DiaryTheme.Colors.surface, in: RoundedRectangle(cornerRadius: 12))
-                } else if isEditable, photos.count < DiaryPhotoPicking.limit {
+                        .transition(.opacity)
+                }
+                if loadingCount == 0, isEditable, photos.count < DiaryPhotoPicking.limit {
                     Button(action: onAdd) {
                         VStack(spacing: 4) {
                             Image(systemName: "plus").font(.title3.weight(.semibold))
@@ -70,6 +72,8 @@ struct DiaryPhotoStrip: View {
                 }
             }
             .padding(.vertical, 2)
+            .animation(PhotoSkeleton.fadeIn, value: photos.map(\.id))
+            .animation(PhotoSkeleton.fadeIn, value: loadingCount)
         }
     }
 }
@@ -82,12 +86,11 @@ struct DiaryPhotoCarousel: View {
     @State private var page: EditorPhoto.ID?
 
     var body: some View {
-        Group {
+        ZStack {
             if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
+                PhotoSkeleton(cornerRadius: 0)
                     .aspectRatio(4 / 3, contentMode: .fit)
-                    .background(DiaryTheme.Colors.surface)
+                    .transition(.opacity)
             } else {
                 TabView(selection: $page) {
                     ForEach(photos) { photo in
@@ -105,9 +108,11 @@ struct DiaryPhotoCarousel: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: photos.count > 1 ? .always : .never))
                 .aspectRatio(4 / 3, contentMode: .fit)
+                .transition(.opacity)
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
+        .animation(PhotoSkeleton.fadeIn, value: isLoading)
     }
 }
 
@@ -187,59 +192,5 @@ private struct ZoomablePhoto: View {
                 withAnimation(.spring(duration: 0.25)) { scale = scale > 1 ? 1 : 2.5 }
             }
             .accessibilityLabel("사진")
-    }
-}
-
-// MARK: - Place
-
-/// Where the diary was written, or where its photos were taken. Opens Apple Maps or Google Maps, as before.
-struct DiaryPlaceCard: View {
-    let coordinates: [DiaryCoordinate]
-    let placeName: String?
-    let isPhotoPlace: Bool
-    let openMaps: (DiaryCoordinate, DiaryMapApp) -> Void
-    @State private var asksForMapApp = false
-
-    var body: some View {
-        Button { asksForMapApp = true } label: {
-            VStack(spacing: 0) {
-                Map(initialPosition: .automatic, interactionModes: []) {
-                    ForEach(Array(coordinates.enumerated()), id: \.offset) { _, coordinate in
-                        Marker("", coordinate: CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude))
-                            .tint(DiaryTheme.Colors.brand)
-                    }
-                }
-                .frame(height: 130)
-                .allowsHitTesting(false)
-                HStack(spacing: DiaryTheme.Spacing.small) {
-                    Image(systemName: "mappin.and.ellipse")
-                        .foregroundStyle(DiaryTheme.Colors.brand)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(placeName ?? "위치")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(DiaryTheme.Colors.text)
-                            .lineLimit(1)
-                        Text(isPhotoPlace ? "사진을 찍은 곳" : "일기를 쓴 곳")
-                            .font(DiaryTheme.Fonts.caption)
-                            .foregroundStyle(DiaryTheme.Colors.secondaryText)
-                    }
-                    Spacer(minLength: 0)
-                    Image(systemName: "arrow.up.right.square")
-                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
-                }
-                .padding(DiaryTheme.Spacing.medium)
-            }
-            .background(DiaryTheme.Colors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(placeName ?? "위치"), 지도에서 열기")
-        .confirmationDialog(placeName ?? "위치", isPresented: $asksForMapApp, titleVisibility: .visible) {
-            if let first = coordinates.first {
-                Button("Apple 지도에서 열기") { openMaps(first, .apple) }
-                Button("Google 지도에서 열기") { openMaps(first, .google) }
-            }
-            Button("취소", role: .cancel) {}
-        }
     }
 }

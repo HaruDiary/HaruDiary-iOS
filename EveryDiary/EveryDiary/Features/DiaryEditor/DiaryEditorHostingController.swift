@@ -33,13 +33,12 @@ final class DiaryEditorHostingController: UIHostingController<DiaryEditorView>, 
 
     init(viewModel: DiaryEditorViewModel) {
         self.viewModel = viewModel
-        let placeholder = DiaryEditorActions(close: {}, save: {}, pickPhotos: {}, openMaps: { _, _ in })
+        let placeholder = DiaryEditorActions(close: {}, save: {}, pickPhotos: {})
         super.init(rootView: DiaryEditorView(viewModel: viewModel, actions: placeholder))
         rootView = DiaryEditorView(viewModel: viewModel, actions: DiaryEditorActions(
             close: { [weak self] in self?.dismiss(animated: true) },
             save: { [weak self] in self?.save() },
-            pickPhotos: { [weak self] in self?.pickPhotos() },
-            openMaps: { coordinate, app in DiaryEditorModule.open(coordinate, in: app) }
+            pickPhotos: { [weak self] in self?.pickPhotos() }
         ))
         bindSaveReports()
     }
@@ -111,7 +110,7 @@ final class DiaryEditorHostingController: UIHostingController<DiaryEditorView>, 
 
     private func pickPhotos() {
         photoPicker.pick(from: self, selection: viewModel.pickerSelection, limit: viewModel.pickerLimit,
-                         onStart: { [weak self] in self?.viewModel.pickingStarted() },
+                         onStart: { [weak self] ids in self?.viewModel.pickingStarted(pickedIDs: ids) },
                          onFinish: { [weak self] photos, ids in self?.viewModel.finishPicking(photos, pickedIDs: ids) })
     }
 
@@ -150,9 +149,6 @@ final class DiaryEditorHostingController: UIHostingController<DiaryEditorView>, 
             TemporaryAlert.presentTemporaryMessage(with: "빈 제목", message: "제목이 비어있습니다. 제목을 입력해주세요.", interval: 2.0, for: self)
         case .signInRequired:
             TemporaryAlert.presentTemporaryMessage(with: "로그인 필요", message: "일기를 연 계정으로 다시 로그인해주세요.", interval: 2.0, for: self)
-        case .photosWithoutPlace:
-            TemporaryAlert.presentTemporaryMessage(with: "위치정보 없음", message: "사진의 위치정보가 없습니다.\n사용자의 현재 위치로 대체됩니다.",
-                                                   interval: 2.0, for: self)
         }
     }
 }
