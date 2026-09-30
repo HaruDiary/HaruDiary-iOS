@@ -11,6 +11,8 @@ struct EditorPhoto: Identifiable {
     let captureTime: String?
     /// "lat, lon", or "Unknown" for stored photos without it.
     let location: String?
+    /// Set for a photo downloaded from the stored diary: saving keeps its file instead of uploading it again.
+    var storedURL: String? = nil
 
     var coordinate: DiaryCoordinate? { DiaryCoordinate(stored: location) }
     var captureDate: Date? { captureTime.flatMap(DateFormatter.yyyyMMddHHmmss.date(from:)) }
@@ -117,6 +119,8 @@ final class DiaryEditorViewModel {
     private var weatherTask: Task<Void, Never>?
     private var placeTask: Task<Void, Never>?
     private var placeQuestionTask: Task<Void, Never>?
+    /// Photos picked but not yet loaded: saving now would leave them out.
+    private var isPickingPhotos = false
     private var loadGeneration = 0
 
     init(saver: any DiarySaving, downloader: any DiaryPhotoDownloading, weather: any DiaryWeatherLooking,
@@ -242,11 +246,13 @@ final class DiaryEditorViewModel {
     func pickingStarted(pickedIDs: [String]) {
         let current = Set(pickerSelection)
         loadingPhotoCount = pickedIDs.filter { !current.contains($0) }.count
+        isPickingPhotos = true
     }
 
     /// `picked` are the photos the picker returned, in selection order; `pickedIDs` includes photos it could not load.
     func finishPicking(_ picked: [EditorPhoto], pickedIDs: [String]) {
         loadingPhotoCount = 0
+        isPickingPhotos = false
         let merged = DiaryPhotoPicking.merge(current: photos, picked: picked, pickedIDs: pickedIDs) { $0.assetIdentifier }
         if merged.map(\.id) != photos.map(\.id) { photosChanged = true }
         photos = merged
@@ -320,7 +326,7 @@ final class DiaryEditorViewModel {
                     let metadata = downloaded.metadata
                     slots[index] = EditorPhoto(image: downloaded.image, assetIdentifier: metadata?["assetIdentifier"],
                                                captureTime: metadata?["captureTime"] ?? "Unknown",
-                                               location: metadata?["location"] ?? "Unknown")
+                                               location: metadata?["location"] ?? "Unknown", storedURL: url)
                 } else {
                     // A photo that failed to load is not shown; saving then leaves the stored photos as they are.
                     existingPhotoLoad.photoFailed()
@@ -365,6 +371,10 @@ final class DiaryEditorViewModel {
             notice = .titleMissing
             return false
         }
+        guard !isPickingPhotos else {
+            notice = .photosStillLoading
+            return false
+        }
         switch mode {
         case .compose:
             let stamp = DiaryWeatherStamp.forDiary(on: draft.date, now: now(), calendar: calendar, lookup: weatherLookup)
@@ -406,9 +416,9 @@ final class DiaryEditorViewModel {
             }
             let photos = photos
             Task {
-                let prepared = await Self.encode(photos)
+                let prepared = await Self.slots(photos)
                 saver.update(updated, diaryID: diaryID, expectedUserID: editingUserID, existingImageURLs: existing,
-                             images: prepared.uploads, unreadablePhotoCount: prepared.unreadable) { [self] result in
+                             photos: prepared.slots, unreadablePhotoCount: prepared.unreadable) { [self] result in
                     finish(result, isUpdate: true)
                 }
             }
@@ -437,6 +447,22 @@ final class DiaryEditorViewModel {
             report = .failed(isUpdate: isUpdate)
         }
         onSaveFinished?(report)
+    }
+
+    /// Stored photos keep their file (even ones saved without a library identifier); only new photos are encoded.
+    nonisolated static func slots(_ photos: [EditorPhoto]) async -> (slots: [DiaryPhotoSlot], unreadable: Int) {
+        let newPhotos = photos.filter { $0.storedURL == nil }
+        let encoded = await encode(newPhotos)
+        var uploads = encoded.uploads.makeIterator()
+        var slots: [DiaryPhotoSlot] = []
+        for photo in photos {
+            if let url = photo.storedURL {
+                slots.append(.stored(url: url))
+            } else if photo.assetIdentifier != nil, let upload = uploads.next() {
+                slots.append(.new(upload))
+            }
+        }
+        return (slots, encoded.unreadable)
     }
 
     /// JPEG at the previous quality, off the main thread. A photo without a library identifier cannot be uploaded.

@@ -341,7 +341,7 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(model.mode, .edit)
     }
 
-    func testEditingReuploadsLoadedPhotosInOrderAndKeepsOtherFields() async throws {
+    func testEditingPhotosKeepsStoredFilesInOrderAndOtherFields() async throws {
         downloader.photos = [
             "u1": .init(image: .testPixel, metadata: ["assetIdentifier": "a1", "captureTime": "t1", "location": "37.1, 127.1"]),
             "u2": .init(image: .testPixel, metadata: ["assetIdentifier": "a2"]),
@@ -362,14 +362,43 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(update.diaryID, "diary-1")
         XCTAssertEqual(update.expectedUserID, "user-a")
         XCTAssertEqual(update.existing, ["u1", "u2"])
-        XCTAssertEqual(update.uploads.map(\.assetIdentifier), ["a1", "a2", "new"])
-        XCTAssertEqual(update.uploads.first?.captureTime, "t1")
-        XCTAssertEqual(update.uploads[1].captureTime, "Unknown")
-        XCTAssertEqual(update.uploads[1].location, "Unknown")
+        // Stored photos keep their files; only the new one is uploaded.
+        XCTAssertEqual(update.slots, ["stored:u1", "stored:u2", "new:new"])
         XCTAssertEqual(update.entry.title, "고친 제목")
         XCTAssertEqual(update.entry.weatherDescription, "맑음")
         XCTAssertEqual(update.entry.currentLocationInfo, "37.5, 127.0")
         XCTAssertEqual(update.entry.userID, "user-a")
+    }
+
+    func testPhotoChangeKeepsStoredPhotoSavedWithoutIdentifier() async throws {
+        downloader.photos = [
+            "legacy": .init(image: .testPixel, metadata: nil),
+            "u2": .init(image: .testPixel, metadata: ["assetIdentifier": "a2"]),
+        ]
+        let model = makeModel()
+        model.open(stored(photos: ["legacy", "u2"]), editing: true)
+        try await waitUntil { !model.isLoadingPhotos }
+        model.removePhoto(model.photos[1].id)
+        model.finishPicking([photo("n")], pickedIDs: ["n"])
+
+        XCTAssertTrue(model.save())
+        try await waitUntil { saver.updated.count == 1 }
+        XCTAssertEqual(saver.updated.first?.slots, ["stored:legacy", "new:n"])
+        XCTAssertEqual(saver.updated.first?.unreadable, 0, "A stored photo is never counted as unreadable")
+    }
+
+    func testSavingWaitsForPickedPhotos() {
+        let model = makeModel()
+        model.startComposing()
+        model.draft.title = "사진과 함께"
+        model.pickingStarted(pickedIDs: ["a"])
+
+        XCTAssertFalse(model.save(), "The picked photo is not in the editor yet")
+        XCTAssertEqual(model.notice, .photosStillLoading)
+        XCTAssertTrue(saver.created.isEmpty)
+
+        model.finishPicking([photo("a")], pickedIDs: ["a"])
+        XCTAssertTrue(model.save())
     }
 
     func testEditingBeforePhotosArriveKeepsStoredPhotos() async throws {
@@ -537,6 +566,8 @@ private final class RecordingDiarySaving: DiarySaving {
         let expectedUserID: String
         let existing: [String]
         let uploads: [DiaryImageUpload]
+        var slots: [String] = []
+        var unreadable = 0
     }
 
     var userID: String? = "user-a"
@@ -560,6 +591,20 @@ private final class RecordingDiarySaving: DiarySaving {
                 completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         updated.append(Update(entry: entry, diaryID: diaryID, expectedUserID: expectedUserID,
                               existing: existingImageURLs, uploads: uploads))
+        completion(outcome)
+    }
+
+    func update(_ entry: DiaryEntry, diaryID: String, expectedUserID: String, existingImageURLs: [String],
+                photos: [DiaryPhotoSlot], unreadablePhotoCount: Int,
+                completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
+        let slots = photos.map { slot -> String in
+            switch slot {
+            case .stored(let url): return "stored:\(url)"
+            case .new(let upload): return "new:\(upload.assetIdentifier)"
+            }
+        }
+        updated.append(Update(entry: entry, diaryID: diaryID, expectedUserID: expectedUserID,
+                              existing: existingImageURLs, uploads: [], slots: slots, unreadable: unreadablePhotoCount))
         completion(outcome)
     }
 

@@ -7,6 +7,13 @@ struct DiaryImageUpload {
     let location: String?
 }
 
+/// A photo of an edited diary, in the order the diary shows it.
+enum DiaryPhotoSlot {
+    /// Already stored: its file and URL are kept as they are, with no second upload.
+    case stored(url: String)
+    case new(DiaryImageUpload)
+}
+
 @MainActor
 protocol DiarySaveAuthenticating {
     var currentUserID: String? { get }
@@ -70,6 +77,14 @@ protocol DiarySaving {
     func update(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
                 existingImageURLs: [String],
                 images uploads: [DiaryImageUpload],
+                unreadablePhotoCount: Int,
+                completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void)
+    /// Saves `photos` in order: stored ones keep their URL, new ones are uploaded, and stored files no longer
+    /// in the list are deleted after the diary is saved. If a new photo cannot be uploaded (or `unreadablePhotoCount`
+    /// is not 0), the new uploads are removed and the diary keeps `existingImageURLs`, with the text saved.
+    func update(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
+                existingImageURLs: [String],
+                photos: [DiaryPhotoSlot],
                 unreadablePhotoCount: Int,
                 completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void)
     /// Saves the text and keeps `existingImageURLs` as they are, without uploading or deleting any photo.
@@ -158,6 +173,60 @@ final class DiarySaveCoordinator: DiarySaving {
         }
     }
 
+    func update(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
+                existingImageURLs: [String],
+                photos: [DiaryPhotoSlot],
+                unreadablePhotoCount: Int = 0,
+                completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
+        guard let userID = authentication.currentUserID else {
+            completion(.failure(DiarySaveError.signedOut))
+            return
+        }
+        guard userID == expectedUserID else {
+            completion(.failure(DiarySaveError.accountChanged))
+            return
+        }
+        let uploads = photos.compactMap { slot -> DiaryImageUpload? in
+            if case .new(let upload) = slot { return upload }
+            return nil
+        }
+        uploadKeepingPositions(uploads, userID: userID) { results in
+            let uploaded = results.compactMap { $0 }
+            let missing = unreadablePhotoCount + results.count - uploaded.count
+            if missing > 0 {
+                self.delete(uploaded) {
+                    var kept = entry
+                    kept.imageURL = existingImageURLs.isEmpty ? nil : existingImageURLs
+                    self.entries.update(kept, diaryID: diaryID, userID: userID) { error in
+                        if let error {
+                            completion(.failure(error))
+                            return
+                        }
+                        completion(.success(.savedWithMissingPhotos(missing)))
+                    }
+                }
+                return
+            }
+            var next = uploaded.makeIterator()
+            let urls = photos.compactMap { slot -> String? in
+                switch slot {
+                case .stored(let url): return url
+                case .new: return next.next()
+                }
+            }
+            var entry = entry
+            entry.imageURL = urls.isEmpty ? nil : urls
+            self.entries.update(entry, diaryID: diaryID, userID: userID) { error in
+                if let error {
+                    self.delete(uploaded) { completion(.failure(error)) }
+                    return
+                }
+                let removed = existingImageURLs.filter { !urls.contains($0) }
+                self.delete(removed) { completion(.success(.saved)) }
+            }
+        }
+    }
+
     func updateKeepingPhotos(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
                              existingImageURLs: [String],
                              completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
@@ -182,6 +251,12 @@ final class DiarySaveCoordinator: DiarySaving {
 
     private func upload(_ uploads: [DiaryImageUpload], userID: String,
                         completion: @escaping ([String]) -> Void) {
+        uploadKeepingPositions(uploads, userID: userID) { completion($0.compactMap { $0 }) }
+    }
+
+    /// One result per upload, in input order; nil where the upload failed.
+    private func uploadKeepingPositions(_ uploads: [DiaryImageUpload], userID: String,
+                                        completion: @escaping ([String?]) -> Void) {
         guard !uploads.isEmpty else {
             completion([])
             return
@@ -196,7 +271,7 @@ final class DiarySaveCoordinator: DiarySaving {
             }
         }
         group.notify(queue: .main) {
-            completion(urls.compactMap { $0 })
+            completion(urls)
         }
     }
 
