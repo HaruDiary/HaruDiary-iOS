@@ -115,6 +115,7 @@ final class DiaryEditorViewModel {
     private var weatherLookup: Result<WeatherResponse, WeatherError>?
     private var weatherTask: Task<Void, Never>?
     private var placeTask: Task<Void, Never>?
+    private var placeQuestionTask: Task<Void, Never>?
     private var loadGeneration = 0
 
     init(saver: any DiarySaving, downloader: any DiaryPhotoDownloading, weather: any DiaryWeatherLooking,
@@ -243,11 +244,15 @@ final class DiaryEditorViewModel {
         let merged = DiaryPhotoPicking.merge(current: photos, picked: picked, pickedIDs: pickedIDs) { $0.assetIdentifier }
         if merged.map(\.id) != photos.map(\.id) { photosChanged = true }
         photos = merged
+        dropPlaceQuestionIfItsPhotoIsGone()
         forgetPlaceIfItsPhotoIsGone()
         // Asked once: a diary that already has its photo's place keeps it.
-        guard !draft.useMetadataLocation, let coordinate = picked.lazy.compactMap(\.coordinate).first else { return }
-        Task { [weak self] in
+        guard !picked.isEmpty, !draft.useMetadataLocation, let placed = photos.first(where: { $0.coordinate != nil }),
+              let coordinate = placed.coordinate else { return }
+        placeQuestionTask = Task { [weak self] in
             guard let self, let name = await locating.placeName(for: coordinate) else { return }
+            // The photo may have been removed or picked away while its place was looked up.
+            guard !Task.isCancelled, photos.contains(where: { $0.id == placed.id }), !draft.useMetadataLocation else { return }
             photoPlaceQuestion = PhotoPlaceQuestion(placeName: name)
         }
     }
@@ -256,7 +261,8 @@ final class DiaryEditorViewModel {
     func answerPhotoPlace(addPlace: Bool) {
         guard photoPlaceQuestion != nil else { return }
         photoPlaceQuestion = nil
-        draft.useMetadataLocation = addPlace
+        // A photo with a place must still be there for its place to be added.
+        draft.useMetadataLocation = addPlace && photos.contains { $0.coordinate != nil }
         refreshPlaceName()
     }
 
@@ -270,7 +276,17 @@ final class DiaryEditorViewModel {
         guard isEditable, let index = photos.firstIndex(where: { $0.id == id }) else { return }
         photos.remove(at: index)
         photosChanged = true
+        dropPlaceQuestionIfItsPhotoIsGone()
         forgetPlaceIfItsPhotoIsGone()
+    }
+
+    /// A question still being prepared, or shown, for a photo no longer in the editor is dropped.
+    private func dropPlaceQuestionIfItsPhotoIsGone() {
+        placeQuestionTask?.cancel()
+        placeQuestionTask = nil
+        if photoPlaceQuestion != nil, !photos.contains(where: { $0.coordinate != nil }) {
+            photoPlaceQuestion = nil
+        }
     }
 
     private func forgetPlaceIfItsPhotoIsGone() {

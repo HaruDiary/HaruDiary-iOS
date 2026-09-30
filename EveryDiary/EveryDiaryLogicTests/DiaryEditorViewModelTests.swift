@@ -239,6 +239,41 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertFalse(model.draft.useMetadataLocation, "No photo is left to take the place from")
     }
 
+    func testLatePlaceLookupForARemovedPhotoAsksNothing() async throws {
+        locating.names = ["37.51, 126.99": "한강공원"]
+        locating.nameDelay = 30
+        let model = makeModel()
+        model.startComposing()
+        model.finishPicking([photo("b", location: "37.51, 126.99")], pickedIDs: ["b"])
+        model.removePhoto(model.photos[0].id)
+        try await Task.sleep(nanoseconds: 80_000_000)
+        XCTAssertNil(model.photoPlaceQuestion)
+        XCTAssertFalse(model.draft.useMetadataLocation)
+    }
+
+    func testLatePlaceLookupAfterPickingAnotherPhotoAsksNothing() async throws {
+        locating.names = ["37.51, 126.99": "한강공원"]
+        locating.nameDelay = 30
+        let model = makeModel()
+        model.startComposing()
+        model.finishPicking([photo("b", location: "37.51, 126.99")], pickedIDs: ["b"])
+        model.finishPicking([photo("c")], pickedIDs: ["c"])
+        try await Task.sleep(nanoseconds: 80_000_000)
+        XCTAssertNil(model.photoPlaceQuestion)
+    }
+
+    func testAddingPlaceAfterItsPhotoWasRemovedAddsNothing() async throws {
+        locating.names = ["37.51, 126.99": "한강공원"]
+        let model = makeModel()
+        model.startComposing()
+        model.finishPicking([photo("b", location: "37.51, 126.99"), photo("c")], pickedIDs: ["b", "c"])
+        try await waitUntil { model.photoPlaceQuestion != nil }
+        model.removePhoto(model.photos[0].id)
+        XCTAssertNil(model.photoPlaceQuestion, "The question for the removed photo is withdrawn")
+        model.answerPhotoPlace(addPlace: true)
+        XCTAssertFalse(model.draft.useMetadataLocation)
+    }
+
     func testOnlyNewlyPickedPhotosShowPlaceholders() {
         let model = makeModel()
         model.startComposing()
@@ -559,6 +594,7 @@ private final class FakeWeatherLooking: DiaryWeatherLooking {
 private final class FakeLocating: DiaryLocating {
     var coordinate: DiaryCoordinate?
     var names: [String: String] = [:]
+    var nameDelay: UInt64 = 0
     private(set) var coordinateRequests = 0
 
     func currentCoordinate() async -> DiaryCoordinate? {
@@ -567,6 +603,7 @@ private final class FakeLocating: DiaryLocating {
     }
 
     func placeName(for coordinate: DiaryCoordinate) async -> String? {
-        names[coordinate.stored]
+        if nameDelay > 0 { try? await Task.sleep(nanoseconds: nameDelay * 1_000_000) }
+        return names[coordinate.stored]
     }
 }
