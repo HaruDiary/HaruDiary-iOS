@@ -6,7 +6,9 @@ import Security
 /// UserDefaults, which also keeps a wrong-passcode wait across relaunches.
 protocol AppLockStore: AnyObject {
     /// "salt:hash" of the passcode, both base64. nil when no passcode is set.
-    var passcodeRecord: String? { get set }
+    var passcodeRecord: String? { get }
+    /// Saves or (with nil) removes the record; throws when the Keychain refuses, so no one is told it was set.
+    func savePasscodeRecord(_ record: String?) throws
     var biometricsEnabled: Bool { get set }
     /// Earlier versions locked with Face ID/Touch ID (falling back to the iPhone passcode) and had no app passcode.
     var legacyBiometricsEnabled: Bool { get set }
@@ -59,11 +61,12 @@ final class AppLock {
     }
 
     /// Sets or replaces the passcode. Someone moving from the old biometrics lock keeps biometrics on.
-    func setPasscode(_ passcode: String) {
+    /// Throws when it could not be saved; the previous passcode (or none) then stays in effect.
+    func setPasscode(_ passcode: String) throws {
         precondition(Self.isValid(passcode))
         var salt = Data(count: 16)
         salt.withUnsafeMutableBytes { _ = SecRandomCopyBytes(kSecRandomDefault, 16, $0.baseAddress!) }
-        store.passcodeRecord = salt.base64EncodedString() + ":" + Self.hash(passcode, salt: salt).base64EncodedString()
+        try store.savePasscodeRecord(salt.base64EncodedString() + ":" + Self.hash(passcode, salt: salt).base64EncodedString())
         if store.legacyBiometricsEnabled {
             store.biometricsEnabled = true
             store.legacyBiometricsEnabled = false
@@ -109,7 +112,8 @@ final class AppLock {
 
     /// Turns the lock off, e.g. after the passcode was forgotten and the iPhone passcode confirmed the owner.
     func turnOff() {
-        store.passcodeRecord = nil
+        // Removing a Keychain item that is already gone is not an error worth stopping for.
+        try? store.savePasscodeRecord(nil)
         store.biometricsEnabled = false
         store.legacyBiometricsEnabled = false
         resetAttempts()

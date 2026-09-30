@@ -8,6 +8,8 @@ final class DiaryReminders {
     private let calendar: Calendar
     private let now: () -> Date
     private var feed: UserDiaryFeed?
+    /// The last reschedule; each one waits for the previous so an older one never finishes last.
+    private var lastReschedule: Task<Void, Never>?
 
     init(store: any ReminderSettingsStore, scheduler: any ReminderScheduling, calendar: Calendar,
          now: @escaping () -> Date) {
@@ -75,7 +77,19 @@ final class DiaryReminders {
         return store.writtenDay == today ? today : nil
     }
 
+    /// Runs one at a time, each reading the settings when it starts, so the latest change is what stays scheduled
+    /// even when quick changes (the time wheel, several weekdays) overlap.
     private func reschedule() async {
+        let previous = lastReschedule
+        let task = Task { [weak self] in
+            await previous?.value
+            await self?.applySchedule()
+        }
+        lastReschedule = task
+        await task.value
+    }
+
+    private func applySchedule() async {
         let requests = ReminderPlan.requests(for: store.settings, writtenDay: currentWrittenDay, now: now(),
                                              calendar: calendar)
         // Without permission nothing can be delivered; earlier reminders are still cleared when turned off.

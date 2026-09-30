@@ -90,8 +90,16 @@ final class PasscodeFlowViewModel: Identifiable {
                 step = .new
                 return
             }
-            lock.setPasscode(entered)
-            isDone = true
+            do {
+                try lock.setPasscode(entered)
+                isDone = true
+            } catch {
+                // Not saved: the screen stays open instead of reporting a passcode that is not in effect.
+                mistakes += 1
+                newPasscode = nil
+                message = "암호를 저장하지 못했어요. 다시 입력해주세요."
+                step = .new
+            }
         }
     }
 }

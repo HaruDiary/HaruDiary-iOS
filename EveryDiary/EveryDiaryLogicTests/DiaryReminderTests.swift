@@ -9,6 +9,8 @@ final class InMemoryReminderStore: ReminderSettingsStore {
 final class FakeReminderScheduler: ReminderScheduling {
     var current: NotificationPermission = .allowed
     var grants = true
+    /// Makes the first replace finish late, like a slow notification center.
+    var delaysFirstReplace = false
     private(set) var permissionRequests = 0
     private(set) var scheduled: [ReminderRequest] = []
     private(set) var replaceCount = 0
@@ -23,6 +25,9 @@ final class FakeReminderScheduler: ReminderScheduling {
 
     func replace(with requests: [ReminderRequest]) async {
         replaceCount += 1
+        if delaysFirstReplace, replaceCount == 1 {
+            try? await Task.sleep(for: .milliseconds(100))
+        }
         scheduled = requests
     }
 }
@@ -117,6 +122,19 @@ final class DiaryReminderTests: XCTestCase {
         // Moved to the trash: tonight's reminder comes back.
         await reminders.diariesChanged([entry(on: now, deleted: true)])
         XCTAssertEqual(scheduler.scheduled.first?.identifier, "diary-reminder-2026-09-30")
+    }
+
+    // Quick changes overlap; the slower earlier one must not leave the older schedule behind.
+    func testTheLatestChangeStaysScheduledWhenChangesOverlap() async {
+        let scheduler = FakeReminderScheduler()
+        scheduler.delaysFirstReplace = true
+        let store = InMemoryReminderStore()
+        let reminders = DiaryReminders(store: store, scheduler: scheduler, calendar: calendar, now: { [unowned self] in now })
+        async let first: Void = reminders.update(settings(hour: 22))
+        async let second: Void = reminders.update(settings(hour: 23))
+        _ = await (first, second)
+        XCTAssertEqual(store.settings.hour, 23)
+        XCTAssertEqual(scheduler.scheduled.first?.fireDate.hour, 23)
     }
 
     func testYesterdaysDiaryDoesNotSkipToday() async {

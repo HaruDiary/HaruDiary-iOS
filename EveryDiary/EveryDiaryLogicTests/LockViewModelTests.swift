@@ -31,8 +31,8 @@ final class LockViewModelTests: XCTestCase {
 
     // MARK: - Lock screen
 
-    func testRightPasscodeUnlocksAndWrongOneShakes() {
-        lock.setPasscode("1234")
+    func testRightPasscodeUnlocksAndWrongOneShakes() throws {
+        try lock.setPasscode("1234")
         let screen = LockScreenViewModel(lock: lock, owner: owner)
         enter("1111", into: screen.type)
         XCTAssertNil(screen.outcome)
@@ -42,8 +42,8 @@ final class LockViewModelTests: XCTestCase {
         XCTAssertEqual(screen.outcome, .unlocked)
     }
 
-    func testFaceIDIsAskedOnlyOnceWhenTheLockAppears() async {
-        lock.setPasscode("1234")
+    func testFaceIDIsAskedOnlyOnceWhenTheLockAppears() async throws {
+        try lock.setPasscode("1234")
         lock.setBiometrics(true)
         owner.biometricsSucceed = false
         let screen = LockScreenViewModel(lock: lock, owner: owner)
@@ -58,8 +58,8 @@ final class LockViewModelTests: XCTestCase {
         XCTAssertEqual(screen.outcome, .unlocked)
     }
 
-    func testFaceIDIsNotOfferedWhenOffOrUnavailable() async {
-        lock.setPasscode("1234")
+    func testFaceIDIsNotOfferedWhenOffOrUnavailable() async throws {
+        try lock.setPasscode("1234")
         let screen = LockScreenViewModel(lock: lock, owner: owner)
         XCTAssertNil(screen.biometryName)
         await screen.promptBiometricsOnce()
@@ -70,8 +70,8 @@ final class LockViewModelTests: XCTestCase {
         XCTAssertNil(screen.biometryName)
     }
 
-    func testForgottenPasscodeTurnsTheLockOffAfterTheIPhonePasscode() async {
-        lock.setPasscode("1234")
+    func testForgottenPasscodeTurnsTheLockOffAfterTheIPhonePasscode() async throws {
+        try lock.setPasscode("1234")
         let screen = LockScreenViewModel(lock: lock, owner: owner)
         owner.ownerSucceeds = false
         await screen.forgotPasscode()
@@ -94,8 +94,8 @@ final class LockViewModelTests: XCTestCase {
         XCTAssertEqual(lock.mode, .legacyBiometrics)
     }
 
-    func testKeypadIsIgnoredDuringAWait() {
-        lock.setPasscode("1234")
+    func testKeypadIsIgnoredDuringAWait() throws {
+        try lock.setPasscode("1234")
         let screen = LockScreenViewModel(lock: lock, owner: owner)
         for _ in 0..<5 { enter("0000", into: screen.type) }
         XCTAssertNotNil(screen.waitUntil)
@@ -123,8 +123,19 @@ final class LockViewModelTests: XCTestCase {
         XCTAssertTrue(lock.matches("2580"))
     }
 
-    func testChangingAndTurningOffAskForTheCurrentPasscode() {
-        lock.setPasscode("1234")
+    func testUnsavedPasscodeKeepsTheSheetOpenAndAsksAgain() {
+        store.failsToSave = true
+        let flow = PasscodeFlowViewModel(purpose: .create, lock: lock)
+        enter("1234", into: flow.type)
+        enter("1234", into: flow.type)
+        XCTAssertFalse(flow.isDone)
+        XCTAssertEqual(flow.step, .new)
+        XCTAssertEqual(flow.message, "암호를 저장하지 못했어요. 다시 입력해주세요.")
+        XCTAssertEqual(lock.mode, .off)
+    }
+
+    func testChangingAndTurningOffAskForTheCurrentPasscode() throws {
+        try lock.setPasscode("1234")
         let change = PasscodeFlowViewModel(purpose: .change, lock: lock)
         XCTAssertEqual(change.step, .current)
         enter("0000", into: change.type)
@@ -143,8 +154,8 @@ final class LockViewModelTests: XCTestCase {
 
     // MARK: - Settings
 
-    func testTurningOnFaceIDChecksItFirst() async {
-        lock.setPasscode("1234")
+    func testTurningOnFaceIDChecksItFirst() async throws {
+        try lock.setPasscode("1234")
         let settings = LockSettingsViewModel(lock: lock, owner: owner)
         owner.biometricsSucceed = false
         await settings.setBiometricsOn(true)

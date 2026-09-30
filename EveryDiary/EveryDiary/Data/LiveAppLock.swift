@@ -25,17 +25,16 @@ final class LiveAppLockStore: AppLockStore {
     }
 
     var passcodeRecord: String? {
-        get { secrets.string(for: Self.passcodeKey) }
-        set {
-            if let newValue {
-                do {
-                    try secrets.set(newValue, for: Self.passcodeKey)
-                } catch {
-                    print("App lock passcode not saved: \((error as NSError).code)")
-                }
-            } else {
-                secrets.remove(Self.passcodeKey)
-            }
+        secrets.string(for: Self.passcodeKey)
+    }
+
+    func savePasscodeRecord(_ record: String?) throws {
+        guard let record else { return secrets.remove(Self.passcodeKey) }
+        do {
+            try secrets.set(record, for: Self.passcodeKey)
+        } catch {
+            print("App lock passcode not saved: \((error as NSError).code)")
+            throw error
         }
     }
 
