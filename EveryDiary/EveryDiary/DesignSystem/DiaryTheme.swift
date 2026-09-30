@@ -21,6 +21,8 @@ enum DiaryTheme {
 
     enum Fonts {
         static let title = Font.title2.weight(.bold)
+        /// The title at the top of each tab (하루일기, 캘린더), larger and heavier than screen titles.
+        static let tabTitle = Font.system(.largeTitle, design: .default).weight(.heavy)
         static let section = Font.headline
         static let body = Font.body
         static let caption = Font.caption
@@ -31,6 +33,11 @@ enum DiaryTheme {
         static let medium: CGFloat = 12
         static let screen: CGFloat = 16
         static let section: CGFloat = 24
+    }
+
+    enum TabHeader {
+        /// Space above the tab title, the same on every tab so titles and the settings button line up.
+        static let top: CGFloat = 12
     }
 
     enum Radius {

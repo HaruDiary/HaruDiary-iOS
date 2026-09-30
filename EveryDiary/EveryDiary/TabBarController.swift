@@ -7,7 +7,7 @@
 
 import UIKit
 
-class TabBarController: UITabBarController {
+class TabBarController: UITabBarController, UITabBarControllerDelegate {
     let firstVC: UINavigationController
     let secondVC: UINavigationController
     let thirdVC: UINavigationController
@@ -25,6 +25,7 @@ class TabBarController: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        delegate = self
         setTabBar()
         customTabBar()
     }
@@ -46,8 +47,73 @@ class TabBarController: UITabBarController {
         let tabBar: UITabBar = self.tabBar
         tabBar.tintColor = .mainTheme
         tabBar.unselectedItemTintColor = .subText
-        tabBar.backgroundColor = .mainCell
-        tabBar.layer.borderColor = UIColor(named: "mainTheme")?.cgColor
-        tabBar.layer.borderWidth = 0.2
+        if #available(iOS 26.0, *) {
+            // The system glass bar: it shrinks while scrolling down and grows back when tapped or scrolled up.
+            tabBarMinimizeBehavior = .onScrollDown
+        } else {
+            tabBar.backgroundColor = .mainCell
+            tabBar.layer.borderColor = UIColor(named: "mainTheme")?.cgColor
+            tabBar.layer.borderWidth = 0.2
+        }
+    }
+
+    // MARK: - Sliding between tabs
+
+    func tabBarController(_ tabBarController: UITabBarController,
+                          animationControllerForTransitionFrom fromVC: UIViewController,
+                          to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        guard let viewControllers, let from = viewControllers.firstIndex(of: fromVC),
+              let to = viewControllers.firstIndex(of: toVC), from != to else { return nil }
+        return TabSlideTransition(towardsRight: to > from)
+    }
+}
+
+/// Switching tabs slides the next tab in from the side it sits on, like a page.
+private final class TabSlideTransition: NSObject, UIViewControllerAnimatedTransitioning {
+    private let towardsRight: Bool
+
+    init(towardsRight: Bool) {
+        self.towardsRight = towardsRight
+    }
+
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+        UIAccessibility.isReduceMotionEnabled ? 0.2 : 0.35
+    }
+
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        guard let fromView = transitionContext.view(forKey: .from),
+              let toView = transitionContext.view(forKey: .to),
+              let toVC = transitionContext.viewController(forKey: .to) else {
+            transitionContext.completeTransition(true)
+            return
+        }
+        let container = transitionContext.containerView
+        toView.frame = transitionContext.finalFrame(for: toVC)
+        container.addSubview(toView)
+
+        let duration = transitionDuration(using: transitionContext)
+        guard !UIAccessibility.isReduceMotionEnabled else {
+            // Reduce Motion: a short cross-fade instead of movement.
+            toView.alpha = 0
+            UIView.animate(withDuration: duration, animations: { toView.alpha = 1 }) { _ in
+                toView.alpha = 1
+                transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+            }
+            return
+        }
+        let width = container.bounds.width
+        let direction: CGFloat = towardsRight ? 1 : -1
+        toView.transform = CGAffineTransform(translationX: direction * width, y: 0)
+        UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0,
+                       options: [.curveEaseOut, .allowUserInteraction]) {
+            toView.transform = .identity
+            fromView.transform = CGAffineTransform(translationX: -direction * width * 0.3, y: 0)
+            fromView.alpha = 0.6
+        } completion: { _ in
+            fromView.transform = .identity
+            fromView.alpha = 1
+            toView.transform = .identity
+            transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+        }
     }
 }

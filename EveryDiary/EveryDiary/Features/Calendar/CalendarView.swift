@@ -13,16 +13,7 @@ struct CalendarView: View {
             DiaryTheme.Colors.background.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: DiaryTheme.Spacing.section) {
-                    HStack {
-                        Text("캘린더").font(DiaryTheme.Fonts.title)
-                        Spacer()
-                        Button(action: onOpenSettings) {
-                            Image(systemName: "gearshape").font(.system(size: DiaryTheme.Size.icon))
-                                .frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
-                        }
-                        .accessibilityLabel("설정")
-                    }
-                    .foregroundStyle(DiaryTheme.Colors.brand)
+                    DiaryTabHeader(title: "캘린더", onOpenSettings: onOpenSettings)
 
                     CalendarMonthGrid(viewModel: viewModel)
                         // Keep seven date columns legible; surrounding text still follows the full accessibility size.
