@@ -314,7 +314,7 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
         case .settingItem(_, _, let number):
             switch number {
             case 1:
-                navigationController?.pushViewController(ReminderModule.makeSettingsViewController(), animated: true)
+                navigationController?.pushViewController(ReminderModule.makeSettingsViewController(reminders: module.reminders), animated: true)
             case 2:
                 navigationController?.pushViewController(LockModule.makeSettingsViewController(), animated: true)
             case 3:

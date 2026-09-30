@@ -25,9 +25,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         self.window = window
-        let dependencies = AppDependencies.live()
+        var live = AppDependencies.live()
+        // One reminders instance for the whole app, also used by the reminder settings screen.
+        let reminders = live.makeDiaryReminders()
+        live.reminders = reminders
+        self.reminders = reminders
+        let dependencies = live
         OnboardingModule.install(in: window) { TabBarController(dependencies: dependencies) }
-        reminders = dependencies.makeDiaryReminders()
         //강제로 다크모드 해제
         window.overrideUserInterfaceStyle = .light
         window.makeKeyAndVisible()

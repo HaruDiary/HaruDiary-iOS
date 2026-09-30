@@ -16,7 +16,10 @@ final class SettingsHostingController: UIHostingController<SettingsView> {
         self.module = module
         super.init(rootView: SettingsView(viewModel: module.viewModel, values: values, actions: .none))
         rootView = SettingsView(viewModel: module.viewModel, values: values, actions: SettingsActions(
-            openReminders: { [weak self] in self?.push(ReminderModule.makeSettingsViewController()) },
+            openReminders: { [weak self] in
+                guard let self else { return }
+                self.push(ReminderModule.makeSettingsViewController(reminders: self.module.reminders))
+            },
             openLock: { [weak self] in self?.push(LockModule.makeSettingsViewController()) },
             openTrash: { [weak self] in
                 guard let self else { return }

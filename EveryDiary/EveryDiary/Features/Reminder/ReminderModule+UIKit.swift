@@ -8,9 +8,11 @@ enum ReminderModule {
                        calendar: calendar, now: Date.init)
     }
 
-    static func makeSettingsViewController() -> UIViewController {
+    /// `reminders` is the app-wide instance; a separate one would reschedule concurrently with it.
+    static func makeSettingsViewController(reminders: DiaryReminders?) -> UIViewController {
         let calendar = Calendar.current
-        let model = ReminderSettingsViewModel(reminders: makeReminders(calendar: calendar), calendar: calendar, now: Date.init)
+        let model = ReminderSettingsViewModel(reminders: reminders ?? makeReminders(calendar: calendar), calendar: calendar,
+                                              now: Date.init)
         return ReminderSettingsHostingController(viewModel: model)
     }
 }
