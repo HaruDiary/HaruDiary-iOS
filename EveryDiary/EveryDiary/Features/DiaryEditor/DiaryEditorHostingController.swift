@@ -109,6 +109,7 @@ final class DiaryEditorHostingController: UIHostingController<DiaryEditorView>, 
     // MARK: - Photos
 
     private func pickPhotos() {
+        guard viewModel.canPickPhotos() else { return }
         photoPicker.pick(from: self, selection: viewModel.pickerSelection, limit: viewModel.pickerLimit,
                          onStart: { [weak self] ids in self?.viewModel.pickingStarted(pickedIDs: ids) },
                          onFinish: { [weak self] photos, ids in self?.viewModel.finishPicking(photos, pickedIDs: ids) })
@@ -147,6 +148,8 @@ final class DiaryEditorHostingController: UIHostingController<DiaryEditorView>, 
         switch notice {
         case .titleMissing:
             TemporaryAlert.presentTemporaryMessage(with: "빈 제목", message: "제목이 비어있습니다. 제목을 입력해주세요.", interval: 2.0, for: self)
+        case .photoLimitReached:
+            TemporaryAlert.presentTemporaryMessage(with: "사진은 3장까지", message: "사진을 지운 뒤 다시 추가해주세요.", interval: 2.0, for: self)
         case .signInRequired:
             TemporaryAlert.presentTemporaryMessage(with: "로그인 필요", message: "일기를 연 계정으로 다시 로그인해주세요.", interval: 2.0, for: self)
         }

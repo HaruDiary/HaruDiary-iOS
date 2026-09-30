@@ -249,6 +249,23 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(model.loadingPhotoCount, 0)
     }
 
+    func testPickerDoesNotOpenWhenPhotosItCannotShowFillTheLimit() async throws {
+        downloader.photos = [
+            "u1": .init(image: .testPixel, metadata: nil),
+            "u2": .init(image: .testPixel, metadata: nil),
+            "u3": .init(image: .testPixel, metadata: nil),
+        ]
+        let model = makeModel()
+        model.open(stored(photos: ["u1", "u2", "u3"]), editing: true)
+        try await waitUntil { !model.isLoadingPhotos }
+        XCTAssertEqual(model.pickerLimit, 0)
+        XCTAssertFalse(model.canPickPhotos())
+        XCTAssertEqual(model.notice, .photoLimitReached)
+
+        model.removePhoto(model.photos[0].id)
+        XCTAssertTrue(model.canPickPhotos())
+    }
+
     func testRemovingPhotoUpdatesPickerSelection() {
         let model = makeModel()
         model.startComposing()
@@ -446,6 +463,12 @@ final class DiaryDraftTests: XCTestCase {
         XCTAssertEqual(merged.map(\.name), ["legacy", "b", "c"])
         XCTAssertEqual(DiaryPhotoPicking.pickerLimit(current: current) { $0.id }, 2)
         XCTAssertEqual(DiaryPhotoPicking.pickerLimit(current: [P]()) { $0.id }, 3)
+
+        // Three photos the picker cannot show fill the limit; nothing picked may be added past it.
+        let full = [P(id: nil, name: "1"), P(id: nil, name: "2"), P(id: nil, name: "3")]
+        XCTAssertEqual(DiaryPhotoPicking.pickerLimit(current: full) { $0.id }, 0)
+        XCTAssertEqual(DiaryPhotoPicking.merge(current: full, picked: [P(id: "x", name: "x")], pickedIDs: ["x"]) { $0.id }.map(\.name),
+                       ["1", "2", "3"])
     }
 }
 

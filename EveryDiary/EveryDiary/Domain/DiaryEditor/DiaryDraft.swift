@@ -104,7 +104,7 @@ enum DiaryWeatherStamp: Equatable {
 enum DiaryPhotoPicking {
     static let limit = 3
 
-    /// Photos still picked keep their place, newly picked ones follow in picking order.
+    /// Photos still picked keep their place, newly picked ones follow in picking order, up to `limit`.
     /// A stored photo without an identifier cannot be shown in the picker, so the picker never removes it.
     static func merge<Photo>(current: [Photo], picked: [Photo], pickedIDs: [String],
                              id: (Photo) -> String?) -> [Photo] {
@@ -112,7 +112,7 @@ enum DiaryPhotoPicking {
         let kept = current.filter { photo in id(photo).map(pickedSet.contains) ?? true }
         let keptIDs = Set(kept.compactMap(id))
         let added = picked.filter { photo in id(photo).map { !keptIDs.contains($0) } ?? false }
-        return kept + added
+        return Array((kept + added).prefix(limit))
     }
 
     /// How many photos the picker may hold: the photos it cannot show still count toward the limit.

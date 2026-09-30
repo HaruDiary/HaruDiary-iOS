@@ -74,6 +74,7 @@ final class DiaryEditorViewModel {
     enum Notice: Equatable {
         case titleMissing
         case signInRequired
+        case photoLimitReached
     }
 
     /// Asked after picking a photo that has a place: add that place to the diary?
@@ -220,6 +221,15 @@ final class DiaryEditorViewModel {
     var pickerLimit: Int { DiaryPhotoPicking.pickerLimit(current: photos) { $0.assetIdentifier } }
 
     var isLoadingPhotos: Bool { loadingPhotoCount > 0 }
+
+    /// False when the photos the picker cannot show already fill the limit: a picker limit of 0 would mean no limit.
+    func canPickPhotos() -> Bool {
+        guard pickerLimit > 0 else {
+            notice = .photoLimitReached
+            return false
+        }
+        return true
+    }
 
     /// `pickedIDs` are what the picker returned; only photos not already in the editor are loaded.
     func pickingStarted(pickedIDs: [String]) {
