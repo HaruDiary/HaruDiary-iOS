@@ -10,50 +10,27 @@ import Firebase
 import FirebaseStorage
 
 class FirebaseStorageManager {
-    static func uploadImage(image: [UIImage], pathRoot: String, assetIdentifier: String, captureTime: String? = nil, location: String? = nil, completion: @escaping ([URL]?) -> Void) {
-        var uploadedURL: [URL] = []
-        let dispatchGroup = DispatchGroup()
-        
-        for image in image {
-            guard let imageData = image.jpegData(compressionQuality: 0.4) else {
+    static func uploadImage(data: Data, pathRoot: String, assetIdentifier: String,
+                            captureTime: String? = nil, location: String? = nil,
+                            completion: @escaping (URL?) -> Void) {
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        var customMetadata = [String: String]()
+        if let captureTime { customMetadata["captureTime"] = captureTime }
+        if let location { customMetadata["location"] = location }
+        customMetadata["assetIdentifier"] = assetIdentifier
+        metadata.customMetadata = customMetadata
+
+        let imageName = "\(UUID().uuidString)_\(Date().timeIntervalSince1970)"
+        let reference = Storage.storage().reference().child("\(pathRoot)/\(imageName)")
+        reference.putData(data, metadata: metadata) { _, error in
+            guard error == nil else {
                 completion(nil)
                 return
             }
-            let metaData = StorageMetadata()
-            metaData.contentType = "image/jpeg"
-            
-            var customMetadata = [String: String]()
-            if let captureTime = captureTime {
-                customMetadata["captureTime"] = captureTime
+            reference.downloadURL { url, error in
+                completion(error == nil ? url : nil)
             }
-            if let location = location {
-                customMetadata["location"] = location
-            }
-            customMetadata["assetIdentifier"] = assetIdentifier
-            metaData.customMetadata = customMetadata
-            
-            let imageName = "\(UUID().uuidString)_\(Date().timeIntervalSince1970)"
-            let firebaseReference = Storage.storage().reference().child("\(pathRoot)/\(imageName)")
-            dispatchGroup.enter()
-            firebaseReference.putData(imageData, metadata: metaData) { metaData, error in
-                if let error = error as NSError? {
-                    // A failed upload has no file to link; callers treat the missing URL as a failure.
-                    // Domain/code only: the HTTP status (e.g. 402 when Storage billing is unavailable) is in the underlying error.
-                    let underlying = (error.userInfo[NSUnderlyingErrorKey] as? NSError).map { " \($0.domain) \($0.code)" } ?? ""
-                    print("Image upload failed: \(error.domain) \(error.code)\(underlying)")
-                    dispatchGroup.leave()
-                    return
-                }
-                firebaseReference.downloadURL { url, error in
-                    if let downloadURL = url {
-                        uploadedURL.append(downloadURL)
-                    }
-                    dispatchGroup.leave()
-                }
-            }
-        }
-        dispatchGroup.notify(queue: .main) {
-            completion(uploadedURL)
         }
     }
     

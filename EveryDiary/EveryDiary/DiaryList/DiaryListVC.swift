@@ -13,12 +13,14 @@ import SnapKit
 // 사용자가 작성한 일기 리스트를 보여주는 ViewController
 class DiaryListVC: UIViewController, UIAdaptivePresentationControllerDelegate {
     private let viewModel: DiaryListViewModel
+    private let makeWriteDiary: MakeWriteDiary
     // The collection view reads this copy so its counts only change together with reloadData().
     private var displayedSections: [DiaryListSection] = []
     private var showsUploadingCell = false
 
-    init(viewModel: DiaryListViewModel) {
+    init(viewModel: DiaryListViewModel, makeWriteDiary: @escaping MakeWriteDiary) {
         self.viewModel = viewModel
+        self.makeWriteDiary = makeWriteDiary
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -203,7 +205,7 @@ extension DiaryListVC {
         viewModel.query = ""
     }
     @objc private func tabWriteDiaryButton() {
-        let writeDiaryVC = WriteDiaryVC()
+        let writeDiaryVC = makeWriteDiary()
         writeDiaryVC.enterDiary(to: .writeNewDiary)
         writeDiaryVC.delegate = self
         writeDiaryVC.loadingDiaryDelegate = self
@@ -288,7 +290,7 @@ extension DiaryListVC: UICollectionViewDataSource {
         guard let diary = diary(at: indexPath) else { return }
         
         // 선택된 일기 정보를 전달하고, 수정(allowEdit) 버튼을 활성화
-        let writeDiaryVC = WriteDiaryVC()
+        let writeDiaryVC = makeWriteDiary()
         writeDiaryVC.enterDiary(to: .showDiary, with: diary)
         writeDiaryVC.delegate = self
         
@@ -335,7 +337,7 @@ extension DiaryListVC {
             // "수정" 액션 생성
             let editAction = UIAction(title: "수정", image: UIImage(systemName: "pencil")) { action in
                 // "수정" 선택 시, 일기를 WriteDiaryVC로 전달하고 업데이트 버튼 활성화
-                let writeDiaryVC = WriteDiaryVC()
+                let writeDiaryVC = self.makeWriteDiary()
                 writeDiaryVC.enterDiary(to: .editDiary, with: diary)
                 writeDiaryVC.delegate = self
                 writeDiaryVC.modalPresentationStyle = .automatic

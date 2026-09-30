@@ -12,8 +12,11 @@ final class SettingsHostingController: UIHostingController<SettingsView> {
     private let appleRequest = AppleAuthorizationRequest()
     private let calendar = Calendar.current
 
-    init(module: SettingsModule) {
+    private let makeWriteDiary: MakeWriteDiary
+
+    init(module: SettingsModule, makeWriteDiary: @escaping MakeWriteDiary) {
         self.module = module
+        self.makeWriteDiary = makeWriteDiary
         super.init(rootView: SettingsView(viewModel: module.viewModel, values: values, actions: .none))
         rootView = SettingsView(viewModel: module.viewModel, values: values, actions: SettingsActions(
             openReminders: { [weak self] in
@@ -23,7 +26,7 @@ final class SettingsHostingController: UIHostingController<SettingsView> {
             openLock: { [weak self] in self?.push(LockModule.makeSettingsViewController()) },
             openTrash: { [weak self] in
                 guard let self else { return }
-                self.push(self.module.makeTrashModule().makeViewController())
+                self.push(self.module.makeTrashModule().makeViewController(makeWriteDiary: self.makeWriteDiary))
             },
             openWebPage: { [weak self] url in
                 let safari = SFSafariViewController(url: url)

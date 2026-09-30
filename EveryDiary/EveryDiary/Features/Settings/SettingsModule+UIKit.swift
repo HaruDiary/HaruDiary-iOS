@@ -1,7 +1,7 @@
 import UIKit
 
 extension SettingsModule {
-    func makeViewController() -> UIViewController {
-        SettingsHostingController(module: self)
+    func makeViewController(makeWriteDiary: @escaping MakeWriteDiary) -> UIViewController {
+        SettingsHostingController(module: self, makeWriteDiary: makeWriteDiary)
     }
 }

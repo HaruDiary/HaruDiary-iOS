@@ -1,7 +1,7 @@
 import UIKit
 
 extension TrashModule {
-    func makeViewController() -> UIViewController {
-        TrashHostingController(viewModel: viewModel, imageLoader: imageLoader)
+    func makeViewController(makeWriteDiary: @escaping MakeWriteDiary) -> UIViewController {
+        TrashHostingController(viewModel: viewModel, imageLoader: imageLoader, makeWriteDiary: makeWriteDiary)
     }
 }

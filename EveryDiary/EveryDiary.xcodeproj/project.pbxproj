@@ -79,7 +79,7 @@
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
 		3F92D7D82BB5961500BDD34E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F92D7D72BB5961500BDD34E /* Extensions.swift */; };
 		3FB6D74E2BB2E8EF0098F29F /* LoadingIndicatorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74D2BB2E8EF0098F29F /* LoadingIndicatorCell.swift */; };
-		3FB6D7502BB316820098F29F /* DiaryUploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74F2BB316820098F29F /* DiaryUploadManager.swift */; };
+		3FB6D7502BB316820098F29F /* DiaryWriteRetention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74F2BB316820098F29F /* DiaryWriteRetention.swift */; };
 		3FF0FEEA2BB14F140045EBB7 /* TemporaryAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FF0FEE92BB14F140045EBB7 /* TemporaryAlert.swift */; };
 		45CFF8E407CBB52410F86BF1 /* DiaryEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00B31F32A3F08AD9CD188D48 /* DiaryEntryTests.swift */; };
 		6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6B95C02F2B8C7A3B00DBB175 /* SFProDisplay-Bold.otf */; };
@@ -194,6 +194,10 @@
 		F4CB8A6B91D6417D86B2D370 /* UserDiaryFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */; };
 		DAD88B399E5C4307808BF89B /* UserDiaryFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */; };
 		96642B834EB444CA9ECCFD96 /* DiaryTrashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */; };
+		B72A1C010000000000000001 /* DiarySaving.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72A1C010000000000000003 /* DiarySaving.swift */; };
+		B72A1C010000000000000002 /* DiarySaving.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72A1C010000000000000003 /* DiarySaving.swift */; };
+		B72A1C010000000000000004 /* DiarySaveCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */; };
+		B72A1C010000000000000006 /* LiveDiarySaving.swift in Sources */ = {isa = PBXBuildFile; fileRef = B72A1C010000000000000007 /* LiveDiarySaving.swift */; };
 		7279067B89E14CB08C3546B6 /* DiaryTrashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */; };
 		647488499E0740F282D024CE /* FirebaseDiaryTrash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AAB81D6DBC642429FBF0175 /* FirebaseDiaryTrash.swift */; };
 		B47EB636C096400BAAC7359C /* DiaryListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47CDA91F2C774E1795104BA9 /* DiaryListViewModel.swift */; };
@@ -324,7 +328,7 @@
 		3F9E0A562BA44CE2004BF1CB /* ImageZoomCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomCollectionViewController.swift; sourceTree = "<group>"; };
 		3F9E0A582BA44DB2004BF1CB /* ImageZoomCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomCollectionViewCell.swift; sourceTree = "<group>"; };
 		3FB6D74D2BB2E8EF0098F29F /* LoadingIndicatorCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicatorCell.swift; sourceTree = "<group>"; };
-		3FB6D74F2BB316820098F29F /* DiaryUploadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryUploadManager.swift; sourceTree = "<group>"; };
+		3FB6D74F2BB316820098F29F /* DiaryWriteRetention.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryWriteRetention.swift; sourceTree = "<group>"; };
 		3FF0FEE92BB14F140045EBB7 /* TemporaryAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryAlert.swift; sourceTree = "<group>"; };
 		633089E86841517C8CBC55A6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6B3C4CC92B8ECF3F00C53005 /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
@@ -410,6 +414,9 @@
 		140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/DeviceOwnerAuthenticating.swift"; sourceTree = "<group>"; };
 		F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/AppLock.swift"; sourceTree = "<group>"; };
 		DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTrashing.swift"; sourceTree = "<group>"; };
+		B72A1C010000000000000003 /* DiarySaving.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiarySaving.swift"; sourceTree = "<group>"; };
+		B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiarySaveCoordinatorTests.swift"; sourceTree = "<group>"; };
+		B72A1C010000000000000007 /* LiveDiarySaving.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveDiarySaving.swift"; sourceTree = "<group>"; };
 		5AAB81D6DBC642429FBF0175 /* FirebaseDiaryTrash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseDiaryTrash.swift"; sourceTree = "<group>"; };
 		47CDA91F2C774E1795104BA9 /* DiaryListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListViewModel.swift"; sourceTree = "<group>"; };
 		85917D9A7D944FA7ACC8933C /* DiaryListModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListModule.swift"; sourceTree = "<group>"; };
@@ -707,7 +714,7 @@
 			isa = PBXGroup;
 			children = (
 				6BB3CE3B2B85F606005BC3E1 /* WriteDiaryVC.swift */,
-				3FB6D74F2BB316820098F29F /* DiaryUploadManager.swift */,
+				3FB6D74F2BB316820098F29F /* DiaryWriteRetention.swift */,
 				3F7831572BA9FE4C00354211 /* KeyboardManager.swift */,
 				3F7831532BA9D2C700354211 /* ImagePickerManager.swift */,
 				3F7831552BA9EC0700354211 /* MapManager.swift */,
@@ -736,6 +743,7 @@
 				7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */,
 				0D07560776BB423EAB1F19AC /* DiaryListViewModelTests.swift */,
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
+				B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
 				1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */,
@@ -794,6 +802,7 @@
 				0E851EEAA92546DAB5CA3FFE /* DiaryDocumentDecoding.swift */,
 				6324AE064574465A82455BD2 /* DayKind.swift */,
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
+				B72A1C010000000000000003 /* DiarySaving.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
 				43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */,
 				65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */,
@@ -834,6 +843,7 @@
 				5584FCC9F31847F7902EC948 /* FirebaseUserDataEraser.swift */,
 				31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */,
 				5AAB81D6DBC642429FBF0175 /* FirebaseDiaryTrash.swift */,
+				B72A1C010000000000000007 /* LiveDiarySaving.swift */,
 				375356660EB6D2DDE12C07DD /* FirebaseDiaryReadingRepository.swift */,
 			);
 			path = Data;
@@ -1105,6 +1115,8 @@
 				7BBDC41BC8CD43ADB7895E8F /* DiaryListIndexTests.swift in Sources */,
 				38317E12A6544ADCA6D72192 /* DiaryListViewModel.swift in Sources */,
 				7279067B89E14CB08C3546B6 /* DiaryTrashing.swift in Sources */,
+				B72A1C010000000000000002 /* DiarySaving.swift in Sources */,
+				B72A1C010000000000000004 /* DiarySaveCoordinatorTests.swift in Sources */,
 				DAD88B399E5C4307808BF89B /* UserDiaryFeed.swift in Sources */,
 				0AA5C09B97BA493193A4CAC9 /* DiaryListIndex.swift in Sources */,
 				05DAB852E56A1805B5B72EBB /* OnboardingViewModelTests.swift in Sources */,
@@ -1213,7 +1225,9 @@
 				AFA5F9226730420F8E7101B4 /* DiaryListModule.swift in Sources */,
 				B47EB636C096400BAAC7359C /* DiaryListViewModel.swift in Sources */,
 				647488499E0740F282D024CE /* FirebaseDiaryTrash.swift in Sources */,
+				B72A1C010000000000000006 /* LiveDiarySaving.swift in Sources */,
 				96642B834EB444CA9ECCFD96 /* DiaryTrashing.swift in Sources */,
+				B72A1C010000000000000001 /* DiarySaving.swift in Sources */,
 				F4CB8A6B91D6417D86B2D370 /* UserDiaryFeed.swift in Sources */,
 				48EB3DE62D7A47E2A33ED0E5 /* DiaryListIndex.swift in Sources */,
 				B1E063E7D0B3A633A8C60E01 /* OnboardingModule.swift in Sources */,
@@ -1280,7 +1294,7 @@
 				D2F0EF552BAAAD51008736F1 /* DateConditionSelectVC.swift in Sources */,
 				D2F0EF562BAAAD51008736F1 /* DateSelectVC.swift in Sources */,
 				D2F0EF572BAAAD51008736F1 /* SettingVC.swift in Sources */,
-				3FB6D7502BB316820098F29F /* DiaryUploadManager.swift in Sources */,
+				3FB6D7502BB316820098F29F /* DiaryWriteRetention.swift in Sources */,
 				D2F0EF582BAAAD51008736F1 /* SignOutCell.swift in Sources */,
 				D2F0EF592BAAAD51008736F1 /* ProfileCell.swift in Sources */,
 				D2F0EF5A2BAAAD51008736F1 /* SettingCell.swift in Sources */,

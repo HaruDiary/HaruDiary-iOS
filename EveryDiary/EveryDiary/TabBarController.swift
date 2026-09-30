@@ -13,10 +13,11 @@ class TabBarController: UITabBarController {
     let thirdVC: UINavigationController
 
     init(dependencies: AppDependencies) {
-        let makeSettings = { dependencies.makeSettingsModule().makeViewController() }
-        firstVC = UINavigationController(rootViewController: dependencies.makeDiaryListModule().makeViewController(makeSettings: makeSettings))
-        secondVC = UINavigationController(rootViewController: dependencies.makeJourneyModule().makeViewController(makeSettings: makeSettings))
-        thirdVC = UINavigationController(rootViewController: dependencies.makeCalendarModule().makeViewController(makeSettings: makeSettings))
+        let makeWriteDiary: MakeWriteDiary = { WriteDiaryVC(saver: dependencies.diarySaving) }
+        let makeSettings = { dependencies.makeSettingsModule().makeViewController(makeWriteDiary: makeWriteDiary) }
+        firstVC = UINavigationController(rootViewController: dependencies.makeDiaryListModule().makeViewController(makeWriteDiary: makeWriteDiary, makeSettings: makeSettings))
+        secondVC = UINavigationController(rootViewController: dependencies.makeJourneyModule().makeViewController(makeWriteDiary: makeWriteDiary, makeSettings: makeSettings))
+        thirdVC = UINavigationController(rootViewController: dependencies.makeCalendarModule().makeViewController(makeWriteDiary: makeWriteDiary, makeSettings: makeSettings))
         super.init(nibName: nil, bundle: nil)
     }
 

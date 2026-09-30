@@ -57,7 +57,10 @@ class DiaryManager {
             completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
             return
         }
-        
+        addDiary(diary: diary, userID: userID, completion: completion)
+    }
+
+    func addDiary(diary: DiaryEntry, userID: String, completion: @escaping (Error?) -> Void) {
         let weatherService = WeatherService()
         
         weatherService.getWeather(forDiaryOn: diary.date) { result in
@@ -192,7 +195,11 @@ class DiaryManager {
             completion(NSError(domain: "Auth Error", code: 401, userInfo: nil))
             return
         }
-        
+        updateDiary(diaryID: diaryID, newDiary: newDiary, userID: userID, completion: completion)
+    }
+
+    func updateDiary(diaryID: String, newDiary: DiaryEntry, userID: String,
+                     completion: @escaping (Error?) -> Void) {
         do {
             try db.collection("users").document(userID).collection("diaries").document(diaryID).setData(from: newDiary) { error in
                 if let error = error {

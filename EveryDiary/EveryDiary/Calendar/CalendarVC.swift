@@ -13,11 +13,13 @@ import SnapKit
 class CalendarVC: UIViewController {
     
     private let viewModel: CalendarViewModel
+    private let makeWriteDiary: MakeWriteDiary
     private var decoratedDays: Set<CalendarDay> = []
     private var diaries: [DiaryEntry] { viewModel.selectedEntries }
 
-    init(viewModel: CalendarViewModel) {
+    init(viewModel: CalendarViewModel, makeWriteDiary: @escaping MakeWriteDiary) {
         self.viewModel = viewModel
+        self.makeWriteDiary = makeWriteDiary
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -71,7 +73,7 @@ class CalendarVC: UIViewController {
     }
     
     @objc private func tabWriteDiaryBTN() {
-        let writeDiaryVC = WriteDiaryVC()
+        let writeDiaryVC = makeWriteDiary()
         writeDiaryVC.enterDiary(to: .writeNewDiary)
         writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic
@@ -186,7 +188,7 @@ extension CalendarVC: UICalendarViewDelegate, UICalendarSelectionSingleDateDeleg
         
         viewModel.select(date)
         if !viewModel.selectedEntries.isEmpty {
-            let calendarListVC = CalendarListVC(viewModel: viewModel)
+            let calendarListVC = CalendarListVC(viewModel: viewModel, makeWriteDiary: makeWriteDiary)
             calendarListVC.hidesBottomBarWhenPushed = true
             navigationController?.pushViewController(calendarListVC, animated: true)
         }

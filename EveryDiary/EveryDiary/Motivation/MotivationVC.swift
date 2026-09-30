@@ -15,10 +15,13 @@ class MotivationVC: UIViewController {
     // This month's picture; each diary day turns on one more light.
     private lazy var scene = UIHostingController(rootView: makeSceneView())
     private let viewModel: JourneyViewModel
+    private let makeWriteDiary: MakeWriteDiary
     private let makeSettings: () -> UIViewController
     
-    init(viewModel: JourneyViewModel, makeSettings: @escaping () -> UIViewController) {
+    init(viewModel: JourneyViewModel, makeWriteDiary: @escaping MakeWriteDiary,
+         makeSettings: @escaping () -> UIViewController) {
         self.viewModel = viewModel
+        self.makeWriteDiary = makeWriteDiary
         self.makeSettings = makeSettings
         super.init(nibName: nil, bundle: nil)
     }
@@ -132,7 +135,7 @@ class MotivationVC: UIViewController {
     }
     
     @objc private func tabWriteDiaryBTN() {
-        let writeDiaryVC = WriteDiaryVC()
+        let writeDiaryVC = makeWriteDiary()
         writeDiaryVC.enterDiary(to: .writeNewDiary)
         writeDiaryVC.delegate = self
         writeDiaryVC.modalPresentationStyle = .automatic

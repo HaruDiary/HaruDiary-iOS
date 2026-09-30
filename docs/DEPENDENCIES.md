@@ -12,6 +12,11 @@
 
 `SceneDelegate` → `AppDependencies.live()` → `TabBarController` → `DiaryListModule` → `DiaryListHostingController`
 
+`SceneDelegate` → `AppDependencies.live()` → `TabBarController` → `makeWriteDiary` → `WriteDiaryVC`
+
+| 구성 | 책임 |
+|---|---|
+| `App/AppDependencies.swift` | 조회·세션·휴지통 이동(`DiaryTrashing`)·작성 저장(`DiarySaving`)·이미지 로더·Calendar·현재 시각 의존성을 보관하고 기능을 생성 |
 `TabBarController` → 각 탭(목록·여정·캘린더)의 설정 버튼 → `SettingsModule` → `SettingVC` → `TrashModule`
 
 | 구성 | 책임 |
@@ -21,6 +26,11 @@
 | `Features/Calendar/CalendarModule.swift` | 전달받은 서비스로 독립적인 화면 상태 생성 |
 | `Features/Calendar/CalendarModule+UIKit.swift` | 생성한 상태와 이미지 로더를 UIKit hosting controller에 연결 |
 | `Features/DiaryList/DiaryListModule.swift`, `+UIKit.swift` | 일기 목록 상태 생성과 UIKit hosting controller 연결. Calendar와 같은 조회·세션을 재사용 |
+| `Domain/DiarySaving.swift`, `Data/LiveDiarySaving.swift` | 인증·사진 저장·일기 쓰기 계약과 기존 Firebase 구현, 단일 저장 결과를 조립 |
+
+휴지통 이동 계약(`DiaryTrashing`)은 요청한 사용자 경로의 휴지통 필드만 수정한다.
+일기 작성·수정 화면은 모든 UIKit 진입점에서 필수 factory를 전달받으며
+화면 내부에서 `AppDependencies.live()`나 새 Firebase 저장 의존성을 만들지 않는다.
 | `Features/Trash/TrashModule.swift`, `+UIKit.swift` | 휴지통 상태 생성과 hosting controller 연결 |
 | `Features/Settings/SettingsModule.swift`, `+UIKit.swift` | 설정 상태 생성과 `SettingVC` 연결. 휴지통은 같은 의존성으로 생성. 교체 전 UIKit 탭의 `SettingVC()`만 `AppDependencies.live()`를 사용 |
 
@@ -41,8 +51,8 @@
 
 ## 후속 범위
 
-일기 목록·작성·여정 등 기존 UIKit의 서비스 직접 접근, 이미지 다운로드 취소,
-날씨 설정과 오류 처리, 데이터 쓰기 경계는 후속 작업이다.
+휴지통 복원·여정 등 나머지 UIKit 서비스 직접 접근, 이미지 다운로드 취소,
+날씨 설정·초안 상태와 실제 Firebase/Storage 통합 검증은 후속 작업이다.
 공통 색상·타이포 기준은 기존 `DiaryTheme`를 출발점으로 별도 정리한다.
 
 Firebase 디코딩에서 문서 하나가 실패하면 전체 구독이 실패하던 문제(PR #1 리뷰 지적)는

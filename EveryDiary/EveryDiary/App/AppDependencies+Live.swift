@@ -17,6 +17,11 @@ extension AppDependencies {
             ),
             signInGateway: FirebaseSocialSignInGateway(auth: .auth(), appleRecords: appleRecords),
             diaryTrash: FirebaseDiaryTrash(database: .firestore()),
+            diarySaving: DiarySaveCoordinator(
+                authentication: LiveDiarySaveAuthentication(),
+                images: LiveDiaryImageStore(),
+                entries: LiveDiaryEntryWriter()
+            ),
             calendarImageLoader: CachedCalendarImageLoader(cache: .shared),
             calendar: .current,
             now: Date.init
