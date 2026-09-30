@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F0F93F1A8E349152F3B6E33 /* UserDefaultsReminderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58B0D59D24667E391ECE344 /* UserDefaultsReminderStore.swift */; };
+		E375AE17F86CD93FEBF12E59 /* UserDefaultsReminderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58B0D59D24667E391ECE344 /* UserDefaultsReminderStore.swift */; };
+		64F76684CFA187A46488A28D /* DiaryReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */; };
+		0F462049A1E6B03434E7750E /* Reminder/ReminderModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BDA3C9035D1493CD510026 /* Reminder/ReminderModule+UIKit.swift */; };
+		1D29B190433965D711C3ECBC /* Reminder/ReminderSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D0443AA48204D8D4F73C24 /* Reminder/ReminderSettingsView.swift */; };
+		2F8C2B5BE9AF32ACA3847EF6 /* Reminder/ReminderSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F8B9715D003A2FA79DD33A /* Reminder/ReminderSettingsViewModel.swift */; };
+		65FF47D95A61C7E8548C8A71 /* Reminder/ReminderSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F8B9715D003A2FA79DD33A /* Reminder/ReminderSettingsViewModel.swift */; };
+		EA2DC5E52E3E57B9D75FE215 /* LiveDiaryReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B56F8AAA6129582DA9DF27 /* LiveDiaryReminders.swift */; };
+		E238DCDD75F515075D903174 /* Reminder/DiaryReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */; };
+		5A5DD13A6C92281D140BBB0B /* Reminder/DiaryReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */; };
+		1242D41DD28D7E28D58A7C3F /* Reminder/DiaryReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */; };
+		47D59BC52C7460EF383A57B4 /* Reminder/DiaryReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */; };
 		011C3163ABFE2B7B60FB2B60 /* LockViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */; };
 		F795D2E8B5E7FA5DA3D56E91 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D802337338EFDCC16CA9E0A /* AppLockTests.swift */; };
 		308C27A962FEE5EE8AC5CE07 /* Lock/LockModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 598784F5EE8499D50B68D1B8 /* Lock/LockModule+UIKit.swift */; };
@@ -366,6 +378,7 @@
 		7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarViewModel.swift"; sourceTree = "<group>"; };
 		77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule.swift"; sourceTree = "<group>"; };
 		2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarViewModelTests.swift"; sourceTree = "<group>"; };
+		1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryReminderTests.swift"; sourceTree = "<group>"; };
 		584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LockViewModelTests.swift"; sourceTree = "<group>"; };
 		9D802337338EFDCC16CA9E0A /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppLockTests.swift"; sourceTree = "<group>"; };
 		91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModelTests.swift"; sourceTree = "<group>"; };
@@ -388,6 +401,8 @@
 		5F48F50BB73E9E4A9B0BF94C /* CalendarModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule+UIKit.swift"; sourceTree = "<group>"; };
 		62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListIndex.swift"; sourceTree = "<group>"; };
 		B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDiaryFeed.swift"; sourceTree = "<group>"; };
+		43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/DiaryReminders.swift"; sourceTree = "<group>"; };
+		65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/DiaryReminder.swift"; sourceTree = "<group>"; };
 		140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/DeviceOwnerAuthenticating.swift"; sourceTree = "<group>"; };
 		F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/AppLock.swift"; sourceTree = "<group>"; };
 		DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTrashing.swift"; sourceTree = "<group>"; };
@@ -424,6 +439,9 @@
 		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
 		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
 		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		60BDA3C9035D1493CD510026 /* Reminder/ReminderModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/ReminderModule+UIKit.swift"; sourceTree = "<group>"; };
+		47D0443AA48204D8D4F73C24 /* Reminder/ReminderSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/ReminderSettingsView.swift"; sourceTree = "<group>"; };
+		28F8B9715D003A2FA79DD33A /* Reminder/ReminderSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/ReminderSettingsViewModel.swift"; sourceTree = "<group>"; };
 		598784F5EE8499D50B68D1B8 /* Lock/LockModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockModule+UIKit.swift"; sourceTree = "<group>"; };
 		5E672AAD72BB4075734C429F /* Lock/LockSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockSettingsView.swift"; sourceTree = "<group>"; };
 		82EAED2BA2701711A61FEC56 /* Lock/LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockScreenView.swift"; sourceTree = "<group>"; };
@@ -453,6 +471,8 @@
 		B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoPreparation.swift"; sourceTree = "<group>"; };
 		55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleRefreshTokenStore.swift"; sourceTree = "<group>"; };
 		47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainSecretStore.swift"; sourceTree = "<group>"; };
+		B58B0D59D24667E391ECE344 /* UserDefaultsReminderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaultsReminderStore.swift"; sourceTree = "<group>"; };
+		C1B56F8AAA6129582DA9DF27 /* LiveDiaryReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveDiaryReminders.swift"; sourceTree = "<group>"; };
 		3C04051C32BA52281C1768D2 /* LiveAppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveAppLock.swift"; sourceTree = "<group>"; };
 		156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleSignInRecords.swift"; sourceTree = "<group>"; };
 		09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleRefreshTokenStoreTests.swift"; sourceTree = "<group>"; };
@@ -711,6 +731,7 @@
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */,
 				584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */,
 				9D802337338EFDCC16CA9E0A /* AppLockTests.swift */,
 				91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */,
@@ -767,6 +788,8 @@
 				6324AE064574465A82455BD2 /* DayKind.swift */,
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */,
+				65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */,
 				140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */,
 				F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */,
 				9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */,
@@ -795,6 +818,8 @@
 				832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */,
 				156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */,
 				47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */,
+				B58B0D59D24667E391ECE344 /* UserDefaultsReminderStore.swift */,
+				C1B56F8AAA6129582DA9DF27 /* LiveDiaryReminders.swift */,
 				3C04051C32BA52281C1768D2 /* LiveAppLock.swift */,
 				68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */,
 				BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */,
@@ -815,6 +840,9 @@
 				0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
+				60BDA3C9035D1493CD510026 /* Reminder/ReminderModule+UIKit.swift */,
+				47D0443AA48204D8D4F73C24 /* Reminder/ReminderSettingsView.swift */,
+				28F8B9715D003A2FA79DD33A /* Reminder/ReminderSettingsViewModel.swift */,
 				598784F5EE8499D50B68D1B8 /* Lock/LockModule+UIKit.swift */,
 				5E672AAD72BB4075734C429F /* Lock/LockSettingsView.swift */,
 				82EAED2BA2701711A61FEC56 /* Lock/LockScreenView.swift */,
@@ -1004,6 +1032,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F0F93F1A8E349152F3B6E33 /* UserDefaultsReminderStore.swift in Sources */,
+				64F76684CFA187A46488A28D /* DiaryReminderTests.swift in Sources */,
+				2F8C2B5BE9AF32ACA3847EF6 /* Reminder/ReminderSettingsViewModel.swift in Sources */,
+				E238DCDD75F515075D903174 /* Reminder/DiaryReminders.swift in Sources */,
+				1242D41DD28D7E28D58A7C3F /* Reminder/DiaryReminder.swift in Sources */,
 				011C3163ABFE2B7B60FB2B60 /* LockViewModelTests.swift in Sources */,
 				F795D2E8B5E7FA5DA3D56E91 /* AppLockTests.swift in Sources */,
 				170DADF1062FEF832B55C3AA /* Lock/LockSettingsViewModel.swift in Sources */,
@@ -1084,6 +1117,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E375AE17F86CD93FEBF12E59 /* UserDefaultsReminderStore.swift in Sources */,
+				0F462049A1E6B03434E7750E /* Reminder/ReminderModule+UIKit.swift in Sources */,
+				1D29B190433965D711C3ECBC /* Reminder/ReminderSettingsView.swift in Sources */,
+				65FF47D95A61C7E8548C8A71 /* Reminder/ReminderSettingsViewModel.swift in Sources */,
+				EA2DC5E52E3E57B9D75FE215 /* LiveDiaryReminders.swift in Sources */,
+				5A5DD13A6C92281D140BBB0B /* Reminder/DiaryReminders.swift in Sources */,
+				47D59BC52C7460EF383A57B4 /* Reminder/DiaryReminder.swift in Sources */,
 				308C27A962FEE5EE8AC5CE07 /* Lock/LockModule+UIKit.swift in Sources */,
 				95AD4E31DADB4F9382137132 /* Lock/LockSettingsView.swift in Sources */,
 				F497325EAE3BB3BE5ACB0F8A /* Lock/LockScreenView.swift in Sources */,
