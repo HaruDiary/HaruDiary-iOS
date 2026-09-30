@@ -10,11 +10,18 @@ final class SettingsRowValues {
     var version = ""
 }
 
+/// Pages the app links to.
+enum AppLinks {
+    static let privacyPolicy = URL(string: "https://woozy-stick-dd0.notion.site/dc4303c83cd3453e98ada95ff0275209")!
+}
+
 /// Screens and system sheets that settings open; UIKit presents them until the tabs move to SwiftUI.
 struct SettingsActions {
     var openReminders: () -> Void
     var openLock: () -> Void
     var openTrash: () -> Void
+    /// Opens a web page inside the app.
+    var openWebPage: (URL) -> Void
     var signIn: () -> Void
     /// Apple members confirm with Sign in with Apple before their account is deleted.
     var confirmWithAppleThenDelete: () -> Void
@@ -43,6 +50,11 @@ struct SettingsView: View {
                 row("알림", systemImage: "bell", value: values.reminder, action: actions.openReminders)
                 row("잠금", systemImage: "lock", value: values.lock, action: actions.openLock)
                 row("최근 삭제한 항목", systemImage: "trash", value: nil, action: actions.openTrash)
+            }
+            Section {
+                row("개인정보 처리방침", systemImage: "hand.raised", value: nil) {
+                    actions.openWebPage(AppLinks.privacyPolicy)
+                }
             }
             if viewModel.profile.isLoggedIn {
                 Section {

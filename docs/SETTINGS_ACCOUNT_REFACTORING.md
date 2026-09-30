@@ -65,7 +65,8 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 
 로그인 화면은 Google·Apple 화면을 띄워 자격 증명만 받고, 계정 연결·전환은 `SocialSignIn`이 정한다.
 설정 화면 자체도 목업 16번 기준 SwiftUI(`SettingsView`)로 교체했다. 프로필·알림·잠금·휴지통·로그아웃·탈퇴와 버전을 보여 주며,
-알림·잠금 행에는 현재 설정(예: "매일 오후 9:00", "암호 · Face ID")을 표시한다. 동작과 문구는 `SettingsViewModel`을 그대로 쓰고,
+알림·잠금 행에는 현재 설정(예: "매일 오후 9:00", "암호 · Face ID")을 표시한다.
+개인정보 처리방침(노션 페이지, `AppLinks.privacyPolicy`)은 앱 안 Safari 화면으로 연다. 동작과 문구는 `SettingsViewModel`을 그대로 쓰고,
 `SettingsHostingController`는 탭의 UIKit 내비게이션에 화면을 넣고 Apple 재확인·로그인 화면만 띄운다. 기존 `SettingVC`는 교체된 UIKit 탭에서만 참조한다.
 설정에서 여는 로그인 화면은 SwiftUI(`Features/SignIn`)로 교체했다. `SignInView`는 표시만 하고,
 `SignInViewModel`이 로그인 결과·닉네임 입력·실패 안내를 정하며, `SignInHostingController`가 Google·Apple 화면을 띄운다.

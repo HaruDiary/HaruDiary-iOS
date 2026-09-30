@@ -1,4 +1,5 @@
 import Observation
+import SafariServices
 import SwiftUI
 import UIKit
 
@@ -20,6 +21,11 @@ final class SettingsHostingController: UIHostingController<SettingsView> {
             openTrash: { [weak self] in
                 guard let self else { return }
                 self.push(self.module.makeTrashModule().makeViewController())
+            },
+            openWebPage: { [weak self] url in
+                let safari = SFSafariViewController(url: url)
+                safari.preferredControlTintColor = DiaryTheme.Colors.brandUIKit
+                self?.present(safari, animated: true)
             },
             signIn: { [weak self] in
                 guard let self else { return }
@@ -102,6 +108,6 @@ final class SettingsHostingController: UIHostingController<SettingsView> {
 
 extension SettingsActions {
     /// Placeholder for the first `rootView`, replaced before the screen appears.
-    static let none = SettingsActions(openReminders: {}, openLock: {}, openTrash: {}, signIn: {},
+    static let none = SettingsActions(openReminders: {}, openLock: {}, openTrash: {}, openWebPage: { _ in }, signIn: {},
                                       confirmWithAppleThenDelete: {}, accountChanged: {})
 }
