@@ -69,48 +69,73 @@ struct ReminderSettingsView: View {
         }
     }
 
+    /// Like the iOS Reminders repeat row: the current choice opens a menu of common schedules,
+    /// and the day buttons below pick any other combination.
     private var repeatSection: some View {
-        VStack(alignment: .leading, spacing: DiaryTheme.Spacing.small) {
-            HStack {
-                sectionTitle("반복")
-                Spacer()
-                Text(viewModel.summary)
-                    .font(DiaryTheme.Fonts.caption)
-                    .foregroundStyle(DiaryTheme.Colors.secondaryText)
-            }
-            HStack(spacing: 0) {
-                ForEach(1...7, id: \.self) { weekday in
-                    let isOn = viewModel.settings.weekdays.contains(weekday)
-                    Button {
-                        Task { await viewModel.toggle(weekday: weekday) }
+        card {
+            VStack(spacing: 0) {
+                HStack {
+                    Text("반복")
+                        .font(DiaryTheme.Fonts.body)
+                        .foregroundStyle(DiaryTheme.Colors.text)
+                    Spacer()
+                    Menu {
+                        ForEach(ReminderSettingsViewModel.Preset.allCases, id: \.self) { preset in
+                            Button {
+                                Task { await viewModel.apply(preset) }
+                            } label: {
+                                if viewModel.settings.weekdays == preset.weekdays {
+                                    Label(preset.title, systemImage: "checkmark")
+                                } else {
+                                    Text(preset.title)
+                                }
+                            }
+                        }
                     } label: {
-                        Text(ReminderPlan.weekdayNames[weekday - 1])
-                            .font(DiaryTheme.Fonts.body.weight(.semibold))
-                            .foregroundStyle(isOn ? .white : DiaryTheme.Colors.secondaryText)
-                            .frame(width: 40, height: 40)
-                            .background(isOn ? DiaryTheme.Colors.brand : DiaryTheme.Colors.surface, in: Circle())
+                        HStack(spacing: 4) {
+                            Text(viewModel.summary)
+                                .lineLimit(1)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption2.weight(.semibold))
+                        }
+                        .font(DiaryTheme.Fonts.body)
+                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
                     }
-                    .buttonStyle(.plain)
-                    .frame(maxWidth: .infinity)
-                    .accessibilityLabel("\(ReminderPlan.weekdayNames[weekday - 1])요일")
-                    .accessibilityAddTraits(isOn ? .isSelected : [])
                 }
-            }
-            HStack(spacing: DiaryTheme.Spacing.small) {
-                ForEach(ReminderSettingsViewModel.Preset.allCases, id: \.self) { preset in
-                    let isOn = viewModel.settings.weekdays == preset.weekdays
-                    Button(preset.title) {
-                        Task { await viewModel.apply(preset) }
+                .padding(DiaryTheme.Spacing.screen)
+                Divider().padding(.leading, DiaryTheme.Spacing.screen)
+                HStack(spacing: 0) {
+                    ForEach(1...7, id: \.self) { weekday in
+                        let isOn = viewModel.settings.weekdays.contains(weekday)
+                        Button {
+                            Task { await viewModel.toggle(weekday: weekday) }
+                        } label: {
+                            Text(ReminderPlan.weekdayNames[weekday - 1])
+                                .font(DiaryTheme.Fonts.caption.weight(.semibold))
+                                .foregroundStyle(isOn ? .white : weekdayColor(weekday))
+                                .frame(width: 34, height: 34)
+                                .background(isOn ? DiaryTheme.Colors.brand : DiaryTheme.Colors.background, in: Circle())
+                                .frame(maxWidth: .infinity, minHeight: DiaryTheme.Size.touchTarget)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("\(ReminderPlan.weekdayNames[weekday - 1])요일")
+                        .accessibilityAddTraits(isOn ? .isSelected : [])
                     }
-                    .font(DiaryTheme.Fonts.caption.weight(.semibold))
-                    .foregroundStyle(isOn ? DiaryTheme.Colors.brand : DiaryTheme.Colors.secondaryText)
-                    .padding(.horizontal, DiaryTheme.Spacing.medium)
-                    .padding(.vertical, 6)
-                    .background(DiaryTheme.Colors.surface, in: Capsule())
-                    .overlay(Capsule().stroke(isOn ? DiaryTheme.Colors.brand : .clear))
-                    .buttonStyle(.plain)
                 }
+                .padding(.horizontal, DiaryTheme.Spacing.small)
+                .padding(.vertical, DiaryTheme.Spacing.small)
+                .animation(.easeOut(duration: 0.15), value: viewModel.settings.weekdays)
             }
+        }
+    }
+
+    /// Unselected Sunday/Saturday keep the calendar's red/blue so the week reads at a glance.
+    private func weekdayColor(_ weekday: Int) -> Color {
+        switch weekday {
+        case 1: return DiaryTheme.Colors.holiday
+        case 7: return DiaryTheme.Colors.saturday
+        default: return DiaryTheme.Colors.secondaryText
         }
     }
 

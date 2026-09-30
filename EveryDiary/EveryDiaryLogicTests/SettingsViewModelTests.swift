@@ -448,3 +448,34 @@ final class AccountDeletionTests: XCTestCase {
         }
     }
 }
+
+final class SettingsSummaryTests: XCTestCase {
+    private let calendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul")!
+        return calendar
+    }()
+
+    func testReminderValueShowsDaysAndTime() {
+        XCTAssertEqual(SettingsSummary.reminder(ReminderSettings(), calendar: calendar), "꺼짐")
+        XCTAssertEqual(SettingsSummary.reminder(ReminderSettings(isOn: true), calendar: calendar), "매일 오후 9:00")
+        XCTAssertEqual(SettingsSummary.reminder(ReminderSettings(isOn: true, hour: 7, minute: 30, weekdays: Set(2...6)),
+                                                calendar: calendar), "평일 오전 7:30")
+        XCTAssertEqual(SettingsSummary.reminder(ReminderSettings(isOn: true, weekdays: []), calendar: calendar), "요일 없음")
+    }
+
+    func testLockValueNamesTheWaysIn() {
+        XCTAssertEqual(SettingsSummary.lock(.off, biometry: .faceID), "꺼짐")
+        XCTAssertEqual(SettingsSummary.lock(.passcode(biometrics: false), biometry: .faceID), "암호")
+        XCTAssertEqual(SettingsSummary.lock(.passcode(biometrics: true), biometry: .touchID), "암호 · Touch ID")
+        // Biometrics turned on but no longer available on the device: only the passcode works.
+        XCTAssertEqual(SettingsSummary.lock(.passcode(biometrics: true), biometry: .none), "암호")
+        XCTAssertEqual(SettingsSummary.lock(.legacyBiometrics, biometry: .faceID), "Face ID")
+    }
+
+    func testVersionValue() {
+        XCTAssertEqual(SettingsSummary.version(short: "2.0", build: "15"), "버전 2.0 (15)")
+        XCTAssertEqual(SettingsSummary.version(short: "2.0", build: "2.0"), "버전 2.0")
+        XCTAssertEqual(SettingsSummary.version(short: nil, build: "1"), "")
+    }
+}
