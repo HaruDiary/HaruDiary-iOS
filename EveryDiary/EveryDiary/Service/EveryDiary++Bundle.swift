@@ -7,10 +7,12 @@
 import Foundation
 
 extension Bundle {
+    /// The OpenWeather key from `Api.plist`, which is kept out of git (see docs/XCODE_CLOUD.md).
+    /// Empty when the file or key is missing; weather then reports `.missingAPIKey` instead of crashing.
     var apiKey: String {
-        guard let file = self.path(forResource: "Api", ofType: "plist") else { return "" }
-        guard let resource = NSDictionary(contentsOfFile: file) else { return "" }
-        guard let key = resource["OPENWEATHERMAP_KEY"] as? String else { fatalError("Api.plsit에 OPENWEATHERMAP_KEY 설정을 해주세요")}
+        guard let file = self.path(forResource: "Api", ofType: "plist"),
+              let resource = NSDictionary(contentsOfFile: file),
+              let key = resource["OPENWEATHERMAP_KEY"] as? String else { return "" }
         return key
     }
 }

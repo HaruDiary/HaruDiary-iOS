@@ -6,15 +6,15 @@
 //
 import Foundation
 
-struct WeatherResponse: Decodable {
+struct WeatherResponse: Decodable, Equatable {
     let weather: [Weather]
     let main: Main
 }
 
-struct Main: Decodable {
+struct Main: Decodable, Equatable {
     let temp: Double
 }
 
-struct Weather: Decodable {
+struct Weather: Decodable, Equatable {
     let description: String
 }

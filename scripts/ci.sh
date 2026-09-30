@@ -27,7 +27,7 @@ case "$MODE" in
     # Compile an isolated copy: never overwrite a developer's Firebase configuration.
     WORKSPACE="$(mktemp -d "${TMPDIR:-/tmp}/harudiary-ci-build.XXXXXX")"
     trap 'rm -rf "$WORKSPACE"' EXIT
-    rsync -a --exclude .git --exclude GoogleService-Info.plist --exclude DerivedData \
+    rsync -a --exclude .git --exclude GoogleService-Info.plist --exclude Api.plist --exclude DerivedData \
       --exclude .build --exclude .DS_Store "$ROOT/" "$WORKSPACE/"
     cat > "$WORKSPACE/EveryDiary/EveryDiary/GoogleService-Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -40,6 +40,14 @@ case "$MODE" in
   <key>API_KEY</key><string>ci-placeholder-not-a-credential</string>
   <key>PLIST_VERSION</key><string>1</string>
   <key>IS_ANALYTICS_ENABLED</key><false/>
+</dict></plist>
+PLIST
+    # Api.plist is not in git; an empty key builds the app and weather reports a missing key.
+    cat > "$WORKSPACE/EveryDiary/EveryDiary/Api.plist" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>OPENWEATHERMAP_KEY</key><string></string>
 </dict></plist>
 PLIST
     xcodebuild -project "$WORKSPACE/EveryDiary/EveryDiary.xcodeproj" -scheme EveryDiary \

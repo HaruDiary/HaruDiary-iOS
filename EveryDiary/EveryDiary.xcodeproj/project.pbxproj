@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		50B61D89F822C870566372ED /* WeatherQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF262DA4226F234E94F6E745 /* WeatherQueryTests.swift */; };
+		E58054AE864E79C8E2DD4B05 /* WeatherQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3026DE6317CC2DE447B39A /* WeatherQuery.swift */; };
+		3AA1C821E89F91E47BA494ED /* WeatherQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3026DE6317CC2DE447B39A /* WeatherQuery.swift */; };
+		90ED5AAA3D344B36A9EBF153 /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D42B8DB715004076EB /* WeatherModel.swift */; };
 		4F2BC974B5C02A70BB0C2596 /* JourneyYearProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */; };
 		22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */; };
 		D57875793289C9FDEE8CEBFA /* JourneyCityScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */; };
@@ -237,6 +241,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DF262DA4226F234E94F6E745 /* WeatherQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WeatherQueryTests.swift"; sourceTree = "<group>"; };
+		9E3026DE6317CC2DE447B39A /* WeatherQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Weather/WeatherQuery.swift"; sourceTree = "<group>"; };
 		F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyYearProgressTests.swift"; sourceTree = "<group>"; };
 		72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyCityView.swift"; sourceTree = "<group>"; };
 		B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyCityScene.swift"; sourceTree = "<group>"; };
@@ -673,6 +679,7 @@
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				DF262DA4226F234E94F6E745 /* WeatherQueryTests.swift */,
 				F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */,
 				A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */,
 				28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */,
@@ -725,6 +732,7 @@
 				6324AE064574465A82455BD2 /* DayKind.swift */,
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				9E3026DE6317CC2DE447B39A /* WeatherQuery.swift */,
 				67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */,
 				A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */,
 				62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */,
@@ -949,6 +957,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				50B61D89F822C870566372ED /* WeatherQueryTests.swift in Sources */,
+				E58054AE864E79C8E2DD4B05 /* WeatherQuery.swift in Sources */,
+				90ED5AAA3D344B36A9EBF153 /* WeatherModel.swift in Sources */,
 				4F2BC974B5C02A70BB0C2596 /* JourneyYearProgressTests.swift in Sources */,
 				D57875793289C9FDEE8CEBFA /* JourneyCityScene.swift in Sources */,
 				ED2FEF69EA27FEC3DF665BCA /* JourneyYearProgress.swift in Sources */,
@@ -1017,6 +1028,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3AA1C821E89F91E47BA494ED /* WeatherQuery.swift in Sources */,
 				22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */,
 				524E6639EAF11484AA7BD7DB /* JourneyCityScene.swift in Sources */,
 				3A14FE2DE5453BCF575BE284 /* JourneyYearProgress.swift in Sources */,
@@ -1314,6 +1326,7 @@
 				INFOPLIST_FILE = EveryDiary/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = EveryDiary;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "일기를 안전하게 관리하기 위해 생체 인증 권한을 허용해 주세요.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "일기의 날씨 정보를 설정하기 위해 위치 정보에 동의해주세요.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "일기에 사진을 첨부하기 위해 사진 라이브러리 접근 권한이 필요합니다.";
@@ -1354,6 +1367,7 @@
 				INFOPLIST_FILE = EveryDiary/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = EveryDiary;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "일기를 안전하게 관리하기 위해 생체 인증 권한을 허용해 주세요.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "일기의 날씨 정보를 설정하기 위해 위치 정보에 동의해주세요.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "일기에 사진을 첨부하기 위해 사진 라이브러리 접근 권한이 필요합니다.";
