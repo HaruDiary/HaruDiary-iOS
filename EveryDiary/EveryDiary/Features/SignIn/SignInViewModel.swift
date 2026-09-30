@@ -102,7 +102,9 @@ final class SignInViewModel {
     }
 
     /// Close button, "나중에 하기", skipping the nickname, or confirming that it was not saved.
+    /// Ignored while a sign-in or nickname save is running: it would still finish after the screen closed.
     func finish() {
+        guard !isSigningIn else { return }
         isFinished = true
     }
 

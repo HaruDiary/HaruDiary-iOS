@@ -8,6 +8,9 @@ final class DiaryReminders {
     private let calendar: Calendar
     private let now: () -> Date
     private var feed: UserDiaryFeed?
+    /// Between a user change and that user's first diaries; refreshes wait so an old day is not rescheduled.
+    private var awaitingDiaries = false
+    private var refreshWhenDiariesArrive = false
     /// The last reschedule; each one waits for the previous so an older one never finishes last.
     private var lastReschedule: Task<Void, Never>?
 
@@ -42,12 +45,17 @@ final class DiaryReminders {
 
     /// When the app becomes active: moves the four-week window forward and forgets yesterday's diary.
     func refresh() async {
+        guard !awaitingDiaries else {
+            refreshWhenDiariesArrive = true
+            return
+        }
         await reschedule()
     }
 
     /// Follows the signed-in user's diaries so a reminder is dropped as soon as today's diary is written.
     func watch(_ feed: UserDiaryFeed) {
         self.feed = feed
+        awaitingDiaries = true
         feed.onEvent = { [weak self] event in
             Task { await self?.handle(event) }
         }
@@ -57,17 +65,31 @@ final class DiaryReminders {
     /// Only a received list changes the schedule. Until a new user's diaries arrive (or when loading fails),
     /// the current schedule stays, so a day that already has a diary is not reminded of in the meantime.
     func handle(_ event: UserDiaryFeed.Event) async {
-        guard case .received(let entries) = event else { return }
-        await diariesChanged(entries)
+        switch event {
+        case .userChanged:
+            awaitingDiaries = true
+        case .received(let entries):
+            awaitingDiaries = false
+            let pendingRefresh = refreshWhenDiariesArrive
+            refreshWhenDiariesArrive = false
+            if await !diariesChanged(entries), pendingRefresh {
+                await reschedule()
+            }
+        case .loading, .failed:
+            break
+        }
     }
 
-    func diariesChanged(_ entries: [DiaryEntry]) async {
+    /// Returns whether it rescheduled.
+    @discardableResult
+    func diariesChanged(_ entries: [DiaryEntry]) async -> Bool {
         let today = now()
         let written = ReminderPlan.hasDiary(on: today, in: entries, calendar: calendar)
             ? ReminderPlan.dayKey(today, calendar: calendar) : nil
-        guard written != currentWrittenDay else { return }
+        guard written != currentWrittenDay else { return false }
         store.writtenDay = written
         await reschedule()
+        return true
     }
 
     /// The stored day only counts while it is still today.

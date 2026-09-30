@@ -30,11 +30,11 @@ final class LiveAppLockStore: AppLockStore {
 
     func savePasscodeRecord(_ record: String?) throws {
         guard let record else {
-            secrets.remove(Self.passcodeKey)
-            // `remove` does not report failures; an item still there means the Keychain refused.
-            guard secrets.string(for: Self.passcodeKey) == nil else {
-                print("App lock passcode not deleted")
-                throw CocoaError(.fileWriteNoPermission)
+            do {
+                try secrets.delete(Self.passcodeKey)
+            } catch {
+                print("App lock passcode not deleted: \((error as NSError).code)")
+                throw error
             }
             return
         }

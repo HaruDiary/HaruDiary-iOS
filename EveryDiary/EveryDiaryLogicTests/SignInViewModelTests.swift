@@ -87,6 +87,17 @@ final class SignInViewModelTests: XCTestCase {
         XCTAssertFalse(model.isSigningIn)
     }
 
+    // Closing mid-way would hide a sign-in or guest switch that still completes.
+    func testClosingWaitsUntilTheSignInFinishes() {
+        let model = model(FakeSignInGateway(isGuest: true))
+        XCTAssertTrue(model.beginProvider())
+        model.finish()
+        XCTAssertFalse(model.isFinished)
+        model.providerCancelled()
+        model.finish()
+        XCTAssertTrue(model.isFinished)
+    }
+
     func testOnlyOneSignInRunsAtATimeAndCancelShowsNothing() {
         let model = model(FakeSignInGateway(isGuest: false))
         XCTAssertTrue(model.beginProvider())

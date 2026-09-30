@@ -74,6 +74,7 @@ struct SignInView: View {
                     .frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
             }
             .accessibilityLabel("닫기")
+            .disabled(viewModel.isSigningIn)
             Spacer()
         }
     }
