@@ -274,6 +274,19 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertFalse(model.draft.useMetadataLocation)
     }
 
+    func testPickingWaitsUntilStoredPhotosArrive() async throws {
+        downloader.photos = ["u1": .init(image: .testPixel, metadata: ["assetIdentifier": "a1"])]
+        downloader.delays = ["u1": 30]
+        let model = makeModel()
+        model.open(stored(photos: ["u1"]), editing: true)
+        XCTAssertFalse(model.canPickPhotos(), "Picked photos would be replaced by the arriving ones")
+        XCTAssertEqual(model.notice, .photosStillLoading)
+
+        try await waitUntil { !model.isLoadingPhotos }
+        XCTAssertTrue(model.canPickPhotos())
+        XCTAssertEqual(model.pickerSelection, ["a1"], "The picker now shows the stored photo as selected")
+    }
+
     func testOnlyNewlyPickedPhotosShowPlaceholders() {
         let model = makeModel()
         model.startComposing()

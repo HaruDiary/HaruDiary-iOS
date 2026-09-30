@@ -148,6 +148,8 @@ final class DiaryEditorHostingController: UIHostingController<DiaryEditorView>, 
         switch notice {
         case .titleMissing:
             TemporaryAlert.presentTemporaryMessage(with: "빈 제목", message: "제목이 비어있습니다. 제목을 입력해주세요.", interval: 2.0, for: self)
+        case .photosStillLoading:
+            TemporaryAlert.presentTemporaryMessage(with: "사진을 불러오는 중", message: "사진을 다 불러온 뒤 다시 추가해주세요.", interval: 2.0, for: self)
         case .photoLimitReached:
             TemporaryAlert.presentTemporaryMessage(with: "사진은 3장까지", message: "사진을 지운 뒤 다시 추가해주세요.", interval: 2.0, for: self)
         case .signInRequired:
