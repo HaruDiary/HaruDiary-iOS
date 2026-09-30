@@ -27,3 +27,4 @@ if [ "$(/usr/libexec/PlistBuddy -c 'Print :BUNDLE_ID' "$TARGET")" != "com.HexaDi
 fi
 
 echo "GoogleService-Info.plist written for Xcode Cloud."
+

@@ -290,7 +290,7 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch self.dataSource[indexPath.row] {
             
-        case let .profileItem(email, name, image, _):
+        case let .profileItem(email, name, _, _):
             let cell = tableView.dequeueReusableCell(withIdentifier: ProfileCell.id, for: indexPath) as! ProfileCell
             cell.prapare(email: email, name: name, image: profileImage(), isLoggedIn: loginStatus)
             cell.backgroundColor = .mainBackground

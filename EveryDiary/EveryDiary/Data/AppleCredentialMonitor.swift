@@ -37,7 +37,7 @@ final class AppleCredentialMonitor {
               let linkedAppleID = user.providerData.first(where: { $0.providerID == "apple.com" })?.uid else { return }
         let appleUserID = appleRecords.appleUserID ?? linkedAppleID
         let firebaseUserID = user.uid
-        ASAuthorizationAppleIDProvider().getCredentialState(forUserID: appleUserID) { state, _ in
+        ASAuthorizationAppleIDProvider().getCredentialState(forUserID: appleUserID) { [weak self] state, _ in
             let status: AppleCredentialStatus
             switch state {
             case .authorized: status = .authorized
@@ -46,7 +46,7 @@ final class AppleCredentialMonitor {
             default: status = .notFound
             }
             guard status.endsSession else { return }
-            Task { @MainActor [weak self] in self?.signOut(ifStill: firebaseUserID) }
+            Task { @MainActor in self?.signOut(ifStill: firebaseUserID) }
         }
         #endif
     }
