@@ -8,6 +8,8 @@ final class DiaryReminders {
     private let calendar: Calendar
     private let now: () -> Date
     private var feed: UserDiaryFeed?
+    /// Counts user changes, so a list that belonged to an earlier user is not applied late.
+    private var userGeneration = 0
     /// The last reschedule; each one waits for the previous so an older one never finishes last.
     private var lastReschedule: Task<Void, Never>?
 
@@ -55,7 +57,7 @@ final class DiaryReminders {
         self.feed = feed
         store.awaitingDiaries = true
         feed.onEvent = { [weak self] event in
-            Task { await self?.handle(event) }
+            self?.eventArrived(event)
         }
         feed.start()
     }
@@ -63,18 +65,33 @@ final class DiaryReminders {
     /// Only a received list changes the schedule. Until a new user's diaries arrive (or when loading fails),
     /// the current schedule stays, so a day that already has a diary is not reminded of in the meantime.
     func handle(_ event: UserDiaryFeed.Event) async {
+        await eventArrived(event)?.value
+    }
+
+    /// Records the event right away, in the order the feed sends them, and returns the work a list starts.
+    /// A list is tagged with the user it belongs to; if the user changes before that work runs, it is dropped.
+    @discardableResult
+    func eventArrived(_ event: UserDiaryFeed.Event) -> Task<Void, Never>? {
         switch event {
         case .userChanged:
+            userGeneration += 1
             store.awaitingDiaries = true
+            return nil
         case .received(let entries):
             store.awaitingDiaries = false
-            let pendingRefresh = store.rescheduleWhenDiariesArrive
-            store.rescheduleWhenDiariesArrive = false
-            if await !diariesChanged(entries), pendingRefresh {
-                await reschedule()
-            }
+            let generation = userGeneration
+            return Task { [weak self] in await self?.apply(entries, generation: generation) }
         case .loading, .failed:
-            break
+            return nil
+        }
+    }
+
+    private func apply(_ entries: [DiaryEntry], generation: Int) async {
+        guard generation == userGeneration else { return }
+        let pendingRefresh = store.rescheduleWhenDiariesArrive
+        store.rescheduleWhenDiariesArrive = false
+        if await !diariesChanged(entries), pendingRefresh {
+            await reschedule()
         }
     }
 

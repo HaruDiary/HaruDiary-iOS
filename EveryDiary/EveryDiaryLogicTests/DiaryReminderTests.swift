@@ -212,6 +212,23 @@ final class DiaryReminderTests: XCTestCase {
         XCTAssertTrue(scheduler.scheduled.isEmpty)
     }
 
+    // The previous user's last list is queued just before the switch; handled late, it must not end the wait.
+    func testAListQueuedBeforeAUserSwitchIsIgnored() async {
+        let store = InMemoryReminderStore()
+        store.settings = settings()
+        let scheduler = FakeReminderScheduler()
+        let reminders = DiaryReminders(store: store, scheduler: scheduler, calendar: calendar, now: { [unowned self] in now })
+        let late = reminders.eventArrived(.received([]))
+        _ = reminders.eventArrived(.userChanged(isDifferentUser: true))
+        await late?.value
+        XCTAssertTrue(store.awaitingDiaries)
+        XCTAssertEqual(scheduler.replaceCount, 0)
+
+        await reminders.eventArrived(.received([entry(on: now)]))?.value
+        XCTAssertFalse(store.awaitingDiaries)
+        XCTAssertEqual(scheduler.scheduled.first?.identifier, "diary-reminder-2026-10-01")
+    }
+
     func testYesterdaysDiaryDoesNotSkipToday() async {
         let store = InMemoryReminderStore()
         store.settings = settings()
