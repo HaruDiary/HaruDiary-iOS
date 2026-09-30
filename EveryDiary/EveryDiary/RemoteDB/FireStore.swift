@@ -290,7 +290,7 @@ class DiaryManager {
         
         diariesReference.getDocuments { [weak self] (querySnapshot, error) in
             // 로드에 실패한 경우
-            guard let self = self else { return }
+            guard self != nil else { return }
             if let error = error {
                 completion(false, error)
                 return

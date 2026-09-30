@@ -44,7 +44,6 @@ class DateConditionSelectVC: UIViewController, UICollectionViewDataSource, UICol
         super.viewDidLoad()
         print(#function)
         view.addSubview(collectionView)
-        let arrowSize: CGFloat = 13
         collectionView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 collectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
