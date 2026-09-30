@@ -8,24 +8,17 @@
 import UIKit
 
 import SnapKit
-import Firebase
-import FirebaseFirestore
-
-protocol BuildingViewDelegate: AnyObject {
-    func didUpdateDiaryCount(_ diaryCount: Int)
-}
 
 class BuildingView: UIView {
-    static let shared = BuildingView()
-    weak var delegate: BuildingViewDelegate?
-    
     var buildings: [BuildingSize] = []
     
-    let db = Firestore.firestore()
-    var diaryDays: Set<Int> = []
+    /// Days of the month with a diary; one window lights up per day.
+    private(set) var diaryDays: Set<Int> = []
     
     let backBuildingLayer = CAShapeLayer()
     let buildingLayer = CAShapeLayer()
+    /// Holds only the windows, so a redraw replaces them instead of stacking new layers on the old ones.
+    private let windowsLayer = CALayer()
     
     let windowSize = CGSize(width: 10, height: 22)
     let windowSpacing: CGFloat = 15
@@ -62,6 +55,19 @@ class BuildingView: UIView {
         ]
         drawCacheBackBuildingPath()
         drawCacheBuildingPath()
+        windowsLayer.frame = buildingLayer.bounds
+        buildingLayer.addSublayer(windowsLayer)
+        drawWindows()
+    }
+    
+    func showWindows(for diaryDays: Set<Int>) {
+        self.diaryDays = diaryDays
+        drawWindows()
+    }
+    
+    private func drawWindows() {
+        windowsLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
+        WindowDrawingHelper.drawBuildingWithWindows(buildings: buildings, onLayer: windowsLayer, diaryDays: diaryDays)
     }
     
     //MARK: - 빌딩 그림 UIBezierPath
@@ -176,65 +182,5 @@ class BuildingView: UIView {
         backBuildingLayer.path = backBuildingPath.cgPath
         backBuildingLayer.fillColor = UIColor.darkGray.cgColor
         layer.addSublayer(backBuildingLayer)
-    }
-}
-
-//MARK: - firebase
-extension BuildingView {
-    func fetchDiariesForCurrentMonth(year: Int, month: Int, completion: @escaping ([DiaryEntry]?, Error?) -> Void) {
-        
-        guard let userID = DiaryManager.shared.getUserID() else {
-            completion([], nil)
-            return
-        }
-        
-        let startOfMonth = "\(year)-\(String(format: "%02d", month))-01 00:00:00 +0000"
-        let endOfMonth = month == 12 ? "\(year + 1)-01-01 23:59:59 +0000" : "\(year)-\(String(format: "%02d", month + 1))-01 23:59:59 +0000"
-        
-        DiaryManager.shared.db.collection("users").document(userID).collection("diaries").whereField("dateString", isGreaterThanOrEqualTo: startOfMonth).whereField("dateString", isLessThan: endOfMonth).addSnapshotListener { (querySnapshot, error) in
-            if let error = error {
-                print("Error getting documents: \(error)")
-                completion(nil, error)
-            } else {
-                var diaries = [DiaryEntry]()
-                for document in querySnapshot!.documents {
-                    if let diary = try? document.data(as: DiaryEntry.self) {
-                        diaries.append(diary)
-                    }
-                }
-                diaries = diaries.filter { !$0.isDeleted }
-                DispatchQueue.main.async {
-                }
-                completion(diaries, nil)
-            }
-        }
-    }
-    
-    func windowsInBuildingData() {
-        let currentYear = Calendar.current.component(.year, from: Date())
-        let currentMonth = Calendar.current.component(.month, from: Date())
-        
-        fetchDiariesForCurrentMonth(year: currentYear, month: currentMonth) { (diaries, error) in
-            if let error = error {
-                print("Error fetching diaries: \(error)")
-                return
-            }
-            
-            if let diaries = diaries {
-                let diaryDays = diaries.compactMap { diaryEntry -> Int? in
-                    if let date = DateFormatter.yyyyMMddHHmmss.date(from: diaryEntry.dateString) {
-                        let day = Calendar.current.component(.day, from: date)
-                        return day
-                    } else {
-                        return nil
-                    }
-                }
-                DispatchQueue.main.async {
-                    self.diaryDays = Set(diaryDays)
-                    self.delegate?.didUpdateDiaryCount(self.diaryDays.count)
-                    WindowDrawingHelper.drawBuildingWithWindows(buildings: self.buildings, onLayer: self.buildingLayer, diaryDays: self.diaryDays)
-                }
-            }
-        }
     }
 }

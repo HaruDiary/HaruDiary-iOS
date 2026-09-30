@@ -106,9 +106,7 @@ class SettingVC: UIViewController {
     }
     
     @objc func didTapLoginButton() {
-        let loginVC = LoginVC(gateway: module.signInGateway)
-        loginVC.modalPresentationStyle = .fullScreen
-        self.present(loginVC, animated: true)
+        present(SignInHostingController(gateway: module.signInGateway), animated: true)
     }
     
     private func setNavigationBar() {
@@ -243,9 +241,7 @@ extension SettingVC {
     }
     
     func showMainScreen() {
-        let loginVC = LoginVC(gateway: module.signInGateway)
-        loginVC.modalPresentationStyle = .fullScreen
-        self.present(loginVC, animated: true)
+        present(SignInHostingController(gateway: module.signInGateway), animated: true)
     }
     
     // Apple 회원은 탈퇴 직전에 Apple로 한 번 더 확인한다. 이 확인으로 Firebase가 Apple 연결을 끊는다.
@@ -295,7 +291,7 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch self.dataSource[indexPath.row] {
             
-        case let .profileItem(email, name, image, _):
+        case let .profileItem(email, name, _, _):
             let cell = tableView.dequeueReusableCell(withIdentifier: ProfileCell.id, for: indexPath) as! ProfileCell
             cell.prapare(email: email, name: name, image: profileImage(), isLoggedIn: loginStatus)
             cell.backgroundColor = .mainBackground
@@ -323,11 +319,9 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
         case .settingItem(_, _, let number):
             switch number {
             case 1:
-                let notificationVC = NotificationVC()
-                navigationController?.pushViewController(notificationVC, animated: true)
+                navigationController?.pushViewController(ReminderModule.makeSettingsViewController(reminders: module.reminders), animated: true)
             case 2:
-                let lockVC = LockVC()
-                navigationController?.pushViewController(lockVC, animated: true)
+                navigationController?.pushViewController(LockModule.makeSettingsViewController(), animated: true)
             case 3:
                 let trashVC = module.makeTrashModule().makeViewController(makeWriteDiary: makeWriteDiary)
                 navigationController?.pushViewController(trashVC, animated: true)

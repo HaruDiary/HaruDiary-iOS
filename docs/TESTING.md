@@ -4,7 +4,7 @@
 
 | 검사 | 실제 범위 | 포함하지 않는 것 |
 |---|---|---|
-| Logic tests | 운영 일기 모델 6개, Calendar 날짜/그리드 10개, Calendar 상태·사용자 전환·구독 수명 11개, 공통 의존성 조립 3개, 온보딩 진행·완료 9개, 요일 구분 6개, 문서 디코딩 3개, 사진 교체 5개, 목록 분류·검색 8개, 목록 상태·구독·휴지통 이동·조립 14개, 휴지통 보관 정책 5개, 만료 삭제 4개, 휴지통 상태 12개, 계정 분류·설정 상태 7개, 탈퇴 순서 4개, 로그인 흐름 6개, 손님 Apple 연결 분류 1개, 닉네임·로그인 방식 5개, 프로필 이미지·사진 6개, 토큰 보관·Apple 상태 5개, 작성·수정 저장 10개: 총 141개 XCTest | Firestore SDK의 Codable 동작, 서버 읽기/쓰기, 실제 로그인, 마을 규칙, 실제 UI 동작 |
+| Logic tests | 일기 모델 6개, 문서 디코딩 3개, 요일 구분 6개, Calendar 날짜/그리드 10개, Calendar 상태·구독 14개, 온보딩 9개, 목록 분류·검색 8개, 목록 상태·구독 14개, 사진 교체 5개, 휴지통 정책 5개, 만료 삭제 4개, 휴지통 상태 12개, 설정 상태 21개, 탈퇴 순서 4개, 로그인 흐름 7개, Apple 상태 1개, Apple 로그인 보관 2개, 여정 기록 6개, 여정 상태 11개, 월별 그림 10개, 연도별 도시 단계 5개, 날씨 문구·오류 구분 6개, 로그인 화면 상태 9개, 앱 잠금 규칙 10개, 잠금 화면·암호 설정 14개, 일기 알림 19개, 설정 행 값 3개, 작성·수정 저장 10개: 총 234개 XCTest | Firestore SDK의 Codable 동작, 서버 읽기/쓰기, 실제 로그인, 실제 WeatherKit 호출·위치, 보상 규칙, 실제 UI 동작 |
 | Simulator build | `EveryDiary` 앱의 Debug 시뮬레이터 컴파일·링크·번들 검증 | 앱 실행, 운영 Firebase 연결, 실기기 서명, App Store archive |
 
 `EveryDiaryLogicTests`는 hostless XCTest 타깃이다. 앱을 실행하지 않고 운영 소스 파일을
@@ -68,3 +68,10 @@ fork PR에서도 실행할 수 있다. 토큰은 contents 읽기 권한만 사�
 
 - [GitHub macOS 26 runner](https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md)
 - [Workflow 구문](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)
+
+## 날씨 (WeatherKit)
+
+날씨는 Apple WeatherKit으로 받으며 API 키 파일이 없다. 앱 서명과 App ID의 WeatherKit 기능으로 인증하므로
+`bash scripts/ci.sh build`(서명 없음)는 컴파일만 확인한다. 실제 날씨 수신은 팀 서명으로 실행한
+시뮬레이터·기기에서 확인한다. 실패는 `noLocation`, `network`, `unavailable`(WeatherKit 거부, 예: 기능 미설정)로
+구분해 로그에 남기며 위치는 출력하지 않는다.

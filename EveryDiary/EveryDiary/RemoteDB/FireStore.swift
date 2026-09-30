@@ -63,7 +63,7 @@ class DiaryManager {
     func addDiary(diary: DiaryEntry, userID: String, completion: @escaping (Error?) -> Void) {
         let weatherService = WeatherService()
         
-        weatherService.getWeather { result in
+        weatherService.getWeather(forDiaryOn: diary.date) { result in
             
             var weatherDescription = "Unknown"
             var weatherTemp = 0.0
@@ -297,7 +297,7 @@ class DiaryManager {
         
         diariesReference.getDocuments { [weak self] (querySnapshot, error) in
             // 로드에 실패한 경우
-            guard let self = self else { return }
+            guard self != nil else { return }
             if let error = error {
                 completion(false, error)
                 return

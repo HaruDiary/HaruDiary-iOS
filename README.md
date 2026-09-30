@@ -35,8 +35,8 @@ Firebase 설정 파일은 공개 저장소에 포함하지 않습니다. 앱 실
 
 설정 파일은 빌드와 실행에 필요하며 `.gitignore`로 공개 저장소에서 제외됩니다.
 기존 Google 로그인 URL scheme은 유지했습니다. 다른 Firebase 앱의 설정을 사용하지 마세요.
-날씨 기능을 사용하려면 `Api.plist`의 빈 `OPENWEATHERMAP_KEY`도 로컬에서 설정해야 합니다.
-키를 채운 파일을 커밋하지 마세요.
+날씨는 Apple WeatherKit으로 받으며 API 키 파일이 필요 없습니다. 팀 `UP9KCDW7ZZ`로 서명해 실행하면 되고,
+App ID의 WeatherKit 설정은 [Xcode Cloud 문서](docs/XCODE_CLOUD.md)를 참고하세요.
 
 실기기 빌드는 Signing & Capabilities에서 본인의 Apple Development Team을 선택해야 합니다.
 

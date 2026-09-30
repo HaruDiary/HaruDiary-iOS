@@ -7,9 +7,76 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6B7CCEDFD98775AE0C549885 /* Settings/SettingsHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4B36924321030901F63EDD /* Settings/SettingsHostingController.swift */; };
+		D478B19977FD8916B2F2A0FB /* Settings/SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C2DBC8A6569656266FC7BC /* Settings/SettingsView.swift */; };
+		F3B954F69016720F752FD360 /* Settings/SettingsSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3865AF8146EA66DB10312B24 /* Settings/SettingsSummary.swift */; };
+		A87A645255A5219DFB524282 /* Settings/SettingsSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3865AF8146EA66DB10312B24 /* Settings/SettingsSummary.swift */; };
+		4F0F93F1A8E349152F3B6E33 /* UserDefaultsReminderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58B0D59D24667E391ECE344 /* UserDefaultsReminderStore.swift */; };
+		E375AE17F86CD93FEBF12E59 /* UserDefaultsReminderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58B0D59D24667E391ECE344 /* UserDefaultsReminderStore.swift */; };
+		64F76684CFA187A46488A28D /* DiaryReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */; };
+		0F462049A1E6B03434E7750E /* Reminder/ReminderModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BDA3C9035D1493CD510026 /* Reminder/ReminderModule+UIKit.swift */; };
+		1D29B190433965D711C3ECBC /* Reminder/ReminderSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D0443AA48204D8D4F73C24 /* Reminder/ReminderSettingsView.swift */; };
+		2F8C2B5BE9AF32ACA3847EF6 /* Reminder/ReminderSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F8B9715D003A2FA79DD33A /* Reminder/ReminderSettingsViewModel.swift */; };
+		65FF47D95A61C7E8548C8A71 /* Reminder/ReminderSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F8B9715D003A2FA79DD33A /* Reminder/ReminderSettingsViewModel.swift */; };
+		EA2DC5E52E3E57B9D75FE215 /* LiveDiaryReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B56F8AAA6129582DA9DF27 /* LiveDiaryReminders.swift */; };
+		E238DCDD75F515075D903174 /* Reminder/DiaryReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */; };
+		5A5DD13A6C92281D140BBB0B /* Reminder/DiaryReminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */; };
+		1242D41DD28D7E28D58A7C3F /* Reminder/DiaryReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */; };
+		47D59BC52C7460EF383A57B4 /* Reminder/DiaryReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */; };
+		011C3163ABFE2B7B60FB2B60 /* LockViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */; };
+		F795D2E8B5E7FA5DA3D56E91 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D802337338EFDCC16CA9E0A /* AppLockTests.swift */; };
+		308C27A962FEE5EE8AC5CE07 /* Lock/LockModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 598784F5EE8499D50B68D1B8 /* Lock/LockModule+UIKit.swift */; };
+		95AD4E31DADB4F9382137132 /* Lock/LockSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E672AAD72BB4075734C429F /* Lock/LockSettingsView.swift */; };
+		F497325EAE3BB3BE5ACB0F8A /* Lock/LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82EAED2BA2701711A61FEC56 /* Lock/LockScreenView.swift */; };
+		58E19496B2EF3A6AA5A2F909 /* Lock/PasscodePad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E50EF6115D879D40EF80A3 /* Lock/PasscodePad.swift */; };
+		170DADF1062FEF832B55C3AA /* Lock/LockSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F985935C7D6E8ECB5EA8B29 /* Lock/LockSettingsViewModel.swift */; };
+		E7B77ED59968E9D63B0C7917 /* Lock/LockSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F985935C7D6E8ECB5EA8B29 /* Lock/LockSettingsViewModel.swift */; };
+		1ED85320190491CEEA2FAE51 /* Lock/LockScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB2241C650E51C0317A56A3 /* Lock/LockScreenViewModel.swift */; };
+		6CD61117B93DBC2DAFAC1873 /* Lock/LockScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB2241C650E51C0317A56A3 /* Lock/LockScreenViewModel.swift */; };
+		B2BD85A616C5BE8AAE042D71 /* Lock/PasscodeFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D1965B57B8CE5F73A3FFFD /* Lock/PasscodeFlowViewModel.swift */; };
+		42E5C0DEE6F02269F8FBC9B2 /* Lock/PasscodeFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D1965B57B8CE5F73A3FFFD /* Lock/PasscodeFlowViewModel.swift */; };
+		7ED9BD5B83EDA29E520AB9F6 /* LiveAppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C04051C32BA52281C1768D2 /* LiveAppLock.swift */; };
+		8DA8197595EBDDA60ADEB483 /* Lock/DeviceOwnerAuthenticating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */; };
+		EB00B0813C1A539672DD3D6F /* Lock/DeviceOwnerAuthenticating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */; };
+		1994D07AC1CC400E2856703E /* Lock/AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */; };
+		CB6FB9C569C8AF246A67AAD6 /* Lock/AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */; };
+		DED38B77BE1D023C3CF04994 /* SignInViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */; };
+		D2106587AD9EED3AA8A1F31F /* SignIn/SignInHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D59C67BCB0B976297E9F0B /* SignIn/SignInHostingController.swift */; };
+		E3A0E6776D1EBBF060FE98C2 /* SignIn/SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A11CAC06AE30F512F4CC2C9 /* SignIn/SignInView.swift */; };
+		0D4D854EBF4A741B3495B5BE /* SignIn/SignInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4209D51899AB5A8A0C4860 /* SignIn/SignInViewModel.swift */; };
+		306180D3AC298324A6BCA09E /* SignIn/SignInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4209D51899AB5A8A0C4860 /* SignIn/SignInViewModel.swift */; };
+		50B61D89F822C870566372ED /* WeatherConditionTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF262DA4226F234E94F6E745 /* WeatherConditionTextTests.swift */; };
+		E58054AE864E79C8E2DD4B05 /* WeatherConditionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */; };
+		3AA1C821E89F91E47BA494ED /* WeatherConditionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */; };
+		90ED5AAA3D344B36A9EBF153 /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D42B8DB715004076EB /* WeatherModel.swift */; };
+		4F2BC974B5C02A70BB0C2596 /* JourneyYearProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */; };
+		22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */; };
+		D57875793289C9FDEE8CEBFA /* JourneyCityScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */; };
+		524E6639EAF11484AA7BD7DB /* JourneyCityScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */; };
+		ED2FEF69EA27FEC3DF665BCA /* JourneyYearProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */; };
+		3A14FE2DE5453BCF575BE284 /* JourneyYearProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */; };
+		7F6627D60329BD93D9C2F43C /* JourneySceneAmbienceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */; };
+		446379991A32541C65DB4BCE /* JourneySceneCatalog+Ambience.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */; };
+		BEF14E9CB671D00A37FA7A82 /* JourneySceneCatalog+Ambience.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */; };
+		ABB6B1D2CE08894005309E5D /* JourneySceneCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */; };
+		0CAEEE01FB33A11D99DF2DDD /* JourneyCollectionHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */; };
+		B3CACE6E3757D5413CF66839 /* JourneyCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */; };
+		C8B2E124D44589724E349D10 /* JourneySceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571F283CAF625F37A8908670 /* JourneySceneView.swift */; };
+		19681167A51C2C077F5C3BED /* JourneySceneCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */; };
+		A30D49B72C7E565B6233ED6C /* JourneySceneCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */; };
+		F72439A15ECAB2F5CC9A618F /* JourneyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */; };
+		7F1C103276CEB16536BBD9B0 /* JourneyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */; };
+		5726EE1D911AD6B7CF85E6BC /* JourneyRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */; };
+		47A1D73818A174E2E92CA355 /* JourneyViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971A43FC69DAC48606710BEC /* JourneyViewModelTests.swift */; };
+		3589A1C10B61E2393F77C32C /* JourneyModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABDF1929F8B6A84C65A6D972 /* JourneyModule+UIKit.swift */; };
+		ED84689D753A8F4437C7080C /* JourneyModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734B318BE5B0AC77B3E75A97 /* JourneyModule.swift */; };
+		5D80395DC7BFE411ED4D9F33 /* JourneyModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734B318BE5B0AC77B3E75A97 /* JourneyModule.swift */; };
+		2FD7A0614EEA22D572A51DBB /* JourneyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009F241D5F03A6D48F9E0BB5 /* JourneyViewModel.swift */; };
+		C4EF7430388972D925EC3F52 /* JourneyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009F241D5F03A6D48F9E0BB5 /* JourneyViewModel.swift */; };
+		6613C80DE1799C65DDEF1D0A /* JourneyRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */; };
+		A749FBFCA05C0A232F6650ED /* JourneyRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */; };
 		0CB52698AD69A166131CE76A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 633089E86841517C8CBC55A6 /* Foundation.framework */; };
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
-		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
 		3F92D7D82BB5961500BDD34E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F92D7D72BB5961500BDD34E /* Extensions.swift */; };
 		3FB6D74E2BB2E8EF0098F29F /* LoadingIndicatorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74D2BB2E8EF0098F29F /* LoadingIndicatorCell.swift */; };
 		3FB6D7502BB316820098F29F /* DiaryWriteRetention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74F2BB316820098F29F /* DiaryWriteRetention.swift */; };
@@ -39,7 +106,6 @@
 		D2F0EF332BAAAD51008736F1 /* DiaryDataDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */; };
 		D2F0EF342BAAAD51008736F1 /* NotificationName.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B342BA14A6600508230 /* NotificationName.swift */; };
 		D2F0EF352BAAAD51008736F1 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D72B8DC135004076EB /* WeatherService.swift */; };
-		D2F0EF362BAAAD51008736F1 /* EveryDiary++Bundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */; };
 		D2F0EF372BAAAD51008736F1 /* SetFaceID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E32B8F182B004076EB /* SetFaceID.swift */; };
 		D2F0EF382BAAAD51008736F1 /* FireStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA011602B88790800A26CE0 /* FireStore.swift */; };
 		D2F0EF392BAAAD51008736F1 /* FirebaseStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A03BDA32B92FA7D008C13DC /* FirebaseStorageManager.swift */; };
@@ -215,16 +281,34 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DF262DA4226F234E94F6E745 /* WeatherConditionTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WeatherConditionTextTests.swift"; sourceTree = "<group>"; };
+		9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Weather/WeatherConditionText.swift"; sourceTree = "<group>"; };
+		F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyYearProgressTests.swift"; sourceTree = "<group>"; };
+		72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyCityView.swift"; sourceTree = "<group>"; };
+		B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyCityScene.swift"; sourceTree = "<group>"; };
+		67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyYearProgress.swift"; sourceTree = "<group>"; };
+		4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneAmbienceView.swift"; sourceTree = "<group>"; };
+		E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneCatalog+Ambience.swift"; sourceTree = "<group>"; };
+		A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneySceneCatalogTests.swift"; sourceTree = "<group>"; };
+		65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyCollectionHostingController.swift"; sourceTree = "<group>"; };
+		54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyCollectionView.swift"; sourceTree = "<group>"; };
+		571F283CAF625F37A8908670 /* JourneySceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneView.swift"; sourceTree = "<group>"; };
+		720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneySceneCatalog.swift"; sourceTree = "<group>"; };
+		0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyScene.swift"; sourceTree = "<group>"; };
+		28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyRecordTests.swift"; sourceTree = "<group>"; };
+		971A43FC69DAC48606710BEC /* JourneyViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyViewModelTests.swift"; sourceTree = "<group>"; };
+		ABDF1929F8B6A84C65A6D972 /* JourneyModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyModule+UIKit.swift"; sourceTree = "<group>"; };
+		734B318BE5B0AC77B3E75A97 /* JourneyModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyModule.swift"; sourceTree = "<group>"; };
+		009F241D5F03A6D48F9E0BB5 /* JourneyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyViewModel.swift"; sourceTree = "<group>"; };
+		A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/JourneyRecord.swift"; sourceTree = "<group>"; };
 		00B31F32A3F08AD9CD188D48 /* DiaryEntryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaryEntryTests.swift; sourceTree = "<group>"; };
 		0EC03C7CA06E85F659010A76 /* EveryDiaryLogicTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EveryDiaryLogicTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A03BDA32B92FA7D008C13DC /* FirebaseStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseStorageManager.swift; sourceTree = "<group>"; };
 		1A6D90672BA05B8500DEBB12 /* PaginationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaginationManager.swift; sourceTree = "<group>"; };
 		1A6D906B2BA1A39800DEBB12 /* StartVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartVC.swift; sourceTree = "<group>"; };
 		1A83D0B52BA9B1C4005DC6C6 /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
-		1AF880D22B8DB5A2004076EB /* Api.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Api.plist; sourceTree = "<group>"; };
 		1AF880D42B8DB715004076EB /* WeatherModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherModel.swift; sourceTree = "<group>"; };
 		1AF880D72B8DC135004076EB /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
-		1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EveryDiary++Bundle.swift"; sourceTree = "<group>"; };
 		1AF880E32B8F182B004076EB /* SetFaceID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetFaceID.swift; sourceTree = "<group>"; };
 		3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
@@ -302,6 +386,10 @@
 		7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarViewModel.swift"; sourceTree = "<group>"; };
 		77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule.swift"; sourceTree = "<group>"; };
 		2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarViewModelTests.swift"; sourceTree = "<group>"; };
+		1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryReminderTests.swift"; sourceTree = "<group>"; };
+		584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LockViewModelTests.swift"; sourceTree = "<group>"; };
+		9D802337338EFDCC16CA9E0A /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppLockTests.swift"; sourceTree = "<group>"; };
+		91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModelTests.swift"; sourceTree = "<group>"; };
 		FFAAE9B7D18137751417D1D9 /* CalendarImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarImageLoader.swift"; sourceTree = "<group>"; };
 		38C72793785CC63EE0D7E647 /* CalendarDiaryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarDiaryRow.swift"; sourceTree = "<group>"; };
 		6DA30A71AEF1E85E1255B938 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarView.swift"; sourceTree = "<group>"; };
@@ -321,6 +409,10 @@
 		5F48F50BB73E9E4A9B0BF94C /* CalendarModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule+UIKit.swift"; sourceTree = "<group>"; };
 		62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListIndex.swift"; sourceTree = "<group>"; };
 		B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDiaryFeed.swift"; sourceTree = "<group>"; };
+		43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/DiaryReminders.swift"; sourceTree = "<group>"; };
+		65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/DiaryReminder.swift"; sourceTree = "<group>"; };
+		140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/DeviceOwnerAuthenticating.swift"; sourceTree = "<group>"; };
+		F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/AppLock.swift"; sourceTree = "<group>"; };
 		DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTrashing.swift"; sourceTree = "<group>"; };
 		B72A1C010000000000000003 /* DiarySaving.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiarySaving.swift"; sourceTree = "<group>"; };
 		B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiarySaveCoordinatorTests.swift"; sourceTree = "<group>"; };
@@ -358,6 +450,22 @@
 		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
 		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
 		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		1F4B36924321030901F63EDD /* Settings/SettingsHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsHostingController.swift"; sourceTree = "<group>"; };
+		17C2DBC8A6569656266FC7BC /* Settings/SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsView.swift"; sourceTree = "<group>"; };
+		3865AF8146EA66DB10312B24 /* Settings/SettingsSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsSummary.swift"; sourceTree = "<group>"; };
+		60BDA3C9035D1493CD510026 /* Reminder/ReminderModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/ReminderModule+UIKit.swift"; sourceTree = "<group>"; };
+		47D0443AA48204D8D4F73C24 /* Reminder/ReminderSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/ReminderSettingsView.swift"; sourceTree = "<group>"; };
+		28F8B9715D003A2FA79DD33A /* Reminder/ReminderSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/ReminderSettingsViewModel.swift"; sourceTree = "<group>"; };
+		598784F5EE8499D50B68D1B8 /* Lock/LockModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockModule+UIKit.swift"; sourceTree = "<group>"; };
+		5E672AAD72BB4075734C429F /* Lock/LockSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockSettingsView.swift"; sourceTree = "<group>"; };
+		82EAED2BA2701711A61FEC56 /* Lock/LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockScreenView.swift"; sourceTree = "<group>"; };
+		04E50EF6115D879D40EF80A3 /* Lock/PasscodePad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/PasscodePad.swift"; sourceTree = "<group>"; };
+		2F985935C7D6E8ECB5EA8B29 /* Lock/LockSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockSettingsViewModel.swift"; sourceTree = "<group>"; };
+		8AB2241C650E51C0317A56A3 /* Lock/LockScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockScreenViewModel.swift"; sourceTree = "<group>"; };
+		C2D1965B57B8CE5F73A3FFFD /* Lock/PasscodeFlowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/PasscodeFlowViewModel.swift"; sourceTree = "<group>"; };
+		15D59C67BCB0B976297E9F0B /* SignIn/SignInHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignIn/SignInHostingController.swift"; sourceTree = "<group>"; };
+		8A11CAC06AE30F512F4CC2C9 /* SignIn/SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignIn/SignInView.swift"; sourceTree = "<group>"; };
+		7D4209D51899AB5A8A0C4860 /* SignIn/SignInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignIn/SignInViewModel.swift"; sourceTree = "<group>"; };
 		A1D40C7B1D02405CB104C056 /* SettingsModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsModule.swift"; sourceTree = "<group>"; };
 		0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsModule+UIKit.swift"; sourceTree = "<group>"; };
 		8A6612B31B0240059B2D34EE /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsViewModelTests.swift"; sourceTree = "<group>"; };
@@ -377,6 +485,9 @@
 		B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoPreparation.swift"; sourceTree = "<group>"; };
 		55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleRefreshTokenStore.swift"; sourceTree = "<group>"; };
 		47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainSecretStore.swift"; sourceTree = "<group>"; };
+		B58B0D59D24667E391ECE344 /* UserDefaultsReminderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaultsReminderStore.swift"; sourceTree = "<group>"; };
+		C1B56F8AAA6129582DA9DF27 /* LiveDiaryReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveDiaryReminders.swift"; sourceTree = "<group>"; };
+		3C04051C32BA52281C1768D2 /* LiveAppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveAppLock.swift"; sourceTree = "<group>"; };
 		156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleSignInRecords.swift"; sourceTree = "<group>"; };
 		09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleRefreshTokenStoreTests.swift"; sourceTree = "<group>"; };
 		1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleCredentialStatus.swift"; sourceTree = "<group>"; };
@@ -435,7 +546,6 @@
 			isa = PBXGroup;
 			children = (
 				1AF880D72B8DC135004076EB /* WeatherService.swift */,
-				1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */,
 				1AF880E32B8F182B004076EB /* SetFaceID.swift */,
 			);
 			path = Service;
@@ -538,7 +648,6 @@
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 				D2F0EF882BAC5A32008736F1 /* PrivacyInfo.xcprivacy */,
-				1AF880D22B8DB5A2004076EB /* Api.plist */,
 				A0F100012026091500000002 /* GoogleService-Info.plist */,
 			);
 			path = EveryDiary;
@@ -637,6 +746,15 @@
 				B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */,
+				584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */,
+				9D802337338EFDCC16CA9E0A /* AppLockTests.swift */,
+				91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */,
+				DF262DA4226F234E94F6E745 /* WeatherConditionTextTests.swift */,
+				F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */,
+				A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */,
+				28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */,
+				971A43FC69DAC48606710BEC /* JourneyViewModelTests.swift */,
 				394F66EE9A24302500E6BAF0 /* CalendarDiaryIndexTests.swift */,
 				00B31F32A3F08AD9CD188D48 /* DiaryEntryTests.swift */,
 			);
@@ -686,6 +804,13 @@
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B72A1C010000000000000003 /* DiarySaving.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */,
+				65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */,
+				140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */,
+				F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */,
+				9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */,
+				67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */,
+				A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */,
 				62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */,
 				A8DC8C0509FE561B652A305B /* OnboardingProgressStore.swift */,
 				4B344B95B910CC4E92228FFD /* DiaryReadingRepository.swift */,
@@ -709,6 +834,9 @@
 				832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */,
 				156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */,
 				47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */,
+				B58B0D59D24667E391ECE344 /* UserDefaultsReminderStore.swift */,
+				C1B56F8AAA6129582DA9DF27 /* LiveDiaryReminders.swift */,
+				3C04051C32BA52281C1768D2 /* LiveAppLock.swift */,
 				68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */,
 				BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */,
 				1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */,
@@ -729,6 +857,22 @@
 				0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
+				1F4B36924321030901F63EDD /* Settings/SettingsHostingController.swift */,
+				17C2DBC8A6569656266FC7BC /* Settings/SettingsView.swift */,
+				3865AF8146EA66DB10312B24 /* Settings/SettingsSummary.swift */,
+				60BDA3C9035D1493CD510026 /* Reminder/ReminderModule+UIKit.swift */,
+				47D0443AA48204D8D4F73C24 /* Reminder/ReminderSettingsView.swift */,
+				28F8B9715D003A2FA79DD33A /* Reminder/ReminderSettingsViewModel.swift */,
+				598784F5EE8499D50B68D1B8 /* Lock/LockModule+UIKit.swift */,
+				5E672AAD72BB4075734C429F /* Lock/LockSettingsView.swift */,
+				82EAED2BA2701711A61FEC56 /* Lock/LockScreenView.swift */,
+				04E50EF6115D879D40EF80A3 /* Lock/PasscodePad.swift */,
+				2F985935C7D6E8ECB5EA8B29 /* Lock/LockSettingsViewModel.swift */,
+				8AB2241C650E51C0317A56A3 /* Lock/LockScreenViewModel.swift */,
+				C2D1965B57B8CE5F73A3FFFD /* Lock/PasscodeFlowViewModel.swift */,
+				15D59C67BCB0B976297E9F0B /* SignIn/SignInHostingController.swift */,
+				8A11CAC06AE30F512F4CC2C9 /* SignIn/SignInView.swift */,
+				7D4209D51899AB5A8A0C4860 /* SignIn/SignInViewModel.swift */,
 				7B849BEF7D104006888017EF /* TrashModule+UIKit.swift */,
 				524ED3536EE44A2785020373 /* TrashModule.swift */,
 				2E450331EF5B4555A6C5B235 /* TrashHostingController.swift */,
@@ -755,6 +899,18 @@
 				FFAAE9B7D18137751417D1D9 /* CalendarImageLoader.swift */,
 				77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */,
 				7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */,
+				72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */,
+				B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */,
+				4315EE551B89A92A8D574180 /* JourneySceneAmbienceView.swift */,
+				E5E6EFCF602ADA42682F131B /* JourneySceneCatalog+Ambience.swift */,
+				65D71A523AC5A315FD2C4291 /* JourneyCollectionHostingController.swift */,
+				54A7AE9AB00A441D5D92D18E /* JourneyCollectionView.swift */,
+				571F283CAF625F37A8908670 /* JourneySceneView.swift */,
+				720FC6B58ABF36B5680E6D14 /* JourneySceneCatalog.swift */,
+				0B5CDEF728F44E5479AA43B1 /* JourneyScene.swift */,
+				ABDF1929F8B6A84C65A6D972 /* JourneyModule+UIKit.swift */,
+				734B318BE5B0AC77B3E75A97 /* JourneyModule.swift */,
+				009F241D5F03A6D48F9E0BB5 /* JourneyViewModel.swift */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -872,7 +1028,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
-				1AF880D32B8DB5A2004076EB /* Api.plist in Resources */,
 				A0F100012026091500000001 /* GoogleService-Info.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
@@ -897,6 +1052,36 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F3B954F69016720F752FD360 /* Settings/SettingsSummary.swift in Sources */,
+				4F0F93F1A8E349152F3B6E33 /* UserDefaultsReminderStore.swift in Sources */,
+				64F76684CFA187A46488A28D /* DiaryReminderTests.swift in Sources */,
+				2F8C2B5BE9AF32ACA3847EF6 /* Reminder/ReminderSettingsViewModel.swift in Sources */,
+				E238DCDD75F515075D903174 /* Reminder/DiaryReminders.swift in Sources */,
+				1242D41DD28D7E28D58A7C3F /* Reminder/DiaryReminder.swift in Sources */,
+				011C3163ABFE2B7B60FB2B60 /* LockViewModelTests.swift in Sources */,
+				F795D2E8B5E7FA5DA3D56E91 /* AppLockTests.swift in Sources */,
+				170DADF1062FEF832B55C3AA /* Lock/LockSettingsViewModel.swift in Sources */,
+				1ED85320190491CEEA2FAE51 /* Lock/LockScreenViewModel.swift in Sources */,
+				B2BD85A616C5BE8AAE042D71 /* Lock/PasscodeFlowViewModel.swift in Sources */,
+				8DA8197595EBDDA60ADEB483 /* Lock/DeviceOwnerAuthenticating.swift in Sources */,
+				1994D07AC1CC400E2856703E /* Lock/AppLock.swift in Sources */,
+				DED38B77BE1D023C3CF04994 /* SignInViewModelTests.swift in Sources */,
+				0D4D854EBF4A741B3495B5BE /* SignIn/SignInViewModel.swift in Sources */,
+				50B61D89F822C870566372ED /* WeatherConditionTextTests.swift in Sources */,
+				E58054AE864E79C8E2DD4B05 /* WeatherConditionText.swift in Sources */,
+				90ED5AAA3D344B36A9EBF153 /* WeatherModel.swift in Sources */,
+				4F2BC974B5C02A70BB0C2596 /* JourneyYearProgressTests.swift in Sources */,
+				D57875793289C9FDEE8CEBFA /* JourneyCityScene.swift in Sources */,
+				ED2FEF69EA27FEC3DF665BCA /* JourneyYearProgress.swift in Sources */,
+				446379991A32541C65DB4BCE /* JourneySceneCatalog+Ambience.swift in Sources */,
+				ABB6B1D2CE08894005309E5D /* JourneySceneCatalogTests.swift in Sources */,
+				19681167A51C2C077F5C3BED /* JourneySceneCatalog.swift in Sources */,
+				F72439A15ECAB2F5CC9A618F /* JourneyScene.swift in Sources */,
+				5726EE1D911AD6B7CF85E6BC /* JourneyRecordTests.swift in Sources */,
+				47A1D73818A174E2E92CA355 /* JourneyViewModelTests.swift in Sources */,
+				ED84689D753A8F4437C7080C /* JourneyModule.swift in Sources */,
+				2FD7A0614EEA22D572A51DBB /* JourneyViewModel.swift in Sources */,
+				6613C80DE1799C65DDEF1D0A /* JourneyRecord.swift in Sources */,
 				0B67131882814099B395D5CA /* AppleAuthorization.swift in Sources */,
 				3761782D1E9541648610A4DF /* AppleCredentialStatus.swift in Sources */,
 				AEBC3933AC39407393EA46C6 /* AppleRefreshTokenStoreTests.swift in Sources */,
@@ -955,6 +1140,44 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6B7CCEDFD98775AE0C549885 /* Settings/SettingsHostingController.swift in Sources */,
+				D478B19977FD8916B2F2A0FB /* Settings/SettingsView.swift in Sources */,
+				A87A645255A5219DFB524282 /* Settings/SettingsSummary.swift in Sources */,
+				E375AE17F86CD93FEBF12E59 /* UserDefaultsReminderStore.swift in Sources */,
+				0F462049A1E6B03434E7750E /* Reminder/ReminderModule+UIKit.swift in Sources */,
+				1D29B190433965D711C3ECBC /* Reminder/ReminderSettingsView.swift in Sources */,
+				65FF47D95A61C7E8548C8A71 /* Reminder/ReminderSettingsViewModel.swift in Sources */,
+				EA2DC5E52E3E57B9D75FE215 /* LiveDiaryReminders.swift in Sources */,
+				5A5DD13A6C92281D140BBB0B /* Reminder/DiaryReminders.swift in Sources */,
+				47D59BC52C7460EF383A57B4 /* Reminder/DiaryReminder.swift in Sources */,
+				308C27A962FEE5EE8AC5CE07 /* Lock/LockModule+UIKit.swift in Sources */,
+				95AD4E31DADB4F9382137132 /* Lock/LockSettingsView.swift in Sources */,
+				F497325EAE3BB3BE5ACB0F8A /* Lock/LockScreenView.swift in Sources */,
+				58E19496B2EF3A6AA5A2F909 /* Lock/PasscodePad.swift in Sources */,
+				E7B77ED59968E9D63B0C7917 /* Lock/LockSettingsViewModel.swift in Sources */,
+				6CD61117B93DBC2DAFAC1873 /* Lock/LockScreenViewModel.swift in Sources */,
+				42E5C0DEE6F02269F8FBC9B2 /* Lock/PasscodeFlowViewModel.swift in Sources */,
+				7ED9BD5B83EDA29E520AB9F6 /* LiveAppLock.swift in Sources */,
+				EB00B0813C1A539672DD3D6F /* Lock/DeviceOwnerAuthenticating.swift in Sources */,
+				CB6FB9C569C8AF246A67AAD6 /* Lock/AppLock.swift in Sources */,
+				D2106587AD9EED3AA8A1F31F /* SignIn/SignInHostingController.swift in Sources */,
+				E3A0E6776D1EBBF060FE98C2 /* SignIn/SignInView.swift in Sources */,
+				306180D3AC298324A6BCA09E /* SignIn/SignInViewModel.swift in Sources */,
+				3AA1C821E89F91E47BA494ED /* WeatherConditionText.swift in Sources */,
+				22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */,
+				524E6639EAF11484AA7BD7DB /* JourneyCityScene.swift in Sources */,
+				3A14FE2DE5453BCF575BE284 /* JourneyYearProgress.swift in Sources */,
+				7F6627D60329BD93D9C2F43C /* JourneySceneAmbienceView.swift in Sources */,
+				BEF14E9CB671D00A37FA7A82 /* JourneySceneCatalog+Ambience.swift in Sources */,
+				0CAEEE01FB33A11D99DF2DDD /* JourneyCollectionHostingController.swift in Sources */,
+				B3CACE6E3757D5413CF66839 /* JourneyCollectionView.swift in Sources */,
+				C8B2E124D44589724E349D10 /* JourneySceneView.swift in Sources */,
+				A30D49B72C7E565B6233ED6C /* JourneySceneCatalog.swift in Sources */,
+				7F1C103276CEB16536BBD9B0 /* JourneyScene.swift in Sources */,
+				3589A1C10B61E2393F77C32C /* JourneyModule+UIKit.swift in Sources */,
+				5D80395DC7BFE411ED4D9F33 /* JourneyModule.swift in Sources */,
+				C4EF7430388972D925EC3F52 /* JourneyViewModel.swift in Sources */,
+				A749FBFCA05C0A232F6650ED /* JourneyRecord.swift in Sources */,
 				8CE10AD94F264F07A3FC33BF /* AppleAuthorizationRequest.swift in Sources */,
 				526E31BBACBE4FD3BE3362A4 /* AppleAuthorization.swift in Sources */,
 				AE80E87C8AF34C86A074B4FD /* AppleCredentialMonitor.swift in Sources */,
@@ -1035,7 +1258,6 @@
 				D2F0EF342BAAAD51008736F1 /* NotificationName.swift in Sources */,
 				D2F0EF352BAAAD51008736F1 /* WeatherService.swift in Sources */,
 				6BB23A392BB171D100C3DA25 /* BezierPathCache.swift in Sources */,
-				D2F0EF362BAAAD51008736F1 /* EveryDiary++Bundle.swift in Sources */,
 				D2F0EF372BAAAD51008736F1 /* SetFaceID.swift in Sources */,
 				6BB23A312BAC5D7500C3DA25 /* DetailVC.swift in Sources */,
 				D2F0EF382BAAAD51008736F1 /* FireStore.swift in Sources */,
@@ -1235,11 +1457,12 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UP9KCDW7ZZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EveryDiary/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = EveryDiary;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "일기를 안전하게 관리하기 위해 생체 인증 권한을 허용해 주세요.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "일기의 날씨 정보를 설정하기 위해 위치 정보에 동의해주세요.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "일기에 사진을 첨부하기 위해 사진 라이브러리 접근 권한이 필요합니다.";
@@ -1252,7 +1475,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.HexaDiary.EveryDiary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1275,11 +1498,12 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UP9KCDW7ZZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EveryDiary/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = EveryDiary;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "일기를 안전하게 관리하기 위해 생체 인증 권한을 허용해 주세요.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "일기의 날씨 정보를 설정하기 위해 위치 정보에 동의해주세요.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "일기에 사진을 첨부하기 위해 사진 라이브러리 접근 권한이 필요합니다.";
@@ -1292,7 +1516,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.HexaDiary.EveryDiary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

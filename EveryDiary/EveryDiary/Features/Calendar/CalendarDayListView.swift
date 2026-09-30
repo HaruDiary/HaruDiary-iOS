@@ -26,9 +26,9 @@ struct CalendarDayListView: View {
                     }
                 }
                 .padding(DiaryTheme.Spacing.screen)
-                .padding(.bottom, DiaryTheme.Size.floatingButton + DiaryTheme.Spacing.section)
+                .padding(.bottom, DiaryTheme.Size.floatingButtonClearance)
             }
-            DiaryWriteButton(action: onWriteDiary).padding(DiaryTheme.Spacing.screen)
+            DiaryWriteButton(action: onWriteDiary)
         }
     }
 }

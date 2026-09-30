@@ -34,8 +34,7 @@ class PaginationManager {
         query.addSnapshotListener { [weak self] (snapshot, error) in
             guard let self = self else { return }
             
-            if let error = error {
-//                print("Error fetching documents: \(error)")
+            if error != nil {
                 completion(nil)
                 return
             }

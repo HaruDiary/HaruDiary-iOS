@@ -36,6 +36,11 @@ final class KeychainSecretStore: SecretStore {
         SecItemDelete(baseQuery(key) as CFDictionary)
     }
 
+    func delete(_ key: String) throws {
+        let status = SecItemDelete(baseQuery(key) as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else { throw KeychainError(status: status) }
+    }
+
     private func baseQuery(_ key: String) -> [String: Any] {
         [kSecClass as String: kSecClassGenericPassword,
          kSecAttrService as String: service,

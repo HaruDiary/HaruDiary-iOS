@@ -7,7 +7,7 @@ UIKit 앱에서 쓰던 코드를 모두 폐기하는 작업이 아니다. 기능
 SwiftUI도 UIKit 뷰/컨트롤러를 연결할 수 있다. UIKit 타입이 있다는 이유만으로 제거하지 않는다.
 
 아래 표는 현재 소스를 확인한 **전환 계획**이다. 대체 구현과 정리는 아직 하지 않았다.
-담당 배정과 새 마을 상세 기획은 별도 논의한다.
+담당 배정과 여정 보상 규칙은 별도 논의한다. 여정 탭 표현은 [여정 탭 기준](JOURNEY.md)을 따른다.
 
 ## 1. 현재 코드 분류
 
@@ -29,7 +29,7 @@ SwiftUI도 UIKit 뷰/컨트롤러를 연결할 수 있다. UIKit 타입이 있�
 | 분리 후 교체 | `DiaryList/TemporaryAlert.swift`, VC의 UIAlertController | 오류·확인 메시지 데이터와 표시를 구분. alert/confirmationDialog/일시 메시지 컴포넌트로 연결 |
 | 재사용 + 인터페이스 정리 | `DiaryList/ImageCacheManager.swift`의 NSCache·다운로드 | SwiftUI라고 캐시가 없어지지 않음. 캐시 정책·취소·오류를 분리. AsyncImage로 기계적으로 대체하지 않음 |
 | 상태 연결 교체 | `AppEvents/NotificationName.swift`의 로그인 이벤트와 delegate 콜백 | 소유자가 있는 세션/화면 상태로 전달. 시스템 notification까지 무조건 제거하지 않음 |
-| 후속 판단 | `Motivation/BuildingView.swift`, BezierPath/이미지 캐시 | 현재 조회/집계와 그리기 결합은 분리 대상. 새 마을 렌더링 기술/기능은 이번에 확정하지 않음 |
+| 교체됨 | `Motivation/BuildingView.swift`, `HonorVC`, `DetailVC`, BezierPath/이미지 캐시 | 여정 탭은 `Features/Journey`(공용 구독 + SwiftUI Canvas 그림)로 교체. 참조가 없어진 기존 파일·에셋은 별도 PR로 정리 |
 | 정리 후보 | `DiaryList/Extensions.swift` | 현재 import만 있는 파일. 타깃/사용 확인 후 별도 정리 |
 | 공통으로 추출 후보 | `DiaryList/DiaryListVC.swift` 안의 `Array.safeFetch` | 실제 사용처와 의미를 확인해 필요한 경우 `Shared/Extensions/Collection+SafeAccess.swift`로 이동 |
 | 의존성 정리 후보 | 프로젝트의 Lottie 패키지 연결 | 현재 앱 Swift 소스 검색에서 Lottie 사용을 찾지 못함. 전체 참조/리소스 확인과 빌드 후 제거 여부 결정 |

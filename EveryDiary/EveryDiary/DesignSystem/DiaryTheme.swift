@@ -40,7 +40,12 @@ enum DiaryTheme {
     enum Size {
         static let icon: CGFloat = 24
         static let touchTarget: CGFloat = 44
-        static let floatingButton: CGFloat = 56
+        /// The write button uses the original `write` artwork at the size and place of the journey tab's button.
+        static let floatingButton: CGFloat = 65
+        static let floatingButtonTrailing: CGFloat = 22
+        static let floatingButtonBottom: CGFloat = 39
+        /// Space scrolling content leaves at the bottom so the write button never covers the last item.
+        static let floatingButtonClearance: CGFloat = floatingButton + floatingButtonBottom + 12
         static let thumbnail: CGFloat = 80
     }
 
@@ -52,5 +57,23 @@ enum DiaryTheme {
         static let title = Font.system(.title2, design: .rounded).weight(.bold)
         static let pageDuration = 0.32
         static let pressDuration = 0.15
+    }
+
+    enum SignIn {
+        static let contentWidth: CGFloat = 480
+        static let title = Font.system(size: 40, weight: .heavy, design: .rounded)
+        static let illustrationMaxHeight: CGFloat = 260
+        static let buttonHeight: CGFloat = 52
+        static let buttonRadius: CGFloat = 12
+        static let providerLogo: CGFloat = 20
+    }
+
+    enum Lock {
+        static let keySize: CGFloat = 76
+        static let keySpacing: CGFloat = 20
+        static let dotSize: CGFloat = 14
+        static let dotSpacing: CGFloat = 20
+        static let headerIcon: CGFloat = 64
+        static let keyFont = Font.system(.title, design: .rounded).weight(.medium)
     }
 }
