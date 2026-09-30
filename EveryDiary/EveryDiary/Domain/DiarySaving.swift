@@ -33,6 +33,32 @@ enum DiarySaveError: Error, Equatable {
 enum DiarySaveOutcome: Equatable {
     case saved
     case savedWithMissingPhotos(Int)
+    /// Only the text was saved; the stored photos were not all loaded, so they were left as they were.
+    case savedKeepingPhotos
+}
+
+/// Loading an edited diary's stored photos. Photos may be replaced only when every one of them arrived:
+/// a photo still loading or that failed to load is not in the editor, and replacing would delete it.
+struct ExistingPhotoLoad: Equatable {
+    let expected: Int
+    private(set) var loaded = 0
+    private(set) var failed = 0
+
+    init(expected: Int) {
+        self.expected = expected
+    }
+
+    /// Every photo either arrived or failed, so the editor can stop showing its loading cell.
+    var isSettled: Bool { loaded + failed >= expected }
+    var allLoaded: Bool { failed == 0 && loaded >= expected }
+
+    mutating func photoArrived() {
+        loaded += 1
+    }
+
+    mutating func photoFailed() {
+        failed += 1
+    }
 }
 
 @MainActor
@@ -46,6 +72,10 @@ protocol DiarySaving {
                 images uploads: [DiaryImageUpload],
                 unreadablePhotoCount: Int,
                 completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void)
+    /// Saves the text and keeps `existingImageURLs` as they are, without uploading or deleting any photo.
+    func updateKeepingPhotos(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
+                             existingImageURLs: [String],
+                             completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void)
 }
 
 @MainActor
@@ -125,6 +155,28 @@ final class DiarySaveCoordinator: DiarySaving {
                 let replaced = existingImageURLs.filter { !urls.contains($0) }
                 self.delete(replaced) { completion(.success(.saved)) }
             }
+        }
+    }
+
+    func updateKeepingPhotos(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
+                             existingImageURLs: [String],
+                             completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
+        guard let userID = authentication.currentUserID else {
+            completion(.failure(DiarySaveError.signedOut))
+            return
+        }
+        guard userID == expectedUserID else {
+            completion(.failure(DiarySaveError.accountChanged))
+            return
+        }
+        var kept = entry
+        kept.imageURL = existingImageURLs.isEmpty ? nil : existingImageURLs
+        entries.update(kept, diaryID: diaryID, userID: userID) { error in
+            if let error {
+                completion(.failure(error))
+                return
+            }
+            completion(.success(.savedKeepingPhotos))
         }
     }
 
