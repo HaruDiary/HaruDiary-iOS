@@ -7,6 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		011C3163ABFE2B7B60FB2B60 /* LockViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */; };
+		F795D2E8B5E7FA5DA3D56E91 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D802337338EFDCC16CA9E0A /* AppLockTests.swift */; };
+		308C27A962FEE5EE8AC5CE07 /* Lock/LockModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 598784F5EE8499D50B68D1B8 /* Lock/LockModule+UIKit.swift */; };
+		95AD4E31DADB4F9382137132 /* Lock/LockSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E672AAD72BB4075734C429F /* Lock/LockSettingsView.swift */; };
+		F497325EAE3BB3BE5ACB0F8A /* Lock/LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82EAED2BA2701711A61FEC56 /* Lock/LockScreenView.swift */; };
+		58E19496B2EF3A6AA5A2F909 /* Lock/PasscodePad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E50EF6115D879D40EF80A3 /* Lock/PasscodePad.swift */; };
+		170DADF1062FEF832B55C3AA /* Lock/LockSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F985935C7D6E8ECB5EA8B29 /* Lock/LockSettingsViewModel.swift */; };
+		E7B77ED59968E9D63B0C7917 /* Lock/LockSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F985935C7D6E8ECB5EA8B29 /* Lock/LockSettingsViewModel.swift */; };
+		1ED85320190491CEEA2FAE51 /* Lock/LockScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB2241C650E51C0317A56A3 /* Lock/LockScreenViewModel.swift */; };
+		6CD61117B93DBC2DAFAC1873 /* Lock/LockScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB2241C650E51C0317A56A3 /* Lock/LockScreenViewModel.swift */; };
+		B2BD85A616C5BE8AAE042D71 /* Lock/PasscodeFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D1965B57B8CE5F73A3FFFD /* Lock/PasscodeFlowViewModel.swift */; };
+		42E5C0DEE6F02269F8FBC9B2 /* Lock/PasscodeFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D1965B57B8CE5F73A3FFFD /* Lock/PasscodeFlowViewModel.swift */; };
+		7ED9BD5B83EDA29E520AB9F6 /* LiveAppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C04051C32BA52281C1768D2 /* LiveAppLock.swift */; };
+		8DA8197595EBDDA60ADEB483 /* Lock/DeviceOwnerAuthenticating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */; };
+		EB00B0813C1A539672DD3D6F /* Lock/DeviceOwnerAuthenticating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */; };
+		1994D07AC1CC400E2856703E /* Lock/AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */; };
+		CB6FB9C569C8AF246A67AAD6 /* Lock/AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */; };
 		DED38B77BE1D023C3CF04994 /* SignInViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */; };
 		D2106587AD9EED3AA8A1F31F /* SignIn/SignInHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D59C67BCB0B976297E9F0B /* SignIn/SignInHostingController.swift */; };
 		E3A0E6776D1EBBF060FE98C2 /* SignIn/SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A11CAC06AE30F512F4CC2C9 /* SignIn/SignInView.swift */; };
@@ -349,6 +366,8 @@
 		7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarViewModel.swift"; sourceTree = "<group>"; };
 		77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule.swift"; sourceTree = "<group>"; };
 		2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarViewModelTests.swift"; sourceTree = "<group>"; };
+		584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LockViewModelTests.swift"; sourceTree = "<group>"; };
+		9D802337338EFDCC16CA9E0A /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppLockTests.swift"; sourceTree = "<group>"; };
 		91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModelTests.swift"; sourceTree = "<group>"; };
 		FFAAE9B7D18137751417D1D9 /* CalendarImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarImageLoader.swift"; sourceTree = "<group>"; };
 		38C72793785CC63EE0D7E647 /* CalendarDiaryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarDiaryRow.swift"; sourceTree = "<group>"; };
@@ -369,6 +388,8 @@
 		5F48F50BB73E9E4A9B0BF94C /* CalendarModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule+UIKit.swift"; sourceTree = "<group>"; };
 		62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListIndex.swift"; sourceTree = "<group>"; };
 		B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDiaryFeed.swift"; sourceTree = "<group>"; };
+		140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/DeviceOwnerAuthenticating.swift"; sourceTree = "<group>"; };
+		F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/AppLock.swift"; sourceTree = "<group>"; };
 		DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTrashing.swift"; sourceTree = "<group>"; };
 		5AAB81D6DBC642429FBF0175 /* FirebaseDiaryTrash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseDiaryTrash.swift"; sourceTree = "<group>"; };
 		47CDA91F2C774E1795104BA9 /* DiaryListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListViewModel.swift"; sourceTree = "<group>"; };
@@ -403,6 +424,13 @@
 		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
 		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
 		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		598784F5EE8499D50B68D1B8 /* Lock/LockModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockModule+UIKit.swift"; sourceTree = "<group>"; };
+		5E672AAD72BB4075734C429F /* Lock/LockSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockSettingsView.swift"; sourceTree = "<group>"; };
+		82EAED2BA2701711A61FEC56 /* Lock/LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockScreenView.swift"; sourceTree = "<group>"; };
+		04E50EF6115D879D40EF80A3 /* Lock/PasscodePad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/PasscodePad.swift"; sourceTree = "<group>"; };
+		2F985935C7D6E8ECB5EA8B29 /* Lock/LockSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockSettingsViewModel.swift"; sourceTree = "<group>"; };
+		8AB2241C650E51C0317A56A3 /* Lock/LockScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockScreenViewModel.swift"; sourceTree = "<group>"; };
+		C2D1965B57B8CE5F73A3FFFD /* Lock/PasscodeFlowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/PasscodeFlowViewModel.swift"; sourceTree = "<group>"; };
 		15D59C67BCB0B976297E9F0B /* SignIn/SignInHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignIn/SignInHostingController.swift"; sourceTree = "<group>"; };
 		8A11CAC06AE30F512F4CC2C9 /* SignIn/SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignIn/SignInView.swift"; sourceTree = "<group>"; };
 		7D4209D51899AB5A8A0C4860 /* SignIn/SignInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignIn/SignInViewModel.swift"; sourceTree = "<group>"; };
@@ -425,6 +453,7 @@
 		B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoPreparation.swift"; sourceTree = "<group>"; };
 		55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleRefreshTokenStore.swift"; sourceTree = "<group>"; };
 		47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainSecretStore.swift"; sourceTree = "<group>"; };
+		3C04051C32BA52281C1768D2 /* LiveAppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveAppLock.swift"; sourceTree = "<group>"; };
 		156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleSignInRecords.swift"; sourceTree = "<group>"; };
 		09D3564D1EC34113BA735C7B /* AppleRefreshTokenStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleRefreshTokenStoreTests.swift"; sourceTree = "<group>"; };
 		1FED75D3DE6749109E003F31 /* AppleCredentialStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleCredentialStatus.swift"; sourceTree = "<group>"; };
@@ -682,6 +711,8 @@
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */,
+				9D802337338EFDCC16CA9E0A /* AppLockTests.swift */,
 				91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */,
 				DF262DA4226F234E94F6E745 /* WeatherConditionTextTests.swift */,
 				F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */,
@@ -736,6 +767,8 @@
 				6324AE064574465A82455BD2 /* DayKind.swift */,
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */,
+				F78B6981A5ABC4B3A582EEEB /* Lock/AppLock.swift */,
 				9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */,
 				67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */,
 				A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */,
@@ -762,6 +795,7 @@
 				832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */,
 				156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */,
 				47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */,
+				3C04051C32BA52281C1768D2 /* LiveAppLock.swift */,
 				68840DB0A97C4959B4D07ED5 /* FirebaseUser+Profile.swift */,
 				BFD53D6A3298402E81953F3A /* FirebaseSocialSignInGateway.swift */,
 				1E8962285FEB4301AD2396F6 /* FirebasePhotoFiles.swift */,
@@ -781,6 +815,13 @@
 				0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
+				598784F5EE8499D50B68D1B8 /* Lock/LockModule+UIKit.swift */,
+				5E672AAD72BB4075734C429F /* Lock/LockSettingsView.swift */,
+				82EAED2BA2701711A61FEC56 /* Lock/LockScreenView.swift */,
+				04E50EF6115D879D40EF80A3 /* Lock/PasscodePad.swift */,
+				2F985935C7D6E8ECB5EA8B29 /* Lock/LockSettingsViewModel.swift */,
+				8AB2241C650E51C0317A56A3 /* Lock/LockScreenViewModel.swift */,
+				C2D1965B57B8CE5F73A3FFFD /* Lock/PasscodeFlowViewModel.swift */,
 				15D59C67BCB0B976297E9F0B /* SignIn/SignInHostingController.swift */,
 				8A11CAC06AE30F512F4CC2C9 /* SignIn/SignInView.swift */,
 				7D4209D51899AB5A8A0C4860 /* SignIn/SignInViewModel.swift */,
@@ -963,6 +1004,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				011C3163ABFE2B7B60FB2B60 /* LockViewModelTests.swift in Sources */,
+				F795D2E8B5E7FA5DA3D56E91 /* AppLockTests.swift in Sources */,
+				170DADF1062FEF832B55C3AA /* Lock/LockSettingsViewModel.swift in Sources */,
+				1ED85320190491CEEA2FAE51 /* Lock/LockScreenViewModel.swift in Sources */,
+				B2BD85A616C5BE8AAE042D71 /* Lock/PasscodeFlowViewModel.swift in Sources */,
+				8DA8197595EBDDA60ADEB483 /* Lock/DeviceOwnerAuthenticating.swift in Sources */,
+				1994D07AC1CC400E2856703E /* Lock/AppLock.swift in Sources */,
 				DED38B77BE1D023C3CF04994 /* SignInViewModelTests.swift in Sources */,
 				0D4D854EBF4A741B3495B5BE /* SignIn/SignInViewModel.swift in Sources */,
 				50B61D89F822C870566372ED /* WeatherConditionTextTests.swift in Sources */,
@@ -1036,6 +1084,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				308C27A962FEE5EE8AC5CE07 /* Lock/LockModule+UIKit.swift in Sources */,
+				95AD4E31DADB4F9382137132 /* Lock/LockSettingsView.swift in Sources */,
+				F497325EAE3BB3BE5ACB0F8A /* Lock/LockScreenView.swift in Sources */,
+				58E19496B2EF3A6AA5A2F909 /* Lock/PasscodePad.swift in Sources */,
+				E7B77ED59968E9D63B0C7917 /* Lock/LockSettingsViewModel.swift in Sources */,
+				6CD61117B93DBC2DAFAC1873 /* Lock/LockScreenViewModel.swift in Sources */,
+				42E5C0DEE6F02269F8FBC9B2 /* Lock/PasscodeFlowViewModel.swift in Sources */,
+				7ED9BD5B83EDA29E520AB9F6 /* LiveAppLock.swift in Sources */,
+				EB00B0813C1A539672DD3D6F /* Lock/DeviceOwnerAuthenticating.swift in Sources */,
+				CB6FB9C569C8AF246A67AAD6 /* Lock/AppLock.swift in Sources */,
 				D2106587AD9EED3AA8A1F31F /* SignIn/SignInHostingController.swift in Sources */,
 				E3A0E6776D1EBBF060FE98C2 /* SignIn/SignInView.swift in Sources */,
 				306180D3AC298324A6BCA09E /* SignIn/SignInViewModel.swift in Sources */,

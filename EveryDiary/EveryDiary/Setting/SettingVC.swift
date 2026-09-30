@@ -317,8 +317,7 @@ extension SettingVC : UITableViewDelegate, UITableViewDataSource {
                 let notificationVC = NotificationVC()
                 navigationController?.pushViewController(notificationVC, animated: true)
             case 2:
-                let lockVC = LockVC()
-                navigationController?.pushViewController(lockVC, animated: true)
+                navigationController?.pushViewController(LockModule.makeSettingsViewController(), animated: true)
             case 3:
                 let trashVC = module.makeTrashModule().makeViewController()
                 navigationController?.pushViewController(trashVC, animated: true)

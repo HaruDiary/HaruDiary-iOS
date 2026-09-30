@@ -12,6 +12,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     var blurEffectView: UIVisualEffectView?
+    private lazy var appLock = AppLockPresenter.live()
     // Created after FirebaseApp.configure() in AppDelegate.
     private lazy var appleCredentialMonitor = AppleCredentialMonitor(
         auth: .auth(),
@@ -27,6 +28,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         //강제로 다크모드 해제
         window.overrideUserInterfaceStyle = .light
         window.makeKeyAndVisible()
+        appLock.attach(to: window)
+        appLock.lockIfNeeded()
     }
     
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -36,42 +39,29 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         removeBlurEffect()
         appleCredentialMonitor.check()
+        appLock.didBecomeActive()
     }
     
+    // Hides the diary in the app switcher while the lock is on; the lock itself appears on entering the background.
     func sceneWillResignActive(_ scene: UIScene) {
-        let biometricsEnabled = UserDefaults.standard.bool(forKey: "BiometricsEnabled")
-        
-        if biometricsEnabled {
+        if appLock.isLockEnabled && !appLock.isLocked {
             addBlurEffect()
         }
     }
     
     func sceneWillEnterForeground(_ scene: UIScene) {
-        let biometricsEnabled = UserDefaults.standard.bool(forKey: "BiometricsEnabled")
         
-        if biometricsEnabled {
-            
-            BiometricsAuth().authenticateWithBiometrics { success, error  in
-                DispatchQueue.main.async {
-                    if success {
-                        print("성공")
-                    } else {
-                        print("login 실패")
-                    }
-                }
-            }
-        }
     }
     
     func sceneDidEnterBackground(_ scene: UIScene) {
-        
+        appLock.lockIfNeeded()
     }
 }
 
 //MARK: - Blur Effect 메서드
 extension SceneDelegate {
     private func addBlurEffect() {
-        guard let window = window else { return }
+        guard let window = window, blurEffectView == nil else { return }
         
         let blurEffect = UIBlurEffect(style: .light)
         blurEffectView = UIVisualEffectView(effect: blurEffect)

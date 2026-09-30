@@ -67,4 +67,13 @@ enum DiaryTheme {
         static let buttonRadius: CGFloat = 12
         static let providerLogo: CGFloat = 20
     }
+
+    enum Lock {
+        static let keySize: CGFloat = 76
+        static let keySpacing: CGFloat = 20
+        static let dotSize: CGFloat = 14
+        static let dotSpacing: CGFloat = 20
+        static let headerIcon: CGFloat = 64
+        static let keyFont = Font.system(.title, design: .rounded).weight(.medium)
+    }
 }
