@@ -108,7 +108,10 @@ final class ReminderSettingsViewModel {
     /// "다음 알림: 오늘 오후 9:00", "내일 …", or the date for later days.
     var nextReminderText: String? {
         guard settings.isOn, let next = nextReminder else { return nil }
-        let time = next.formatted(Date.FormatStyle(date: .omitted, time: .shortened).locale(Locale(identifier: "ko_KR")))
+        // The same time zone as the calendar that picked the day, not the device default.
+        var style = Date.FormatStyle(date: .omitted, time: .shortened).locale(Locale(identifier: "ko_KR"))
+        style.timeZone = calendar.timeZone
+        let time = next.formatted(style)
         let day: String
         if calendar.isDate(next, inSameDayAs: now()) {
             day = "오늘"

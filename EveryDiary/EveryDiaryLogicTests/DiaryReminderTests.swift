@@ -130,9 +130,11 @@ final class DiaryReminderTests: XCTestCase {
         scheduler.delaysFirstReplace = true
         let store = InMemoryReminderStore()
         let reminders = DiaryReminders(store: store, scheduler: scheduler, calendar: calendar, now: { [unowned self] in now })
-        async let first: Void = reminders.update(settings(hour: 22))
-        async let second: Void = reminders.update(settings(hour: 23))
-        _ = await (first, second)
+        let first = Task { await reminders.update(settings(hour: 22)) }
+        // The first change is now inside its slow replace; the second one arrives meanwhile.
+        while scheduler.replaceCount == 0 { await Task.yield() }
+        await reminders.update(settings(hour: 23))
+        await first.value
         XCTAssertEqual(store.settings.hour, 23)
         XCTAssertEqual(scheduler.scheduled.first?.fireDate.hour, 23)
     }
