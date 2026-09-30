@@ -139,6 +139,26 @@ final class DiaryReminderTests: XCTestCase {
         XCTAssertEqual(scheduler.scheduled.first?.fireDate.hour, 23)
     }
 
+    // A new user's first diaries have not arrived yet: tonight's skip must stay until they do.
+    func testSwitchingUsersWaitsForTheirDiariesBeforeRescheduling() async {
+        let store = InMemoryReminderStore()
+        let scheduler = FakeReminderScheduler()
+        let reminders = DiaryReminders(store: store, scheduler: scheduler, calendar: calendar, now: { [unowned self] in now })
+        await reminders.update(settings())
+        await reminders.handle(.received([entry(on: now)]))
+        XCTAssertEqual(scheduler.scheduled.first?.identifier, "diary-reminder-2026-10-01")
+        let count = scheduler.replaceCount
+
+        await reminders.handle(.userChanged(isDifferentUser: true))
+        await reminders.handle(.loading)
+        await reminders.handle(.failed)
+        XCTAssertEqual(scheduler.replaceCount, count)
+        XCTAssertEqual(store.writtenDay, "2026-09-30")
+
+        await reminders.handle(.received([]))
+        XCTAssertEqual(scheduler.scheduled.first?.identifier, "diary-reminder-2026-09-30")
+    }
+
     func testYesterdaysDiaryDoesNotSkipToday() async {
         let store = InMemoryReminderStore()
         store.settings = settings()

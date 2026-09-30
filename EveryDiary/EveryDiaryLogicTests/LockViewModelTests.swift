@@ -134,6 +134,26 @@ final class LockViewModelTests: XCTestCase {
         XCTAssertEqual(lock.mode, .off)
     }
 
+    func testTurningOffStaysOpenWhenThePasscodeCannotBeDeleted() throws {
+        try lock.setPasscode("1234")
+        store.failsToRemove = true
+        let flow = PasscodeFlowViewModel(purpose: .turnOff, lock: lock)
+        enter("1234", into: flow.type)
+        XCTAssertFalse(flow.isDone)
+        XCTAssertEqual(flow.message, "잠금을 끄지 못했어요. 다시 시도해주세요.")
+        XCTAssertTrue(lock.isEnabled)
+    }
+
+    func testForgottenPasscodeStillUnlocksWhenItCannotBeDeleted() async throws {
+        try lock.setPasscode("1234")
+        store.failsToRemove = true
+        let screen = LockScreenViewModel(lock: lock, owner: owner)
+        await screen.forgotPasscode()
+        // The owner was confirmed, so this time the app opens; the lock itself stays on.
+        XCTAssertEqual(screen.outcome, .unlocked)
+        XCTAssertTrue(lock.isEnabled)
+    }
+
     func testChangingAndTurningOffAskForTheCurrentPasscode() throws {
         try lock.setPasscode("1234")
         let change = PasscodeFlowViewModel(purpose: .change, lock: lock)

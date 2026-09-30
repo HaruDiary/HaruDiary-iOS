@@ -66,8 +66,13 @@ final class PasscodeFlowViewModel: Identifiable {
             case .unlocked:
                 message = nil
                 if purpose == .turnOff {
-                    lock.turnOff()
-                    isDone = true
+                    do {
+                        try lock.turnOff()
+                        isDone = true
+                    } catch {
+                        mistakes += 1
+                        message = "잠금을 끄지 못했어요. 다시 시도해주세요."
+                    }
                 } else {
                     step = .new
                 }

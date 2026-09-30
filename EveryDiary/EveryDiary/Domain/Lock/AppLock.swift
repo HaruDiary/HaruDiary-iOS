@@ -111,9 +111,9 @@ final class AppLock {
     }
 
     /// Turns the lock off, e.g. after the passcode was forgotten and the iPhone passcode confirmed the owner.
-    func turnOff() {
-        // Removing a Keychain item that is already gone is not an error worth stopping for.
-        try? store.savePasscodeRecord(nil)
+    /// Throws when the passcode could not be deleted; the lock then stays as it was.
+    func turnOff() throws {
+        try store.savePasscodeRecord(nil)
         store.biometricsEnabled = false
         store.legacyBiometricsEnabled = false
         resetAttempts()

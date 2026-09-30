@@ -4,6 +4,8 @@ final class InMemoryAppLockStore: AppLockStore {
     private(set) var passcodeRecord: String?
     /// Simulates a Keychain that refuses to save.
     var failsToSave = false
+    /// Simulates a Keychain that refuses to delete.
+    var failsToRemove = false
     var biometricsEnabled = false
     var legacyBiometricsEnabled = false
     var failedAttempts = 0
@@ -11,6 +13,7 @@ final class InMemoryAppLockStore: AppLockStore {
 
     func savePasscodeRecord(_ record: String?) throws {
         if failsToSave, record != nil { throw NSError(domain: NSOSStatusErrorDomain, code: -25308) }
+        if failsToRemove, record == nil { throw NSError(domain: NSOSStatusErrorDomain, code: -25308) }
         passcodeRecord = record
     }
 }
@@ -91,7 +94,7 @@ final class AppLockTests: XCTestCase {
         lock.setBiometrics(true)
         XCTAssertEqual(lock.mode, .passcode(biometrics: true))
         _ = lock.unlock(with: "0000")
-        lock.turnOff()
+        try lock.turnOff()
         XCTAssertEqual(lock.mode, .off)
         XCTAssertNil(store.passcodeRecord)
         XCTAssertFalse(store.biometricsEnabled)
@@ -110,6 +113,15 @@ final class AppLockTests: XCTestCase {
         XCTAssertThrowsError(try lock.setPasscode("5678"))
         XCTAssertTrue(lock.matches("1234"))
         XCTAssertFalse(lock.matches("5678"))
+    }
+
+    // The passcode could not be deleted: the lock stays on rather than looking off and locking again later.
+    func testUndeletedPasscodeKeepsTheLockOn() throws {
+        try lock.setPasscode("1234")
+        lock.setBiometrics(true)
+        store.failsToRemove = true
+        XCTAssertThrowsError(try lock.turnOff())
+        XCTAssertEqual(lock.mode, .passcode(biometrics: true))
     }
 
     func testWaitMessageRoundsUp() {

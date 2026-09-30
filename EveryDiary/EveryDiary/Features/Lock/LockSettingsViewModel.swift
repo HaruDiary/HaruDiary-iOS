@@ -71,9 +71,13 @@ final class LockSettingsViewModel {
     /// same way it unlocks; setting a passcode replaces it instead.
     func turnOffLegacyLock() async {
         guard isLegacy, await owner.authenticateDeviceOwner(reason: "잠금을 끄려면 본인을 확인해주세요.") else { return }
-        lock.turnOff()
+        do {
+            try lock.turnOff()
+            notice = "잠금을 껐어요."
+        } catch {
+            notice = "잠금을 끄지 못했어요. 다시 시도해주세요."
+        }
         mode = lock.mode
-        notice = "잠금을 껐어요."
     }
 
     func noticeShown() {

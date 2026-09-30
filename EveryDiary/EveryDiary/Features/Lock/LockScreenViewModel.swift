@@ -105,7 +105,13 @@ final class LockScreenViewModel {
         let succeeded = await owner.authenticateDeviceOwner(reason: "iPhone 암호로 본인을 확인하면 앱 잠금을 끄고 새 암호를 정할 수 있어요.")
         isAuthenticating = false
         guard succeeded, outcome == nil else { return }
-        lock.turnOff()
-        outcome = .unlockedAndTurnedOff
+        do {
+            try lock.turnOff()
+            outcome = .unlockedAndTurnedOff
+        } catch {
+            // The owner is confirmed, so the app opens this time; the passcode could not be removed and stays.
+            lock.unlockedByDeviceOwner()
+            outcome = .unlocked
+        }
     }
 }

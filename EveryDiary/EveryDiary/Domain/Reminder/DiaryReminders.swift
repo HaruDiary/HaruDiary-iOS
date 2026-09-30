@@ -49,17 +49,16 @@ final class DiaryReminders {
     func watch(_ feed: UserDiaryFeed) {
         self.feed = feed
         feed.onEvent = { [weak self] event in
-            guard let self else { return }
-            switch event {
-            case .userChanged:
-                Task { await self.diariesChanged([]) }
-            case .received(let entries):
-                Task { await self.diariesChanged(entries) }
-            case .loading, .failed:
-                break
-            }
+            Task { await self?.handle(event) }
         }
         feed.start()
+    }
+
+    /// Only a received list changes the schedule. Until a new user's diaries arrive (or when loading fails),
+    /// the current schedule stays, so a day that already has a diary is not reminded of in the meantime.
+    func handle(_ event: UserDiaryFeed.Event) async {
+        guard case .received(let entries) = event else { return }
+        await diariesChanged(entries)
     }
 
     func diariesChanged(_ entries: [DiaryEntry]) async {
