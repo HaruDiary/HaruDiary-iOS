@@ -37,3 +37,31 @@ CI 빌드는 가짜 Firebase 설정을 사용하며 **실행하지 않는다**.
 이번 화면/오프라인 검증으로 증명되지 않는다. 기존 Storage `HTTP 400` 업로드 오류의 원인 해결,
 사진 일부 실패/기존 사진 선삭제 정책 변경, 작성 초안과 입력 검증의 별도 상태 분리,
 SwiftUI 작성 화면은 후속 범위다. 저장 필드명이나 서버 마이그레이션은 변경하지 않았다.
+
+## SwiftUI 작성·수정·읽기 화면
+
+`WriteDiaryVC`를 `Features/DiaryEditor`의 SwiftUI 화면으로 교체했다(목업 03·04·06~10·28).
+여는 쪽의 코드는 그대로다. `DiaryEditorHostingController`가 기존 `enterDiary(to:with:)`,
+`delegate`, `loadingDiaryDelegate`를 제공한다. 저장 흐름은 위의 `DiarySaving` 경계를 그대로 쓴다.
+
+- `DiaryEditorViewModel`이 초안·사진·날씨·위치·저장을 맡는다. 화면은 표시와 입력만 한다.
+  저장은 편집기가 닫힌 뒤에도 뷰모델이 끝까지 진행하고, 결과는 편집기를 연 화면에 알린다. `DiaryWriteRetention` 전역 보관은 더 쓰지 않는다.
+- 날짜는 "날짜 변경" 버튼이 있는 카드로 보이고, 누르면 달력 시트가 열린다. 오늘 이후 날짜는 고를 수 없다.
+  감정·날씨는 이름이 붙은 격자 시트에서 고른다. 저장 값(asset 이름)과 순서는 이전과 같다.
+- 날씨는 새 일기를 오늘 날짜로 쓸 때만 보여 준다. Apple 날씨 표기와 법적 고지 링크를 함께 둔다.
+  편집기가 받은 날씨를 그대로 저장한다. 아직 받는 중일 때만 저장 단계에서 다시 조회한다(`DiaryWeatherStamp`).
+  오늘이 아니거나 조회에 실패하면 이전처럼 `"Unknown"`/`0`을 저장한다.
+- 사진은 PHPicker(최대 3장, 선택 순서, 기존 선택 표시)를 그대로 쓴다. 번호·삭제·크게 보기를 제공한다.
+  위치가 있는 사진을 고르면 "사진의 날짜와 위치를 쓸까요?"를 묻는다. 저장소 metadata 형식은 이전과 같다.
+- 수정 저장 규칙:
+  - 바뀐 것이 없으면 아무것도 쓰지 않고 닫는다. 읽기 화면의 연필과 저장 버튼이 같은 자리여서, 연필을 두 번 누르면 바로 저장되던 문제를 막는다.
+  - 사진을 건드리지 않았으면 기존 사진 URL을 그대로 둔다. 다시 압축·업로드하지 않으며, assetIdentifier가 없는 옛 사진도 그대로 남는다.
+  - 사진을 바꾼 경우에만 이전처럼 교체한다.
+- 새 일기만 현재 위치를 기록한다. 이전에는 기존 일기를 수정할 때도 저장된 위치를 지금 위치로 덮어썼다.
+
+`DiaryEditorViewModelTests`는 fake 저장소·사진·날씨·위치로 위 규칙을 검증한다.
+시뮬레이터에서는 작성·날짜/감정/날씨 시트·닫기 확인·읽기·사진 보기·수정 화면을 확인했다.
+카메라 롤 사진 선택, 실제 새 일기 저장, 실기기 동작은 확인하지 않았다.
+기존 UIKit 편집기 파일(`WriteDiaryVC`, `DateSelectVC`, `DateConditionSelectVC`, `ImagePickerManager`,
+`KeyboardManager`, `Image*Cell`, `MapCollectionViewCell`, `DiaryWriteRetention`)과 `DiaryPhotoReplacement`는
+참조가 없어졌지만 삭제 승인을 받은 뒤 지운다.

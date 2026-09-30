@@ -22,9 +22,9 @@ SwiftUI도 UIKit 뷰/컨트롤러를 연결할 수 있다. UIKit 타입이 있�
 | 교체 | UIViewController, UITableView/UICollectionView cell, delegate | SwiftUI View·List·LazyVGrid 등으로 기능별 전환. delegate의 비즈니스 로직은 먼저 분리 |
 | 교체 후 제거 | 각 화면의 SnapKit·Auto Layout | SwiftUI stack/layout/modifier로 전환. UIKit 화면이 남아 있는 동안 SnapKit 유지 |
 | 교체 | `TabBarController.swift`, 각 UINavigationController, `SceneDelegate.swift` | TabView·NavigationStack·sheet 경로 및 상태 소유권 설계. 기존 뒤로 가기/로그인 URL 연결 보존 |
-| 분리 후 교체 | `WriteDiary/KeyboardManager.swift` | UIScrollView·SnapKit constraint 조작은 가져오지 않음. SwiftUI 키보드 회피·FocusState를 우선 검증 |
-| 연결 후 단계적 교체 | `WriteDiary/ImagePickerManager.swift` | PhotosPicker 대체 가능성 검증. 기능 동등성이 부족하면 PHPicker를 representable로 연결 |
-| 분리 후 연결 | `WriteDiary/MapManager.swift` | 위치/주소 조회와 권한 상태는 서비스로 분리. 지도 표현은 SwiftUI Map 또는 기존 MKMapView 연결 |
+| 교체 완료(삭제 대기) | `WriteDiary/KeyboardManager.swift` | SwiftUI 작성 화면(`Features/DiaryEditor`)의 FocusState·키보드 회피로 대체. 참조 제거 후 삭제 |
+| 교체 완료(삭제 대기) | `WriteDiary/ImagePickerManager.swift` | PhotosPicker는 선택 순서·기존 선택 표시·assetIdentifier를 보장하지 않아 PHPicker를 유지. `DiaryPhotoLibraryPicker`로 옮김 |
+| 분리 후 연결 | `WriteDiary/MapManager.swift` | 주소 조회·지도 앱 열기는 작성 화면이 그대로 사용. 지도 표현은 SwiftUI Map으로 교체 |
 | 재사용 + 수명 정리 | `Service/SetFaceID.swift`, 알림 등록 및 인증 관련 코드 | LocalAuthentication·UserNotifications·Firebase/Google 로그인은 계속 사용. 표시/상태 전달만 분리 |
 | 분리 후 교체 | `DiaryList/TemporaryAlert.swift`, VC의 UIAlertController | 오류·확인 메시지 데이터와 표시를 구분. alert/confirmationDialog/일시 메시지 컴포넌트로 연결 |
 | 재사용 + 인터페이스 정리 | `DiaryList/ImageCacheManager.swift`의 NSCache·다운로드 | SwiftUI라고 캐시가 없어지지 않음. 캐시 정책·취소·오류를 분리. AsyncImage로 기계적으로 대체하지 않음 |

@@ -16,19 +16,6 @@ private struct PhotoEncodeSource {
     let location: String?
 }
 
-protocol WriteDiaryDelegate: AnyObject {
-    func diaryUploadDidStart()
-    func diaryUploadDidFinish()
-}
-
-// WriteDiaryVC를 호출하는 목적에 따라 WriteDiaryVC의 UI컴포넌트 상태 구분
-enum UIstatus {
-    case writeNewDiary      // 새로운 일기 작성
-    case editDiary          // 작성된 일기 수정
-    case showDiary          // 작성된 일기 조회
-}
-
-typealias MakeWriteDiary = @MainActor () -> WriteDiaryVC
 
 class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
     

@@ -57,7 +57,7 @@ class SettingVC: UIViewController {
     convenience init() {
         let dependencies = AppDependencies.live()
         self.init(module: dependencies.makeSettingsModule(),
-                  makeWriteDiary: { WriteDiaryVC(saver: dependencies.diarySaving) })
+                  makeWriteDiary: { DiaryEditorModule.makeEditor(saver: dependencies.diarySaving) })
     }
     
     required init?(coder: NSCoder) { return nil }
