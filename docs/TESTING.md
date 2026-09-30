@@ -4,7 +4,7 @@
 
 | 검사 | 실제 범위 | 포함하지 않는 것 |
 |---|---|---|
-| Logic tests | 일기 모델 6개, 문서 디코딩 3개, 요일 구분 6개, Calendar 날짜/그리드 10개, Calendar 상태·구독 14개, 온보딩 9개, 목록 분류·검색 8개, 목록 상태·구독 14개, 사진 교체 5개, 휴지통 정책 5개, 만료 삭제 4개, 휴지통 상태 12개, 설정 상태 21개, 탈퇴 순서 4개, 로그인 흐름 7개, Apple 상태 1개, Apple 로그인 보관 2개, 여정 기록 6개, 여정 상태 11개, 월별 그림 10개, 연도별 도시 단계 5개, 날씨 요청·응답 5개: 총 168개 XCTest | Firestore SDK의 Codable 동작, 서버 읽기/쓰기, 실제 로그인, 실제 날씨 API 호출·위치, 보상 규칙, 실제 UI 동작 |
+| Logic tests | 일기 모델 6개, 문서 디코딩 3개, 요일 구분 6개, Calendar 날짜/그리드 10개, Calendar 상태·구독 14개, 온보딩 9개, 목록 분류·검색 8개, 목록 상태·구독 14개, 사진 교체 5개, 휴지통 정책 5개, 만료 삭제 4개, 휴지통 상태 12개, 설정 상태 21개, 탈퇴 순서 4개, 로그인 흐름 7개, Apple 상태 1개, Apple 로그인 보관 2개, 여정 기록 6개, 여정 상태 11개, 월별 그림 10개, 연도별 도시 단계 5개, 날씨 문구·오류 구분 5개: 총 168개 XCTest | Firestore SDK의 Codable 동작, 서버 읽기/쓰기, 실제 로그인, 실제 WeatherKit 호출·위치, 보상 규칙, 실제 UI 동작 |
 | Simulator build | `EveryDiary` 앱의 Debug 시뮬레이터 컴파일·링크·번들 검증 | 앱 실행, 운영 Firebase 연결, 실기기 서명, App Store archive |
 
 `EveryDiaryLogicTests`는 hostless XCTest 타깃이다. 앱을 실행하지 않고 운영 소스 파일을
@@ -36,7 +36,7 @@ Calendar의 화면 동작과 오프라인 검증 범위는 [Calendar 리팩토�
 - `HARUDIARY_CI_OUTPUT=/tmp/harudiary-check`로 결과 폴더를 지정할 수 있다.
   결과 폴더는 저장소 밖에 둔다.
 - `.xcresult`를 Xcode에서 열면 테스트별 결과를 볼 수 있다.
-- build: 임시 프로젝트 복사본에 작동하지 않는 CI용 Firebase plist와 빈 날씨 키 `Api.plist`를 만들고 컴파일한다.
+- build: 임시 프로젝트 복사본에 작동하지 않는 CI용 Firebase plist를 만들고 컴파일한다.
   실제 로컬 설정 파일을 덮어쓰지 않으며, 해당 빌드의 앱을 실행하거나 배포하지 않는다.
 - 처음 실행하면 Swift 패키지를 다운로드한다. `Package.resolved`의 버전만 사용한다.
 - 기존 DerivedData에 다른 SDK 버전이 남아 이상이 발생하면 해당 결과 폴더의 DerivedData만
@@ -69,9 +69,9 @@ fork PR에서도 실행할 수 있다. 토큰은 contents 읽기 권한만 사�
 - [GitHub macOS 26 runner](https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md)
 - [Workflow 구문](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)
 
-## 날씨 API 키 (`Api.plist`)
+## 날씨 (WeatherKit)
 
-`EveryDiary/EveryDiary/Api.plist`는 git에 올리지 않는다(`.gitignore`). 로컬에서 날씨를 쓰려면
-이 파일에 `OPENWEATHERMAP_KEY`(OpenWeather 키)를 넣는다. 파일이나 키가 없어도 앱은 빌드·실행되며
-날씨만 `missingAPIKey`로 비어 있다. 키가 거부되면 `invalidAPIKey`, 위치를 얻지 못하면 `noLocation`으로
-구분해 로그에 남긴다(요청 URL에는 키가 있으므로 출력하지 않는다).
+날씨는 Apple WeatherKit으로 받으며 API 키 파일이 없다. 앱 서명과 App ID의 WeatherKit 기능으로 인증하므로
+`bash scripts/ci.sh build`(서명 없음)는 컴파일만 확인한다. 실제 날씨 수신은 팀 서명으로 실행한
+시뮬레이터·기기에서 확인한다. 실패는 `noLocation`, `network`, `unavailable`(WeatherKit 거부, 예: 기능 미설정)로
+구분해 로그에 남기며 위치는 출력하지 않는다.

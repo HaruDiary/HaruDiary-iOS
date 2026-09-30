@@ -6,8 +6,10 @@
 //
 import CoreLocation
 import Foundation
+import WeatherKit
 
-/// Current weather at the device's location. Call from the main thread; the completion may run on any thread.
+/// Current weather at the device's location from Apple WeatherKit (needs the WeatherKit capability on the App ID).
+/// Call from the main thread; the completion may run on any thread.
 ///
 /// A fresh instance has no location yet, so a request waits for one (at most `locationTimeout`) instead of
 /// failing at once. The service keeps itself alive until every waiting completion has been called, so a caller
@@ -16,15 +18,11 @@ class WeatherService: NSObject, CLLocationManagerDelegate {
     static let locationTimeout: TimeInterval = 5
 
     private let locationManager = CLLocationManager()
-    private let apiKey: String
-    private let session: URLSession
     private var waiting: [(Result<WeatherResponse, WeatherError>) -> Void] = []
     private var keepAlive: WeatherService?
     private var timeout: DispatchWorkItem?
 
-    init(apiKey: String = Bundle.main.apiKey, session: URLSession = .shared) {
-        self.apiKey = apiKey
-        self.session = session
+    override init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
@@ -32,10 +30,6 @@ class WeatherService: NSObject, CLLocationManagerDelegate {
     }
 
     func getWeather(completion: @escaping (Result<WeatherResponse, WeatherError>) -> Void) {
-        // Without a key the request can only fail; skip asking for a location.
-        guard WeatherQuery.url(latitude: 0, longitude: 0, apiKey: apiKey) != nil else {
-            return completion(.failure(.missingAPIKey))
-        }
         if let location = locationManager.location, abs(location.timestamp.timeIntervalSinceNow) < 600 {
             return fetch(at: location, completion: completion)
         }
@@ -50,19 +44,18 @@ class WeatherService: NSObject, CLLocationManagerDelegate {
     }
 
     private func fetch(at location: CLLocation, completion: @escaping (Result<WeatherResponse, WeatherError>) -> Void) {
-        guard let url = WeatherQuery.url(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, apiKey: apiKey) else {
-            return completion(.failure(.missingAPIKey))
-        }
-        var request = URLRequest(url: url)
-        request.timeoutInterval = WeatherQuery.requestTimeout
-        session.dataTask(with: request) { data, response, _ in
-            let result = WeatherQuery.parse(data: data, statusCode: (response as? HTTPURLResponse)?.statusCode)
-            if case .failure(let error) = result {
-                // The error kind only; the request URL carries the key and is never logged.
-                print("Load weather failed: \(error)")
+        Task {
+            do {
+                let current = try await WeatherKit.WeatherService.shared.weather(for: location, including: .current)
+                let description = WeatherConditionText.description(condition: current.condition.rawValue, fallback: current.condition.description)
+                completion(.success(WeatherResponse(description: description, celsius: current.temperature.converted(to: .celsius).value)))
+            } catch {
+                let kind = WeatherError.kind(of: error)
+                // The kind and error type only; no location is logged.
+                print("Load weather failed: \(kind) (\(type(of: error)))")
+                completion(.failure(kind))
             }
-            completion(result)
-        }.resume()
+        }
     }
 
     /// Answers every waiting request with `location`, or with `.noLocation` when there is none.

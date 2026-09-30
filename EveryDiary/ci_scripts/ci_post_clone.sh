@@ -28,12 +28,3 @@ fi
 
 echo "GoogleService-Info.plist written for Xcode Cloud."
 
-# The OpenWeather key is optional: without it the app builds and weather reports a missing key.
-API_PLIST="$CI_PRIMARY_REPOSITORY_PATH/EveryDiary/EveryDiary/Api.plist"
-/usr/libexec/PlistBuddy -c "Clear dict" -c "Add :OPENWEATHERMAP_KEY string" "$API_PLIST" > /dev/null 2>&1 || true
-if [ -n "${OPENWEATHERMAP_KEY:-}" ]; then
-  /usr/libexec/PlistBuddy -c "Set :OPENWEATHERMAP_KEY $OPENWEATHERMAP_KEY" "$API_PLIST"
-  echo "Api.plist written for Xcode Cloud."
-else
-  echo "warning: OPENWEATHERMAP_KEY is not set; this build has no weather." >&2
-fi

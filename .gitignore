@@ -103,5 +103,5 @@ iOSInjectionProject/
 *.DS_Store
 *.xcconfig
 GoogleService-Info.plist
-# OpenWeather key; each developer keeps a local copy, Xcode Cloud writes it (see docs/XCODE_CLOUD.md)
+# Former OpenWeather key file; weather now uses WeatherKit. Kept ignored so old local copies are never committed.
 EveryDiary/EveryDiary/Api.plist

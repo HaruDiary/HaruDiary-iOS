@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		50B61D89F822C870566372ED /* WeatherQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF262DA4226F234E94F6E745 /* WeatherQueryTests.swift */; };
-		E58054AE864E79C8E2DD4B05 /* WeatherQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3026DE6317CC2DE447B39A /* WeatherQuery.swift */; };
-		3AA1C821E89F91E47BA494ED /* WeatherQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3026DE6317CC2DE447B39A /* WeatherQuery.swift */; };
+		50B61D89F822C870566372ED /* WeatherConditionTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF262DA4226F234E94F6E745 /* WeatherConditionTextTests.swift */; };
+		E58054AE864E79C8E2DD4B05 /* WeatherConditionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */; };
+		3AA1C821E89F91E47BA494ED /* WeatherConditionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */; };
 		90ED5AAA3D344B36A9EBF153 /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D42B8DB715004076EB /* WeatherModel.swift */; };
 		4F2BC974B5C02A70BB0C2596 /* JourneyYearProgressTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */; };
 		22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */; };
@@ -39,7 +39,6 @@
 		A749FBFCA05C0A232F6650ED /* JourneyRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */; };
 		0CB52698AD69A166131CE76A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 633089E86841517C8CBC55A6 /* Foundation.framework */; };
 		1A03BDA22B92F910008C13DC /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1A03BDA12B92F910008C13DC /* FirebaseStorage */; };
-		1AF880D32B8DB5A2004076EB /* Api.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1AF880D22B8DB5A2004076EB /* Api.plist */; };
 		3F92D7D82BB5961500BDD34E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F92D7D72BB5961500BDD34E /* Extensions.swift */; };
 		3FB6D74E2BB2E8EF0098F29F /* LoadingIndicatorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74D2BB2E8EF0098F29F /* LoadingIndicatorCell.swift */; };
 		3FB6D7502BB316820098F29F /* DiaryUploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB6D74F2BB316820098F29F /* DiaryUploadManager.swift */; };
@@ -69,7 +68,6 @@
 		D2F0EF332BAAAD51008736F1 /* DiaryDataDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B2B2B9FE9BB00508230 /* DiaryDataDelegate.swift */; };
 		D2F0EF342BAAAD51008736F1 /* NotificationName.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2094B342BA14A6600508230 /* NotificationName.swift */; };
 		D2F0EF352BAAAD51008736F1 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880D72B8DC135004076EB /* WeatherService.swift */; };
-		D2F0EF362BAAAD51008736F1 /* EveryDiary++Bundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */; };
 		D2F0EF372BAAAD51008736F1 /* SetFaceID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF880E32B8F182B004076EB /* SetFaceID.swift */; };
 		D2F0EF382BAAAD51008736F1 /* FireStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA011602B88790800A26CE0 /* FireStore.swift */; };
 		D2F0EF392BAAAD51008736F1 /* FirebaseStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A03BDA32B92FA7D008C13DC /* FirebaseStorageManager.swift */; };
@@ -241,8 +239,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		DF262DA4226F234E94F6E745 /* WeatherQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WeatherQueryTests.swift"; sourceTree = "<group>"; };
-		9E3026DE6317CC2DE447B39A /* WeatherQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Weather/WeatherQuery.swift"; sourceTree = "<group>"; };
+		DF262DA4226F234E94F6E745 /* WeatherConditionTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WeatherConditionTextTests.swift"; sourceTree = "<group>"; };
+		9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Weather/WeatherConditionText.swift"; sourceTree = "<group>"; };
 		F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyYearProgressTests.swift"; sourceTree = "<group>"; };
 		72A5502C9D12F706D16C40F0 /* JourneyCityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyCityView.swift"; sourceTree = "<group>"; };
 		B2B05EB803CFF8D5FE8BCBCE /* JourneyCityScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Journey/Scenes/JourneyCityScene.swift"; sourceTree = "<group>"; };
@@ -267,10 +265,8 @@
 		1A6D90672BA05B8500DEBB12 /* PaginationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaginationManager.swift; sourceTree = "<group>"; };
 		1A6D906B2BA1A39800DEBB12 /* StartVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartVC.swift; sourceTree = "<group>"; };
 		1A83D0B52BA9B1C4005DC6C6 /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
-		1AF880D22B8DB5A2004076EB /* Api.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Api.plist; sourceTree = "<group>"; };
 		1AF880D42B8DB715004076EB /* WeatherModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherModel.swift; sourceTree = "<group>"; };
 		1AF880D72B8DC135004076EB /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
-		1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EveryDiary++Bundle.swift"; sourceTree = "<group>"; };
 		1AF880E32B8F182B004076EB /* SetFaceID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetFaceID.swift; sourceTree = "<group>"; };
 		3F0FEFE82B8D8881001539AE /* JournalCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalCollectionViewCell.swift; sourceTree = "<group>"; };
 		3F0FEFEA2B8D88B9001539AE /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
@@ -478,7 +474,6 @@
 			isa = PBXGroup;
 			children = (
 				1AF880D72B8DC135004076EB /* WeatherService.swift */,
-				1AF880E12B8EC021004076EB /* EveryDiary++Bundle.swift */,
 				1AF880E32B8F182B004076EB /* SetFaceID.swift */,
 			);
 			path = Service;
@@ -581,7 +576,6 @@
 				6BABC3712B85D109009267B3 /* Assets.xcassets */,
 				6BABC3762B85D109009267B3 /* Info.plist */,
 				D2F0EF882BAC5A32008736F1 /* PrivacyInfo.xcprivacy */,
-				1AF880D22B8DB5A2004076EB /* Api.plist */,
 				A0F100012026091500000002 /* GoogleService-Info.plist */,
 			);
 			path = EveryDiary;
@@ -679,7 +673,7 @@
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
-				DF262DA4226F234E94F6E745 /* WeatherQueryTests.swift */,
+				DF262DA4226F234E94F6E745 /* WeatherConditionTextTests.swift */,
 				F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */,
 				A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */,
 				28E07BCA7B611D0D6AEBB653 /* JourneyRecordTests.swift */,
@@ -732,7 +726,7 @@
 				6324AE064574465A82455BD2 /* DayKind.swift */,
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
-				9E3026DE6317CC2DE447B39A /* WeatherQuery.swift */,
+				9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */,
 				67318E058E00F90F8034E7B9 /* JourneyYearProgress.swift */,
 				A4A55F5B98B0294E04D5A559 /* JourneyRecord.swift */,
 				62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */,
@@ -932,7 +926,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6B95C0512B8C7A5A00DBB175 /* SFProRounded-Regular.otf in Resources */,
-				1AF880D32B8DB5A2004076EB /* Api.plist in Resources */,
 				A0F100012026091500000001 /* GoogleService-Info.plist in Resources */,
 				6BABC3752B85D109009267B3 /* LaunchScreen.storyboard in Resources */,
 				6B95C0382B8C7A3B00DBB175 /* SFProDisplay-Bold.otf in Resources */,
@@ -957,8 +950,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				50B61D89F822C870566372ED /* WeatherQueryTests.swift in Sources */,
-				E58054AE864E79C8E2DD4B05 /* WeatherQuery.swift in Sources */,
+				50B61D89F822C870566372ED /* WeatherConditionTextTests.swift in Sources */,
+				E58054AE864E79C8E2DD4B05 /* WeatherConditionText.swift in Sources */,
 				90ED5AAA3D344B36A9EBF153 /* WeatherModel.swift in Sources */,
 				4F2BC974B5C02A70BB0C2596 /* JourneyYearProgressTests.swift in Sources */,
 				D57875793289C9FDEE8CEBFA /* JourneyCityScene.swift in Sources */,
@@ -1028,7 +1021,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3AA1C821E89F91E47BA494ED /* WeatherQuery.swift in Sources */,
+				3AA1C821E89F91E47BA494ED /* WeatherConditionText.swift in Sources */,
 				22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */,
 				524E6639EAF11484AA7BD7DB /* JourneyCityScene.swift in Sources */,
 				3A14FE2DE5453BCF575BE284 /* JourneyYearProgress.swift in Sources */,
@@ -1121,7 +1114,6 @@
 				D2F0EF342BAAAD51008736F1 /* NotificationName.swift in Sources */,
 				D2F0EF352BAAAD51008736F1 /* WeatherService.swift in Sources */,
 				6BB23A392BB171D100C3DA25 /* BezierPathCache.swift in Sources */,
-				D2F0EF362BAAAD51008736F1 /* EveryDiary++Bundle.swift in Sources */,
 				D2F0EF372BAAAD51008736F1 /* SetFaceID.swift in Sources */,
 				6BB23A312BAC5D7500C3DA25 /* DetailVC.swift in Sources */,
 				D2F0EF382BAAAD51008736F1 /* FireStore.swift in Sources */,
