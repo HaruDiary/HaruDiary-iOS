@@ -67,6 +67,80 @@ final class DiarySaveCoordinatorTests: XCTestCase {
         XCTAssertTrue(writer.created.isEmpty)
     }
 
+    private func waitUntil(_ condition: @MainActor () -> Bool, file: StaticString = #filePath, line: UInt = #line) async {
+        for _ in 0..<2000 {
+            if condition() { return }
+            try? await Task.sleep(nanoseconds: 1_000_000)
+        }
+        XCTFail("Timed out", file: file, line: line)
+    }
+
+    private func edited() -> DiaryEntry {
+        var updated = entry()
+        updated.id = "diary-1"
+        updated.userID = "user-a"
+        return updated
+    }
+
+    func testSlotUpdateKeepsStoredFilesAndUploadsOnlyNewPhotos() async {
+        let storage = SaveTestImages()
+        let writer = SaveTestWriter()
+        let coordinator = DiarySaveCoordinator(authentication: SaveTestAuthentication(), images: storage, entries: writer)
+        let finished = expectation(description: "Saved")
+        var outcome: DiarySaveOutcome?
+
+        coordinator.update(edited(), diaryID: "diary-1", expectedUserID: "user-a", existingImageURLs: ["old-1", "old-2"],
+                           photos: [.stored(url: "old-2"), .new(image(3))], unreadablePhotoCount: 0) { result in
+            outcome = try? result.get()
+            finished.fulfill()
+        }
+        XCTAssertEqual(storage.uploads.map(\.image.assetIdentifier), ["asset-3"], "Stored photos are not uploaded again")
+        storage.completeUpload(at: 0, url: "new-3")
+        await waitUntil { !storage.deletions.isEmpty }
+        XCTAssertEqual(writer.updated.first?.entry.imageURL, ["old-2", "new-3"])
+        XCTAssertEqual(storage.deletions.map(\.url), ["old-1"], "Only the removed stored photo is deleted, after saving")
+        storage.completeDeletion(at: 0)
+        await fulfillment(of: [finished], timeout: 3)
+        XCTAssertEqual(outcome, .saved)
+    }
+
+    func testSlotUpdateWithFailedUploadKeepsStoredPhotosAndSavesText() async {
+        let storage = SaveTestImages()
+        let writer = SaveTestWriter()
+        let coordinator = DiarySaveCoordinator(authentication: SaveTestAuthentication(), images: storage, entries: writer)
+        let finished = expectation(description: "Saved")
+        var outcome: DiarySaveOutcome?
+
+        coordinator.update(edited(), diaryID: "diary-1", expectedUserID: "user-a", existingImageURLs: ["old-1"],
+                           photos: [.new(image(3)), .new(image(4))], unreadablePhotoCount: 0) { result in
+            outcome = try? result.get()
+            finished.fulfill()
+        }
+        storage.completeUpload(at: 0, url: "new-3")
+        storage.completeUpload(at: 1, url: nil)
+        await waitUntil { !storage.deletions.isEmpty }
+        XCTAssertEqual(storage.deletions.map(\.url), ["new-3"], "The new upload is removed, the stored photo is not")
+        storage.completeDeletion(at: 0)
+        await fulfillment(of: [finished], timeout: 3)
+        XCTAssertEqual(writer.updated.first?.entry.imageURL, ["old-1"])
+        XCTAssertEqual(outcome, .savedWithMissingPhotos(1))
+    }
+
+    func testSlotUpdateRefusesAnotherAccount() {
+        let auth = SaveTestAuthentication()
+        auth.currentUserID = "user-b"
+        let storage = SaveTestImages()
+        let writer = SaveTestWriter()
+        let coordinator = DiarySaveCoordinator(authentication: auth, images: storage, entries: writer)
+        var error: Error?
+
+        coordinator.update(edited(), diaryID: "diary-1", expectedUserID: "user-a", existingImageURLs: ["old-1"],
+                           photos: [.new(image(3))], unreadablePhotoCount: 0) { if case .failure(let e) = $0 { error = e } }
+        XCTAssertEqual(error as? DiarySaveError, .accountChanged)
+        XCTAssertTrue(storage.uploads.isEmpty)
+        XCTAssertTrue(writer.updated.isEmpty)
+    }
+
     func testUpdateClearsImageURLsBeforeDeletingOldPhotosWhenNoNewPhotos() async {
         let auth = SaveTestAuthentication()
         let storage = SaveTestImages()
@@ -201,6 +275,69 @@ final class DiarySaveCoordinatorTests: XCTestCase {
         XCTAssertEqual(storage.deletions.map(\.url), ["new"])
     }
 
+    // Saved before the photos finished loading (or after one failed to load): the editor holds none or only some
+    // of them, so replacing would delete the rest. Only the text is saved and every stored photo stays.
+    func testUpdateKeepingPhotosNeverUploadsOrDeletes() {
+        let auth = SaveTestAuthentication()
+        let storage = SaveTestImages()
+        let writer = SaveTestWriter()
+        let coordinator = DiarySaveCoordinator(authentication: auth, images: storage, entries: writer)
+        var result: Result<DiarySaveOutcome, Error>?
+        var edited = entry()
+        edited.content = "바꾼 본문"
+        edited.imageURL = []
+
+        coordinator.updateKeepingPhotos(edited, diaryID: "diary-1", expectedUserID: "user-a",
+                                        existingImageURLs: ["old-1", "old-2"]) { result = $0 }
+
+        if case .success(.savedKeepingPhotos)? = result {} else { XCTFail("Text must be saved") }
+        XCTAssertEqual(writer.updated.first?.entry.content, "바꾼 본문")
+        XCTAssertEqual(writer.updated.first?.entry.imageURL, ["old-1", "old-2"])
+        XCTAssertTrue(storage.uploads.isEmpty)
+        XCTAssertTrue(storage.deletions.isEmpty)
+    }
+
+    func testUpdateKeepingPhotosChecksTheAccount() {
+        let auth = SaveTestAuthentication()
+        auth.currentUserID = "user-b"
+        let writer = SaveTestWriter()
+        let coordinator = DiarySaveCoordinator(authentication: auth, images: SaveTestImages(), entries: writer)
+        var result: Result<DiarySaveOutcome, Error>?
+
+        coordinator.updateKeepingPhotos(entry(), diaryID: "diary-1", expectedUserID: "user-a",
+                                        existingImageURLs: ["old"]) { result = $0 }
+
+        if case .failure(let error)? = result {
+            XCTAssertEqual(error as? DiarySaveError, .accountChanged)
+        } else {
+            XCTFail("Account switch must reject the save")
+        }
+        XCTAssertTrue(writer.updated.isEmpty)
+    }
+
+    func testPhotosCanBeReplacedOnlyWhenEveryStoredPhotoArrived() {
+        var none = ExistingPhotoLoad(expected: 0)
+        XCTAssertTrue(none.isSettled)
+        XCTAssertTrue(none.allLoaded)
+        none.photoArrived()
+        XCTAssertTrue(none.allLoaded)
+
+        var load = ExistingPhotoLoad(expected: 2)
+        XCTAssertFalse(load.isSettled)
+        XCTAssertFalse(load.allLoaded)
+        load.photoArrived()
+        XCTAssertFalse(load.isSettled)
+        load.photoFailed()
+        // Loading ends so the screen stops waiting, but the missing photo must not be treated as removed.
+        XCTAssertTrue(load.isSettled)
+        XCTAssertFalse(load.allLoaded)
+
+        var complete = ExistingPhotoLoad(expected: 2)
+        complete.photoArrived()
+        complete.photoArrived()
+        XCTAssertTrue(complete.allLoaded)
+    }
+
     func testSignedOutUpdateNeverDeletesPhotos() {
         let auth = SaveTestAuthentication()
         auth.currentUserID = nil
@@ -264,6 +401,18 @@ final class UnusedDiarySaving: DiarySaving {
                 images uploads: [DiaryImageUpload],
                 unreadablePhotoCount: Int,
                 completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
+        XCTFail("Composition must not update a diary")
+    }
+
+    func update(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
+                existingImageURLs: [String], photos: [DiaryPhotoSlot], unreadablePhotoCount: Int,
+                completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
+        XCTFail("Composition must not update a diary")
+    }
+
+    func updateKeepingPhotos(_ entry: DiaryEntry, diaryID: String, expectedUserID: String,
+                             existingImageURLs: [String],
+                             completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         XCTFail("Composition must not update a diary")
     }
 }

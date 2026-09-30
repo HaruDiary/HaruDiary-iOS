@@ -61,6 +61,11 @@ class DiaryManager {
     }
 
     func addDiary(diary: DiaryEntry, userID: String, completion: @escaping (Error?) -> Void) {
+        // The editor already looked the weather up while the diary was written; only look it up when it could not.
+        if diary.weatherDescription != nil {
+            storeNewDiary(diary, userID: userID, completion: completion)
+            return
+        }
         let weatherService = WeatherService()
         
         weatherService.getWeather(forDiaryOn: diary.date) { result in
@@ -85,29 +90,33 @@ class DiaryManager {
                 diaryWithWeather.weatherTemp = 0
             }
             
-            var newDiaryWithUserID = diaryWithWeather
-            newDiaryWithUserID.userID = userID
-            let documentReference = DiaryManager.shared.db.collection("users").document(userID).collection("diaries").document()
-            newDiaryWithUserID.id = documentReference.documentID
-            
-            do {
-                try documentReference.setData(from: newDiaryWithUserID) { error in
-                    if let error = error {
-                        print("Error adding document: \(error)")
-                        completion(error)
-                    } else {
-                        self.fetchDiaries { (diaries, error) in
-                            if let error = error {
-                                print("Error fetching diaries after adding a new diary: \(error)")
-                            }
+            self.storeNewDiary(diaryWithWeather, userID: userID, completion: completion)
+        }
+    }
+
+    private func storeNewDiary(_ diary: DiaryEntry, userID: String, completion: @escaping (Error?) -> Void) {
+        var newDiaryWithUserID = diary
+        newDiaryWithUserID.userID = userID
+        let documentReference = DiaryManager.shared.db.collection("users").document(userID).collection("diaries").document()
+        newDiaryWithUserID.id = documentReference.documentID
+        
+        do {
+            try documentReference.setData(from: newDiaryWithUserID) { error in
+                if let error = error {
+                    print("Error adding document: \(error)")
+                    completion(error)
+                } else {
+                    self.fetchDiaries { (diaries, error) in
+                        if let error = error {
+                            print("Error fetching diaries after adding a new diary: \(error)")
                         }
-                        completion(nil)
                     }
+                    completion(nil)
                 }
-            } catch {
-                print("Error adding document: \(error)")
-                completion(error)
             }
+        } catch {
+            print("Error adding document: \(error)")
+            completion(error)
         }
     }
     

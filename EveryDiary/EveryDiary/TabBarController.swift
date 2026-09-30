@@ -13,7 +13,7 @@ class TabBarController: UITabBarController {
     let thirdVC: UINavigationController
 
     init(dependencies: AppDependencies) {
-        let makeWriteDiary: MakeWriteDiary = { WriteDiaryVC(saver: dependencies.diarySaving) }
+        let makeWriteDiary: MakeWriteDiary = { DiaryEditorModule.makeEditor(saver: dependencies.diarySaving) }
         let makeSettings = { dependencies.makeSettingsModule().makeViewController(makeWriteDiary: makeWriteDiary) }
         firstVC = UINavigationController(rootViewController: dependencies.makeDiaryListModule().makeViewController(makeWriteDiary: makeWriteDiary, makeSettings: makeSettings))
         secondVC = UINavigationController(rootViewController: dependencies.makeJourneyModule().makeViewController(makeWriteDiary: makeWriteDiary, makeSettings: makeSettings))

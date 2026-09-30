@@ -16,19 +16,6 @@ private struct PhotoEncodeSource {
     let location: String?
 }
 
-protocol WriteDiaryDelegate: AnyObject {
-    func diaryUploadDidStart()
-    func diaryUploadDidFinish()
-}
-
-// WriteDiaryVC를 호출하는 목적에 따라 WriteDiaryVC의 UI컴포넌트 상태 구분
-enum UIstatus {
-    case writeNewDiary      // 새로운 일기 작성
-    case editDiary          // 작성된 일기 수정
-    case showDiary          // 작성된 일기 조회
-}
-
-typealias MakeWriteDiary = @MainActor () -> WriteDiaryVC
 
 class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
     
@@ -64,6 +51,8 @@ class WriteDiaryVC: UIViewController, ImagePickerDelegate, UITextFieldDelegate {
     private var existingImageURLs: [String] = []                // 이미지 목록을 저장할 변수
     private var isSavingDiary = false                           // 중복저장을 방지하기 위한 변수(플래그)
     private var isLoadingImages = false                         // 이미지 불러오는 중임을 나타내는 플래그
+    // 수정 중인 일기의 저장된 사진을 모두 받았는지. 다 받기 전에는 사진을 바꾸지 않는다.
+    private var existingPhotoLoad = ExistingPhotoLoad(expected: 0)
     private var hasUnsavedChanges = false {
         didSet {
             self.isModalInPresentation = hasUnsavedChanges
@@ -298,6 +287,13 @@ extension WriteDiaryVC {
                 message: "글은 저장했습니다. 사진 \(count)장은 저장하지 못했습니다.",
                 interval: 2.0
             )
+        case .success(.savedKeepingPhotos):
+            delegate?.diaryDidUpdate()
+            TemporaryAlert.presentOnTopScreen(
+                with: "사진은 그대로 두었어요",
+                message: "사진을 모두 불러오기 전에 저장해서 글만 저장했습니다.",
+                interval: 2.0
+            )
         case .failure(let error):
             print("Error saving diary: \(error.localizedDescription)")
             TemporaryAlert.presentOnTopScreen(
@@ -341,6 +337,16 @@ extension WriteDiaryVC {
         updatedEntry.useMetadataLocation = useMetadataLocation
         updatedEntry.currentLocationInfo = currentLocationInfo
         let existingURLs = existingImageURLs
+        // 저장된 사진을 아직 다 받지 못했으면(불러오는 중이거나 실패) 화면에 없는 사진이 지워지지 않도록 글만 저장한다.
+        guard existingPhotoLoad.allLoaded else {
+            dismiss(animated: true) { [weak self] in
+                self?.saver.updateKeepingPhotos(updatedEntry, diaryID: diaryID, expectedUserID: editingUserID,
+                                                existingImageURLs: existingURLs) { [weak self] result in
+                    self?.finishSave(result, failureTitle: "업데이트 실패")
+                }
+            }
+            return
+        }
         saveAfterDismiss { [weak self] prepared in
             self?.saver.update(updatedEntry, diaryID: diaryID, expectedUserID: editingUserID,
                                existingImageURLs: existingURLs,
@@ -486,6 +492,7 @@ extension WriteDiaryVC {
         self.selectedPhotoIdentifiers.removeAll()
         self.imagesLocationInfo.removeAll()
         self.tempImagesLocationInfo = Array(repeating: nil, count: diary.imageURL?.count ?? 0)
+        self.existingPhotoLoad = ExistingPhotoLoad(expected: diary.imageURL?.count ?? 0)
         
         guard let imageURLs = diary.imageURL, !imageURLs.isEmpty else {
             self.isLoadingImages = false                // 이미지가 없다면 로딩 플래그 false
@@ -506,7 +513,13 @@ extension WriteDiaryVC {
     }
     
     private func handleDownloadedImage(_ downloadedImage: UIImage?, metadata: [String: String]?, index: Int, totalImages: Int) {
-        guard let image = downloadedImage else { return }
+        guard let image = downloadedImage else {
+            // 받지 못한 사진이 있어도 로딩 표시는 끝낸다. 이 경우 수정 저장은 사진을 건드리지 않는다.
+            existingPhotoLoad.photoFailed()
+            finishLoadingExistingPhotosIfSettled()
+            return
+        }
+        existingPhotoLoad.photoArrived()
         let captureTime = metadata?["captureTime"] ?? "Unknown"
         let locationInfoString = metadata?["location"] ?? "Unknown"
         let assetIdentifier = metadata?["assetIdentifier"]
@@ -519,8 +532,11 @@ extension WriteDiaryVC {
         // 메타데이터를 포함한 ImageLocationInfo 객체 생성
         let imageLocationInfo = ImageLocationInfo(image: image, locationInfo: locationInfo, assetIdentifier: assetIdentifier, captureTime: captureTime, location: locationInfoString)
         self.tempImagesLocationInfo[index] = imageLocationInfo
-        
-        if tempImagesLocationInfo.compactMap({ $0 }).count == totalImages {
+        finishLoadingExistingPhotosIfSettled()
+    }
+
+    private func finishLoadingExistingPhotosIfSettled() {
+        if existingPhotoLoad.isSettled {
             DispatchQueue.main.async {
                 // 다운로드된 이미지를 순서대로 배열에 저장
                 self.isLoadingImages = false    // 이미지 로딩 완료 플래그 설정

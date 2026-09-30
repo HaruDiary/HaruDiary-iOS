@@ -62,8 +62,9 @@ private struct CalendarDiaryThumbnail: View {
             DiaryTheme.Colors.selection.opacity(0.5)
             if let image {
                 Image(uiImage: image).resizable().scaledToFill()
+                    .transition(.opacity)
             } else if isLoading {
-                ProgressView()
+                PhotoSkeleton(cornerRadius: 0)
             } else if !entry.emotion.isEmpty {
                 Image(entry.emotion).resizable().scaledToFit().padding(DiaryTheme.Spacing.screen)
             } else {
@@ -82,8 +83,10 @@ private struct CalendarDiaryThumbnail: View {
             isLoading = true
             let loaded = await imageLoader.image(for: url)
             guard !Task.isCancelled else { return }
-            image = loaded
-            isLoading = false
+            withAnimation(PhotoSkeleton.fadeIn) {
+                image = loaded
+                isLoading = false
+            }
         }
     }
 }

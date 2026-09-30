@@ -7,6 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B005F748B1E5517923677A7 /* PhotoSkeleton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */; };
+		2FDFF42697C6012BFA76146A /* DiaryEditorViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E94119F25F06D502A982397 /* DiaryEditorViewModelTests.swift */; };
+		CB9E36BF189F3B465DAB14FA /* DiaryEditor/DiaryEditorModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CC059E79CE3150358018128 /* DiaryEditor/DiaryEditorModule+UIKit.swift */; };
+		69416B9FCE2A0B85CCE3CD23 /* DiaryEditor/DiaryEditorHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1418DC5A4907664FF55A05BA /* DiaryEditor/DiaryEditorHostingController.swift */; };
+		17554B1496218ACF09B14AEF /* DiaryEditor/DiaryPhotoViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED06D6A8AE46B0CBF9A6190 /* DiaryEditor/DiaryPhotoViews.swift */; };
+		8D2CFDD6199EF44866BF58F2 /* DiaryEditor/DiaryEditorSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0B5B0A5A04F0F1B191DE6F /* DiaryEditor/DiaryEditorSheets.swift */; };
+		2D4935A81A0A2CB90EA4BFC5 /* DiaryEditor/DiaryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE75FE4AB8F212EAB3EFD44 /* DiaryEditor/DiaryEditorView.swift */; };
+		B3FDFD39AA6A0315EBC562B6 /* DiaryEditor/DiaryEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C0E8527E91F7FF94707073 /* DiaryEditor/DiaryEditorViewModel.swift */; };
+		0CAEC572BCF7B10EAF96681B /* DiaryEditor/DiaryEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C0E8527E91F7FF94707073 /* DiaryEditor/DiaryEditorViewModel.swift */; };
+		55061C4C17D75A27A51B8974 /* DiaryEditor/DiaryDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EF531F51606B07FD08F5C3 /* DiaryEditor/DiaryDraft.swift */; };
+		E67AEA5ED56EEA7E2672614A /* DiaryEditor/DiaryDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EF531F51606B07FD08F5C3 /* DiaryEditor/DiaryDraft.swift */; };
+		6E1635B7B6A70A92E14CE55F /* DiaryEditor/DiaryCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8498F8BC94473E280D191B /* DiaryEditor/DiaryCondition.swift */; };
+		AF335043DC10F16B4D62C1A9 /* DiaryEditor/DiaryCondition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE8498F8BC94473E280D191B /* DiaryEditor/DiaryCondition.swift */; };
 		6B7CCEDFD98775AE0C549885 /* Settings/SettingsHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4B36924321030901F63EDD /* Settings/SettingsHostingController.swift */; };
 		D478B19977FD8916B2F2A0FB /* Settings/SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C2DBC8A6569656266FC7BC /* Settings/SettingsView.swift */; };
 		F3B954F69016720F752FD360 /* Settings/SettingsSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3865AF8146EA66DB10312B24 /* Settings/SettingsSummary.swift */; };
@@ -386,6 +399,7 @@
 		7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarViewModel.swift"; sourceTree = "<group>"; };
 		77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule.swift"; sourceTree = "<group>"; };
 		2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarViewModelTests.swift"; sourceTree = "<group>"; };
+		3E94119F25F06D502A982397 /* DiaryEditorViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditorViewModelTests.swift"; sourceTree = "<group>"; };
 		1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryReminderTests.swift"; sourceTree = "<group>"; };
 		584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LockViewModelTests.swift"; sourceTree = "<group>"; };
 		9D802337338EFDCC16CA9E0A /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppLockTests.swift"; sourceTree = "<group>"; };
@@ -409,6 +423,8 @@
 		5F48F50BB73E9E4A9B0BF94C /* CalendarModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule+UIKit.swift"; sourceTree = "<group>"; };
 		62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListIndex.swift"; sourceTree = "<group>"; };
 		B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDiaryFeed.swift"; sourceTree = "<group>"; };
+		59EF531F51606B07FD08F5C3 /* DiaryEditor/DiaryDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryDraft.swift"; sourceTree = "<group>"; };
+		EE8498F8BC94473E280D191B /* DiaryEditor/DiaryCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryCondition.swift"; sourceTree = "<group>"; };
 		43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/DiaryReminders.swift"; sourceTree = "<group>"; };
 		65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/DiaryReminder.swift"; sourceTree = "<group>"; };
 		140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/DeviceOwnerAuthenticating.swift"; sourceTree = "<group>"; };
@@ -431,6 +447,7 @@
 		6324AE064574465A82455BD2 /* DayKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKind.swift"; sourceTree = "<group>"; };
 		7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKindTests.swift"; sourceTree = "<group>"; };
 		8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWeatherIcon.swift"; sourceTree = "<group>"; };
+		31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoSkeleton.swift"; sourceTree = "<group>"; };
 		0E851EEAA92546DAB5CA3FFE /* DiaryDocumentDecoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryDocumentDecoding.swift"; sourceTree = "<group>"; };
 		1FAAA1DC7DFF409D9B8A4315 /* DiaryDocumentDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryDocumentDecodingTests.swift"; sourceTree = "<group>"; };
 		D71EA87682D94703AF9A9F78 /* DiaryPhotoReplacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryPhotoReplacement.swift"; sourceTree = "<group>"; };
@@ -450,6 +467,12 @@
 		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
 		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
 		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		1CC059E79CE3150358018128 /* DiaryEditor/DiaryEditorModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryEditorModule+UIKit.swift"; sourceTree = "<group>"; };
+		1418DC5A4907664FF55A05BA /* DiaryEditor/DiaryEditorHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryEditorHostingController.swift"; sourceTree = "<group>"; };
+		CED06D6A8AE46B0CBF9A6190 /* DiaryEditor/DiaryPhotoViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryPhotoViews.swift"; sourceTree = "<group>"; };
+		8D0B5B0A5A04F0F1B191DE6F /* DiaryEditor/DiaryEditorSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryEditorSheets.swift"; sourceTree = "<group>"; };
+		AEE75FE4AB8F212EAB3EFD44 /* DiaryEditor/DiaryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryEditorView.swift"; sourceTree = "<group>"; };
+		06C0E8527E91F7FF94707073 /* DiaryEditor/DiaryEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryEditorViewModel.swift"; sourceTree = "<group>"; };
 		1F4B36924321030901F63EDD /* Settings/SettingsHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsHostingController.swift"; sourceTree = "<group>"; };
 		17C2DBC8A6569656266FC7BC /* Settings/SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsView.swift"; sourceTree = "<group>"; };
 		3865AF8146EA66DB10312B24 /* Settings/SettingsSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsSummary.swift"; sourceTree = "<group>"; };
@@ -746,6 +769,7 @@
 				B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				3E94119F25F06D502A982397 /* DiaryEditorViewModelTests.swift */,
 				1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */,
 				584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */,
 				9D802337338EFDCC16CA9E0A /* AppLockTests.swift */,
@@ -804,6 +828,8 @@
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B72A1C010000000000000003 /* DiarySaving.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				59EF531F51606B07FD08F5C3 /* DiaryEditor/DiaryDraft.swift */,
+				EE8498F8BC94473E280D191B /* DiaryEditor/DiaryCondition.swift */,
 				43A7AA7BC81686C38656E2C4 /* Reminder/DiaryReminders.swift */,
 				65CC4023EF5651607629AD49 /* Reminder/DiaryReminder.swift */,
 				140EB7F99C8EBB2D540A16B8 /* Lock/DeviceOwnerAuthenticating.swift */,
@@ -857,6 +883,12 @@
 				0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
+				1CC059E79CE3150358018128 /* DiaryEditor/DiaryEditorModule+UIKit.swift */,
+				1418DC5A4907664FF55A05BA /* DiaryEditor/DiaryEditorHostingController.swift */,
+				CED06D6A8AE46B0CBF9A6190 /* DiaryEditor/DiaryPhotoViews.swift */,
+				8D0B5B0A5A04F0F1B191DE6F /* DiaryEditor/DiaryEditorSheets.swift */,
+				AEE75FE4AB8F212EAB3EFD44 /* DiaryEditor/DiaryEditorView.swift */,
+				06C0E8527E91F7FF94707073 /* DiaryEditor/DiaryEditorViewModel.swift */,
 				1F4B36924321030901F63EDD /* Settings/SettingsHostingController.swift */,
 				17C2DBC8A6569656266FC7BC /* Settings/SettingsView.swift */,
 				3865AF8146EA66DB10312B24 /* Settings/SettingsSummary.swift */,
@@ -921,6 +953,7 @@
 				62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */,
 				DEBC2E2935FB4A6F8D9D09CF /* DiaryListComponents.swift */,
 				8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */,
+				31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */,
 				4D68D4420386455C94759513 /* DiaryWriteButton.swift */,
 				040BD821321645E60FF1909E /* DiaryTheme.swift */,
 			);
@@ -1052,6 +1085,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2FDFF42697C6012BFA76146A /* DiaryEditorViewModelTests.swift in Sources */,
+				B3FDFD39AA6A0315EBC562B6 /* DiaryEditor/DiaryEditorViewModel.swift in Sources */,
+				55061C4C17D75A27A51B8974 /* DiaryEditor/DiaryDraft.swift in Sources */,
+				6E1635B7B6A70A92E14CE55F /* DiaryEditor/DiaryCondition.swift in Sources */,
 				F3B954F69016720F752FD360 /* Settings/SettingsSummary.swift in Sources */,
 				4F0F93F1A8E349152F3B6E33 /* UserDefaultsReminderStore.swift in Sources */,
 				64F76684CFA187A46488A28D /* DiaryReminderTests.swift in Sources */,
@@ -1140,6 +1177,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B005F748B1E5517923677A7 /* PhotoSkeleton.swift in Sources */,
+				CB9E36BF189F3B465DAB14FA /* DiaryEditor/DiaryEditorModule+UIKit.swift in Sources */,
+				69416B9FCE2A0B85CCE3CD23 /* DiaryEditor/DiaryEditorHostingController.swift in Sources */,
+				17554B1496218ACF09B14AEF /* DiaryEditor/DiaryPhotoViews.swift in Sources */,
+				8D2CFDD6199EF44866BF58F2 /* DiaryEditor/DiaryEditorSheets.swift in Sources */,
+				2D4935A81A0A2CB90EA4BFC5 /* DiaryEditor/DiaryEditorView.swift in Sources */,
+				0CAEC572BCF7B10EAF96681B /* DiaryEditor/DiaryEditorViewModel.swift in Sources */,
+				E67AEA5ED56EEA7E2672614A /* DiaryEditor/DiaryDraft.swift in Sources */,
+				AF335043DC10F16B4D62C1A9 /* DiaryEditor/DiaryCondition.swift in Sources */,
 				6B7CCEDFD98775AE0C549885 /* Settings/SettingsHostingController.swift in Sources */,
 				D478B19977FD8916B2F2A0FB /* Settings/SettingsView.swift in Sources */,
 				A87A645255A5219DFB524282 /* Settings/SettingsSummary.swift in Sources */,
