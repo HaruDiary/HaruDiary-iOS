@@ -101,9 +101,7 @@ class SettingVC: UIViewController {
     }
     
     @objc func didTapLoginButton() {
-        let loginVC = LoginVC(gateway: module.signInGateway)
-        loginVC.modalPresentationStyle = .fullScreen
-        self.present(loginVC, animated: true)
+        present(SignInHostingController(gateway: module.signInGateway), animated: true)
     }
     
     private func setNavigationBar() {
@@ -238,9 +236,7 @@ extension SettingVC {
     }
     
     func showMainScreen() {
-        let loginVC = LoginVC(gateway: module.signInGateway)
-        loginVC.modalPresentationStyle = .fullScreen
-        self.present(loginVC, animated: true)
+        present(SignInHostingController(gateway: module.signInGateway), animated: true)
     }
     
     // Apple 회원은 탈퇴 직전에 Apple로 한 번 더 확인한다. 이 확인으로 Firebase가 Apple 연결을 끊는다.

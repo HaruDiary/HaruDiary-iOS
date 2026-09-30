@@ -144,7 +144,8 @@ Calendar 작업에서 일기 모델·날짜 formatter의 Foundation 분리, Cale
 목록과 같은 카드 형식의 SwiftUI로 교체했다. 설정의 계정 상태·로그아웃·탈퇴를 Firebase 직접 호출에서 분리했다.
 여정 탭은 공용 일기 구독을 쓰는 SwiftUI 월별 그림·연도별 도시로 교체했고([여정 탭 기준](JOURNEY.md)),
 날씨는 API 키 없이 Apple WeatherKit으로 받는다. 현재 테스트 개수는 [테스트와 CI](TESTING.md)를 따른다.
-일기 작성·수정 저장 분리(PR #8)와 작성 화면·로그인 화면의 SwiftUI 전환이 남아 있다.
+설정에서 여는 로그인 화면은 목업 20번 기준 SwiftUI로 교체했다(계정 연결 규칙은 기존 `SocialSignIn`).
+일기 작성·수정 저장 분리(PR #8)와 작성 화면의 SwiftUI 전환이 남아 있다.
 온보딩의 수동 화면 검증 상태는 [온보딩 리팩토링](ONBOARDING_REFACTORING.md)을 참고한다.
 세부 범위와 남은 통합 검증은 [Calendar 리팩토링](CALENDAR_REFACTORING.md),
 [일기 목록 리팩토링](DIARY_LIST_REFACTORING.md), [휴지통 리팩토링](TRASH_REFACTORING.md), [설정·계정 리팩토링](SETTINGS_ACCOUNT_REFACTORING.md)을 참고한다.

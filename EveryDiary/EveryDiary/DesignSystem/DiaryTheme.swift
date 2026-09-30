@@ -58,4 +58,13 @@ enum DiaryTheme {
         static let pageDuration = 0.32
         static let pressDuration = 0.15
     }
+
+    enum SignIn {
+        static let contentWidth: CGFloat = 480
+        static let title = Font.system(size: 40, weight: .heavy, design: .rounded)
+        static let illustrationMaxHeight: CGFloat = 260
+        static let buttonHeight: CGFloat = 52
+        static let buttonRadius: CGFloat = 12
+        static let providerLogo: CGFloat = 20
+    }
 }

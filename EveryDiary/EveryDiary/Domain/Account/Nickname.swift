@@ -7,6 +7,13 @@ enum Nickname {
     enum Problem: Error, Equatable {
         case empty
         case tooLong
+
+        var message: String {
+            switch self {
+            case .empty: return "닉네임을 입력해주세요."
+            case .tooLong: return "닉네임은 \(Nickname.maxLength)자까지 입력할 수 있어요."
+            }
+        }
     }
 
     /// Trims surrounding spaces and line breaks; 1...20 characters as the user sees them.

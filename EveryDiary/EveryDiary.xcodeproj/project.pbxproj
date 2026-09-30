@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DED38B77BE1D023C3CF04994 /* SignInViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */; };
+		D2106587AD9EED3AA8A1F31F /* SignIn/SignInHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D59C67BCB0B976297E9F0B /* SignIn/SignInHostingController.swift */; };
+		E3A0E6776D1EBBF060FE98C2 /* SignIn/SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A11CAC06AE30F512F4CC2C9 /* SignIn/SignInView.swift */; };
+		0D4D854EBF4A741B3495B5BE /* SignIn/SignInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4209D51899AB5A8A0C4860 /* SignIn/SignInViewModel.swift */; };
+		306180D3AC298324A6BCA09E /* SignIn/SignInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4209D51899AB5A8A0C4860 /* SignIn/SignInViewModel.swift */; };
 		50B61D89F822C870566372ED /* WeatherConditionTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF262DA4226F234E94F6E745 /* WeatherConditionTextTests.swift */; };
 		E58054AE864E79C8E2DD4B05 /* WeatherConditionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */; };
 		3AA1C821E89F91E47BA494ED /* WeatherConditionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */; };
@@ -344,6 +349,7 @@
 		7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarViewModel.swift"; sourceTree = "<group>"; };
 		77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule.swift"; sourceTree = "<group>"; };
 		2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarViewModelTests.swift"; sourceTree = "<group>"; };
+		91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignInViewModelTests.swift"; sourceTree = "<group>"; };
 		FFAAE9B7D18137751417D1D9 /* CalendarImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarImageLoader.swift"; sourceTree = "<group>"; };
 		38C72793785CC63EE0D7E647 /* CalendarDiaryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarDiaryRow.swift"; sourceTree = "<group>"; };
 		6DA30A71AEF1E85E1255B938 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarView.swift"; sourceTree = "<group>"; };
@@ -397,6 +403,9 @@
 		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
 		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
 		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		15D59C67BCB0B976297E9F0B /* SignIn/SignInHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignIn/SignInHostingController.swift"; sourceTree = "<group>"; };
+		8A11CAC06AE30F512F4CC2C9 /* SignIn/SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignIn/SignInView.swift"; sourceTree = "<group>"; };
+		7D4209D51899AB5A8A0C4860 /* SignIn/SignInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SignIn/SignInViewModel.swift"; sourceTree = "<group>"; };
 		A1D40C7B1D02405CB104C056 /* SettingsModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsModule.swift"; sourceTree = "<group>"; };
 		0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsModule+UIKit.swift"; sourceTree = "<group>"; };
 		8A6612B31B0240059B2D34EE /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsViewModelTests.swift"; sourceTree = "<group>"; };
@@ -673,6 +682,7 @@
 				E7912AF936F44D47AEE57E23 /* DiaryListIndexTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				91B7DDD8898E47A6F2F6BBEA /* SignInViewModelTests.swift */,
 				DF262DA4226F234E94F6E745 /* WeatherConditionTextTests.swift */,
 				F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */,
 				A0CB02074AB8A6C124772284 /* JourneySceneCatalogTests.swift */,
@@ -771,6 +781,9 @@
 				0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
+				15D59C67BCB0B976297E9F0B /* SignIn/SignInHostingController.swift */,
+				8A11CAC06AE30F512F4CC2C9 /* SignIn/SignInView.swift */,
+				7D4209D51899AB5A8A0C4860 /* SignIn/SignInViewModel.swift */,
 				7B849BEF7D104006888017EF /* TrashModule+UIKit.swift */,
 				524ED3536EE44A2785020373 /* TrashModule.swift */,
 				2E450331EF5B4555A6C5B235 /* TrashHostingController.swift */,
@@ -950,6 +963,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DED38B77BE1D023C3CF04994 /* SignInViewModelTests.swift in Sources */,
+				0D4D854EBF4A741B3495B5BE /* SignIn/SignInViewModel.swift in Sources */,
 				50B61D89F822C870566372ED /* WeatherConditionTextTests.swift in Sources */,
 				E58054AE864E79C8E2DD4B05 /* WeatherConditionText.swift in Sources */,
 				90ED5AAA3D344B36A9EBF153 /* WeatherModel.swift in Sources */,
@@ -1021,6 +1036,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D2106587AD9EED3AA8A1F31F /* SignIn/SignInHostingController.swift in Sources */,
+				E3A0E6776D1EBBF060FE98C2 /* SignIn/SignInView.swift in Sources */,
+				306180D3AC298324A6BCA09E /* SignIn/SignInViewModel.swift in Sources */,
 				3AA1C821E89F91E47BA494ED /* WeatherConditionText.swift in Sources */,
 				22B739C169D1698A10CA3CBB /* JourneyCityView.swift in Sources */,
 				524E6639EAF11484AA7BD7DB /* JourneyCityScene.swift in Sources */,

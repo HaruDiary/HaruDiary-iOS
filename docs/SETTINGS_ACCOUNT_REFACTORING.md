@@ -63,7 +63,11 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 
 ## 로그인 흐름 (Google·Apple)
 
-로그인 화면(`LoginVC`)은 Google·Apple 화면을 띄워 자격 증명만 받고, 계정 연결·전환은 `SocialSignIn`이 정한다.
+로그인 화면은 Google·Apple 화면을 띄워 자격 증명만 받고, 계정 연결·전환은 `SocialSignIn`이 정한다.
+설정에서 여는 로그인 화면은 SwiftUI(`Features/SignIn`)로 교체했다. `SignInView`는 표시만 하고,
+`SignInViewModel`이 로그인 결과·닉네임 입력·실패 안내를 정하며, `SignInHostingController`가 Google·Apple 화면을 띄운다.
+실패 문구는 게이트웨이가 Firebase 오류 코드를 `SignInFailure`로 분류해 정한다. 기존 `LoginVC`는 참조가 없으며 대체 흐름을
+실제 계정으로 확인한 뒤 삭제한다.
 
 | 현재 상태 | 동작 |
 |---|---|

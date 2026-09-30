@@ -21,7 +21,7 @@ final class FirebaseAccountSession: AccountSession {
             let handle = auth.addStateDidChangeListener { _, user in
                 continuation.yield(user.map(Self.snapshot))
             }
-            // LoginVC still reports display-name updates with this notification; the state listener does not fire for them.
+            // The sign-in screen still reports display-name updates with this notification; the state listener does not fire for them.
             // Remove once the sign-in flow reports through this session.
             let observer = NotificationCenter.default.addObserver(forName: .loginstatusChanged, object: nil, queue: .main) { [auth] _ in
                 continuation.yield(auth.currentUser.map(Self.snapshot))
