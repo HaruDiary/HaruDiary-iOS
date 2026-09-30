@@ -60,7 +60,7 @@ class DiaryManager {
         
         let weatherService = WeatherService()
         
-        weatherService.getWeather { result in
+        weatherService.getWeather(forDiaryOn: diary.date) { result in
             
             var weatherDescription = "Unknown"
             var weatherTemp = 0.0

@@ -29,6 +29,12 @@ class WeatherService: NSObject, CLLocationManagerDelegate {
         locationManager.requestWhenInUseAuthorization()
     }
 
+    /// Answers `.notToday` at once for any other day, without waiting for a location.
+    func getWeather(forDiaryOn date: Date, completion: @escaping (Result<WeatherResponse, WeatherError>) -> Void) {
+        guard WeatherError.appliesToDiary(on: date) else { return completion(.failure(.notToday)) }
+        getWeather(completion: completion)
+    }
+
     func getWeather(completion: @escaping (Result<WeatherResponse, WeatherError>) -> Void) {
         if let location = locationManager.location, abs(location.timestamp.timeIntervalSinceNow) < 600 {
             return fetch(at: location, completion: completion)

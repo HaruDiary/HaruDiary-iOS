@@ -26,4 +26,14 @@ final class WeatherConditionTextTests: XCTestCase {
         XCTAssertEqual(WeatherError.kind(of: URLError(.notConnectedToInternet)), .network)
         XCTAssertEqual(WeatherError.kind(of: NSError(domain: "WeatherDaemon", code: 2)), .unavailable)
     }
+
+    func testOnlyTodaysDiaryUsesCurrentWeather() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "Asia/Seoul"))
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 9, day: 30, hour: 0, minute: 30)))
+        let lateToday = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 9, day: 30, hour: 23, minute: 59)))
+        let lateYesterday = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 9, day: 29, hour: 23, minute: 59)))
+        XCTAssertTrue(WeatherError.appliesToDiary(on: lateToday, now: now, calendar: calendar))
+        XCTAssertFalse(WeatherError.appliesToDiary(on: lateYesterday, now: now, calendar: calendar))
+    }
 }

@@ -8,6 +8,13 @@ enum WeatherError: Error, Equatable {
     case network
     /// WeatherKit refused or failed, e.g. the WeatherKit capability is not enabled for the App ID.
     case unavailable
+    /// The diary is not for today, so current weather does not describe it; nothing was requested.
+    case notToday
+
+    /// Current weather only describes a diary written for today.
+    static func appliesToDiary(on date: Date, now: Date = Date(), calendar: Calendar = .current) -> Bool {
+        calendar.isDate(date, inSameDayAs: now)
+    }
 
     static func kind(of error: Error) -> WeatherError {
         error is URLError ? .network : .unavailable
