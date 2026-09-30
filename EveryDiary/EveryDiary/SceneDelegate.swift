@@ -12,6 +12,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     var blurEffectView: UIVisualEffectView?
+    private lazy var appLock = AppLockPresenter.live()
+    private var reminders: DiaryReminders?
     // Created after FirebaseApp.configure() in AppDelegate.
     private lazy var appleCredentialMonitor = AppleCredentialMonitor(
         auth: .auth(),
@@ -23,10 +25,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         self.window = window
-        OnboardingModule.install(in: window) { TabBarController(dependencies: .live()) }
+        var live = AppDependencies.live()
+        // One reminders instance for the whole app, also used by the reminder settings screen.
+        let reminders = live.makeDiaryReminders()
+        live.reminders = reminders
+        self.reminders = reminders
+        let dependencies = live
+        OnboardingModule.install(in: window) { TabBarController(dependencies: dependencies) }
         //강제로 다크모드 해제
         window.overrideUserInterfaceStyle = .light
         window.makeKeyAndVisible()
+        appLock.attach(to: window)
+        appLock.lockIfNeeded()
     }
     
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -36,42 +46,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         removeBlurEffect()
         appleCredentialMonitor.check()
+        appLock.didBecomeActive()
+        // Moves the reminder window forward and brings back today's reminder after midnight.
+        if let reminders { Task { await reminders.refresh() } }
     }
     
+    // Hides the diary in the app switcher while the lock is on; the lock itself appears on entering the background.
     func sceneWillResignActive(_ scene: UIScene) {
-        let biometricsEnabled = UserDefaults.standard.bool(forKey: "BiometricsEnabled")
-        
-        if biometricsEnabled {
+        if appLock.isLockEnabled && !appLock.isLocked {
             addBlurEffect()
         }
     }
     
     func sceneWillEnterForeground(_ scene: UIScene) {
-        let biometricsEnabled = UserDefaults.standard.bool(forKey: "BiometricsEnabled")
         
-        if biometricsEnabled {
-            
-            BiometricsAuth().authenticateWithBiometrics { success, error  in
-                DispatchQueue.main.async {
-                    if success {
-                        print("성공")
-                    } else {
-                        print("login 실패")
-                    }
-                }
-            }
-        }
     }
     
     func sceneDidEnterBackground(_ scene: UIScene) {
-        
+        appLock.lockIfNeeded()
     }
 }
 
 //MARK: - Blur Effect 메서드
 extension SceneDelegate {
     private func addBlurEffect() {
-        guard let window = window else { return }
+        guard let window = window, blurEffectView == nil else { return }
         
         let blurEffect = UIBlurEffect(style: .light)
         blurEffectView = UIVisualEffectView(effect: blurEffect)

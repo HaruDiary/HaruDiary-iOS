@@ -19,9 +19,6 @@ enum NicknameAlert {
     }
 
     static func problemMessage(_ problem: Nickname.Problem) -> String {
-        switch problem {
-        case .empty: return "닉네임을 입력해주세요."
-        case .tooLong: return "닉네임은 \(Nickname.maxLength)자까지 입력할 수 있어요."
-        }
+        problem.message
     }
 }

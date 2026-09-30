@@ -5,6 +5,14 @@ protocol SecretStore: AnyObject {
     func string(for key: String) -> String?
     func set(_ value: String, for key: String) throws
     func remove(_ key: String)
+    /// Like `remove`, but throws when the item could not be deleted. An item that is already gone is fine.
+    func delete(_ key: String) throws
+}
+
+extension SecretStore {
+    func delete(_ key: String) throws {
+        remove(key)
+    }
 }
 
 /// What the app keeps about Sign in with Apple: only the Apple user identifier, used to ask Apple whether

@@ -73,13 +73,14 @@ final class SocialSignInTests: XCTestCase {
 }
 
 @MainActor
-private final class FakeSignInGateway: SocialSignInGateway {
+final class FakeSignInGateway: SocialSignInGateway {
     let isGuest: Bool?
     var currentName: String?
     var linkResult: GuestLinkResult = .linked
     var linkError: Error?
     var signInError: Error?
     var nameError: Error?
+    var failureKind: SignInFailure = .other
     private(set) var calls: [String] = []
 
     init(isGuest: Bool?) {
@@ -108,6 +109,7 @@ private final class FakeSignInGateway: SocialSignInGateway {
 
     func appleCredential(for authorization: AppleAuthorization) -> SocialCredential { SocialCredential(provider: .apple, raw: NSObject()) }
     func rememberAppleUserID(_ id: String) {}
+    func failure(for error: Error) -> SignInFailure { failureKind }
 }
 
 /// For dependency-assembly tests that never open the login screen.
@@ -121,4 +123,5 @@ final class UnusedSignInGateway: SocialSignInGateway {
     func updateDisplayName(_ name: String) async throws {}
     func appleCredential(for authorization: AppleAuthorization) -> SocialCredential { SocialCredential(provider: .apple, raw: NSObject()) }
     func rememberAppleUserID(_ id: String) {}
+    func failure(for error: Error) -> SignInFailure { .other }
 }

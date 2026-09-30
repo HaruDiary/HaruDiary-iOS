@@ -10,6 +10,9 @@ struct AppDependencies {
     let calendarImageLoader: any CalendarImageLoading
     let calendar: Calendar
     let now: () -> Date
+    /// The app-wide writing reminders, shared with the reminder settings screen so their reschedules run in order.
+    /// Created by the scene (it starts a diary subscription); nil where no scene set it up.
+    var reminders: DiaryReminders? = nil
 
     func makeCalendarModule() -> CalendarModule {
         CalendarModule(repository: diaryRepository, session: userSession,
@@ -26,7 +29,8 @@ struct AppDependencies {
     }
 
     func makeSettingsModule() -> SettingsModule {
-        SettingsModule(session: accountSession, signInGateway: signInGateway, makeTrashModule: makeTrashModule)
+        SettingsModule(session: accountSession, signInGateway: signInGateway, makeTrashModule: makeTrashModule,
+                       reminders: reminders)
     }
 
     func makeDiaryListModule() -> DiaryListModule {

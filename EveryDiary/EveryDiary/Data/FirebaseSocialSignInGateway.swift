@@ -59,13 +59,24 @@ final class FirebaseSocialSignInGateway: SocialSignInGateway {
         }
     }
 
+    func failure(for error: Error) -> SignInFailure {
+        let error = error as NSError
+        guard error.domain == AuthErrorDomain else { return .other }
+        switch AuthErrorCode(rawValue: error.code) {
+        case .accountExistsWithDifferentCredential: return .otherProviderAccount
+        case .networkError: return .network
+        case .userDisabled: return .disabled
+        default: return .other
+        }
+    }
+
     func updateDisplayName(_ name: String) async throws {
         guard let request = auth.currentUser?.createProfileChangeRequest() else { return }
         request.displayName = name
         try await request.commitChanges()
     }
 
-    // LoginVC wraps the Firebase credentials it builds from the Google/Apple results.
+    // The sign-in screen wraps the Firebase credentials it builds from the Google/Apple results.
     private static func authCredential(_ credential: SocialCredential) throws -> AuthCredential {
         guard let credential = credential.raw as? AuthCredential else { throw SocialSignInError.invalidCredential }
         return credential

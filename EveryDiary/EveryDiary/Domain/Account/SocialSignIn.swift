@@ -6,6 +6,26 @@ struct SocialCredential {
     let raw: AnyObject
 }
 
+/// Why a sign-in failed, as far as the user can act on it. The gateway maps its own error codes to these.
+enum SignInFailure: Equatable {
+    /// The same email already has an account with the other provider (Google or Apple).
+    case otherProviderAccount
+    case network
+    case disabled
+    case other
+
+    var message: String {
+        switch self {
+        case .otherProviderAccount:
+            // 같은 이메일의 Google·Apple 계정은 하나만 만들 수 있다.
+            return "같은 이메일로 다른 로그인 방식(Google 또는 Apple)의 계정이 있어요.\n그 방식으로 로그인해주세요."
+        case .network: return "네트워크 연결을 확인한 뒤 다시 시도해주세요."
+        case .disabled: return "사용이 중지된 계정이에요."
+        case .other: return "잠시 후 다시 시도해주세요."
+        }
+    }
+}
+
 enum GuestLinkResult {
     case linked
     /// The Google/Apple account already has its own account; `existing` signs in to it.
@@ -28,6 +48,7 @@ protocol SocialSignInGateway {
     func appleCredential(for authorization: AppleAuthorization) -> SocialCredential
     /// Keeps the Apple user identifier used to ask Apple whether Sign in with Apple is still allowed.
     func rememberAppleUserID(_ id: String)
+    func failure(for error: Error) -> SignInFailure
 }
 
 /// Which sign-in happens for the current account. Previously any failure while linking a guest deleted the guest
