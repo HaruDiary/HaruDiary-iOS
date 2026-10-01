@@ -154,7 +154,7 @@ private struct DiaryListScreen: View {
             // Same as before: only a new diary written from the list shows its upload in the list.
             onWriteDiary: { shell.write(showsUploadInList: true) },
             onOpenSettings: { shell.push(.settings) },
-            tabRoot: TabRoot(shell: shell)
+            tabRoot: TabRoot(shell: shell, tab: 0)
         )
         .onAppear { viewModel.start() }
         .onChange(of: viewModel.notice) { _, notice in
@@ -202,7 +202,7 @@ private struct CalendarScreen: View {
             onOpenDayList: { shell.push(.calendarDay) },
             onWriteDiary: { shell.write() },
             onOpenSettings: { shell.push(.settings) },
-            tabRoot: TabRoot(shell: shell)
+            tabRoot: TabRoot(shell: shell, tab: 2)
         )
         .onAppear { viewModel.start() }
         .onChange(of: shell.savedCount) {

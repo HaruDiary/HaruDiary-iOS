@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A77B2B8A2060E5FBFFDE9026 /* DiaryTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040BD821321645E60FF1909E /* DiaryTheme.swift */; };
+		B12D087A72730659A30F0D4A /* DiaryToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793B10D507CA2BF3E1DDD523 /* DiaryToast.swift */; };
+		595DA297577E88ED0A938AAD /* TabBar/DiaryTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC0D169012C956C2777B843 /* TabBar/DiaryTabBar.swift */; };
+		60DFA9CB81BF068C8A0A2FF6 /* App/AppShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7670BE3B9B74186A9DFC1252 /* App/AppShell.swift */; };
+		69D192BC0603A7FAC79DE3C2 /* AppShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C2E15A44DE6D6662D3783CB /* AppShellTests.swift */; };
 		9538B46842A63A39D026E884 /* DiaryToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793B10D507CA2BF3E1DDD523 /* DiaryToast.swift */; };
 		85F5B55AC412E7BE4B5716F3 /* Reminder/ReminderSettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E7E16BA6E16832B2DEAF42A /* Reminder/ReminderSettingsScreen.swift */; };
 		AEDD92246AB98073545943A2 /* Reminder/ReminderModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001BF3802E8806CAF2EB2A41 /* Reminder/ReminderModule.swift */; };
@@ -294,6 +299,7 @@
 		7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarViewModel.swift"; sourceTree = "<group>"; };
 		77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule.swift"; sourceTree = "<group>"; };
 		2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarViewModelTests.swift"; sourceTree = "<group>"; };
+		6C2E15A44DE6D6662D3783CB /* AppShellTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppShellTests.swift"; sourceTree = "<group>"; };
 		E007FF9E171CF5EACD1D60F8 /* AppTextSizeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppTextSizeTests.swift"; sourceTree = "<group>"; };
 		F6D2735F01230F1B69AD2203 /* TabBarCollapseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TabBarCollapseTests.swift"; sourceTree = "<group>"; };
 		3E94119F25F06D502A982397 /* DiaryEditorViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditorViewModelTests.swift"; sourceTree = "<group>"; };
@@ -561,6 +567,7 @@
 				B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				6C2E15A44DE6D6662D3783CB /* AppShellTests.swift */,
 				E007FF9E171CF5EACD1D60F8 /* AppTextSizeTests.swift */,
 				F6D2735F01230F1B69AD2203 /* TabBarCollapseTests.swift */,
 				3E94119F25F06D502A982397 /* DiaryEditorViewModelTests.swift */,
@@ -865,6 +872,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A77B2B8A2060E5FBFFDE9026 /* DiaryTheme.swift in Sources */,
+				B12D087A72730659A30F0D4A /* DiaryToast.swift in Sources */,
+				595DA297577E88ED0A938AAD /* TabBar/DiaryTabBar.swift in Sources */,
+				60DFA9CB81BF068C8A0A2FF6 /* App/AppShell.swift in Sources */,
+				69D192BC0603A7FAC79DE3C2 /* AppShellTests.swift in Sources */,
 				A162627352D44005A4F4EF43 /* AppTextSizeTests.swift in Sources */,
 				E888EAE899D5628B2CB0ECBE /* TextSize/AppTextSizeController.swift in Sources */,
 				303BDD9E1354C53D18A531BC /* UserDefaultsTextSizeStore.swift in Sources */,

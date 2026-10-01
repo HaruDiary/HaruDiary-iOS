@@ -89,8 +89,9 @@ final class AppShell {
         tabBar.isCollapsed = false
     }
 
-    /// `offset` is the distance scrolled from the top of the open tab's first screen.
-    func scrolled(to offset: CGFloat) {
+    /// `offset` is the distance scrolled from the top of `tab`'s first screen. Only the open tab moves the bar.
+    func scrolled(to offset: CGFloat, tab: Int) {
+        guard tab == tabBar.selected else { return }
         collapse.scrolled(to: offset)
         if tabBar.isCollapsed != collapse.isCollapsed {
             tabBar.isCollapsed = collapse.isCollapsed
@@ -135,12 +136,12 @@ extension View {
     /// Reports this scroll view's position to the shell, which shrinks the tab bar while scrolling down.
     /// Before iOS 18 the position cannot be read from SwiftUI, so the bar stays at full size.
     @ViewBuilder
-    func shrinksTabBar(_ shell: AppShell) -> some View {
+    func shrinksTabBar(_ shell: AppShell, tab: Int) -> some View {
         if #available(iOS 18.0, *) {
             onScrollGeometryChange(for: CGFloat.self) { geometry in
                 geometry.contentOffset.y + geometry.contentInsets.top
             } action: { _, offset in
-                shell.scrolled(to: offset)
+                shell.scrolled(to: offset, tab: tab)
             }
         } else {
             self
