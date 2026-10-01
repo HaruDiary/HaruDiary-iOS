@@ -91,5 +91,5 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer bash scripts/ci.sh buil
 - 그림은 이미지 자산이 아니라 `OnboardingIllustration`이 앱의 색과 조각(감정 그림, 날씨 아이콘, 여정 그림)으로 그린다.
   고정된 크기로 그려 주어진 공간에 맞게 줄이며, 라이트·다크를 따른다. 그림 속 글자는 글자 크기 설정을 따르지 않고 읽어 주지도 않는다.
 - 로그인 화면도 같은 그림(보관)을 쓴다.
-- 이전 목업 이미지(`Assets.xcassets/OnboardingMockup`)는 더 쓰지 않는다. 자산 파일은 아직 지우지 않았다.
+- 이전 목업 이미지(`Assets.xcassets/OnboardingMockup`, 5장)는 쓰는 곳이 없어져 삭제했다.
 - 시뮬레이터(iOS 27.0, 앱을 처음 설치)에서 5페이지를 라이트와 다크로 확인했다.
