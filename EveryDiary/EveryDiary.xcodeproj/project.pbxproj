@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E0B6CEB3952D0F1E8F6F52A5 /* DiarySaveIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FEBAB7039E55BEBF373ED1 /* DiarySaveIndicators.swift */; };
+		10E1D8EE716ACD4C9B9B154D /* ProfilePhotoFilesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFA5DF78819334F0FBD1D4A /* ProfilePhotoFilesTests.swift */; };
+		7EAE8E3A061BF210288A6440 /* Settings/ProfilePhotoLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5311CC627A430610DB20DD63 /* Settings/ProfilePhotoLoader.swift */; };
+		163F15BCA40F3C4453A9A8AB /* Settings/ProfilePhotoLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5311CC627A430610DB20DD63 /* Settings/ProfilePhotoLoader.swift */; };
+		1080C51EB2B6AFFFF7B06BE2 /* ProfilePhotoFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AF72E1A925632795709CB96 /* ProfilePhotoFiles.swift */; };
+		37180E8C105026B478B441D6 /* ProfilePhotoFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AF72E1A925632795709CB96 /* ProfilePhotoFiles.swift */; };
+		1DB5588D09253A6EFE48F66D /* Account/ProfilePhotoStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65B02F6659D61FB59A219146 /* Account/ProfilePhotoStoring.swift */; };
+		D33F7A10D27C95C447284681 /* Account/ProfilePhotoStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65B02F6659D61FB59A219146 /* Account/ProfilePhotoStoring.swift */; };
 		A77B2B8A2060E5FBFFDE9026 /* DiaryTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040BD821321645E60FF1909E /* DiaryTheme.swift */; };
 		B12D087A72730659A30F0D4A /* DiaryToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 793B10D507CA2BF3E1DDD523 /* DiaryToast.swift */; };
 		595DA297577E88ED0A938AAD /* TabBar/DiaryTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC0D169012C956C2777B843 /* TabBar/DiaryTabBar.swift */; };
@@ -299,6 +307,7 @@
 		7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarViewModel.swift"; sourceTree = "<group>"; };
 		77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule.swift"; sourceTree = "<group>"; };
 		2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarViewModelTests.swift"; sourceTree = "<group>"; };
+		AEFA5DF78819334F0FBD1D4A /* ProfilePhotoFilesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfilePhotoFilesTests.swift"; sourceTree = "<group>"; };
 		6C2E15A44DE6D6662D3783CB /* AppShellTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppShellTests.swift"; sourceTree = "<group>"; };
 		E007FF9E171CF5EACD1D60F8 /* AppTextSizeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppTextSizeTests.swift"; sourceTree = "<group>"; };
 		F6D2735F01230F1B69AD2203 /* TabBarCollapseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TabBarCollapseTests.swift"; sourceTree = "<group>"; };
@@ -323,6 +332,7 @@
 		10B0DDC556D00782C3F47643 /* CalendarImageLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarImageLoading.swift"; sourceTree = "<group>"; };
 		62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListIndex.swift"; sourceTree = "<group>"; };
 		B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDiaryFeed.swift"; sourceTree = "<group>"; };
+		65B02F6659D61FB59A219146 /* Account/ProfilePhotoStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/ProfilePhotoStoring.swift"; sourceTree = "<group>"; };
 		C912F9CF2FE996FBFB4968A5 /* TextSize/AppTextSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextSize/AppTextSize.swift"; sourceTree = "<group>"; };
 		59EF531F51606B07FD08F5C3 /* DiaryEditor/DiaryDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryDraft.swift"; sourceTree = "<group>"; };
 		EE8498F8BC94473E280D191B /* DiaryEditor/DiaryCondition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryCondition.swift"; sourceTree = "<group>"; };
@@ -346,6 +356,7 @@
 		6324AE064574465A82455BD2 /* DayKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKind.swift"; sourceTree = "<group>"; };
 		7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKindTests.swift"; sourceTree = "<group>"; };
 		8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWeatherIcon.swift"; sourceTree = "<group>"; };
+		A9FEBAB7039E55BEBF373ED1 /* DiarySaveIndicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiarySaveIndicators.swift"; sourceTree = "<group>"; };
 		793B10D507CA2BF3E1DDD523 /* DiaryToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryToast.swift"; sourceTree = "<group>"; };
 		F97B71008AB60D5196889786 /* DiaryTabHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTabHeader.swift"; sourceTree = "<group>"; };
 		31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoSkeleton.swift"; sourceTree = "<group>"; };
@@ -364,6 +375,7 @@
 		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
 		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
 		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		5311CC627A430610DB20DD63 /* Settings/ProfilePhotoLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoLoader.swift"; sourceTree = "<group>"; };
 		5E7E16BA6E16832B2DEAF42A /* Reminder/ReminderSettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/ReminderSettingsScreen.swift"; sourceTree = "<group>"; };
 		001BF3802E8806CAF2EB2A41 /* Reminder/ReminderModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Reminder/ReminderModule.swift"; sourceTree = "<group>"; };
 		DAA8C9BFFB9160CBF562344E /* Lock/LockScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Lock/LockScreens.swift"; sourceTree = "<group>"; };
@@ -417,6 +429,7 @@
 		B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoPreparation.swift"; sourceTree = "<group>"; };
 		55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleRefreshTokenStore.swift"; sourceTree = "<group>"; };
 		47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainSecretStore.swift"; sourceTree = "<group>"; };
+		7AF72E1A925632795709CB96 /* ProfilePhotoFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfilePhotoFiles.swift"; sourceTree = "<group>"; };
 		40D42BD09A039831C8ED8557 /* UserDefaultsTextSizeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaultsTextSizeStore.swift"; sourceTree = "<group>"; };
 		B58B0D59D24667E391ECE344 /* UserDefaultsReminderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaultsReminderStore.swift"; sourceTree = "<group>"; };
 		C1B56F8AAA6129582DA9DF27 /* LiveDiaryReminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiveDiaryReminders.swift"; sourceTree = "<group>"; };
@@ -567,6 +580,7 @@
 				B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				AEFA5DF78819334F0FBD1D4A /* ProfilePhotoFilesTests.swift */,
 				6C2E15A44DE6D6662D3783CB /* AppShellTests.swift */,
 				E007FF9E171CF5EACD1D60F8 /* AppTextSizeTests.swift */,
 				F6D2735F01230F1B69AD2203 /* TabBarCollapseTests.swift */,
@@ -615,6 +629,7 @@
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B72A1C010000000000000003 /* DiarySaving.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				65B02F6659D61FB59A219146 /* Account/ProfilePhotoStoring.swift */,
 				C912F9CF2FE996FBFB4968A5 /* TextSize/AppTextSize.swift */,
 				59EF531F51606B07FD08F5C3 /* DiaryEditor/DiaryDraft.swift */,
 				EE8498F8BC94473E280D191B /* DiaryEditor/DiaryCondition.swift */,
@@ -648,6 +663,7 @@
 				832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */,
 				156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */,
 				47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */,
+				7AF72E1A925632795709CB96 /* ProfilePhotoFiles.swift */,
 				40D42BD09A039831C8ED8557 /* UserDefaultsTextSizeStore.swift */,
 				B58B0D59D24667E391ECE344 /* UserDefaultsReminderStore.swift */,
 				C1B56F8AAA6129582DA9DF27 /* LiveDiaryReminders.swift */,
@@ -671,6 +687,7 @@
 				B470769C0A454C869F7E2BAE /* ProfileEditView.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
+				5311CC627A430610DB20DD63 /* Settings/ProfilePhotoLoader.swift */,
 				5E7E16BA6E16832B2DEAF42A /* Reminder/ReminderSettingsScreen.swift */,
 				001BF3802E8806CAF2EB2A41 /* Reminder/ReminderModule.swift */,
 				DAA8C9BFFB9160CBF562344E /* Lock/LockScreens.swift */,
@@ -746,6 +763,7 @@
 				62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */,
 				DEBC2E2935FB4A6F8D9D09CF /* DiaryListComponents.swift */,
 				8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */,
+				A9FEBAB7039E55BEBF373ED1 /* DiarySaveIndicators.swift */,
 				793B10D507CA2BF3E1DDD523 /* DiaryToast.swift */,
 				F97B71008AB60D5196889786 /* DiaryTabHeader.swift */,
 				31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */,
@@ -872,6 +890,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				10E1D8EE716ACD4C9B9B154D /* ProfilePhotoFilesTests.swift in Sources */,
+				7EAE8E3A061BF210288A6440 /* Settings/ProfilePhotoLoader.swift in Sources */,
+				1080C51EB2B6AFFFF7B06BE2 /* ProfilePhotoFiles.swift in Sources */,
+				1DB5588D09253A6EFE48F66D /* Account/ProfilePhotoStoring.swift in Sources */,
 				A77B2B8A2060E5FBFFDE9026 /* DiaryTheme.swift in Sources */,
 				B12D087A72730659A30F0D4A /* DiaryToast.swift in Sources */,
 				595DA297577E88ED0A938AAD /* TabBar/DiaryTabBar.swift in Sources */,
@@ -973,6 +995,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E0B6CEB3952D0F1E8F6F52A5 /* DiarySaveIndicators.swift in Sources */,
+				163F15BCA40F3C4453A9A8AB /* Settings/ProfilePhotoLoader.swift in Sources */,
+				37180E8C105026B478B441D6 /* ProfilePhotoFiles.swift in Sources */,
+				D33F7A10D27C95C447284681 /* Account/ProfilePhotoStoring.swift in Sources */,
 				9538B46842A63A39D026E884 /* DiaryToast.swift in Sources */,
 				85F5B55AC412E7BE4B5716F3 /* Reminder/ReminderSettingsScreen.swift in Sources */,
 				AEDD92246AB98073545943A2 /* Reminder/ReminderModule.swift in Sources */,

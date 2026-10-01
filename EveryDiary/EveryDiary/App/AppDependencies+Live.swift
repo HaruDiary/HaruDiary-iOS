@@ -6,7 +6,7 @@ import Foundation
 extension AppDependencies {
     static func live() -> AppDependencies {
         let appleRecords = AppleSignInRecords(secrets: AppleSignInSecrets(secrets: KeychainSecretStore(), legacy: .standard))
-        return AppDependencies(
+        var dependencies = AppDependencies(
             diaryRepository: FirebaseDiaryReadingRepository(database: .firestore()),
             userSession: FirebaseDiaryUserSession(auth: .auth()),
             accountSession: FirebaseAccountSession(
@@ -26,5 +26,7 @@ extension AppDependencies {
             calendar: .current,
             now: Date.init
         )
+        dependencies.profilePhotos = ProfilePhotoLoader(files: .inCaches())
+        return dependencies
     }
 }

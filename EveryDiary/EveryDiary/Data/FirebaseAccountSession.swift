@@ -16,6 +16,10 @@ final class FirebaseAccountSession: AccountSession {
         self.appleRecords = appleRecords
     }
 
+    var currentAccount: AccountSnapshot? {
+        auth.currentUser.map(Self.snapshot)
+    }
+
     func observeAccount() -> AsyncStream<AccountSnapshot?> {
         AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
             let handle = auth.addStateDidChangeListener { _, user in

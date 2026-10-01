@@ -8,6 +8,8 @@ enum AppRoute: Hashable {
     case lock
     case textSize
     case trash
+    /// Diaries found by their title or content; opened from the list and the calendar.
+    case search
     case calendarDay
     case journeyYears
     case journeyYear(Int)
@@ -25,6 +27,22 @@ struct DiaryEditorRequest: Identifiable {
     let purpose: Purpose
     /// The list shows a "saving" row while a new diary written from it is uploaded.
     var showsUploadInList = false
+    /// For a new diary: the day it is for, when one was picked before opening (the calendar's selected day).
+    var day: Date? = nil
+}
+
+/// A save that has not ended yet.
+struct DiarySaveInProgress: Identifiable, Equatable {
+    let id: UUID
+    let day: Date
+    let isNew: Bool
+    /// The list shows a row for it while it is written from the list.
+    var showsInList = false
+}
+
+enum DiarySavePhase: Equatable {
+    case saving
+    case saved
 }
 
 /// What the tabs share: the floating tab bar, the editor sheet, short messages and the paths of pushed screens.
@@ -51,6 +69,13 @@ final class AppShell {
     var isSettingPasscode = false {
         didSet { showWhatWaitedForTheSheet() }
     }
+
+    /// Saves going on. The editor is already closed, so the tabs show them.
+    private(set) var saves: [DiarySaveInProgress] = []
+    /// The save that just succeeded, kept for a moment to say so.
+    private(set) var justSaved: DiarySaveInProgress?
+    @ObservationIgnored private var justSavedExpiry: Task<Void, Never>?
+    static let savedNoteDuration: Duration = .milliseconds(1600)
 
     /// Goes up when a diary was saved; screens whose loading failed load again.
     private(set) var savedCount = 0
@@ -166,9 +191,9 @@ final class AppShell {
 
     // MARK: - Editor
 
-    func write(showsUploadInList: Bool = false) {
+    func write(showsUploadInList: Bool = false, on day: Date? = nil) {
         guard editor == nil else { return }
-        editor = DiaryEditorRequest(purpose: .compose, showsUploadInList: showsUploadInList)
+        editor = DiaryEditorRequest(purpose: .compose, showsUploadInList: showsUploadInList, day: day)
     }
 
     func read(_ entry: DiaryEntry) {
@@ -181,8 +206,54 @@ final class AppShell {
         editor = DiaryEditorRequest(purpose: .edit(entry))
     }
 
+    func saveStarted(_ save: DiarySaveInProgress) {
+        saves.removeAll { $0.id == save.id }
+        saves.append(save)
+    }
+
+    /// A new diary being saved is shown where it will appear, when that place is on screen: the calendar's
+    /// selected day (`calendarDay`), or the list for a diary written from the list.
+    func showsInPlace(_ save: DiarySaveInProgress, calendarDay: Date?, calendar: Calendar) -> Bool {
+        guard save.isNew else { return false }
+        let path = paths[tabBar.selected]
+        switch tabBar.selected {
+        case 0:
+            return path.isEmpty && save.showsInList
+        case 2:
+            guard path.isEmpty || path == [.calendarDay], let calendarDay else { return false }
+            return calendar.isDate(save.day, inSameDayAs: calendarDay)
+        default:
+            return false
+        }
+    }
+
+    /// A new diary for `day` is being saved; the calendar shows a placeholder row for it on that day.
+    func isSavingNewDiary(on day: Date, calendar: Calendar) -> Bool {
+        saves.contains { $0.isNew && calendar.isDate($0.day, inSameDayAs: day) }
+    }
+
+    /// The small note over the tabs: for saves whose place is not on screen. Nil when there is nothing to tell.
+    func savePhase(calendarDay: Date?, calendar: Calendar) -> DiarySavePhase? {
+        if saves.contains(where: { !showsInPlace($0, calendarDay: calendarDay, calendar: calendar) }) { return .saving }
+        if let justSaved, !showsInPlace(justSaved, calendarDay: calendarDay, calendar: calendar) { return .saved }
+        return nil
+    }
+
     /// The editor is already closed when its save ends, so the result is shown over whatever is on screen.
-    func saveFinished(_ report: DiarySaveReport) {
+    /// `id` is the save given to `saveStarted`.
+    func saveFinished(_ report: DiarySaveReport, id: UUID? = nil) {
+        let ended = saves.first { $0.id == id }
+        saves.removeAll { $0.id == id }
+        if let ended, report != .failed(isUpdate: true), report != .failed(isUpdate: false) {
+            justSaved = ended
+            AccessibilityNotification.Announcement("일기를 저장했어요").post()
+            justSavedExpiry?.cancel()
+            justSavedExpiry = Task { [weak self] in
+                try? await Task.sleep(for: Self.savedNoteDuration)
+                guard !Task.isCancelled, self?.justSaved?.id == ended.id else { return }
+                self?.justSaved = nil
+            }
+        }
         switch report {
         case .saved:
             break

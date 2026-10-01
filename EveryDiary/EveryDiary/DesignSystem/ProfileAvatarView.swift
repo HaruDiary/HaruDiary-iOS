@@ -71,16 +71,23 @@ struct ProfilePictureView: View {
     /// A photo picked in the editor but not uploaded yet.
     var pickedPhoto: UIImage?
     var size: CGFloat = 50
+    /// Keeps the uploaded photo on the device; nil in previews, where the photo is downloaded each time.
+    var photos: ProfilePhotoLoader? = nil
 
     var body: some View {
         Group {
             if let pickedPhoto {
                 Image(uiImage: pickedPhoto).resizable().scaledToFill()
             } else if case .photo(let url) = picture {
-                AsyncImage(url: url) { image in
-                    image.resizable().scaledToFill()
-                } placeholder: {
-                    ProfileAvatarView(avatar: nil, size: size).overlay { ProgressView() }
+                if let photos {
+                    // A new photo is a new view, so the photo kept for the previous one is never shown for it.
+                    StoredProfilePhoto(url: url, photos: photos, size: size).id(url)
+                } else {
+                    AsyncImage(url: url) { image in
+                        image.resizable().scaledToFill()
+                    } placeholder: {
+                        ProfileAvatarView(avatar: nil, size: size).overlay { ProgressView() }
+                    }
                 }
             } else if case .avatar(let avatar) = picture {
                 ProfileAvatarView(avatar: avatar, size: size)
@@ -91,5 +98,26 @@ struct ProfilePictureView: View {
         .frame(width: size, height: size)
         .clipShape(Circle())
         .accessibilityHidden(true)
+    }
+}
+
+/// The uploaded photo: drawn at once when it is kept on the device, otherwise loaded once and kept.
+private struct StoredProfilePhoto: View {
+    let url: URL
+    let photos: ProfilePhotoLoader
+    let size: CGFloat
+    @State private var loaded: UIImage?
+
+    var body: some View {
+        // Read while drawing, so the very first frame already has the photo.
+        if let image = loaded ?? photos.image(for: url) {
+            Image(uiImage: image).resizable().scaledToFill()
+        } else {
+            PhotoSkeleton(cornerRadius: size / 2)
+                .task {
+                    let image = await photos.load(url)
+                    withAnimation(PhotoSkeleton.fadeIn) { loaded = image }
+                }
+        }
     }
 }

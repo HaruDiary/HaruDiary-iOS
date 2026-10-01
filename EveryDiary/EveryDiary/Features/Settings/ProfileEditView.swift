@@ -12,10 +12,11 @@ struct ProfileEditView: View {
     @State private var isLoadingPhoto = false
     @State private var isSaving = false
     @State private var message: String?
+    let profilePhotos: ProfilePhotoLoader?
     let onSave: (String, ProfilePictureSelection) async -> Bool
     let onClose: () -> Void
 
-    init(nickname: String?, picture: ProfilePicture?, onSave: @escaping (String, ProfilePictureSelection) async -> Bool,
+    init(nickname: String?, picture: ProfilePicture?, profilePhotos: ProfilePhotoLoader? = nil, onSave: @escaping (String, ProfilePictureSelection) async -> Bool,
          onClose: @escaping () -> Void) {
         _nickname = State(initialValue: nickname ?? "")
         switch picture {
@@ -23,6 +24,7 @@ struct ProfileEditView: View {
         case .avatar(let avatar): _selection = State(initialValue: .avatar(avatar))
         case nil: _selection = State(initialValue: .avatar(.google))
         }
+        self.profilePhotos = profilePhotos
         self.onSave = onSave
         self.onClose = onClose
     }
@@ -54,7 +56,7 @@ struct ProfileEditView: View {
             ScrollView {
                 VStack(spacing: DiaryTheme.Spacing.section) {
                     VStack(spacing: DiaryTheme.Spacing.medium) {
-                        ProfilePictureView(picture: previewPicture, pickedPhoto: pickedPhoto, size: 104)
+                        ProfilePictureView(picture: previewPicture, pickedPhoto: pickedPhoto, size: 104, photos: profilePhotos)
                             .overlay { if isLoadingPhoto { ProgressView() } }
                         PhotosPicker(selection: $photoItem, matching: .images) {
                             Label("앨범에서 사진 선택", systemImage: "photo.on.rectangle")

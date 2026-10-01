@@ -7,10 +7,12 @@ struct SettingsModule {
     let makeTrashModule: () -> TrashModule
     let reminders: DiaryReminders?
     let textSize: AppTextSizeController?
+    let profilePhotos: ProfilePhotoLoader?
 
     init(session: any AccountSession, signInGateway: any SocialSignInGateway, makeTrashModule: @escaping () -> TrashModule,
-         reminders: DiaryReminders? = nil, textSize: AppTextSizeController? = nil) {
-        viewModel = SettingsViewModel(session: session)
+         reminders: DiaryReminders? = nil, textSize: AppTextSizeController? = nil, profilePhotos: ProfilePhotoLoader? = nil) {
+        viewModel = SettingsViewModel(session: session, photos: profilePhotos)
+        self.profilePhotos = profilePhotos
         self.signInGateway = signInGateway
         self.makeTrashModule = makeTrashModule
         self.reminders = reminders

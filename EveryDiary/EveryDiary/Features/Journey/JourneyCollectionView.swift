@@ -279,39 +279,70 @@ private struct JourneyMonthCard: View {
 }
 
 /// One month's picture on the whole screen, lighting up to the days written.
+/// It closes with its button or by pulling it down.
 struct JourneyMonthDetailView: View {
     let month: JourneyMonth
     let numberOfDays: Int
     let onClose: () -> Void
 
+    /// How far the picture is pulled down; let go far enough and the screen closes.
+    @State private var pull: CGFloat = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var scene: JourneyScene { JourneySceneCatalog.scene(for: month.month) }
 
     var body: some View {
-        JourneySceneView(scene: scene, year: month.year, litCount: month.days.count, slotCount: numberOfDays, animatesLighting: true)
-            .ignoresSafeArea()
-            .overlay(alignment: .top) {
-                VStack(spacing: DiaryTheme.Spacing.small) {
-                    Text(verbatim: "\(month.year)년 \(month.month)월")
-                        .font(.title.weight(.bold))
-                    Text(scene.title)
-                        .font(.headline)
-                        .opacity(0.85)
-                    Text("\(numberOfDays)일 중 \(month.days.count)일을 채웠어요.")
-                        .font(.subheadline)
+        // The picture and what is written on it are one card as large as the screen, so pulling it moves all of
+        // it, status bar area included. The texts keep clear of the status bar by the inset measured outside it.
+        GeometryReader { geometry in
+            let progress = min(pull / 400, 1)
+            JourneySceneView(scene: scene, year: month.year, litCount: month.days.count, slotCount: numberOfDays,
+                             animatesLighting: true)
+                .overlay(alignment: .top) { title.padding(.top, geometry.safeAreaInsets.top + 56) }
+                .overlay(alignment: .topTrailing) { closeButton.padding(.top, geometry.safeAreaInsets.top) }
+                // Pulled down, it becomes a rounded card that follows the finger over the year behind it.
+                .clipShape(RoundedRectangle(cornerRadius: pull > 0 ? 40 : 0))
+                .scaleEffect(reduceMotion ? 1 : 1 - progress * 0.1)
+                .offset(y: pull)
+                .ignoresSafeArea()
+        }
+        .presentationBackground(.clear)
+        .gesture(
+            DragGesture(minimumDistance: 12)
+                .onChanged { pull = max(0, $0.translation.height) }
+                .onEnded { drag in
+                    if drag.translation.height > 120 || drag.predictedEndTranslation.height > 420 {
+                        onClose()
+                    } else {
+                        withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) { pull = 0 }
+                    }
                 }
+        )
+        .accessibilityAction(.escape, onClose)
+    }
+
+    private var title: some View {
+        VStack(spacing: DiaryTheme.Spacing.small) {
+            Text(verbatim: "\(month.year)년 \(month.month)월")
+                .font(.title.weight(.bold))
+            Text(scene.title)
+                .font(.headline)
+                .opacity(0.85)
+            Text("\(numberOfDays)일 중 \(month.days.count)일을 채웠어요.")
+                .font(.subheadline)
+        }
+        .foregroundStyle(.white)
+        .shadow(color: .black.opacity(0.3), radius: 4)
+    }
+
+    private var closeButton: some View {
+        Button(action: onClose) {
+            Image(systemName: "xmark")
+                .font(.headline)
                 .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.3), radius: 4)
-                .padding(.top, 56)
-            }
-            .overlay(alignment: .topTrailing) {
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
-                }
-                .accessibilityLabel("닫기")
-                .padding(.trailing, DiaryTheme.Spacing.small)
-            }
+                .frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
+        }
+        .accessibilityLabel("닫기")
+        .padding(.trailing, DiaryTheme.Spacing.small)
     }
 }

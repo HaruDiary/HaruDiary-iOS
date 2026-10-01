@@ -117,10 +117,20 @@ struct DiaryPhotoCarousel: View {
 }
 
 /// A photo at full size (mockup 10): swipe between photos, pinch or double-tap to zoom.
+/// It closes with its button or by pulling the photo down, which shrinks it back over the diary.
 struct DiaryPhotoViewer: View {
     let photos: [EditorPhoto]
     @State private var page: EditorPhoto.ID?
+    /// How far the photo is pulled down; let go far enough and the viewer closes.
+    @State private var pull: CGFloat = 0
+    /// Decided when a drag starts: only a downward drag pulls, so swiping between photos is left alone.
+    @State private var isPulling: Bool?
+    /// A zoomed photo is moved around by its own gestures, not pulled away.
+    @State private var zoomed: Set<EditorPhoto.ID> = []
+    /// Let go far enough: the photo shrinks away where it is, instead of the whole screen sliding down.
+    @State private var isClosing = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(photos: [EditorPhoto], start: EditorPhoto.ID) {
         self.photos = photos
@@ -130,16 +140,23 @@ struct DiaryPhotoViewer: View {
     private var index: Int { photos.firstIndex { $0.id == page } ?? 0 }
 
     var body: some View {
+        let progress = min(pull / 320, 1)
         ZStack {
-            Color.black.ignoresSafeArea()
+            // The diary shows through more and more as the photo is pulled away.
+            Color.black.opacity(isClosing ? 0 : 1 - progress).ignoresSafeArea()
             TabView(selection: $page) {
                 ForEach(photos) { photo in
-                    ZoomablePhoto(image: photo.image)
-                        .tag(Optional(photo.id))
+                    ZoomablePhoto(image: photo.image) { isZoomed in
+                        if isZoomed { zoomed.insert(photo.id) } else { zoomed.remove(photo.id) }
+                    }
+                    .tag(Optional(photo.id))
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .ignoresSafeArea(edges: .bottom)
+            .scaleEffect(reduceMotion ? 1 : isClosing ? 0.4 : 1 - progress * 0.4)
+            .offset(y: pull)
+            .opacity(isClosing ? 0 : 1)
         }
         .overlay(alignment: .top) {
             ZStack {
@@ -159,6 +176,7 @@ struct DiaryPhotoViewer: View {
                 }
             }
             .padding(.horizontal, DiaryTheme.Spacing.small)
+            .opacity(1 - min(progress * 4, 1))
         }
         .overlay(alignment: .bottomLeading) {
             if photos.indices.contains(index), let date = photos[index].captureDate {
@@ -166,14 +184,49 @@ struct DiaryPhotoViewer: View {
                     .font(.footnote)
                     .foregroundStyle(.white.opacity(0.85))
                     .padding(DiaryTheme.Spacing.screen)
+                    .opacity(1 - min(progress * 4, 1))
             }
         }
+        .presentationBackground(.clear)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 16)
+                .onChanged { drag in
+                    if isPulling == nil {
+                        let isZoomed = page.map(zoomed.contains) ?? false
+                        isPulling = !isZoomed && drag.translation.height > 0
+                            && drag.translation.height > abs(drag.translation.width)
+                    }
+                    if isPulling == true { pull = max(0, drag.translation.height) }
+                }
+                .onEnded { drag in
+                    defer { isPulling = nil }
+                    guard isPulling == true else { return }
+                    if drag.translation.height > 120 || drag.predictedEndTranslation.height > 420 {
+                        closeShrinking()
+                    } else {
+                        withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) { pull = 0 }
+                    }
+                }
+        )
+        .accessibilityAction(.escape) { dismiss() }
         .statusBarHidden()
+    }
+
+    private func closeShrinking() {
+        withAnimation(.easeOut(duration: 0.2)) { isClosing = true }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(200))
+            // Nothing is left to see, so the screen goes without its own slide down.
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) { dismiss() }
+        }
     }
 }
 
 private struct ZoomablePhoto: View {
     let image: UIImage
+    let onZoomChanged: (Bool) -> Void
     @State private var scale: CGFloat = 1
     @GestureState private var pinch: CGFloat = 1
 
@@ -191,6 +244,7 @@ private struct ZoomablePhoto: View {
             .onTapGesture(count: 2) {
                 withAnimation(.spring(duration: 0.25)) { scale = scale > 1 ? 1 : 2.5 }
             }
+            .onChange(of: scale) { _, scale in onZoomChanged(scale > 1) }
             .accessibilityLabel("사진")
     }
 }

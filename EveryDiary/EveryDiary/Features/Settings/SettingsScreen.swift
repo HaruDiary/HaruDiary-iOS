@@ -35,7 +35,7 @@ struct SettingsScreen: View {
                 // The account session refreshes the signed-in user on this notification.
                 NotificationCenter.default.post(name: .loginstatusChanged, object: nil)
             }
-        ))
+        ), profilePhotos: module.value.profilePhotos)
         .navigationTitle("설정")
         .navigationBarTitleDisplayMode(.inline)
         // No way back while the account is being deleted.

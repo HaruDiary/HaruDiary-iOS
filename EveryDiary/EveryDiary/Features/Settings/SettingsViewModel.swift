@@ -34,10 +34,16 @@ final class SettingsViewModel {
     var notice: Notice?
 
     @ObservationIgnored private let session: any AccountSession
+    @ObservationIgnored private let photos: (any ProfilePhotoStoring)?
     @ObservationIgnored private var observation: Task<Void, Never>?
 
-    init(session: any AccountSession) {
+    init(session: any AccountSession, photos: (any ProfilePhotoStoring)? = nil) {
         self.session = session
+        self.photos = photos
+        // The account known right now, so the profile is not drawn signed out before the first observed value.
+        let current = session.currentAccount
+        account = AccountState(current)
+        picture = ProfilePicture(storedURL: current?.photoURL)
     }
 
     var profile: Profile { Self.profile(for: account, picture: picture) }
@@ -55,8 +61,15 @@ final class SettingsViewModel {
             for await snapshot in accounts {
                 self?.account = AccountState(snapshot)
                 self?.picture = ProfilePicture(storedURL: snapshot?.photoURL)
+                self?.forgetPhotoNoLongerShown()
             }
         }
+    }
+
+    /// After a sign-out, an account deletion or a change to an avatar the photo kept on the device is removed.
+    private func forgetPhotoNoLongerShown() {
+        if case .photo = picture { return }
+        photos?.removeAll()
     }
 
     func stop() {
@@ -109,6 +122,11 @@ final class SettingsViewModel {
             // A profile change does not trigger the sign-in listener, so the shown account is updated here.
             account = .member(email: email, name: name, provider: provider)
             picture = saved
+            // The photo just uploaded is kept on the device, so it is shown without downloading it back.
+            if case .newPhoto(let jpeg) = selection, case .photo(let url) = saved {
+                photos?.store(jpeg, for: url)
+            }
+            forgetPhotoNoLongerShown()
             notice = .profileSaved
             return true
         } catch {

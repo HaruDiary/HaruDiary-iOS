@@ -7,21 +7,36 @@ struct DiaryListView: View {
     let onEditDiary: (DiaryEntry) -> Void
     let onWriteDiary: () -> Void
     let onOpenSettings: () -> Void
+    /// The search button of the tab's header.
+    var onOpenSearch: () -> Void = {}
     var tabRoot: TabRoot? = nil
+    /// The pushed search screen: the same list under a search field, without the tab's title and write button.
+    var isSearchScreen = false
     @FocusState private var isSearchFocused: Bool
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             DiaryTheme.Colors.background.ignoresSafeArea()
             list
-            DiaryWriteButton { leaveSearch(then: onWriteDiary) }
+            if !isSearchScreen {
+                DiaryWriteButton(action: onWriteDiary)
+            }
         }
         .diaryStatusBarBackground()
+        // The search screen is opened to type: the keyboard comes up once the screen has slid in
+        // (focus asked for during the slide is dropped).
+        .task {
+            guard isSearchScreen, viewModel.query.isEmpty else { return }
+            try? await Task.sleep(for: .milliseconds(500))
+            if !Task.isCancelled { isSearchFocused = true }
+        }
     }
 
-    // The title and search field are rows too, so the whole screen scrolls together, like the calendar tab.
+    // The title is a row too, so the whole screen scrolls together, like the calendar tab.
     private var header: some View {
-        DiaryTabHeader(title: "하루일기", onOpenSettings: { leaveSearch(then: onOpenSettings) })
+        DiaryTabHeader(title: "하루일기",
+                       extra: .init(systemImage: "magnifyingglass", label: "검색", action: onOpenSearch),
+                       onOpenSettings: onOpenSettings)
             .listRowInsets(EdgeInsets(top: DiaryTheme.Spacing.screen, leading: DiaryTheme.Spacing.screen,
                                       bottom: DiaryTheme.Spacing.medium, trailing: DiaryTheme.Spacing.screen))
             .listRowSeparator(.hidden)
@@ -31,7 +46,7 @@ struct DiaryListView: View {
 
     private var searchField: some View {
         DiarySearchField(text: $viewModel.query, isFocused: $isSearchFocused)
-            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: DiaryTheme.Spacing.small, trailing: 0))
+            .listRowInsets(EdgeInsets(top: DiaryTheme.Spacing.small, leading: 0, bottom: DiaryTheme.Spacing.small, trailing: 0))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
     }
@@ -45,8 +60,7 @@ struct DiaryListView: View {
 
     private var listContent: some View {
         List {
-            header
-            searchField
+            if isSearchScreen { searchField } else { header }
             if viewModel.sections.isEmpty && !viewModel.isUploadingDiary {
                 placeholder
                     .frame(maxWidth: .infinity)
@@ -63,7 +77,7 @@ struct DiaryListView: View {
                 DiaryLoadFailure(onRetry: viewModel.retry).diaryCardRow()
             }
             if viewModel.isUploadingDiary {
-                DiaryListUploadingRow().diaryCardRow()
+                DiarySavingRow().diaryCardRow()
             }
             ForEach(viewModel.sections) { section in
                 Section {
@@ -136,19 +150,5 @@ struct DiaryListView: View {
                 )
             }
         }
-    }
-}
-
-private struct DiaryListUploadingRow: View {
-    var body: some View {
-        HStack(spacing: DiaryTheme.Spacing.medium) {
-            ProgressView()
-            Text("일기를 저장하고 있어요")
-                .font(DiaryTheme.Fonts.body)
-                .foregroundStyle(DiaryTheme.Colors.secondaryText)
-        }
-        .frame(maxWidth: .infinity, minHeight: DiaryTheme.Size.thumbnail)
-        .background(DiaryTheme.Colors.selection.opacity(0.5), in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
-        .accessibilityElement(children: .combine)
     }
 }

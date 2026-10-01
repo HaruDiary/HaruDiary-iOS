@@ -36,6 +36,8 @@ struct SettingsView: View {
     @Bindable var viewModel: SettingsViewModel
     let values: SettingsRowValues
     let actions: SettingsActions
+    /// Shows the uploaded profile photo from the device; nil in previews.
+    var profilePhotos: ProfilePhotoLoader? = nil
 
     @State private var isEditingProfile = false
     @State private var isConfirmingSignOut = false
@@ -124,7 +126,7 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $isEditingProfile) {
             ProfileEditView(
-                nickname: viewModel.nickname, picture: viewModel.profile.picture,
+                nickname: viewModel.nickname, picture: viewModel.profile.picture, profilePhotos: profilePhotos,
                 onSave: { nickname, picture in await viewModel.updateProfile(nickname: nickname, picture: picture) },
                 onClose: { isEditingProfile = false }
             )
@@ -153,7 +155,7 @@ struct SettingsView: View {
             }
         } label: {
             HStack(spacing: DiaryTheme.Spacing.medium) {
-                ProfilePictureView(picture: profile.picture, pickedPhoto: nil, size: 56)
+                ProfilePictureView(picture: profile.picture, pickedPhoto: nil, size: 56, photos: profilePhotos)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(profile.name)
                         .font(DiaryTheme.Fonts.section)

@@ -23,17 +23,16 @@ struct DiaryListRow: View {
     var body: some View {
         columns {
             dateColumn
+            // Title and content always start right after the date, whatever the diary has; its weather, mood
+            // and photo sit at the trailing edge.
             VStack(alignment: .leading, spacing: DiaryTheme.Spacing.small) {
-                // The icons sit in a photo-wide slot so every title starts on the same line.
-                HStack(spacing: alignsTitleWithContent ? DiaryTheme.Spacing.medium : DiaryTheme.Spacing.small) {
-                    iconSlot.accessibilityHidden(true)
+                HStack(spacing: DiaryTheme.Spacing.small) {
                     Text(entry.title)
                         .font(DiaryTheme.Fonts.section)
                         .foregroundStyle(DiaryTheme.Colors.text)
                         .lineLimit(dynamicTypeSize.isAccessibilitySize ? 3 : 1)
                         .truncationMode(.tail)
                     if let badge {
-                        Spacer(minLength: DiaryTheme.Spacing.small)
                         // The title gives up space first so the badge always stays readable.
                         Text(badge.text)
                             .font(.caption.weight(.semibold))
@@ -45,20 +44,22 @@ struct DiaryListRow: View {
                             .layoutPriority(1)
                     }
                 }
-                columns {
-                    // Without a photo the content starts where the photo would be, using the full width.
+                Text(entry.content)
+                    .font(.subheadline)
+                    .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                    // Beside a photo the text can use the photo's height (about three lines).
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? 4 : (thumbnailURL == nil ? 2 : 3))
+                    .truncationMode(.tail)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if hasIcons || thumbnailURL != nil {
+                VStack(alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing, spacing: DiaryTheme.Spacing.small) {
+                    if hasIcons { icons.accessibilityHidden(true) }
                     if let url = thumbnailURL {
                         DiaryListThumbnail(url: url, imageLoader: imageLoader)
                     }
-                    Text(entry.content)
-                        .font(.subheadline)
-                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
-                        // Beside a photo the text can use the photo's height (about three lines).
-                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 4 : (thumbnailURL == nil ? 2 : 3))
-                        .truncationMode(.tail)
                 }
             }
-            Spacer(minLength: 0)
         }
         .padding(DiaryTheme.Spacing.screen)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -84,29 +85,31 @@ struct DiaryListRow: View {
         }
     }
 
-    private var alignsTitleWithContent: Bool {
-        !dynamicTypeSize.isAccessibilitySize
+    private var hasIcons: Bool {
+        !entry.weather.isEmpty || !entry.emotion.isEmpty
     }
 
-    // Weather centered in the left half, emotion in the right half; a single icon takes the whole slot.
+    /// As wide as the photo under them: the weather at its leading edge and the mood at its trailing edge.
+    /// One icon alone sits at the trailing edge.
     @ViewBuilder
-    private var iconSlot: some View {
-        let icons = HStack(spacing: alignsTitleWithContent ? 0 : DiaryTheme.Spacing.small) {
+    private var icons: some View {
+        let row = HStack(spacing: DiaryTheme.Spacing.small) {
             if !entry.weather.isEmpty {
-                DiaryWeatherIcon(name: entry.weather)
-                    .frame(maxWidth: alignsTitleWithContent ? .infinity : nil)
+                DiaryWeatherIcon(name: entry.weather, size: Self.iconSize)
             }
+            if dynamicTypeSize.isAccessibilitySize == false { Spacer(minLength: 0) }
             if !entry.emotion.isEmpty {
-                Image(entry.emotion).resizable().scaledToFit().frame(width: 20, height: 20)
-                    .frame(maxWidth: alignsTitleWithContent ? .infinity : nil)
+                Image(entry.emotion).resizable().scaledToFit().frame(width: Self.iconSize, height: Self.iconSize)
             }
         }
-        if alignsTitleWithContent {
-            icons.frame(width: DiaryListThumbnail.side)
+        if dynamicTypeSize.isAccessibilitySize {
+            row
         } else {
-            icons
+            row.frame(width: DiaryListThumbnail.side)
         }
     }
+
+    private static let iconSize: CGFloat = 24
 
     private var dayColor: Color? {
         guard let date else { return nil }

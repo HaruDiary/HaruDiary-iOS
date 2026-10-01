@@ -41,25 +41,40 @@ struct MainTabsView: View {
                             .toolbar(.hidden, for: .navigationBar)
                             .navigationDestination(for: AppRoute.self) { destination($0, tab: tab.id) }
                     }
-                    // The tab leaving fades away while the next one fades in, settling from slightly smaller.
-                    .opacity(tab.id == selected ? 1 : 0)
-                    .scaleEffect(tab.id == selected || reduceMotion ? 1 : 0.97)
+                    // Faded as one layer, and only faded. A stack that is scaled, or faded without being one layer,
+                    // is drawn cut off at the status bar and the home indicator, so a picture reaching under them
+                    // jumps when the change starts or ends.
+                    .compositingGroup()
+                    // The tab leaving fades away while the next one fades in. Only the opacity animates;
+                    // nothing inside a tab is moved by a tab change.
+                    .animation(.easeOut(duration: reduceMotion ? 0.18 : 0.26)) { content in
+                        content.opacity(tab.id == selected ? 1 : 0)
+                    }
                     .allowsHitTesting(tab.id == selected)
                     .accessibilityHidden(tab.id != selected)
                     .zIndex(tab.id == selected ? 1 : 0)
                 }
             }
         }
-        .animation(.easeOut(duration: reduceMotion ? 0.18 : 0.28), value: selected)
         .tint(DiaryTheme.Colors.brand)
         .overlay(alignment: .bottom) {
-            DiaryTabBar(state: shell.tabBar, onSelect: select, onExpand: shell.expandBar)
+            DiaryTabBar(state: shell.tabBar, onSelect: select)
                 .frame(width: DiaryTabBar.width(tabs: shell.tabBar.tabs.count, collapsed: false),
                        height: DiaryTabBar.expandedHeight)
                 .allowsHitTesting(!shell.tabBar.isHidden)
                 .accessibilityHidden(shell.tabBar.isHidden)
                 .offset(y: 2)
         }
+        .overlay(alignment: .bottom) {
+            // Above the tab bar, or at the bottom of a pushed screen, where the bar is hidden.
+            if let phase = savePhase {
+                DiarySavePill(phase: phase)
+                    .padding(.bottom, shell.tabBar.isHidden ? DiaryTheme.Spacing.medium : DiaryTabBar.expandedHeight + DiaryTheme.Spacing.medium)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                    .allowsHitTesting(false)
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: savePhase)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             shell.isKeyboardShown = true
         }
@@ -70,11 +85,14 @@ struct MainTabsView: View {
         .sheet(item: $shell.editor) { request in
             DiaryEditorScreen(
                 request: request, saver: dependencies.diarySaving,
-                onSaveStarted: { [list = modules.value.list.viewModel] in
+                onSaveStarted: { [list = modules.value.list.viewModel] start in
+                    // One editor saves once, so its request names the save.
+                    shell.saveStarted(DiarySaveInProgress(id: request.id, day: start.day, isNew: start.isNew,
+                                                          showsInList: request.showsUploadInList))
                     if request.showsUploadInList { list.uploadDidStart() }
                 },
                 onSaveFinished: { [list = modules.value.list.viewModel] report in
-                    shell.saveFinished(report)
+                    shell.saveFinished(report, id: request.id)
                     if request.showsUploadInList { list.uploadDidFinish() }
                 }
             )
@@ -94,9 +112,25 @@ struct MainTabsView: View {
         .diaryToast(shell.toasts)
     }
 
+    /// The calendar's selected day counts only once the calendar has been opened.
+    private var savePhase: DiarySavePhase? {
+        let calendar = modules.value.calendar.viewModel
+        return shell.savePhase(calendarDay: visited.contains(2) ? calendar.selectedDate : nil, calendar: calendar.calendar)
+    }
+
     private func select(_ tab: Int) {
-        visited.insert(tab)
-        shell.select(tab)
+        guard !visited.contains(tab) else {
+            shell.select(tab)
+            return
+        }
+        // A tab opened for the first time is built first, still invisible and without animation, and shown
+        // right after: built while fading in, its screen would be seen settling into place.
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) { _ = visited.insert(tab) }
+        Task { @MainActor in
+            if shell.tabBar.selected != tab { shell.select(tab) }
+        }
     }
 
     // MARK: - Tabs
@@ -127,6 +161,8 @@ struct MainTabsView: View {
             }
         case .trash:
             TrashScreen(shell: shell, tab: tab, makeModule: dependencies.makeTrashModule)
+        case .search:
+            DiarySearchScreen(shell: shell, makeModule: dependencies.makeDiaryListModule)
         case .calendarDay:
             CalendarDayScreen(shell: shell, module: modules.value.calendar)
         case .journeyYears:
@@ -154,10 +190,54 @@ private struct DiaryListScreen: View {
             // Same as before: only a new diary written from the list shows its upload in the list.
             onWriteDiary: { shell.write(showsUploadInList: true) },
             onOpenSettings: { shell.push(.settings) },
+            onOpenSearch: { shell.push(.search) },
             tabRoot: TabRoot(shell: shell, tab: 0)
         )
         .onAppear { viewModel.start() }
-        .onChange(of: viewModel.notice) { _, notice in
+        .announcesTrashResults(of: viewModel, through: shell)
+        .onChange(of: shell.savedCount) {
+            // The live subscription already reflects saved changes; only recover a failed load.
+            if viewModel.state == .failed { viewModel.retry() }
+        }
+    }
+}
+
+/// The search screen pushed from the list and the calendar. It has its own list state, so what is typed here
+/// does not filter the list tab, and its subscription lives only while the screen is open.
+private struct DiarySearchScreen: View {
+    let shell: AppShell
+    @State private var module: Once<DiaryListModule>
+
+    init(shell: AppShell, makeModule: @escaping @MainActor () -> DiaryListModule) {
+        self.shell = shell
+        _module = State(initialValue: Once(makeModule))
+    }
+
+    var body: some View {
+        let viewModel = module.value.viewModel
+        DiaryListView(
+            viewModel: viewModel, imageLoader: module.value.imageLoader,
+            onSelectDiary: { shell.read($0) },
+            onEditDiary: { shell.edit($0) },
+            onWriteDiary: { shell.write() },
+            onOpenSettings: {},
+            isSearchScreen: true
+        )
+        .navigationTitle("검색")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { viewModel.start() }
+        .onDisappear { viewModel.stop() }
+        .announcesTrashResults(of: viewModel, through: shell)
+        .onChange(of: shell.savedCount) {
+            if viewModel.state == .failed { viewModel.retry() }
+        }
+    }
+}
+
+private extension View {
+    /// The list's "moved to trash" results, said over the tabs.
+    func announcesTrashResults(of viewModel: DiaryListViewModel, through shell: AppShell) -> some View {
+        onChange(of: viewModel.notice) { _, notice in
             guard let notice else { return }
             viewModel.notice = nil
             switch notice {
@@ -166,10 +246,6 @@ private struct DiaryListScreen: View {
             case .trashFailed:
                 shell.announce("삭제 실패", message: "휴지통으로 이동하지 못했습니다.\n잠시 후 다시 시도해주세요.", duration: 1.5)
             }
-        }
-        .onChange(of: shell.savedCount) {
-            // The live subscription already reflects saved changes; only recover a failed load.
-            if viewModel.state == .failed { viewModel.retry() }
         }
     }
 }
@@ -200,9 +276,12 @@ private struct CalendarScreen: View {
             viewModel: viewModel, imageLoader: module.imageLoader,
             onSelectDiary: { shell.read($0) },
             onOpenDayList: { shell.push(.calendarDay) },
-            onWriteDiary: { shell.write() },
+            // A diary written from the calendar is for the day selected in it.
+            onWriteDiary: { shell.write(on: viewModel.selectedDate) },
             onOpenSettings: { shell.push(.settings) },
-            tabRoot: TabRoot(shell: shell, tab: 2)
+            onOpenSearch: { shell.push(.search) },
+            tabRoot: TabRoot(shell: shell, tab: 2),
+            isSavingNewDiary: shell.isSavingNewDiary(on: viewModel.selectedDate, calendar: viewModel.calendar)
         )
         .onAppear { viewModel.start() }
         .onChange(of: shell.savedCount) {
@@ -220,7 +299,8 @@ private struct CalendarDayScreen: View {
     var body: some View {
         let viewModel = module.viewModel
         CalendarDayListView(viewModel: viewModel, imageLoader: module.imageLoader,
-                            onSelectDiary: { shell.read($0) }, onWriteDiary: { shell.write() })
+                            onSelectDiary: { shell.read($0) }, onWriteDiary: { shell.write(on: viewModel.selectedDate) },
+                            isSavingNewDiary: shell.isSavingNewDiary(on: viewModel.selectedDate, calendar: viewModel.calendar))
             .navigationTitle(title(viewModel))
             .navigationBarTitleDisplayMode(.inline)
     }

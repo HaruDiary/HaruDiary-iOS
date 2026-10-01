@@ -47,4 +47,24 @@ final class TabBarCollapseTests: XCTestCase {
         collapse.scrolled(to: 330)
         XCTAssertTrue(collapse.isCollapsed)
     }
+
+    @MainActor
+    func testTheTabUnderTheFingerFollowsTheBarsSize() {
+        // Full size: 6 pt of edge, then three tabs of 68 pt.
+        XCTAssertEqual(DiaryTabBar.tabIndex(at: 10, tabs: 3, collapsed: false), 0)
+        XCTAssertEqual(DiaryTabBar.tabIndex(at: 73.9, tabs: 3, collapsed: false), 0)
+        XCTAssertEqual(DiaryTabBar.tabIndex(at: 74, tabs: 3, collapsed: false), 1)
+        XCTAssertEqual(DiaryTabBar.tabIndex(at: 200, tabs: 3, collapsed: false), 2)
+        // Shrunk: three tabs of 46 pt, so the same point is another tab.
+        XCTAssertEqual(DiaryTabBar.tabIndex(at: 74, tabs: 3, collapsed: true), 1)
+        XCTAssertEqual(DiaryTabBar.tabIndex(at: 100, tabs: 3, collapsed: true), 2)
+    }
+
+    @MainActor
+    func testAFingerSlidPastTheEndsStaysOnTheNearestTab() {
+        XCTAssertEqual(DiaryTabBar.tabIndex(at: -40, tabs: 3, collapsed: false), 0)
+        XCTAssertEqual(DiaryTabBar.tabIndex(at: 2, tabs: 3, collapsed: false), 0)
+        XCTAssertEqual(DiaryTabBar.tabIndex(at: 900, tabs: 3, collapsed: false), 2)
+        XCTAssertEqual(DiaryTabBar.tabIndex(at: 900, tabs: 3, collapsed: true), 2)
+    }
 }

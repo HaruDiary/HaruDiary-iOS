@@ -13,13 +13,13 @@ struct DiaryEditorScreen: View {
 
     /// `onSaveStarted` and `onSaveFinished` are called even after the sheet has closed: saving goes on without it.
     init(request: DiaryEditorRequest, saver: any DiarySaving,
-         onSaveStarted: @escaping () -> Void, onSaveFinished: @escaping (DiarySaveReport) -> Void) {
+         onSaveStarted: @escaping (DiarySaveStart) -> Void, onSaveFinished: @escaping (DiarySaveReport) -> Void) {
         _model = State(initialValue: Once {
             let viewModel = DiaryEditorModule.makeViewModel(saver: saver)
             viewModel.onSaveStarted = onSaveStarted
             viewModel.onSaveFinished = onSaveFinished
             switch request.purpose {
-            case .compose: viewModel.startComposing()
+            case .compose: viewModel.startComposing(on: request.day)
             case .read(let entry): viewModel.open(entry, editing: false)
             case .edit(let entry): viewModel.open(entry, editing: true)
             }
