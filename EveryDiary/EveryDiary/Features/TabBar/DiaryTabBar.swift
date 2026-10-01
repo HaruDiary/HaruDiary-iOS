@@ -30,21 +30,28 @@ struct DiaryTabBar: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    static let expandedHeight: CGFloat = 62
-    static let collapsedHeight: CGFloat = 46
-    static let maxWidth: CGFloat = 360
+    static let expandedHeight: CGFloat = 60
+    static let collapsedHeight: CGFloat = 44
+    /// The bar is only as wide as its icons need, not stretched across the screen.
+    static let expandedTabWidth: CGFloat = 68
+    static let collapsedTabWidth: CGFloat = 46
+    static let edgePadding: CGFloat = 6
+
+    static func width(tabs: Int, collapsed: Bool) -> CGFloat {
+        CGFloat(tabs) * (collapsed ? collapsedTabWidth : expandedTabWidth) + edgePadding * 2
+    }
 
     var body: some View {
         GeometryReader { geometry in
-            let full = min(geometry.size.width, Self.maxWidth)
             let collapsed = state.isCollapsed
             HStack(spacing: 0) {
                 ForEach(state.tabs) { tab in
                     button(for: tab, collapsed: collapsed)
                 }
             }
-            .padding(.horizontal, collapsed ? 6 : 8)
-            .frame(width: collapsed ? full * 0.62 : full, height: collapsed ? Self.collapsedHeight : Self.expandedHeight)
+            .padding(.horizontal, Self.edgePadding)
+            .frame(width: min(Self.width(tabs: state.tabs.count, collapsed: collapsed), geometry.size.width),
+                   height: collapsed ? Self.collapsedHeight : Self.expandedHeight)
             .background { background }
             .overlay {
                 // While shrunk the whole bar is one target that grows it back.
@@ -57,7 +64,6 @@ struct DiaryTabBar: View {
                         .accessibilityAddTraits(.isButton)
                 }
             }
-            .shadow(color: .black.opacity(0.12), radius: 16, y: 6)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             .offset(y: state.isHidden ? Self.expandedHeight * 2 : 0)
             .opacity(state.isHidden ? 0 : 1)
@@ -81,7 +87,7 @@ struct DiaryTabBar: View {
                     if isSelected {
                         Capsule()
                             .fill(DiaryTheme.Colors.brand.opacity(0.12))
-                            .padding(.vertical, collapsed ? 5 : 8)
+                            .padding(.vertical, collapsed ? 5 : 7)
                     }
                 }
                 .contentShape(Rectangle())
@@ -94,11 +100,13 @@ struct DiaryTabBar: View {
     @ViewBuilder
     private var background: some View {
         if #available(iOS 26.0, *) {
-            Capsule().fill(.clear).glassEffect(.regular, in: Capsule())
+            // The system's Liquid Glass, which bends and tints with whatever scrolls behind it.
+            Color.clear.glassEffect(.regular.interactive(), in: Capsule())
         } else {
             Capsule()
                 .fill(.ultraThinMaterial)
                 .overlay { Capsule().strokeBorder(.white.opacity(0.35), lineWidth: 0.5) }
+                .shadow(color: .black.opacity(0.12), radius: 16, y: 6)
         }
     }
 }

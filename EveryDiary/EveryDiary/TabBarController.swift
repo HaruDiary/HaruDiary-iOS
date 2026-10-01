@@ -86,8 +86,9 @@ class TabBarController: UITabBarController, UINavigationControllerDelegate {
         view.addSubview(host.view)
         host.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            host.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            host.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            // Only as wide as the bar itself, so touches beside it reach the screen behind.
+            host.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            host.view.widthAnchor.constraint(equalToConstant: DiaryTabBar.width(tabs: barState.tabs.count, collapsed: false)),
             host.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 2),
             host.view.heightAnchor.constraint(equalToConstant: DiaryTabBar.expandedHeight),
         ])
