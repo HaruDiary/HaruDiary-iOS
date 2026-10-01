@@ -41,16 +41,21 @@ struct MainTabsView: View {
                             .toolbar(.hidden, for: .navigationBar)
                             .navigationDestination(for: AppRoute.self) { destination($0, tab: tab.id) }
                     }
-                    // The tab leaving fades away while the next one fades in, settling from slightly smaller.
-                    .opacity(tab.id == selected ? 1 : 0)
-                    .scaleEffect(tab.id == selected || reduceMotion ? 1 : 0.97)
+                    // Faded as one layer, and only faded. A stack that is scaled, or faded without being one layer,
+                    // is drawn cut off at the status bar and the home indicator, so a picture reaching under them
+                    // jumps when the change starts or ends.
+                    .compositingGroup()
+                    // The tab leaving fades away while the next one fades in. Only the opacity animates;
+                    // nothing inside a tab is moved by a tab change.
+                    .animation(.easeOut(duration: reduceMotion ? 0.18 : 0.26)) { content in
+                        content.opacity(tab.id == selected ? 1 : 0)
+                    }
                     .allowsHitTesting(tab.id == selected)
                     .accessibilityHidden(tab.id != selected)
                     .zIndex(tab.id == selected ? 1 : 0)
                 }
             }
         }
-        .animation(.easeOut(duration: reduceMotion ? 0.18 : 0.28), value: selected)
         .tint(DiaryTheme.Colors.brand)
         .overlay(alignment: .bottom) {
             DiaryTabBar(state: shell.tabBar, onSelect: select, onExpand: shell.expandBar)
@@ -95,8 +100,18 @@ struct MainTabsView: View {
     }
 
     private func select(_ tab: Int) {
-        visited.insert(tab)
-        shell.select(tab)
+        guard !visited.contains(tab) else {
+            shell.select(tab)
+            return
+        }
+        // A tab opened for the first time is built first, still invisible and without animation, and shown
+        // right after: built while fading in, its screen would be seen settling into place.
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) { _ = visited.insert(tab) }
+        Task { @MainActor in
+            if shell.tabBar.selected != tab { shell.select(tab) }
+        }
     }
 
     // MARK: - Tabs
