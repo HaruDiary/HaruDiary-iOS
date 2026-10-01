@@ -43,8 +43,6 @@ class TabBarController: UITabBarController, UINavigationControllerDelegate {
             let tab = barState.tabs[index]
             navigation.tabBarItem = UITabBarItem(title: tab.title, image: UIImage(named: tab.image), tag: index + 1)
             navigation.delegate = self
-            // The tab's first screen leaves room for the floating bar; pushed screens hide it.
-            navigation.viewControllers.first?.additionalSafeAreaInsets.bottom = DiaryTabBar.expandedHeight + 8
         }
         hideSystemTabBar()
         installBar()
@@ -53,6 +51,22 @@ class TabBarController: UITabBarController, UINavigationControllerDelegate {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         hideSystemTabBar()
+        reserveSpaceForBar()
+    }
+
+    /// Each tab's first screen leaves exactly the floating bar's room above the home indicator; pushed screens
+    /// hide the bar. The system's own share is measured, since a hidden system tab bar may still reserve its
+    /// height on some iOS versions; the difference (negative if needed) is added.
+    private func reserveSpaceForBar() {
+        let wanted = view.safeAreaInsets.bottom + DiaryTabBar.expandedHeight + 8
+        for navigation in [firstVC, secondVC, thirdVC] {
+            guard let root = navigation.viewControllers.first, root.isViewLoaded, root.view.window != nil else { continue }
+            let system = root.view.safeAreaInsets.bottom - root.additionalSafeAreaInsets.bottom
+            let extra = wanted - system
+            if abs(root.additionalSafeAreaInsets.bottom - extra) > 0.5 {
+                root.additionalSafeAreaInsets.bottom = extra
+            }
+        }
     }
 
     /// UIKit shows its own bar again after a screen that hides it is popped, so it is hidden every time.
@@ -108,6 +122,7 @@ class TabBarController: UITabBarController, UINavigationControllerDelegate {
         barState.selected = index
         expandBar()
         observeScrolling()
+        view.setNeedsLayout()
     }
 
     /// Netflix-style switch: the current tab fades away while the next one fades in, settling from slightly smaller.
@@ -216,6 +231,7 @@ class TabBarController: UITabBarController, UINavigationControllerDelegate {
         // A cancelled back swipe ends on the pushed screen again.
         barState.isHidden = viewController !== navigationController.viewControllers.first
         hideSystemTabBar()
+        view.setNeedsLayout()
         if !barState.isHidden { observeScrolling() }
     }
 }
