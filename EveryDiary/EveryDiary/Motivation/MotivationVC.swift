@@ -8,7 +8,6 @@
 import UIKit
 
 import Observation
-import SnapKit
 import SwiftUI
 
 class MotivationVC: UIViewController {
@@ -50,14 +49,14 @@ class MotivationVC: UIViewController {
     
     private lazy var monthLabel: UILabel = {
         let monthLabel = UILabel()
-        monthLabel.font = UIFont(name: "SFProDisplay-Bold", size: 25)
+        monthLabel.font = .systemFont(ofSize: 25, weight: .bold)
         monthLabel.textColor = .white
         return monthLabel
     }()
     
     private lazy var countLabel: UILabel = {
         let countLabel = UILabel()
-        countLabel.font = UIFont(name: "SFProDisplay-Regular", size: 16)
+        countLabel.font = .systemFont(ofSize: 16)
         countLabel.textColor = .white
         return countLabel
     }()
@@ -185,37 +184,35 @@ class MotivationVC: UIViewController {
     }
     
     func autoLayout() {
-        // The picture fills the whole screen; the floating tab bar sits over its ground.
-        scene.view.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        writeDiaryButton.snp.makeConstraints { make in
-            make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
-        }
-        // The same place as the list and calendar headers: the screen padding on every side.
-        header.view.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
-        }
-        monthLabel.snp.makeConstraints { make in
-            make.top.equalTo(header.view.snp.bottom).offset(20)
-            make.centerX.equalToSuperview()
-        }
-        countLabel.snp.makeConstraints { make in
-            make.top.equalTo(monthLabel.snp.bottom).offset(16)
-            make.centerX.equalToSuperview()
-        }
-        sceneLabel.snp.makeConstraints { make in
-            make.top.equalTo(countLabel.snp.bottom).offset(6)
-            make.centerX.equalToSuperview()
-        }
-        retryButton.snp.makeConstraints { make in
-            make.top.equalTo(sceneLabel.snp.bottom).offset(12)
-            make.centerX.equalToSuperview()
-        }
+        let views: [UIView] = [scene.view, writeDiaryButton, header.view, monthLabel, countLabel, sceneLabel, retryButton]
+        views.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+        let safeArea = view.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            // The picture fills the whole screen; the floating tab bar sits over its ground.
+            scene.view.topAnchor.constraint(equalTo: view.topAnchor),
+            scene.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scene.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scene.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            writeDiaryButton.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -10),
+            writeDiaryButton.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: -32),
+
+            // The same place as the list and calendar headers: the screen padding on every side.
+            header.view.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 16),
+            header.view.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            header.view.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+
+            monthLabel.topAnchor.constraint(equalTo: header.view.bottomAnchor, constant: 20),
+            monthLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            countLabel.topAnchor.constraint(equalTo: monthLabel.bottomAnchor, constant: 16),
+            countLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            sceneLabel.topAnchor.constraint(equalTo: countLabel.bottomAnchor, constant: 6),
+            sceneLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            retryButton.topAnchor.constraint(equalTo: sceneLabel.bottomAnchor, constant: 12),
+            retryButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+        ])
     }
-    
+
     // The tab draws its own header; pushed screens show the navigation bar again.
     private func setNavigationBar() {
         navigationController?.setNavigationBarHidden(true, animated: true)

@@ -71,6 +71,4 @@ SwiftUI 작성 화면은 후속 범위다. 저장 필드명이나 서버 마이�
 `DiaryEditorViewModelTests`는 fake 저장소·사진·날씨·위치로 위 규칙을 검증한다.
 시뮬레이터에서는 작성·날짜/감정/날씨 시트·닫기 확인·읽기·사진 보기·수정 화면을 확인했다.
 실제 새 일기 저장과 실기기 동작은 확인하지 않았다.
-기존 UIKit 편집기 파일(`WriteDiaryVC`, `DateSelectVC`, `DateConditionSelectVC`, `ImagePickerManager`,
-`KeyboardManager`, `Image*Cell`, `MapCollectionViewCell`, `DiaryWriteRetention`)과 `DiaryPhotoReplacement`는
-참조가 없어졌지만 삭제 승인을 받은 뒤 지운다.
+기존 UIKit 편집기 파일과 `DiaryPhotoReplacement`는 삭제했다([안 쓰는 코드 정리](LEGACY_CLEANUP.md)).

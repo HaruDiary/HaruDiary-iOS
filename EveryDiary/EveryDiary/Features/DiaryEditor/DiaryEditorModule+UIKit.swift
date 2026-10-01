@@ -77,11 +77,10 @@ private final class LiveDiaryLocating: NSObject, DiaryLocating, CLLocationManage
     }
 
     func placeName(for coordinate: DiaryCoordinate) async -> String? {
-        await withCheckedContinuation { continuation in
-            MapManager.shared.getPlaceName(latitude: coordinate.latitude, longitude: coordinate.longitude) { name in
-                continuation.resume(returning: name == "Unknown Location" ? nil : name)
-            }
-        }
+        // The place's own name when it has one, as the previous editor showed.
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let placemark = try? await CLGeocoder().reverseGeocodeLocation(location).first
+        return placemark?.name ?? placemark?.locality
     }
 
     private func finish(_ coordinate: DiaryCoordinate?) {
