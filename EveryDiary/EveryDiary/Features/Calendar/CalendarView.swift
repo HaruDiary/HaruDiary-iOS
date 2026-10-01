@@ -7,6 +7,7 @@ struct CalendarView: View {
     let onOpenDayList: () -> Void
     let onWriteDiary: () -> Void
     let onOpenSettings: () -> Void
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -27,6 +28,14 @@ struct CalendarView: View {
             DiaryWriteButton(action: onWriteDiary)
         }
         .diaryStatusBarBackground()
+        // The today marker follows the date: at midnight, on return to the app and when the tab is shown again.
+        .onAppear { viewModel.refreshToday() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { viewModel.refreshToday() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+            Task { @MainActor in viewModel.refreshToday() }
+        }
     }
 
     private var selectedDaySection: some View {

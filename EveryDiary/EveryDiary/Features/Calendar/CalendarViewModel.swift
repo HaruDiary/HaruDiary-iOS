@@ -15,6 +15,8 @@ final class CalendarViewModel {
     private(set) var index: CalendarDiaryIndex
     private(set) var displayedMonth: Date
     private(set) var selectedDate: Date
+    /// The day the calendar marks as today. Observed, so the marker moves when `refreshToday()` finds a new day.
+    private(set) var today: CalendarDay
     let calendar: Calendar
 
     @ObservationIgnored private let feed: UserDiaryFeed
@@ -27,6 +29,7 @@ final class CalendarViewModel {
         let today = now()
         displayedMonth = calendar.dateInterval(of: .month, for: today)?.start ?? today
         selectedDate = calendar.startOfDay(for: today)
+        self.today = CalendarDay(date: today, calendar: calendar)
         index = CalendarDiaryIndex(entries: [], calendar: calendar, now: today)
         feed.onEvent = { [weak self] in self?.apply($0) }
     }
@@ -35,9 +38,10 @@ final class CalendarViewModel {
         CalendarDay(date: selectedDate, calendar: calendar)
     }
 
-    /// Read from the clock each time, so the marker moves on while the app stays open.
-    var today: CalendarDay {
-        CalendarDay(date: now(), calendar: calendar)
+    /// Called at midnight and when the app comes back to the front, so yesterday does not stay marked.
+    func refreshToday() {
+        let current = CalendarDay(date: now(), calendar: calendar)
+        if current != today { today = current }
     }
 
     static let minimumYear = 2011
@@ -90,6 +94,7 @@ final class CalendarViewModel {
     }
 
     func showToday() {
+        refreshToday()
         select(now())
     }
 

@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import XCTest
 import UIKit
 
@@ -265,6 +266,24 @@ final class CalendarViewModelTests: XCTestCase {
         XCTAssertEqual(model.today, CalendarDay(year: 2026, month: 9, day: 15))
         model.moveMonth(by: 2)
         XCTAssertEqual(model.today, CalendarDay(year: 2026, month: 9, day: 15), "Moving the calendar does not move today")
+    }
+
+    func testTodayMarkerMovesAfterMidnightWhenRefreshed() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
+        var clock = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-09-30T14:59:00Z")) // 23:59 in Seoul
+        let model = CalendarViewModel(repository: FakeDiaryRepository(), session: FakeDiarySession(userID: "user-a"),
+                                      calendar: calendar, now: { clock })
+        XCTAssertEqual(model.today, CalendarDay(year: 2026, month: 9, day: 30))
+
+        clock = clock.addingTimeInterval(120)
+        XCTAssertEqual(model.today, CalendarDay(year: 2026, month: 9, day: 30), "Unchanged until the calendar is told the day changed")
+        var changes = 0
+        withObservationTracking { _ = model.today } onChange: { changes += 1 }
+        model.refreshToday()
+        XCTAssertEqual(model.today, CalendarDay(year: 2026, month: 10, day: 1))
+        XCTAssertEqual(changes, 1, "Views reading today are redrawn")
+        XCTAssertEqual(model.selectedDay, CalendarDay(year: 2026, month: 9, day: 30), "The selection is left where the user put it")
     }
 
     func testYearOverviewJumpsToAMonthAndSelectsTodayInTheCurrentMonth() throws {
