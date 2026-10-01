@@ -35,4 +35,9 @@ protocol DiaryDraftStoring: AnyObject {
     func save(_ draft: StoredDiaryDraft)
     /// Clears the new diary's writing, or the kept changes when they are for `diaryID`.
     func clear(diaryID: String?)
+    /// A save of `draft` started or ended. The editor closes when a save starts, so another editor can open
+    /// while it runs: the writing stays kept (the app may be closed before the save ends), but it is not
+    /// brought back into that editor.
+    func setSaving(_ isSaving: Bool, _ draft: StoredDiaryDraft)
+    func isBeingSaved(_ draft: StoredDiaryDraft) -> Bool
 }

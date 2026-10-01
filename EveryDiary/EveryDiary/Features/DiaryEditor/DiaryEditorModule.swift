@@ -10,10 +10,11 @@ import WeatherKit
 
 @MainActor
 enum DiaryEditorModule {
-    static func makeViewModel(saver: any DiarySaving) -> DiaryEditorViewModel {
+    /// `drafts` is shared by every editor, so one editor knows about a save another one started.
+    static func makeViewModel(saver: any DiarySaving, drafts: (any DiaryDraftStoring)?) -> DiaryEditorViewModel {
         DiaryEditorViewModel(saver: saver, downloader: StoragePhotoDownloader(), weather: LiveDiaryWeather(),
                              locating: LiveDiaryLocating(), calendar: .current, now: Date.init,
-                             drafts: UserDefaultsDiaryDraftStore())
+                             drafts: drafts)
     }
 }
 

@@ -7,6 +7,8 @@ final class UserDefaultsDiaryDraftStore: DiaryDraftStoring {
     /// The changes being made to a stored diary; the latest edited diary only.
     static let editKey = "diaryDraft.edit.v1"
     private let defaults: UserDefaults
+    /// Drafts whose save is running. Only for as long as the app runs: after a restart no save is running.
+    private var saving: [StoredDiaryDraft] = []
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -30,6 +32,15 @@ final class UserDefaultsDiaryDraftStore: DiaryDraftStoring {
         }
         // Changes kept for another diary are left alone.
         if read(Self.editKey)?.diaryID == diaryID { defaults.removeObject(forKey: Self.editKey) }
+    }
+
+    func setSaving(_ isSaving: Bool, _ draft: StoredDiaryDraft) {
+        saving.removeAll { $0 == draft }
+        if isSaving { saving.append(draft) }
+    }
+
+    func isBeingSaved(_ draft: StoredDiaryDraft) -> Bool {
+        saving.contains(draft)
     }
 
     private func read(_ key: String) -> StoredDiaryDraft? {

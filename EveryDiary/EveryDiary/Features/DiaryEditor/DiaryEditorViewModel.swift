@@ -131,6 +131,8 @@ final class DiaryEditorViewModel {
     /// Who is writing, fixed when the writing starts. What is kept is kept for this account, also when the
     /// app signs out or another account signs in while the editor is open.
     private var draftUserID: String?
+    /// What was kept when this editor's save started; only this is cleared when the save succeeds.
+    private var savingDraft: StoredDiaryDraft?
 
     private var entry: DiaryEntry?
     private var editingUserID: String?
@@ -173,7 +175,8 @@ final class DiaryEditorViewModel {
         // Read before the draft is set: setting it stores it, and an empty one clears what was kept.
         let kept = drafts?.load(diaryID: nil)
         initialDraft = fresh
-        if let kept, !kept.isEmpty, kept.belongs(to: draftUserID) {
+        // Writing whose save is still running (the previous editor closed a moment ago) is not written again.
+        if let kept, !kept.isEmpty, kept.belongs(to: draftUserID), drafts?.isBeingSaved(kept) != true {
             // Writing left unsaved (the app was closed, or the save failed) comes back as it was, with its own day.
             var restored = fresh
             restored.title = kept.title
@@ -239,8 +242,9 @@ final class DiaryEditorViewModel {
             let kept = keptDraft(diaryID: nil, photoCount: photos.count)
             if !kept.isEmpty {
                 drafts.save(kept)
-            } else if drafts.load(diaryID: nil)?.belongs(to: draftUserID) == true {
-                // Only this writer's own kept writing is cleared by an empty editor, never another account's.
+            } else if let stored = drafts.load(diaryID: nil), stored.belongs(to: draftUserID), !drafts.isBeingSaved(stored) {
+                // Only this writer's own kept writing is cleared by an empty editor: never another account's,
+                // and not writing whose save is still running.
                 drafts.clear(diaryID: nil)
             }
         case .edit:
@@ -285,7 +289,8 @@ final class DiaryEditorViewModel {
         // Reading may have been opened under another account than the one editing now.
         draftUserID = saver.currentUserID
         guard let diaryID = entry?.id, let userID = draftUserID,
-              let kept = drafts?.load(diaryID: diaryID), kept.userID == userID else { return }
+              let kept = drafts?.load(diaryID: diaryID), kept.userID == userID,
+              drafts?.isBeingSaved(kept) != true else { return }
         var restored = draft
         restored.title = kept.title
         restored.content = kept.content
@@ -569,6 +574,14 @@ final class DiaryEditorViewModel {
     private func begin(isNew: Bool) {
         isSaving = true
         weatherTask?.cancel()
+        // The editor closes now. From here on it keeps nothing: a late change (the place arriving) must not
+        // overwrite what the next editor keeps. What is kept stays until the save has succeeded.
+        isDraftSettled = true
+        let diaryID = isNew ? nil : entry?.id
+        if let kept = drafts?.load(diaryID: diaryID), kept.userID == draftUserID {
+            savingDraft = kept
+            drafts?.setSaving(true, kept)
+        }
         onSaveStarted?(DiarySaveStart(day: draft.date, isNew: isNew))
     }
 
@@ -584,15 +597,16 @@ final class DiaryEditorViewModel {
             print("Error saving diary: \(type(of: error))")
             report = .failed(isUpdate: isUpdate)
         }
-        // Saved writing is kept no more; after a failure it stays for the next try.
-        if report != .failed(isUpdate: isUpdate) {
-            isDraftSettled = true
-            if isUpdate {
-                if let diaryID = entry?.id { drafts?.clear(diaryID: diaryID) }
-            } else {
-                drafts?.clear(diaryID: nil)
+        // Saved writing is kept no more; after a failure it stays for the next try. Only the writing this save
+        // was started with is cleared: the editor closed when the save started, and another one may have kept
+        // new writing since.
+        if let savingDraft {
+            drafts?.setSaving(false, savingDraft)
+            if report != .failed(isUpdate: isUpdate), drafts?.load(diaryID: savingDraft.diaryID) == savingDraft {
+                drafts?.clear(diaryID: savingDraft.diaryID)
             }
         }
+        savingDraft = nil
         onSaveFinished?(report)
     }
 

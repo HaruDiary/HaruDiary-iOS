@@ -84,7 +84,7 @@ struct MainTabsView: View {
         .onChange(of: shell.paths) { shell.updateBarVisibility() }
         .sheet(item: $shell.editor) { request in
             DiaryEditorScreen(
-                request: request, saver: dependencies.diarySaving,
+                request: request, saver: dependencies.diarySaving, drafts: dependencies.diaryDrafts,
                 onSaveStarted: { [list = modules.value.list.viewModel] start in
                     // One editor saves once, so its request names the save.
                     shell.saveStarted(DiarySaveInProgress(id: request.id, day: start.day, isNew: start.isNew,

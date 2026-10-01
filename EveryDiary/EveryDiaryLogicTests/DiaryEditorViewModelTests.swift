@@ -193,6 +193,56 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertNil(drafts.stored)
     }
 
+    func testASaveStillRunningNeitherComesBackNorClearsWhatTheNextEditorKeeps() async throws {
+        let drafts = FakeDraftStore()
+        saver.holdsCreate = true
+        let first = makeModel(drafts: drafts)
+        first.startComposing()
+        first.draft.title = "저장 중인 글"
+        var report: DiarySaveReport?
+        first.onSaveFinished = { report = $0 }
+        XCTAssertTrue(first.save())
+        try await waitUntil { saver.heldCreate != nil }
+        XCTAssertEqual(drafts.stored?.title, "저장 중인 글", "Kept until the save has succeeded")
+
+        // The editor closed when the save started; the user writes again while it runs.
+        let second = makeModel(drafts: drafts)
+        second.startComposing()
+        XCTAssertEqual(second.draft.title, "", "Writing that is being saved is not written again")
+        XCTAssertNil(second.notice)
+        XCTAssertEqual(drafts.stored?.title, "저장 중인 글", "An empty editor does not drop it either")
+        second.draft.title = "다음 글"
+        // A late change in the closed editor must not overwrite the next editor's writing.
+        first.draft.currentLocationInfo = "37.5, 127.0"
+        XCTAssertEqual(drafts.stored?.title, "다음 글")
+
+        // The first save succeeds: the next editor's writing stays.
+        saver.heldCreate?(.success(.saved))
+        try await waitUntil { report != nil }
+        XCTAssertEqual(report, .saved)
+        XCTAssertEqual(drafts.stored?.title, "다음 글")
+    }
+
+    func testAnEditStillBeingSavedDoesNotComeBackAndItsEndClearsOnlyItsOwnChanges() async throws {
+        let drafts = FakeDraftStore()
+        let first = makeModel(drafts: drafts)
+        first.open(stored(), editing: true)
+        first.draft.title = "저장 중인 수정"
+        saver.holdsKeeping = true
+        XCTAssertTrue(first.save())
+        XCTAssertNotNil(saver.heldKeeping)
+
+        // Edited again while the save runs: the stored diary as it is, not the changes being saved.
+        let second = makeModel(drafts: drafts)
+        second.open(stored(), editing: true)
+        XCTAssertEqual(second.draft.title, "산책")
+        XCTAssertNil(second.notice)
+        second.draft.title = "그 사이의 새 수정"
+
+        saver.heldKeeping?(.success(.savedKeepingPhotos))
+        XCTAssertEqual(drafts.storedEdit?.title, "그 사이의 새 수정")
+    }
+
     func testWritingKeptForItsWriterIsNotRewrittenAfterASignOutOrAnAccountSwitch() {
         let drafts = FakeDraftStore()
         let model = makeModel(drafts: drafts)
@@ -936,6 +986,15 @@ private final class FakeDraftStore: DiaryDraftStoring {
     func clear(diaryID: String?) {
         if diaryID == nil { stored = nil } else if storedEdit?.diaryID == diaryID { storedEdit = nil }
     }
+
+    private var saving: [StoredDiaryDraft] = []
+
+    func setSaving(_ isSaving: Bool, _ draft: StoredDiaryDraft) {
+        saving.removeAll { $0 == draft }
+        if isSaving { saving.append(draft) }
+    }
+
+    func isBeingSaved(_ draft: StoredDiaryDraft) -> Bool { saving.contains(draft) }
 }
 
 @MainActor
@@ -965,8 +1024,18 @@ private final class RecordingDiarySaving: DiarySaving {
                 completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         created.append(entry)
         createdUploads.append(uploads)
-        completion(outcome)
+        if holdsCreate {
+            heldCreate = completion
+        } else {
+            completion(outcome)
+        }
     }
+
+    /// Saves that end only when the test ends them, to look at what happens while a save runs.
+    var holdsCreate = false
+    private(set) var heldCreate: ((Result<DiarySaveOutcome, Error>) -> Void)?
+    var holdsKeeping = false
+    private(set) var heldKeeping: ((Result<DiarySaveOutcome, Error>) -> Void)?
 
     func update(_ entry: DiaryEntry, diaryID: String, expectedUserID: String, existingImageURLs: [String],
                 images uploads: [DiaryImageUpload], unreadablePhotoCount: Int,
@@ -994,7 +1063,11 @@ private final class RecordingDiarySaving: DiarySaving {
                              completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         keptPhotos.append(Update(entry: entry, diaryID: diaryID, expectedUserID: expectedUserID,
                                  existing: existingImageURLs, uploads: []))
-        completion(keepingOutcome)
+        if holdsKeeping {
+            heldKeeping = completion
+        } else {
+            completion(keepingOutcome)
+        }
     }
 }
 

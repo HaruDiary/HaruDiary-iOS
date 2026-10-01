@@ -258,6 +258,28 @@ final class DiaryExtrasTests: XCTestCase {
         XCTAssertNil(store.load(diaryID: "diary-2"))
     }
 
+    func testDraftStoreKnowsWhichDraftIsBeingSavedOnlyWhileTheAppRuns() throws {
+        let suite = "diary-draft-tests-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = UserDefaultsDiaryDraftStore(defaults: defaults)
+        let draft = StoredDiaryDraft(title: "제목", content: "", date: date(2026, 9, 30), emotion: "", weather: "", photoCount: 0, userID: "user-a")
+        var other = draft
+        other.title = "다른 글"
+        store.save(draft)
+
+        store.setSaving(true, draft)
+        XCTAssertTrue(store.isBeingSaved(draft))
+        XCTAssertFalse(store.isBeingSaved(other))
+        XCTAssertEqual(store.load(diaryID: nil), draft, "It stays kept while it is saved")
+
+        // After a restart no save is running: the kept writing comes back.
+        XCTAssertFalse(UserDefaultsDiaryDraftStore(defaults: defaults).isBeingSaved(draft))
+
+        store.setSaving(false, draft)
+        XCTAssertFalse(store.isBeingSaved(draft))
+    }
+
     func testADraftStoredBeforeEditsWereKeptIsStillRead() throws {
         // Written by the first version of the store, without `diaryID`.
         let old = #"{"title":"제목","content":"","date":0,"emotion":"","weather":"","photoCount":1}"#
