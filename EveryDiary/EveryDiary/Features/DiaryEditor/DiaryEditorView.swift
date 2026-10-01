@@ -15,6 +15,7 @@ struct DiaryEditorView: View {
     @State private var sheet: EditorSheet?
     @State private var viewerStart: PhotoViewerRequest?
     @FocusState private var focus: Field?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private enum Field {
         case title
@@ -145,18 +146,26 @@ struct DiaryEditorView: View {
     }
 
     private var conditionChips: some View {
-        HStack(spacing: DiaryTheme.Spacing.small) {
-            DiaryConditionChip(placeholder: "기분", symbol: "face.smiling",
-                               label: DiaryConditions.emotionLabel(viewModel.draft.emotion),
-                               hasValue: !viewModel.draft.emotion.isEmpty) {
-                Image(viewModel.draft.emotion).resizable().scaledToFit()
-            } action: { sheet = .emotion }
-            DiaryConditionChip(placeholder: "날씨", symbol: "cloud.sun",
-                               label: DiaryConditions.weatherLabel(viewModel.draft.weather),
-                               hasValue: !viewModel.draft.weather.isEmpty) {
-                DiaryWeatherIcon(name: viewModel.draft.weather, size: 20)
-            } action: { sheet = .weather }
-            Spacer(minLength: DiaryTheme.Spacing.small)
+        // In large text the live weather moves under the chips instead of squeezing beside them.
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: DiaryTheme.Spacing.small))
+            : AnyLayout(HStackLayout(spacing: DiaryTheme.Spacing.small))
+        return layout {
+            HStack(spacing: DiaryTheme.Spacing.small) {
+                DiaryConditionChip(placeholder: "기분", symbol: "face.smiling",
+                                   label: DiaryConditions.emotionLabel(viewModel.draft.emotion),
+                                   hasValue: !viewModel.draft.emotion.isEmpty) {
+                    Image(viewModel.draft.emotion).resizable().scaledToFit()
+                } action: { sheet = .emotion }
+                DiaryConditionChip(placeholder: "날씨", symbol: "cloud.sun",
+                                   label: DiaryConditions.weatherLabel(viewModel.draft.weather),
+                                   hasValue: !viewModel.draft.weather.isEmpty) {
+                    DiaryWeatherIcon(name: viewModel.draft.weather, size: 20)
+                } action: { sheet = .weather }
+            }
+            if !dynamicTypeSize.isAccessibilitySize {
+                Spacer(minLength: DiaryTheme.Spacing.small)
+            }
             // The live weather sits at the end of the same row, so the title comes right below.
             if viewModel.mode == .compose {
                 DiaryWeatherNote(state: viewModel.weather, attribution: viewModel.attribution)
@@ -202,6 +211,8 @@ struct DiaryEditorView: View {
         .padding(.vertical, 6)
         .background(.bar)
         .overlay(alignment: .top) { Divider() }
+        // Three buttons share the width, so their labels stop growing at the largest standard size.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 
     private func barButton(symbol: String, label: String, action: @escaping () -> Void) -> some View {
@@ -256,35 +267,22 @@ struct DiaryDateCard: View {
     let date: Date
     let isToday: Bool
     let action: () -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: DiaryTheme.Spacing.medium) {
-                Image(systemName: "calendar")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(DiaryTheme.Colors.brand)
-                    .frame(width: 40, height: 40)
-                    .background(DiaryTheme.Colors.brand.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(isToday ? "오늘의 일기" : "지난 날의 일기")
-                        .font(DiaryTheme.Fonts.caption)
-                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
-                    Text(DiaryEditorFormat.cardDate.string(from: date))
-                        .font(.headline)
-                        .foregroundStyle(DiaryTheme.Colors.text)
-                        .monospacedDigit()
+        // In large text the "change date" button goes under the date, so the date stays on one line.
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: DiaryTheme.Spacing.medium))
+            : AnyLayout(HStackLayout(spacing: DiaryTheme.Spacing.medium))
+        return Button(action: action) {
+            layout {
+                dateLabel
+                if !dynamicTypeSize.isAccessibilitySize {
+                    Spacer(minLength: 0)
                 }
-                Spacer(minLength: 0)
-                HStack(spacing: 4) {
-                    Text("날짜 변경")
-                    Image(systemName: "chevron.down").font(.caption.weight(.bold))
-                }
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(DiaryTheme.Colors.brand)
-                .padding(.horizontal, DiaryTheme.Spacing.medium)
-                .padding(.vertical, 7)
-                .background(DiaryTheme.Colors.brand.opacity(0.12), in: Capsule())
+                changeLabel
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(DiaryTheme.Spacing.medium)
             .background(DiaryTheme.Colors.surface, in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
             .overlay {
@@ -296,6 +294,39 @@ struct DiaryDateCard: View {
         .buttonStyle(.plain)
         .accessibilityLabel("날짜, \(DiaryEditorFormat.cardDate.string(from: date))")
         .accessibilityHint("눌러서 날짜를 바꿉니다")
+    }
+
+    private var dateLabel: some View {
+        HStack(spacing: DiaryTheme.Spacing.medium) {
+            Image(systemName: "calendar")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(DiaryTheme.Colors.brand)
+                .frame(width: 40, height: 40)
+                .background(DiaryTheme.Colors.brand.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(isToday ? "오늘의 일기" : "지난 날의 일기")
+                    .font(DiaryTheme.Fonts.caption)
+                    .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                Text(DiaryEditorFormat.cardDate.string(from: date))
+                    .font(.headline)
+                    .foregroundStyle(DiaryTheme.Colors.text)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+    }
+
+    private var changeLabel: some View {
+        HStack(spacing: 4) {
+            Text("날짜 변경")
+            Image(systemName: "chevron.down").font(.caption.weight(.bold))
+        }
+        .font(.subheadline.weight(.semibold))
+        .foregroundStyle(DiaryTheme.Colors.brand)
+        .padding(.horizontal, DiaryTheme.Spacing.medium)
+        .padding(.vertical, 7)
+        .background(DiaryTheme.Colors.brand.opacity(0.12), in: Capsule())
     }
 }
 
@@ -342,10 +373,11 @@ struct DiaryWeatherNote: View {
     let state: DiaryEditorViewModel.WeatherState
     let attribution: WeatherAttribution?
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         if let text {
-            VStack(alignment: .trailing, spacing: 2) {
+            VStack(alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing, spacing: 2) {
                 Text(text)
                     .foregroundStyle(DiaryTheme.Colors.secondaryText)
                     .lineLimit(1)
@@ -360,7 +392,7 @@ struct DiaryWeatherNote: View {
                                 Text("Apple 날씨")
                             }
                             .frame(height: 11)
-                            Text("법적 고지").underline()
+                            Text("법적 고지").underline().lineLimit(1)
                         }
                         .foregroundStyle(DiaryTheme.Colors.secondaryText)
                     }

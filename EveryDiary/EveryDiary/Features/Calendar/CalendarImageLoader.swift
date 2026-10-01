@@ -10,8 +10,7 @@ final class CachedCalendarImageLoader: CalendarImageLoading {
     }
 
     func image(for url: URL) async -> UIImage? {
-        // The existing cache completes once. The view ignores results from cancelled tasks;
-        // transport cancellation can be added when the shared image service exposes it.
+        // The cache completes once, with a thumbnail-sized image. The view ignores results from cancelled tasks.
         await withCheckedContinuation { continuation in
             cache.loadImage(from: url) { continuation.resume(returning: $0) }
         }

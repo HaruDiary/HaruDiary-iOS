@@ -24,6 +24,10 @@ final class SettingsHostingController: UIHostingController<SettingsView> {
                 self.push(ReminderModule.makeSettingsViewController(reminders: self.module.reminders))
             },
             openLock: { [weak self] in self?.push(LockModule.makeSettingsViewController()) },
+            openTextSize: { [weak self] in
+                guard let self, let textSize = self.module.textSize else { return }
+                self.push(TextSizeSettingsHostingController(controller: textSize))
+            },
             openTrash: { [weak self] in
                 guard let self else { return }
                 self.push(self.module.makeTrashModule().makeViewController(makeWriteDiary: self.makeWriteDiary))
@@ -75,6 +79,7 @@ final class SettingsHostingController: UIHostingController<SettingsView> {
     private func refreshValues() {
         values.reminder = SettingsSummary.reminder(UserDefaultsReminderStore(calendar: calendar).settings, calendar: calendar)
         values.lock = SettingsSummary.lock(LockModule.makeLock().mode, biometry: LiveDeviceOwnerAuthenticator().biometry)
+        values.textSize = module.textSize?.setting.title ?? AppTextSize.system.title
         let info = Bundle.main.infoDictionary
         values.version = SettingsSummary.version(short: info?["CFBundleShortVersionString"] as? String,
                                                  build: info?["CFBundleVersion"] as? String)
@@ -114,6 +119,6 @@ final class SettingsHostingController: UIHostingController<SettingsView> {
 
 extension SettingsActions {
     /// Placeholder for the first `rootView`, replaced before the screen appears.
-    static let none = SettingsActions(openReminders: {}, openLock: {}, openTrash: {}, openWebPage: { _ in }, signIn: {},
+    static let none = SettingsActions(openReminders: {}, openLock: {}, openTextSize: {}, openTrash: {}, openWebPage: { _ in }, signIn: {},
                                       confirmWithAppleThenDelete: {}, accountChanged: {})
 }

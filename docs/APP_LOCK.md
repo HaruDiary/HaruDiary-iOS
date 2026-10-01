@@ -34,4 +34,4 @@
 - `AppLockTests`, `LockViewModelTests`: 해시 저장, 대기 시간, 재실행 후 대기 유지, 기존 잠금 전환, 설정·잠금 화면 흐름.
 - 시뮬레이터(Face ID 등록): 암호 설정(불일치 재입력 포함), Face ID 켜기, 앱 시작·복귀 잠금, Face ID 실패 후 암호,
   틀린 암호 안내, Face ID로 해제, 암호 분실 후 잠금 끄기, 기존 잠금 사용자 안내를 확인했다.
-- 실기기 Face ID/Touch ID는 확인하지 않았다. 기존 `LockVC`, `SetFaceID.swift`는 참조가 없으며 실기기 확인 후 삭제한다.
+- 실기기 Face ID/Touch ID는 확인하지 않았다. 기존 `LockVC`, `SetFaceID.swift`는 삭제했다.

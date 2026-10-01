@@ -15,24 +15,16 @@ SwiftUI도 UIKit 뷰/컨트롤러를 연결할 수 있다. UIKit 타입이 있�
 
 | 구분 | 기존 구성 / 근거 | 처리 방향 |
 |---|---|---|
-| 재사용 + 책임 분리 | Firebase SDK, `RemoteDB/FireStore.swift`·`PaginationManager.swift` | 서버와 문서 형식은 유지. 조회/저장 계약과 오류·구독 수명 분리 |
-| 재사용 + 타입 분리 | `Model/DataModel.swift`의 `DiaryEntry`, 날짜 formatter | 저장 DTO와 순수 모델/날짜 유틸 분리. 같은 파일의 UIImage·셀 모델을 Domain에 넣지 않음 |
+| 재사용 + 책임 분리 | Firebase SDK, `RemoteDB/FireStore.swift`(쓰기만 남김) | 서버와 문서 형식은 유지. 조회/저장 계약과 오류·구독 수명 분리 |
+| 재사용 + 타입 분리 | `Domain/DiaryEntry.swift`, `Shared/DiaryDateFormatting.swift` | 저장 DTO와 순수 모델/날짜 유틸 분리. 같은 파일의 UIImage·셀 모델을 Domain에 넣지 않음 |
 | 재사용 | `Assets.xcassets`의 colorset·감정/날씨/사진 등 이미지 | SwiftUI에서도 자산 사용 가능. 실제 사용처와 목업을 비교해 이름/의미를 정리 |
-| 공통 기준 정리 | `Font/`, `Info.plist`의 UIAppFonts, 여러 VC의 `UIFont(name:size:)` | 표시 역할별 타이포 정의. 시스템 폰트/커스텀 폰트 선택과 Dynamic Type 기준 합의 |
 | 교체 | UIViewController, UITableView/UICollectionView cell, delegate | SwiftUI View·List·LazyVGrid 등으로 기능별 전환. delegate의 비즈니스 로직은 먼저 분리 |
-| 교체 후 제거 | 각 화면의 SnapKit·Auto Layout | SwiftUI stack/layout/modifier로 전환. UIKit 화면이 남아 있는 동안 SnapKit 유지 |
 | 교체 | `TabBarController.swift`, 각 UINavigationController, `SceneDelegate.swift` | TabView·NavigationStack·sheet 경로 및 상태 소유권 설계. 기존 뒤로 가기/로그인 URL 연결 보존 |
-| 교체 완료(삭제 대기) | `WriteDiary/KeyboardManager.swift` | SwiftUI 작성 화면(`Features/DiaryEditor`)의 FocusState·키보드 회피로 대체. 참조 제거 후 삭제 |
-| 교체 완료(삭제 대기) | `WriteDiary/ImagePickerManager.swift` | PhotosPicker는 선택 순서·기존 선택 표시·assetIdentifier를 보장하지 않아 PHPicker를 유지. `DiaryPhotoLibraryPicker`로 옮김 |
-| 분리 후 연결 | `WriteDiary/MapManager.swift` | 주소 조회·지도 앱 열기는 작성 화면이 그대로 사용. 지도 표현은 SwiftUI Map으로 교체 |
-| 재사용 + 수명 정리 | `Service/SetFaceID.swift`, 알림 등록 및 인증 관련 코드 | LocalAuthentication·UserNotifications·Firebase/Google 로그인은 계속 사용. 표시/상태 전달만 분리 |
 | 분리 후 교체 | `DiaryList/TemporaryAlert.swift`, VC의 UIAlertController | 오류·확인 메시지 데이터와 표시를 구분. alert/confirmationDialog/일시 메시지 컴포넌트로 연결 |
 | 재사용 + 인터페이스 정리 | `DiaryList/ImageCacheManager.swift`의 NSCache·다운로드 | SwiftUI라고 캐시가 없어지지 않음. 캐시 정책·취소·오류를 분리. AsyncImage로 기계적으로 대체하지 않음 |
 | 상태 연결 교체 | `AppEvents/NotificationName.swift`의 로그인 이벤트와 delegate 콜백 | 소유자가 있는 세션/화면 상태로 전달. 시스템 notification까지 무조건 제거하지 않음 |
-| 교체됨 | `Motivation/BuildingView.swift`, `HonorVC`, `DetailVC`, BezierPath/이미지 캐시 | 여정 탭은 `Features/Journey`(공용 구독 + SwiftUI Canvas 그림)로 교체. 참조가 없어진 기존 파일·에셋은 별도 PR로 정리 |
-| 정리 후보 | `DiaryList/Extensions.swift` | 현재 import만 있는 파일. 타깃/사용 확인 후 별도 정리 |
-| 공통으로 추출 후보 | `DiaryList/DiaryListVC.swift` 안의 `Array.safeFetch` | 실제 사용처와 의미를 확인해 필요한 경우 `Shared/Extensions/Collection+SafeAccess.swift`로 이동 |
-| 의존성 정리 후보 | 프로젝트의 Lottie 패키지 연결 | 현재 앱 Swift 소스 검색에서 Lottie 사용을 찾지 못함. 전체 참조/리소스 확인과 빌드 후 제거 여부 결정 |
+
+교체가 끝난 UIKit 화면·SnapKit·Lottie·번들 폰트·안 쓰는 이미지는 삭제했다. 목록은 [안 쓰는 코드 정리](LEGACY_CLEANUP.md)에 있다.
 
 **정리 후보는 곧바로 삭제할 목록이 아니다.** 폰트·이미지·패키지는 Xcode 타깃,
 Info.plist, 문자열 기반 자산 참조까지 확인한다. 대체 호출부가 동작한 후 별도 커밋으로 제거한다.
