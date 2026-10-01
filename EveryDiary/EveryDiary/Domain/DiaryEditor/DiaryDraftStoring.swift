@@ -16,7 +16,8 @@ struct StoredDiaryDraft: Codable, Equatable {
     /// The stored diary being changed; nil for a new diary.
     var diaryID: String? = nil
 
-    /// Nothing worth keeping: photos alone cannot be brought back.
+    /// Nothing worth keeping: photos alone cannot be brought back, and a day picked without any writing is
+    /// not kept on purpose. An empty editor opening on a past day would invite writing today's diary there.
     var isEmpty: Bool {
         title.isEmpty && content.isEmpty && emotion.isEmpty && weather.isEmpty
     }
