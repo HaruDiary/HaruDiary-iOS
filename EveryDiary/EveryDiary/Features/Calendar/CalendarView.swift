@@ -8,6 +8,8 @@ struct CalendarView: View {
     let onWriteDiary: () -> Void
     let onOpenSettings: () -> Void
     var tabRoot: TabRoot? = nil
+    /// A new diary for the selected day is being saved; a placeholder row stands where it will appear.
+    var isSavingNewDiary = false
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -61,8 +63,11 @@ struct CalendarView: View {
             }
             .accessibilityLabel("\(dayTitle), 날짜별 일기 보기")
 
+            if isSavingNewDiary {
+                DiarySavingRow()
+            }
             if viewModel.selectedEntries.isEmpty {
-                if viewModel.state == .loaded {
+                if viewModel.state == .loaded && !isSavingNewDiary {
                     Text("이 날짜에 작성한 일기가 없어요")
                         .font(DiaryTheme.Fonts.body)
                         .foregroundStyle(DiaryTheme.Colors.secondaryText)

@@ -65,6 +65,16 @@ struct MainTabsView: View {
                 .accessibilityHidden(shell.tabBar.isHidden)
                 .offset(y: 2)
         }
+        .overlay(alignment: .bottom) {
+            // Above the tab bar, or at the bottom of a pushed screen, where the bar is hidden.
+            if let phase = savePhase {
+                DiarySavePill(phase: phase)
+                    .padding(.bottom, shell.tabBar.isHidden ? DiaryTheme.Spacing.medium : DiaryTabBar.expandedHeight + DiaryTheme.Spacing.medium)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                    .allowsHitTesting(false)
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: savePhase)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             shell.isKeyboardShown = true
         }
@@ -75,11 +85,14 @@ struct MainTabsView: View {
         .sheet(item: $shell.editor) { request in
             DiaryEditorScreen(
                 request: request, saver: dependencies.diarySaving,
-                onSaveStarted: { [list = modules.value.list.viewModel] in
+                onSaveStarted: { [list = modules.value.list.viewModel] start in
+                    // One editor saves once, so its request names the save.
+                    shell.saveStarted(DiarySaveInProgress(id: request.id, day: start.day, isNew: start.isNew,
+                                                          showsInList: request.showsUploadInList))
                     if request.showsUploadInList { list.uploadDidStart() }
                 },
                 onSaveFinished: { [list = modules.value.list.viewModel] report in
-                    shell.saveFinished(report)
+                    shell.saveFinished(report, id: request.id)
                     if request.showsUploadInList { list.uploadDidFinish() }
                 }
             )
@@ -97,6 +110,12 @@ struct MainTabsView: View {
             PasscodeSetupSheet(onClose: { shell.isSettingPasscode = false })
         }
         .diaryToast(shell.toasts)
+    }
+
+    /// The calendar's selected day counts only once the calendar has been opened.
+    private var savePhase: DiarySavePhase? {
+        let calendar = modules.value.calendar.viewModel
+        return shell.savePhase(calendarDay: visited.contains(2) ? calendar.selectedDate : nil, calendar: calendar.calendar)
     }
 
     private func select(_ tab: Int) {
@@ -218,7 +237,8 @@ private struct CalendarScreen: View {
             // A diary written from the calendar is for the day selected in it.
             onWriteDiary: { shell.write(on: viewModel.selectedDate) },
             onOpenSettings: { shell.push(.settings) },
-            tabRoot: TabRoot(shell: shell, tab: 2)
+            tabRoot: TabRoot(shell: shell, tab: 2),
+            isSavingNewDiary: shell.isSavingNewDiary(on: viewModel.selectedDate, calendar: viewModel.calendar)
         )
         .onAppear { viewModel.start() }
         .onChange(of: shell.savedCount) {
@@ -236,7 +256,8 @@ private struct CalendarDayScreen: View {
     var body: some View {
         let viewModel = module.viewModel
         CalendarDayListView(viewModel: viewModel, imageLoader: module.imageLoader,
-                            onSelectDiary: { shell.read($0) }, onWriteDiary: { shell.write(on: viewModel.selectedDate) })
+                            onSelectDiary: { shell.read($0) }, onWriteDiary: { shell.write(on: viewModel.selectedDate) },
+                            isSavingNewDiary: shell.isSavingNewDiary(on: viewModel.selectedDate, calendar: viewModel.calendar))
             .navigationTitle(title(viewModel))
             .navigationBarTitleDisplayMode(.inline)
     }

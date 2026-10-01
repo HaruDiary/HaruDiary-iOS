@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E0B6CEB3952D0F1E8F6F52A5 /* DiarySaveIndicators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FEBAB7039E55BEBF373ED1 /* DiarySaveIndicators.swift */; };
 		10E1D8EE716ACD4C9B9B154D /* ProfilePhotoFilesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEFA5DF78819334F0FBD1D4A /* ProfilePhotoFilesTests.swift */; };
 		7EAE8E3A061BF210288A6440 /* Settings/ProfilePhotoLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5311CC627A430610DB20DD63 /* Settings/ProfilePhotoLoader.swift */; };
 		163F15BCA40F3C4453A9A8AB /* Settings/ProfilePhotoLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5311CC627A430610DB20DD63 /* Settings/ProfilePhotoLoader.swift */; };
@@ -355,6 +356,7 @@
 		6324AE064574465A82455BD2 /* DayKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKind.swift"; sourceTree = "<group>"; };
 		7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKindTests.swift"; sourceTree = "<group>"; };
 		8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWeatherIcon.swift"; sourceTree = "<group>"; };
+		A9FEBAB7039E55BEBF373ED1 /* DiarySaveIndicators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiarySaveIndicators.swift"; sourceTree = "<group>"; };
 		793B10D507CA2BF3E1DDD523 /* DiaryToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryToast.swift"; sourceTree = "<group>"; };
 		F97B71008AB60D5196889786 /* DiaryTabHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTabHeader.swift"; sourceTree = "<group>"; };
 		31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoSkeleton.swift"; sourceTree = "<group>"; };
@@ -761,6 +763,7 @@
 				62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */,
 				DEBC2E2935FB4A6F8D9D09CF /* DiaryListComponents.swift */,
 				8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */,
+				A9FEBAB7039E55BEBF373ED1 /* DiarySaveIndicators.swift */,
 				793B10D507CA2BF3E1DDD523 /* DiaryToast.swift */,
 				F97B71008AB60D5196889786 /* DiaryTabHeader.swift */,
 				31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */,
@@ -992,6 +995,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E0B6CEB3952D0F1E8F6F52A5 /* DiarySaveIndicators.swift in Sources */,
 				163F15BCA40F3C4453A9A8AB /* Settings/ProfilePhotoLoader.swift in Sources */,
 				37180E8C105026B478B441D6 /* ProfilePhotoFiles.swift in Sources */,
 				D33F7A10D27C95C447284681 /* Account/ProfilePhotoStoring.swift in Sources */,

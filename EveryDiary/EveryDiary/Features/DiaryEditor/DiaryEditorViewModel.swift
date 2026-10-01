@@ -49,6 +49,12 @@ protocol DiaryLocating {
 }
 
 /// How a save ended, for the screen that opened the editor (the editor is already closed by then).
+/// What a save tells when it starts: the day the diary is for, and whether the diary is new.
+struct DiarySaveStart: Equatable {
+    let day: Date
+    let isNew: Bool
+}
+
 enum DiarySaveReport: Equatable {
     case saved
     case savedWithMissingPhotos(Int)
@@ -101,7 +107,7 @@ final class DiaryEditorViewModel {
     /// "작성을 그만할까요?" (mockup 28), from the close button or a swipe down.
     var showsDiscardConfirmation = false
 
-    var onSaveStarted: (() -> Void)?
+    var onSaveStarted: ((DiarySaveStart) -> Void)?
     var onSaveFinished: ((DiarySaveReport) -> Void)?
 
     private let saver: any DiarySaving
@@ -393,7 +399,7 @@ final class DiaryEditorViewModel {
         case .compose:
             let stamp = DiaryWeatherStamp.forDiary(on: draft.date, now: now(), calendar: calendar, lookup: weatherLookup)
             let newEntry = draft.newEntry(weather: stamp)
-            begin()
+            begin(isNew: true)
             let photos = photos
             Task {
                 let prepared = await Self.encode(photos)
@@ -411,7 +417,7 @@ final class DiaryEditorViewModel {
             guard hasChanges else { return true }
             let updated = draft.applied(to: entry)
             let existing = existingImageURLs
-            begin()
+            begin(isNew: false)
             // Untouched photos keep their stored files instead of being compressed and uploaded again.
             guard photosChanged else {
                 saver.updateKeepingPhotos(updated, diaryID: diaryID, expectedUserID: editingUserID,
@@ -442,10 +448,10 @@ final class DiaryEditorViewModel {
         return true
     }
 
-    private func begin() {
+    private func begin(isNew: Bool) {
         isSaving = true
         weatherTask?.cancel()
-        onSaveStarted?()
+        onSaveStarted?(DiarySaveStart(day: draft.date, isNew: isNew))
     }
 
     private func finish(_ result: Result<DiarySaveOutcome, Error>, isUpdate: Bool, photosUntouched: Bool = false) {

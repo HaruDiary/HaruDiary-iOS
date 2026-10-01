@@ -121,6 +121,93 @@ final class AppShellTests: XCTestCase {
         XCTAssertNil(shell.editor?.day)
     }
 
+    // MARK: - Saving
+
+    private var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }
+    private let day = Date(timeIntervalSince1970: 1_790_000_000)
+    private var nextDay: Date { day.addingTimeInterval(86_400) }
+
+    func testASaveIsNotedOverTheTabsUntilItEndsAndThenSaidToBeDone() async throws {
+        let shell = AppShell()
+        XCTAssertNil(shell.savePhase(calendarDay: nil, calendar: calendar))
+        let save = DiarySaveInProgress(id: UUID(), day: day, isNew: true)
+
+        shell.saveStarted(save)
+        XCTAssertEqual(shell.savePhase(calendarDay: nil, calendar: calendar), .saving)
+
+        shell.saveFinished(.saved, id: save.id)
+        XCTAssertTrue(shell.saves.isEmpty)
+        XCTAssertEqual(shell.savePhase(calendarDay: nil, calendar: calendar), .saved)
+
+        // The note leaves by itself.
+        try await Task.sleep(for: AppShell.savedNoteDuration + .milliseconds(400))
+        XCTAssertNil(shell.savePhase(calendarDay: nil, calendar: calendar))
+    }
+
+    func testAFailedSaveIsNotSaidToBeDone() {
+        let shell = AppShell()
+        let save = DiarySaveInProgress(id: UUID(), day: day, isNew: true)
+        shell.saveStarted(save)
+
+        shell.saveFinished(.failed(isUpdate: false), id: save.id)
+
+        XCTAssertNil(shell.savePhase(calendarDay: nil, calendar: calendar))
+        XCTAssertEqual(shell.toasts.current?.title, "업로드 실패")
+    }
+
+    func testTheCalendarShowsANewDiaryOfItsSelectedDayInPlaceInsteadOfTheNote() {
+        let shell = AppShell()
+        let save = DiarySaveInProgress(id: UUID(), day: day.addingTimeInterval(3_600), isNew: true)
+        shell.saveStarted(save)
+        shell.select(2)
+
+        // The selected day: a placeholder row in the day's list, no note.
+        XCTAssertTrue(shell.isSavingNewDiary(on: day, calendar: calendar))
+        XCTAssertNil(shell.savePhase(calendarDay: day, calendar: calendar))
+        shell.push(.calendarDay)
+        XCTAssertNil(shell.savePhase(calendarDay: day, calendar: calendar))
+
+        // Another day selected, or a screen where that day is not shown: the note.
+        XCTAssertFalse(shell.isSavingNewDiary(on: nextDay, calendar: calendar))
+        XCTAssertEqual(shell.savePhase(calendarDay: nextDay, calendar: calendar), .saving)
+        shell.push(.settings)
+        XCTAssertEqual(shell.savePhase(calendarDay: day, calendar: calendar), .saving)
+        shell.select(1)
+        XCTAssertEqual(shell.savePhase(calendarDay: day, calendar: calendar), .saving)
+
+        // Back on the selected day the end is not noted either: the diary itself appears.
+        shell.select(2)
+        shell.paths[2] = []
+        shell.saveFinished(.saved, id: save.id)
+        XCTAssertNil(shell.savePhase(calendarDay: day, calendar: calendar))
+        XCTAssertEqual(shell.savePhase(calendarDay: nextDay, calendar: calendar), .saved)
+    }
+
+    func testAnEditedDiaryIsAlwaysNotedOverTheTabs() {
+        let shell = AppShell()
+        shell.select(2)
+        shell.saveStarted(DiarySaveInProgress(id: UUID(), day: day, isNew: false))
+
+        // Its row is already there, so no placeholder stands in for it.
+        XCTAssertFalse(shell.isSavingNewDiary(on: day, calendar: calendar))
+        XCTAssertEqual(shell.savePhase(calendarDay: day, calendar: calendar), .saving)
+    }
+
+    func testTheListShowsADiaryWrittenFromItInPlace() {
+        let shell = AppShell()
+        let fromList = DiarySaveInProgress(id: UUID(), day: day, isNew: true, showsInList: true)
+        shell.saveStarted(fromList)
+        XCTAssertNil(shell.savePhase(calendarDay: nil, calendar: calendar))
+
+        // On another tab the list's row is not seen.
+        shell.select(1)
+        XCTAssertEqual(shell.savePhase(calendarDay: nil, calendar: calendar), .saving)
+    }
+
     func testWritingFromTheCalendarCarriesItsSelectedDay() {
         let shell = AppShell()
         let day = Date(timeIntervalSince1970: 1_790_000_000)

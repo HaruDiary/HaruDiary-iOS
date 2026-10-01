@@ -5,6 +5,8 @@ struct CalendarDayListView: View {
     let imageLoader: any CalendarImageLoading
     let onSelectDiary: (DiaryEntry) -> Void
     let onWriteDiary: () -> Void
+    /// A new diary for this day is being saved; a placeholder row stands where it will appear.
+    var isSavingNewDiary = false
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -15,7 +17,10 @@ struct CalendarDayListView: View {
                     Text("일기 \(viewModel.selectedEntries.count)개")
                         .font(DiaryTheme.Fonts.caption)
                         .foregroundStyle(DiaryTheme.Colors.secondaryText)
-                    if viewModel.selectedEntries.isEmpty && viewModel.state == .loaded {
+                    if isSavingNewDiary {
+                        DiarySavingRow()
+                    }
+                    if viewModel.selectedEntries.isEmpty && viewModel.state == .loaded && !isSavingNewDiary {
                         ContentUnavailableView("작성한 일기가 없어요", systemImage: "book.closed", description: Text("이 날짜의 기록이 여기에 표시돼요"))
                     }
                     ForEach(Array(viewModel.selectedEntries.enumerated()), id: \.offset) { _, entry in

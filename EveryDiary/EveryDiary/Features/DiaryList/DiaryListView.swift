@@ -63,7 +63,7 @@ struct DiaryListView: View {
                 DiaryLoadFailure(onRetry: viewModel.retry).diaryCardRow()
             }
             if viewModel.isUploadingDiary {
-                DiaryListUploadingRow().diaryCardRow()
+                DiarySavingRow().diaryCardRow()
             }
             ForEach(viewModel.sections) { section in
                 Section {
@@ -136,19 +136,5 @@ struct DiaryListView: View {
                 )
             }
         }
-    }
-}
-
-private struct DiaryListUploadingRow: View {
-    var body: some View {
-        HStack(spacing: DiaryTheme.Spacing.medium) {
-            ProgressView()
-            Text("일기를 저장하고 있어요")
-                .font(DiaryTheme.Fonts.body)
-                .foregroundStyle(DiaryTheme.Colors.secondaryText)
-        }
-        .frame(maxWidth: .infinity, minHeight: DiaryTheme.Size.thumbnail)
-        .background(DiaryTheme.Colors.selection.opacity(0.5), in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
-        .accessibilityElement(children: .combine)
     }
 }

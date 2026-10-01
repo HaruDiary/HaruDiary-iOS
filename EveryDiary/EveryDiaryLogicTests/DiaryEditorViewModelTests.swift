@@ -98,12 +98,28 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertFalse(model.isToday)
         XCTAssertEqual(model.weather, .notToday)
 
+        // The save tells which day it is for, so the screens can show it there.
+        var started: DiarySaveStart?
+        model.onSaveStarted = { started = $0 }
         model.draft.title = "지난 일"
         XCTAssertTrue(model.save())
+        XCTAssertEqual(started, DiarySaveStart(day: lastWeek, isNew: true))
         try await waitUntil { saver.created.count == 1 }
         XCTAssertEqual(saver.created.first?.dateString, DateFormatter.yyyyMMddHHmmss.string(from: lastWeek))
         XCTAssertEqual(saver.created.first?.weatherDescription, "Unknown")
         XCTAssertEqual(weather.lookups, 0)
+    }
+
+    func testSavingAnEditedDiaryTellsItIsNotNew() {
+        let model = makeModel()
+        model.open(stored(), editing: true)
+        var started: DiarySaveStart?
+        model.onSaveStarted = { started = $0 }
+        model.draft.title = "고친 제목"
+
+        XCTAssertTrue(model.save())
+
+        XCTAssertEqual(started, DiarySaveStart(day: lastWeek, isNew: false))
     }
 
     func testNewDiaryOpenedForTodayOrADayToComeIsWrittenNow() {
@@ -169,7 +185,7 @@ final class DiaryEditorViewModelTests: XCTestCase {
         let model = makeModel()
         model.startComposing()
         var events: [String] = []
-        model.onSaveStarted = { events.append("start") }
+        model.onSaveStarted = { _ in events.append("start") }
         model.onSaveFinished = { events.append("\($0)") }
         model.draft.title = "제목"
 
@@ -482,7 +498,7 @@ final class DiaryEditorViewModelTests: XCTestCase {
         downloader.photos = ["u1": .init(image: .testPixel, metadata: ["assetIdentifier": "a1"])]
         let model = makeModel()
         var started = false
-        model.onSaveStarted = { started = true }
+        model.onSaveStarted = { _ in started = true }
         model.open(stored(photos: ["u1"]), editing: false)
         try await waitUntil { !model.isLoadingPhotos }
         model.beginEditing()
