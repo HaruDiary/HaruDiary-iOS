@@ -38,7 +38,10 @@ struct DiaryTabHeader: View {
             Image(systemName: systemImage)
                 .font(.system(size: DiaryTheme.Size.icon, weight: .semibold))
                 .frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
+                .contentShape(Rectangle())
         }
+        // In a list row, buttons of the default style all fire together when the row is tapped.
+        .buttonStyle(.plain)
         .accessibilityLabel(label)
     }
 }

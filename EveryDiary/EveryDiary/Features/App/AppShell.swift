@@ -8,6 +8,8 @@ enum AppRoute: Hashable {
     case lock
     case textSize
     case trash
+    /// Diaries found by their title or content; opened from the list and the calendar.
+    case search
     case calendarDay
     case journeyYears
     case journeyYear(Int)

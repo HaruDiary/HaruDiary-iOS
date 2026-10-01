@@ -58,7 +58,7 @@ struct MainTabsView: View {
         }
         .tint(DiaryTheme.Colors.brand)
         .overlay(alignment: .bottom) {
-            DiaryTabBar(state: shell.tabBar, onSelect: select, onExpand: shell.expandBar)
+            DiaryTabBar(state: shell.tabBar, onSelect: select)
                 .frame(width: DiaryTabBar.width(tabs: shell.tabBar.tabs.count, collapsed: false),
                        height: DiaryTabBar.expandedHeight)
                 .allowsHitTesting(!shell.tabBar.isHidden)
@@ -161,6 +161,8 @@ struct MainTabsView: View {
             }
         case .trash:
             TrashScreen(shell: shell, tab: tab, makeModule: dependencies.makeTrashModule)
+        case .search:
+            DiarySearchScreen(shell: shell, makeModule: dependencies.makeDiaryListModule)
         case .calendarDay:
             CalendarDayScreen(shell: shell, module: modules.value.calendar)
         case .journeyYears:
@@ -188,10 +190,54 @@ private struct DiaryListScreen: View {
             // Same as before: only a new diary written from the list shows its upload in the list.
             onWriteDiary: { shell.write(showsUploadInList: true) },
             onOpenSettings: { shell.push(.settings) },
+            onOpenSearch: { shell.push(.search) },
             tabRoot: TabRoot(shell: shell, tab: 0)
         )
         .onAppear { viewModel.start() }
-        .onChange(of: viewModel.notice) { _, notice in
+        .announcesTrashResults(of: viewModel, through: shell)
+        .onChange(of: shell.savedCount) {
+            // The live subscription already reflects saved changes; only recover a failed load.
+            if viewModel.state == .failed { viewModel.retry() }
+        }
+    }
+}
+
+/// The search screen pushed from the list and the calendar. It has its own list state, so what is typed here
+/// does not filter the list tab, and its subscription lives only while the screen is open.
+private struct DiarySearchScreen: View {
+    let shell: AppShell
+    @State private var module: Once<DiaryListModule>
+
+    init(shell: AppShell, makeModule: @escaping @MainActor () -> DiaryListModule) {
+        self.shell = shell
+        _module = State(initialValue: Once(makeModule))
+    }
+
+    var body: some View {
+        let viewModel = module.value.viewModel
+        DiaryListView(
+            viewModel: viewModel, imageLoader: module.value.imageLoader,
+            onSelectDiary: { shell.read($0) },
+            onEditDiary: { shell.edit($0) },
+            onWriteDiary: { shell.write() },
+            onOpenSettings: {},
+            isSearchScreen: true
+        )
+        .navigationTitle("검색")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { viewModel.start() }
+        .onDisappear { viewModel.stop() }
+        .announcesTrashResults(of: viewModel, through: shell)
+        .onChange(of: shell.savedCount) {
+            if viewModel.state == .failed { viewModel.retry() }
+        }
+    }
+}
+
+private extension View {
+    /// The list's "moved to trash" results, said over the tabs.
+    func announcesTrashResults(of viewModel: DiaryListViewModel, through shell: AppShell) -> some View {
+        onChange(of: viewModel.notice) { _, notice in
             guard let notice else { return }
             viewModel.notice = nil
             switch notice {
@@ -200,10 +246,6 @@ private struct DiaryListScreen: View {
             case .trashFailed:
                 shell.announce("삭제 실패", message: "휴지통으로 이동하지 못했습니다.\n잠시 후 다시 시도해주세요.", duration: 1.5)
             }
-        }
-        .onChange(of: shell.savedCount) {
-            // The live subscription already reflects saved changes; only recover a failed load.
-            if viewModel.state == .failed { viewModel.retry() }
         }
     }
 }
@@ -237,6 +279,7 @@ private struct CalendarScreen: View {
             // A diary written from the calendar is for the day selected in it.
             onWriteDiary: { shell.write(on: viewModel.selectedDate) },
             onOpenSettings: { shell.push(.settings) },
+            onOpenSearch: { shell.push(.search) },
             tabRoot: TabRoot(shell: shell, tab: 2),
             isSavingNewDiary: shell.isSavingNewDiary(on: viewModel.selectedDate, calendar: viewModel.calendar)
         )

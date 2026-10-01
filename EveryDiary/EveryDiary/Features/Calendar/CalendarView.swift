@@ -7,6 +7,8 @@ struct CalendarView: View {
     let onOpenDayList: () -> Void
     let onWriteDiary: () -> Void
     let onOpenSettings: () -> Void
+    /// The search button of the header.
+    var onOpenSearch: () -> Void = {}
     var tabRoot: TabRoot? = nil
     /// A new diary for the selected day is being saved; a placeholder row stands where it will appear.
     var isSavingNewDiary = false
@@ -18,7 +20,9 @@ struct CalendarView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: DiaryTheme.Spacing.section) {
-                        DiaryTabHeader(title: "캘린더", onOpenSettings: onOpenSettings)
+                        DiaryTabHeader(title: "캘린더",
+                                       extra: .init(systemImage: "magnifyingglass", label: "검색", action: onOpenSearch),
+                                       onOpenSettings: onOpenSettings)
 
                         CalendarMonthGrid(viewModel: viewModel)
                             // Keep seven date columns legible; surrounding text still follows the full accessibility size.
