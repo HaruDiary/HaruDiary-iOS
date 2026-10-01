@@ -30,6 +30,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let reminders = live.makeDiaryReminders()
         live.reminders = reminders
         self.reminders = reminders
+        let textSize = AppTextSizeController(store: UserDefaultsTextSizeStore())
+        textSize.attach(to: window)
+        live.textSize = textSize
+        appLock.applyTextSize = { [weak textSize] in textSize?.apply(to: $0) }
         let dependencies = live
         OnboardingModule.install(in: window) { TabBarController(dependencies: dependencies) }
         //강제로 다크모드 해제

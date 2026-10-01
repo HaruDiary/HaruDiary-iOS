@@ -49,14 +49,18 @@ class MotivationVC: UIViewController {
     
     private lazy var monthLabel: UILabel = {
         let monthLabel = UILabel()
-        monthLabel.font = .systemFont(ofSize: 25, weight: .bold)
+        monthLabel.font = UIFontMetrics(forTextStyle: .title1).scaledFont(for: .systemFont(ofSize: 25, weight: .bold))
+        monthLabel.adjustsFontForContentSizeCategory = true
         monthLabel.textColor = .white
         return monthLabel
     }()
     
     private lazy var countLabel: UILabel = {
         let countLabel = UILabel()
-        countLabel.font = .systemFont(ofSize: 16)
+        countLabel.font = UIFontMetrics(forTextStyle: .body).scaledFont(for: .systemFont(ofSize: 16))
+        countLabel.adjustsFontForContentSizeCategory = true
+        countLabel.numberOfLines = 0
+        countLabel.textAlignment = .center
         countLabel.textColor = .white
         return countLabel
     }()
@@ -78,7 +82,8 @@ class MotivationVC: UIViewController {
     
     private lazy var sceneLabel: UILabel = {
         let sceneLabel = UILabel()
-        sceneLabel.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        sceneLabel.font = UIFontMetrics(forTextStyle: .footnote).scaledFont(for: .systemFont(ofSize: 14, weight: .semibold))
+        sceneLabel.adjustsFontForContentSizeCategory = true
         sceneLabel.textColor = UIColor.white.withAlphaComponent(0.85)
         return sceneLabel
     }()
@@ -206,6 +211,7 @@ class MotivationVC: UIViewController {
             monthLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             countLabel.topAnchor.constraint(equalTo: monthLabel.bottomAnchor, constant: 16),
             countLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            countLabel.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 16),
             sceneLabel.topAnchor.constraint(equalTo: countLabel.bottomAnchor, constant: 6),
             sceneLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             retryButton.topAnchor.constraint(equalTo: sceneLabel.bottomAnchor, constant: 12),

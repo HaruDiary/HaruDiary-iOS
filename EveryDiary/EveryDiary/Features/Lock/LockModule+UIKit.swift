@@ -40,6 +40,8 @@ final class AppLockPresenter {
     private weak var mainWindow: UIWindow?
     private var lockWindow: UIWindow?
     private var screen: LockScreenViewModel?
+    /// Gives the lock screen's window the app's text size.
+    var applyTextSize: ((UIWindow) -> Void)?
 
     init(makeLock: @escaping @MainActor () -> AppLock, owner: any DeviceOwnerAuthenticating) {
         self.makeLock = makeLock
@@ -66,6 +68,7 @@ final class AppLockPresenter {
         let window = UIWindow(windowScene: scene)
         window.windowLevel = .alert + 1
         window.overrideUserInterfaceStyle = .light
+        applyTextSize?(window)
         window.rootViewController = UIHostingController(rootView: LockScreenView(viewModel: model))
         window.makeKeyAndVisible()
         lockWindow = window

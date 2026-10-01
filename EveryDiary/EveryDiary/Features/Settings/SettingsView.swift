@@ -7,6 +7,7 @@ import SwiftUI
 final class SettingsRowValues {
     var reminder = ""
     var lock = ""
+    var textSize = ""
     var version = ""
 }
 
@@ -19,6 +20,7 @@ enum AppLinks {
 struct SettingsActions {
     var openReminders: () -> Void
     var openLock: () -> Void
+    var openTextSize: () -> Void
     var openTrash: () -> Void
     /// Opens a web page inside the app.
     var openWebPage: (URL) -> Void
@@ -49,6 +51,7 @@ struct SettingsView: View {
             Section {
                 row("알림", systemImage: "bell", value: values.reminder, action: actions.openReminders)
                 row("잠금", systemImage: "lock", value: values.lock, action: actions.openLock)
+                row("글자 크기", systemImage: "textformat.size", value: values.textSize, action: actions.openTextSize)
                 row("최근 삭제한 항목", systemImage: "trash", value: nil, action: actions.openTrash)
             }
             Section {
