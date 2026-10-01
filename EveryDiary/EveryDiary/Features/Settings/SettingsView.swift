@@ -16,7 +16,7 @@ enum AppLinks {
     static let privacyPolicy = URL(string: "https://woozy-stick-dd0.notion.site/dc4303c83cd3453e98ada95ff0275209")!
 }
 
-/// Screens and system sheets that settings open; UIKit presents them until the tabs move to SwiftUI.
+/// Screens and system sheets that settings open (`SettingsScreen`).
 struct SettingsActions {
     var openReminders: () -> Void
     var openLock: () -> Void
@@ -27,7 +27,7 @@ struct SettingsActions {
     var signIn: () -> Void
     /// Apple members confirm with Sign in with Apple before their account is deleted.
     var confirmWithAppleThenDelete: () -> Void
-    /// Signed out or deleted: screens that still listen for the old notification refresh their user.
+    /// Signed out or deleted: the account session refreshes its user.
     var accountChanged: () -> Void
 }
 

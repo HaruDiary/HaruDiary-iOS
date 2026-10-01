@@ -3,16 +3,16 @@ import CoreLocation
 import ImageIO
 import Photos
 import PhotosUI
+import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 import WeatherKit
 
 @MainActor
 enum DiaryEditorModule {
-    static func makeEditor(saver: any DiarySaving) -> DiaryEditorHostingController {
-        let viewModel = DiaryEditorViewModel(saver: saver, downloader: StoragePhotoDownloader(), weather: LiveDiaryWeather(),
-                                             locating: LiveDiaryLocating(), calendar: .current, now: Date.init)
-        return DiaryEditorHostingController(viewModel: viewModel)
+    static func makeViewModel(saver: any DiarySaving) -> DiaryEditorViewModel {
+        DiaryEditorViewModel(saver: saver, downloader: StoragePhotoDownloader(), weather: LiveDiaryWeather(),
+                             locating: LiveDiaryLocating(), calendar: .current, now: Date.init)
     }
 }
 
@@ -119,88 +119,50 @@ private final class LiveDiaryLocating: NSObject, DiaryLocating, CLLocationManage
 
 // MARK: - Photo library
 
-/// The system photo picker: up to three photos in selection order, with each photo's library identifier,
-/// capture time and place, which saving stores with the photo.
-@MainActor
-final class DiaryPhotoLibraryPicker: NSObject, PHPickerViewControllerDelegate {
-    private var onStart: (([String]) -> Void)?
-    private var onFinish: (([EditorPhoto], [String]) -> Void)?
-
-    func pick(from presenter: UIViewController, selection: [String], limit: Int,
-              onStart: @escaping ([String]) -> Void, onFinish: @escaping ([EditorPhoto], [String]) -> Void) {
-        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
-            Task { @MainActor in
-                switch status {
-                case .authorized, .limited:
-                    self.onStart = onStart
-                    self.onFinish = onFinish
-                    var configuration = PHPickerConfiguration(photoLibrary: .shared())
-                    configuration.selectionLimit = limit
-                    configuration.selection = .ordered
-                    configuration.filter = .images
-                    configuration.preselectedAssetIdentifiers = selection
-                    let picker = PHPickerViewController(configuration: configuration)
-                    picker.delegate = self
-                    presenter.present(picker, animated: true)
-                default:
-                    Self.askForAccess(from: presenter)
-                }
-            }
-        }
+/// Loads photos picked with the system photo picker, with each photo's library identifier, capture time and
+/// place, which saving stores with the photo.
+enum DiaryPhotoLoader {
+    /// Asked once, so the capture time and place can be read from the library. The picker itself needs no
+    /// permission, so a refusal does not stop the user from adding photos.
+    static func requestLibraryAccessIfNeeded() async {
+        guard PHPhotoLibrary.authorizationStatus(for: .readWrite) == .notDetermined else { return }
+        _ = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
     }
 
-    nonisolated func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        Task { @MainActor in
-            picker.dismiss(animated: true)
-            let ids = results.compactMap(\.assetIdentifier)
-            onStart?(ids)
-            let photos = await withTaskGroup(of: (Int, EditorPhoto?).self) { group in
-                for (index, result) in results.enumerated() {
-                    guard let id = result.assetIdentifier else { continue }
-                    group.addTask { (index, await Self.load(result, id: id)) }
-                }
-                var loaded: [(Int, EditorPhoto)] = []
-                for await (index, photo) in group {
-                    if let photo { loaded.append((index, photo)) }
-                }
-                // Loaded in parallel, kept in the order they were picked.
-                return loaded.sorted { $0.0 < $1.0 }.map(\.1)
+    /// Loaded in parallel, returned in the order they were picked. A photo that cannot be read is left out.
+    static func load(_ items: [PhotosPickerItem]) async -> [EditorPhoto] {
+        await withTaskGroup(of: (Int, EditorPhoto?).self) { group in
+            for (index, item) in items.enumerated() {
+                guard let id = item.itemIdentifier else { continue }
+                group.addTask { (index, await load(item, id: id)) }
             }
-            onFinish?(photos, ids)
+            var loaded: [(Int, EditorPhoto)] = []
+            for await (index, photo) in group {
+                if let photo { loaded.append((index, photo)) }
+            }
+            return loaded.sorted { $0.0 < $1.0 }.map(\.1)
         }
     }
 
     /// The capture time and place come from the photo library when the app may read it, otherwise from the file.
     /// A photo is never dropped for missing metadata (with limited access the library lookup finds nothing).
-    private nonisolated static func load(_ result: PHPickerResult, id: String) async -> EditorPhoto? {
-        let image: UIImage? = await withCheckedContinuation { continuation in
-            result.itemProvider.loadObject(ofClass: UIImage.self) { object, _ in
-                continuation.resume(returning: object as? UIImage)
-            }
-        }
-        guard let image else { return nil }
+    private static func load(_ item: PhotosPickerItem, id: String) async -> EditorPhoto? {
+        guard let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) else { return nil }
         if let asset = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject {
             let location = asset.location.map { "\($0.coordinate.latitude), \($0.coordinate.longitude)" }
             return EditorPhoto(image: image, assetIdentifier: id, captureTime: asset.creationDate?.description, location: location)
         }
-        let file = await fileMetadata(of: result)
+        let file = fileMetadata(of: data)
         return EditorPhoto(image: image, assetIdentifier: id, captureTime: file.date?.description, location: file.location?.stored)
     }
 
-    private nonisolated static func fileMetadata(of result: PHPickerResult) async -> (date: Date?, location: DiaryCoordinate?) {
-        await withCheckedContinuation { continuation in
-            result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.image.identifier) { url, _ in
-                guard let url, let source = CGImageSourceCreateWithURL(url as CFURL, nil),
-                      let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] else {
-                    continuation.resume(returning: (nil, nil))
-                    return
-                }
-                continuation.resume(returning: (captureDate(properties), coordinate(properties)))
-            }
-        }
+    private static func fileMetadata(of data: Data) -> (date: Date?, location: DiaryCoordinate?) {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] else { return (nil, nil) }
+        return (captureDate(properties), coordinate(properties))
     }
 
-    private nonisolated static func captureDate(_ properties: [CFString: Any]) -> Date? {
+    private static func captureDate(_ properties: [CFString: Any]) -> Date? {
         guard let exif = properties[kCGImagePropertyExifDictionary] as? [CFString: Any],
               let text = exif[kCGImagePropertyExifDateTimeOriginal] as? String else { return nil }
         let formatter = DateFormatter()
@@ -213,23 +175,12 @@ final class DiaryPhotoLibraryPicker: NSObject, PHPickerViewControllerDelegate {
         return formatter.date(from: text)
     }
 
-    private nonisolated static func coordinate(_ properties: [CFString: Any]) -> DiaryCoordinate? {
+    private static func coordinate(_ properties: [CFString: Any]) -> DiaryCoordinate? {
         guard let gps = properties[kCGImagePropertyGPSDictionary] as? [CFString: Any],
               let latitude = gps[kCGImagePropertyGPSLatitude] as? Double,
               let longitude = gps[kCGImagePropertyGPSLongitude] as? Double else { return nil }
         let south = (gps[kCGImagePropertyGPSLatitudeRef] as? String) == "S"
         let west = (gps[kCGImagePropertyGPSLongitudeRef] as? String) == "W"
         return DiaryCoordinate(latitude: south ? -latitude : latitude, longitude: west ? -longitude : longitude)
-    }
-
-    private static func askForAccess(from presenter: UIViewController) {
-        let alert = UIAlertController(title: "사진에 접근할 수 없어요",
-                                      message: "일기에 사진을 넣으려면 설정에서 사진 접근을 허용해주세요.", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-        alert.addAction(UIAlertAction(title: "설정", style: .default) { _ in
-            guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-            UIApplication.shared.open(url)
-        })
-        presenter.present(alert, animated: true)
     }
 }

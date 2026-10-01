@@ -287,6 +287,21 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(model.pickerSelection, ["a1"], "The picker now shows the stored photo as selected")
     }
 
+    func testPickedPhotoThatCannotBeReadIsReported() {
+        let model = makeModel()
+        model.startComposing()
+        model.pickingStarted(pickedIDs: ["a", "b", "c"])
+        // "b" and "c" could not be loaded (e.g. still in iCloud).
+        model.finishPicking([photo("a")], pickedIDs: ["a", "b", "c"])
+        XCTAssertEqual(model.photos.map(\.assetIdentifier), ["a"])
+        XCTAssertEqual(model.notice, .photosNotLoaded(2))
+
+        model.notice = nil
+        model.pickingStarted(pickedIDs: ["a", "d"])
+        model.finishPicking([photo("d")], pickedIDs: ["a", "d"])
+        XCTAssertNil(model.notice)
+    }
+
     func testOnlyNewlyPickedPhotosShowPlaceholders() {
         let model = makeModel()
         model.startComposing()

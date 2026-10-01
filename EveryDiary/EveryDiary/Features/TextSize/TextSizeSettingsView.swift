@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 /// Choosing the app's text size, with a sample that changes as soon as an option is picked.
 struct TextSizeSettingsView: View {
@@ -53,16 +52,7 @@ struct TextSizeSettingsView: View {
         }
         .scrollContentBackground(.hidden)
         .background(DiaryTheme.Colors.background)
+        .navigationTitle("글자 크기")
+        .navigationBarTitleDisplayMode(.inline)
     }
-}
-
-// Remove this UIKit bridge when settings push their screens from SwiftUI.
-@MainActor
-final class TextSizeSettingsHostingController: UIHostingController<TextSizeSettingsView> {
-    init(controller: AppTextSizeController) {
-        super.init(rootView: TextSizeSettingsView(controller: controller))
-        title = "글자 크기"
-    }
-
-    required init?(coder: NSCoder) { return nil }
 }

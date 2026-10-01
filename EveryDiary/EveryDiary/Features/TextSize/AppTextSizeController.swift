@@ -1,8 +1,9 @@
 import Observation
 import UIKit
 
-/// Applies the app's text size to its windows. Every screen in a window (UIKit and SwiftUI, sheets included)
-/// reads its text size from the window, so one override covers the whole app.
+/// Applies the app's text size to its windows. Everything shown in a window, sheets included, reads its text
+/// size from the window, so one override covers the whole app. (A SwiftUI `dynamicTypeSize` on the root view
+/// does not reach sheets.)
 @MainActor
 @Observable
 final class AppTextSizeController {

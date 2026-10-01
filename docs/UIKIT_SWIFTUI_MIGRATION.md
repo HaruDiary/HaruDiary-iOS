@@ -19,12 +19,10 @@ SwiftUI도 UIKit 뷰/컨트롤러를 연결할 수 있다. UIKit 타입이 있�
 | 재사용 + 타입 분리 | `Domain/DiaryEntry.swift`, `Shared/DiaryDateFormatting.swift` | 저장 DTO와 순수 모델/날짜 유틸 분리. 같은 파일의 UIImage·셀 모델을 Domain에 넣지 않음 |
 | 재사용 | `Assets.xcassets`의 colorset·감정/날씨/사진 등 이미지 | SwiftUI에서도 자산 사용 가능. 실제 사용처와 목업을 비교해 이름/의미를 정리 |
 | 교체 | UIViewController, UITableView/UICollectionView cell, delegate | SwiftUI View·List·LazyVGrid 등으로 기능별 전환. delegate의 비즈니스 로직은 먼저 분리 |
-| 교체 | `TabBarController.swift`, 각 UINavigationController, `SceneDelegate.swift` | TabView·NavigationStack·sheet 경로 및 상태 소유권 설계. 기존 뒤로 가기/로그인 URL 연결 보존 |
-| 분리 후 교체 | `DiaryList/TemporaryAlert.swift`, VC의 UIAlertController | 오류·확인 메시지 데이터와 표시를 구분. alert/confirmationDialog/일시 메시지 컴포넌트로 연결 |
 | 재사용 + 인터페이스 정리 | `DiaryList/ImageCacheManager.swift`의 NSCache·다운로드 | SwiftUI라고 캐시가 없어지지 않음. 캐시 정책·취소·오류를 분리. AsyncImage로 기계적으로 대체하지 않음 |
 | 상태 연결 교체 | `AppEvents/NotificationName.swift`의 로그인 이벤트와 delegate 콜백 | 소유자가 있는 세션/화면 상태로 전달. 시스템 notification까지 무조건 제거하지 않음 |
 
-교체가 끝난 UIKit 화면·SnapKit·Lottie·번들 폰트·안 쓰는 이미지는 삭제했다. 목록은 [안 쓰는 코드 정리](LEGACY_CLEANUP.md)에 있다.
+탭 틀·내비게이션·시트·알림까지 모든 화면이 SwiftUI로 바뀌었다([SwiftUI 앱 틀](APP_SHELL.md)). 교체가 끝난 UIKit 화면·SnapKit·Lottie·번들 폰트·안 쓰는 이미지는 삭제했다. 목록은 [안 쓰는 코드 정리](LEGACY_CLEANUP.md)에 있다.
 
 **정리 후보는 곧바로 삭제할 목록이 아니다.** 폰트·이미지·패키지는 Xcode 타깃,
 Info.plist, 문자열 기반 자산 참조까지 확인한다. 대체 호출부가 동작한 후 별도 커밋으로 제거한다.

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// What the editor asks of the UIKit screen that presents it.
+/// What the editor asks of the screen that presents it (`DiaryEditorScreen`).
 struct DiaryEditorActions {
     var close: () -> Void
     var save: () -> Void
