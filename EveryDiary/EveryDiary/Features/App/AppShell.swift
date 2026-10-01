@@ -7,6 +7,7 @@ enum AppRoute: Hashable {
     case reminders
     case lock
     case textSize
+    case appearance
     case trash
     /// Diaries found by their title or content; opened from the list and the calendar.
     case search
@@ -264,11 +265,11 @@ final class AppShell {
         case .savedKeepingPhotos:
             announce("사진은 그대로 두었어요", message: "사진을 모두 불러오기 전에 저장해서 글만 저장했습니다.")
         case .failed(let isUpdate):
-            // A new diary's writing is kept on the device, so writing again brings it back.
+            // The writing is kept on the device, so writing or editing again brings it back.
             announce(isUpdate ? "업데이트 실패" : "업로드 실패",
-                     message: isUpdate ? "일기를 저장하지 못했습니다.\n잠시 후 다시 시도해주세요."
+                     message: isUpdate ? "일기를 저장하지 못했습니다.\n고친 내용은 남겨 두었어요. 그 일기를 다시 수정하면 이어서 고칠 수 있어요."
                                        : "일기를 저장하지 못했습니다.\n쓰던 글은 남겨 두었어요. 일기 쓰기를 누르면 이어서 쓸 수 있어요.",
-                     duration: isUpdate ? 2.0 : 3.5)
+                     duration: 3.5)
         }
         if case .failed = report { return }
         savedCount += 1

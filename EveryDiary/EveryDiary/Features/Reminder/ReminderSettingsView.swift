@@ -112,7 +112,7 @@ struct ReminderSettingsView: View {
                         } label: {
                             Text(ReminderPlan.weekdayNames[weekday - 1])
                                 .font(DiaryTheme.Fonts.caption.weight(.semibold))
-                                .foregroundStyle(isOn ? .white : weekdayColor(weekday))
+                                .foregroundStyle(isOn ? DiaryTheme.Colors.onBrand : weekdayColor(weekday))
                                 .frame(width: 34, height: 34)
                                 .background(isOn ? DiaryTheme.Colors.brand : DiaryTheme.Colors.background, in: Circle())
                                 .frame(maxWidth: .infinity, minHeight: DiaryTheme.Size.touchTarget)

@@ -65,7 +65,7 @@ struct DiaryExportScreen: View {
                 ShareLink(item: file) {
                     Label("파일 내보내기", systemImage: "square.and.arrow.up")
                         .font(DiaryTheme.Fonts.body.weight(.semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(DiaryTheme.Colors.onBrand)
                         .frame(maxWidth: .infinity, minHeight: 52)
                         .background(DiaryTheme.Colors.brand, in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
                 }

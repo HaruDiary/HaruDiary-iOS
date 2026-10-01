@@ -28,6 +28,8 @@ struct SignInScreen: View {
                    onApple: { Task { await signInWithApple() } },
                    onGoogle: { Task { await signInWithGoogle() } },
                    onFinish: { dismiss() })
+            // Like onboarding, drawn for a light background.
+            .preferredColorScheme(.light)
     }
 
     private func signInWithApple() async {

@@ -5,6 +5,8 @@ enum DiaryTheme {
     enum Colors {
         static let brand = Color("mainTheme")
         static let background = Color("mainBackground")
+        /// Text and icons on `brand`: white in light mode, the deep purple on dark mode's light purple.
+        static let onBrand = Color("onTheme")
         static let surface = Color("mainCell")
         static let text = Color("mainText")
         static let secondaryText = Color("SubText")

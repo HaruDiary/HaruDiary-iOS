@@ -1,16 +1,20 @@
 import Foundation
 
-/// The writing of a new diary, kept on the device until the diary is saved or the writing is given up:
-/// it survives the app being closed and a save that failed. Photos are not kept, only how many there were.
+/// Writing kept on the device until it is saved or given up: it survives the app being closed and a save
+/// that failed. Either a new diary, or the changes being made to a stored one.
+/// Photos are not kept, only how many would have to be picked again.
 struct StoredDiaryDraft: Codable, Equatable {
     var title: String
     var content: String
     var date: Date
     var emotion: String
     var weather: String
+    /// New diary: its photos. Stored diary: the photos added while editing.
     var photoCount: Int
     /// Who was writing; nil before any account exists. Another account is never shown this draft.
     var userID: String?
+    /// The stored diary being changed; nil for a new diary.
+    var diaryID: String? = nil
 
     /// Nothing worth keeping: photos alone cannot be brought back.
     var isEmpty: Bool {
@@ -23,9 +27,12 @@ struct StoredDiaryDraft: Codable, Equatable {
     }
 }
 
+/// One new diary's writing and one stored diary's changes are kept at a time.
 @MainActor
 protocol DiaryDraftStoring: AnyObject {
-    func load() -> StoredDiaryDraft?
+    /// `diaryID` nil asks for the new diary's writing; otherwise for the changes kept for that diary.
+    func load(diaryID: String?) -> StoredDiaryDraft?
     func save(_ draft: StoredDiaryDraft)
-    func clear()
+    /// Clears the new diary's writing, or the kept changes when they are for `diaryID`.
+    func clear(diaryID: String?)
 }

@@ -100,6 +100,10 @@ struct DiaryEditorScreen: View {
             toasts.show("쓰던 글을 불러왔어요",
                         message: photoCount > 0 ? "저장하지 못한 글이에요. 사진 \(photoCount)장은 다시 넣어주세요." : "저장하지 못한 글을 이어서 쓸 수 있어요.",
                         duration: 3.0)
+        case .editRestored(let photoCount):
+            toasts.show("고치던 내용을 불러왔어요",
+                        message: photoCount > 0 ? "저장하지 못한 수정이에요. 새로 넣던 사진 \(photoCount)장은 다시 넣어주세요." : "저장하지 못한 수정을 이어서 할 수 있어요.",
+                        duration: 3.0)
         case .signInRequired:
             toasts.show("로그인 필요", message: "일기를 연 계정으로 다시 로그인해주세요.")
         }

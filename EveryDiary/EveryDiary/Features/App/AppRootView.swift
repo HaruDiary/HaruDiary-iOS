@@ -26,12 +26,12 @@ struct AppRootView: View {
                     }
                 }
                 .transition(.opacity)
+                // The illustrations are drawn on a light background, so onboarding stays light.
+                .preferredColorScheme(.light)
             } else {
                 MainTabsView(shell: shell, dependencies: dependencies)
                     .transition(.opacity)
             }
         }
-        // The app is designed for light appearance only.
-        .preferredColorScheme(.light)
     }
 }

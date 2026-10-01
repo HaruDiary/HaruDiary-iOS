@@ -207,16 +207,57 @@ final class DiaryExtrasTests: XCTestCase {
         let draft = StoredDiaryDraft(title: "제목", content: "내용", date: date(2026, 9, 30), emotion: "Grinning face",
                                      weather: "u_sun", photoCount: 2, userID: "user-a")
 
-        XCTAssertNil(UserDefaultsDiaryDraftStore(defaults: defaults).load())
+        XCTAssertNil(UserDefaultsDiaryDraftStore(defaults: defaults).load(diaryID: nil))
         UserDefaultsDiaryDraftStore(defaults: defaults).save(draft)
-        XCTAssertEqual(UserDefaultsDiaryDraftStore(defaults: defaults).load(), draft)
+        XCTAssertEqual(UserDefaultsDiaryDraftStore(defaults: defaults).load(diaryID: nil), draft)
 
-        UserDefaultsDiaryDraftStore(defaults: defaults).clear()
-        XCTAssertNil(UserDefaultsDiaryDraftStore(defaults: defaults).load())
+        UserDefaultsDiaryDraftStore(defaults: defaults).clear(diaryID: nil)
+        XCTAssertNil(UserDefaultsDiaryDraftStore(defaults: defaults).load(diaryID: nil))
 
         // Something this version cannot read is no draft.
         defaults.set(Data("not a draft".utf8), forKey: UserDefaultsDiaryDraftStore.key)
-        XCTAssertNil(UserDefaultsDiaryDraftStore(defaults: defaults).load())
+        XCTAssertNil(UserDefaultsDiaryDraftStore(defaults: defaults).load(diaryID: nil))
+    }
+
+    func testDraftStoreKeepsANewDiaryAndOneEditedDiaryApart() throws {
+        let suite = "diary-draft-tests-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = UserDefaultsDiaryDraftStore(defaults: defaults)
+        let new = StoredDiaryDraft(title: "새 일기", content: "", date: date(2026, 9, 30), emotion: "", weather: "", photoCount: 0, userID: "user-a")
+        var edit = new
+        edit.title = "고친 제목"
+        edit.diaryID = "diary-1"
+
+        store.save(new)
+        store.save(edit)
+
+        XCTAssertEqual(store.load(diaryID: nil), new)
+        XCTAssertEqual(store.load(diaryID: "diary-1"), edit)
+        XCTAssertNil(store.load(diaryID: "diary-2"))
+
+        // Clearing for another diary, or the new diary's writing, leaves the kept changes.
+        store.clear(diaryID: "diary-2")
+        store.clear(diaryID: nil)
+        XCTAssertNil(store.load(diaryID: nil))
+        XCTAssertEqual(store.load(diaryID: "diary-1"), edit)
+
+        // Editing another diary replaces them: only the latest edited diary is kept.
+        var other = edit
+        other.diaryID = "diary-2"
+        store.save(other)
+        XCTAssertNil(store.load(diaryID: "diary-1"))
+        store.clear(diaryID: "diary-2")
+        XCTAssertNil(store.load(diaryID: "diary-2"))
+    }
+
+    func testADraftStoredBeforeEditsWereKeptIsStillRead() throws {
+        // Written by the first version of the store, without `diaryID`.
+        let old = #"{"title":"제목","content":"","date":0,"emotion":"","weather":"","photoCount":1}"#
+        let draft = try JSONDecoder().decode(StoredDiaryDraft.self, from: Data(old.utf8))
+        XCTAssertEqual(draft.title, "제목")
+        XCTAssertNil(draft.diaryID)
+        XCTAssertNil(draft.userID)
     }
 
     func testADraftBelongsToItsWriterOrToWhoeverContinuesWithoutAnAccount() {

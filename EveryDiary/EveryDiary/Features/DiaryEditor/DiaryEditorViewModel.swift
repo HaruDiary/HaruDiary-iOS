@@ -88,6 +88,8 @@ final class DiaryEditorViewModel {
         case photosNotLoaded(Int)
         /// Writing that was not saved before was brought back; its photos (so many) have to be picked again.
         case draftRestored(photoCount: Int)
+        /// Changes to this stored diary that were not saved before were brought back.
+        case editRestored(photoCount: Int)
     }
 
     /// Asked after picking a photo that has a place: add that place to the diary?
@@ -165,7 +167,7 @@ final class DiaryEditorViewModel {
         isDraftSettled = false
         let fresh = DiaryDraft(date: composeDate(for: day))
         // Read before the draft is set: setting it stores it, and an empty one clears what was kept.
-        let kept = drafts?.load()
+        let kept = drafts?.load(diaryID: nil)
         initialDraft = fresh
         if let kept, !kept.isEmpty, kept.belongs(to: saver.currentUserID) {
             // Writing left unsaved (the app was closed, or the save failed) comes back as it was, with its own day.
@@ -199,6 +201,8 @@ final class DiaryEditorViewModel {
     }
 
     func open(_ entry: DiaryEntry, editing: Bool) {
+        // Nothing is kept while the stored diary is being put on screen.
+        isDraftSettled = true
         self.entry = entry
         mode = editing ? .edit : .read
         editingUserID = saver.currentUserID
@@ -206,27 +210,73 @@ final class DiaryEditorViewModel {
         initialDraft = draft
         existingImageURLs = entry.imageURL ?? []
         loadStoredPhotos(existingImageURLs)
+        isDraftSettled = false
+        if editing { restoreKeptChanges() }
         refreshPlaceName()
     }
 
     /// Called when the writing is given up ("나가기"): what was kept goes too.
     func discardDraft() {
         isDraftSettled = true
-        if mode == .compose { drafts?.clear() }
+        switch mode {
+        case .compose: drafts?.clear(diaryID: nil)
+        case .edit: if let diaryID = entry?.id { drafts?.clear(diaryID: diaryID) }
+        case .read: break
+        }
     }
 
-    /// Every change to a new diary's writing is kept, so closing the app or a failed save does not lose it.
+    /// Every change to the writing is kept, so closing the app or a failed save does not lose it:
+    /// a new diary's writing, or what was changed in a stored diary.
     private func keepDraft() {
-        guard mode == .compose, !isDraftSettled, let drafts else { return }
-        let kept = StoredDiaryDraft(title: draft.title, content: draft.content, date: draft.date, emotion: draft.emotion,
-                                    weather: draft.weather, photoCount: photos.count, userID: saver.currentUserID)
-        if kept.isEmpty { drafts.clear() } else { drafts.save(kept) }
+        guard !isDraftSettled, let drafts else { return }
+        switch mode {
+        case .compose:
+            let kept = keptDraft(diaryID: nil, photoCount: photos.count)
+            if kept.isEmpty { drafts.clear(diaryID: nil) } else { drafts.save(kept) }
+        case .edit:
+            guard let diaryID = entry?.id else { return }
+            // Only changed writing is kept; an edit that changed nothing, or only photos, has nothing to bring back.
+            if hasSameWriting(draft, initialDraft) {
+                drafts.clear(diaryID: diaryID)
+            } else {
+                drafts.save(keptDraft(diaryID: diaryID, photoCount: photos.filter { $0.storedURL == nil }.count))
+            }
+        case .read:
+            break
+        }
+    }
+
+    private func keptDraft(diaryID: String?, photoCount: Int) -> StoredDiaryDraft {
+        StoredDiaryDraft(title: draft.title, content: draft.content, date: draft.date, emotion: draft.emotion,
+                         weather: draft.weather, photoCount: photoCount, userID: saver.currentUserID, diaryID: diaryID)
+    }
+
+    private func hasSameWriting(_ lhs: DiaryDraft, _ rhs: DiaryDraft) -> Bool {
+        lhs.title == rhs.title && lhs.content == rhs.content && lhs.date == rhs.date
+            && lhs.emotion == rhs.emotion && lhs.weather == rhs.weather
+    }
+
+    /// Changes to this diary that were not saved (the app was closed, or the save failed) come back.
+    /// Changes to its photos are not kept: the stored photos are shown as they are.
+    private func restoreKeptChanges() {
+        guard let diaryID = entry?.id, let userID = saver.currentUserID,
+              let kept = drafts?.load(diaryID: diaryID), kept.userID == userID else { return }
+        var restored = draft
+        restored.title = kept.title
+        restored.content = kept.content
+        restored.date = min(kept.date, now())
+        restored.emotion = kept.emotion
+        restored.weather = kept.weather
+        guard !hasSameWriting(restored, draft) else { return }
+        draft = restored
+        notice = .editRestored(photoCount: kept.photoCount)
     }
 
     /// The pencil of the read screen: the same diary becomes editable in place.
     func beginEditing() {
         guard mode == .read else { return }
         mode = .edit
+        restoreKeptChanges()
     }
 
     var isEditable: Bool { mode != .read }
@@ -509,10 +559,14 @@ final class DiaryEditorViewModel {
             print("Error saving diary: \(type(of: error))")
             report = .failed(isUpdate: isUpdate)
         }
-        // A new diary that was saved needs its kept writing no more; after a failure it stays for the next try.
-        if !isUpdate, report != .failed(isUpdate: false) {
+        // Saved writing is kept no more; after a failure it stays for the next try.
+        if report != .failed(isUpdate: isUpdate) {
             isDraftSettled = true
-            drafts?.clear()
+            if isUpdate {
+                if let diaryID = entry?.id { drafts?.clear(diaryID: diaryID) }
+            } else {
+                drafts?.clear(diaryID: nil)
+            }
         }
         onSaveFinished?(report)
     }

@@ -219,14 +219,112 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(model.notice, .draftRestored(photoCount: 2))
     }
 
-    func testEditingAStoredDiaryKeepsNothing() {
+    func testChangesToAStoredDiaryAreKeptApartFromANewDiarysWriting() {
+        let drafts = FakeDraftStore()
+        drafts.stored = StoredDiaryDraft(title: "새 일기", content: "", date: today, emotion: "", weather: "", photoCount: 0, userID: "user-a")
+        let model = makeModel(drafts: drafts)
+        model.open(stored(), editing: true)
+        XCTAssertNil(drafts.storedEdit, "Nothing changed, nothing kept")
+
+        model.draft.title = "고친 제목"
+        model.draft.emotion = "Neutral face"
+
+        XCTAssertEqual(drafts.storedEdit, StoredDiaryDraft(title: "고친 제목", content: "강변", date: lastWeek, emotion: "Neutral face",
+                                                           weather: "u_sun", photoCount: 0, userID: "user-a", diaryID: "diary-1"))
+        XCTAssertEqual(drafts.stored?.title, "새 일기", "The new diary's writing is untouched")
+
+        // Put back as it was: nothing to keep.
+        model.draft.title = "산책"
+        model.draft.emotion = "Grinning face"
+        XCTAssertNil(drafts.storedEdit)
+    }
+
+    func testKeptChangesComeBackWhenTheSameDiaryIsEditedAgain() {
         let drafts = FakeDraftStore()
         let model = makeModel(drafts: drafts)
         model.open(stored(), editing: true)
+        model.draft.content = "강변을 오래 걸었다"
 
-        model.draft.title = "고친 제목"
+        // The app is closed and opened again, and the diary is edited again.
+        let next = makeModel(drafts: drafts)
+        next.open(stored(), editing: true)
 
-        XCTAssertNil(drafts.stored)
+        XCTAssertEqual(next.draft.content, "강변을 오래 걸었다")
+        XCTAssertEqual(next.draft.title, "산책")
+        XCTAssertEqual(next.notice, .editRestored(photoCount: 0))
+        XCTAssertTrue(next.hasChanges, "Saving writes the change, closing asks first")
+
+        // Another diary is not given these changes.
+        let other = makeModel(drafts: drafts)
+        other.open(stored(id: "diary-2"), editing: true)
+        XCTAssertEqual(other.draft.content, "강변")
+        XCTAssertNil(other.notice)
+        XCTAssertEqual(drafts.storedEdit?.diaryID, "diary-1", "Opening another diary does not drop them")
+    }
+
+    func testKeptChangesComeBackWhenReadingTurnsIntoEditing() {
+        let drafts = FakeDraftStore()
+        drafts.storedEdit = StoredDiaryDraft(title: "고친 제목", content: "강변", date: lastWeek, emotion: "", weather: "",
+                                             photoCount: 2, userID: "user-a", diaryID: "diary-1")
+        let model = makeModel(drafts: drafts)
+
+        model.open(stored(), editing: false)
+        XCTAssertEqual(model.draft.title, "산책", "Reading shows the diary as it is stored")
+        XCTAssertNil(model.notice)
+
+        model.beginEditing()
+        XCTAssertEqual(model.draft.title, "고친 제목")
+        XCTAssertEqual(model.notice, .editRestored(photoCount: 2))
+    }
+
+    func testChangesKeptByAnotherAccountAreNotBroughtBack() {
+        let drafts = FakeDraftStore()
+        drafts.storedEdit = StoredDiaryDraft(title: "남이 고친 제목", content: "강변", date: lastWeek, emotion: "", weather: "",
+                                             photoCount: 0, userID: "user-b", diaryID: "diary-1")
+        let model = makeModel(drafts: drafts)
+
+        model.open(stored(), editing: true)
+
+        XCTAssertEqual(model.draft.title, "산책")
+        XCTAssertNil(model.notice)
+    }
+
+    func testSavedChangesAreKeptNoMoreButAFailedSaveKeepsThem() async throws {
+        let drafts = FakeDraftStore()
+        saver.keepingOutcome = .failure(DiarySaveError.signedOut)
+        let model = makeModel(drafts: drafts)
+        model.open(stored(), editing: true)
+        model.draft.title = "저장 실패할 수정"
+        var report: DiarySaveReport?
+        model.onSaveFinished = { report = $0 }
+
+        XCTAssertTrue(model.save())
+        try await waitUntil { report != nil }
+        XCTAssertEqual(report, .failed(isUpdate: true))
+        XCTAssertEqual(drafts.storedEdit?.title, "저장 실패할 수정")
+
+        saver.keepingOutcome = .success(.savedKeepingPhotos)
+        let next = makeModel(drafts: drafts)
+        next.open(stored(), editing: true)
+        XCTAssertEqual(next.draft.title, "저장 실패할 수정")
+        report = nil
+        next.onSaveFinished = { report = $0 }
+        XCTAssertTrue(next.save())
+        try await waitUntil { report != nil }
+        XCTAssertEqual(report, .saved)
+        XCTAssertNil(drafts.storedEdit)
+    }
+
+    func testGivingUpChangesForgetsThem() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.open(stored(), editing: true)
+        model.draft.title = "버릴 수정"
+        XCTAssertNotNil(drafts.storedEdit)
+
+        model.discardDraft()
+
+        XCTAssertNil(drafts.storedEdit)
     }
 
     func testSavingAnEditedDiaryTellsItIsNotNew() {
@@ -744,11 +842,22 @@ private extension UIImage {
 
 @MainActor
 private final class FakeDraftStore: DiaryDraftStoring {
+    /// The new diary's writing.
     var stored: StoredDiaryDraft?
+    /// The changes kept for a stored diary.
+    var storedEdit: StoredDiaryDraft?
 
-    func load() -> StoredDiaryDraft? { stored }
-    func save(_ draft: StoredDiaryDraft) { stored = draft }
-    func clear() { stored = nil }
+    func load(diaryID: String?) -> StoredDiaryDraft? {
+        diaryID == nil ? stored : (storedEdit?.diaryID == diaryID ? storedEdit : nil)
+    }
+
+    func save(_ draft: StoredDiaryDraft) {
+        if draft.diaryID == nil { stored = draft } else { storedEdit = draft }
+    }
+
+    func clear(diaryID: String?) {
+        if diaryID == nil { stored = nil } else if storedEdit?.diaryID == diaryID { storedEdit = nil }
+    }
 }
 
 @MainActor
@@ -765,6 +874,8 @@ private final class RecordingDiarySaving: DiarySaving {
 
     var userID: String? = "user-a"
     var outcome: Result<DiarySaveOutcome, Error> = .success(.saved)
+    /// What an update that leaves the photos alone ends with.
+    var keepingOutcome: Result<DiarySaveOutcome, Error> = .success(.savedKeepingPhotos)
     private(set) var created: [DiaryEntry] = []
     private(set) var createdUploads: [[DiaryImageUpload]] = []
     private(set) var updated: [Update] = []
@@ -805,7 +916,7 @@ private final class RecordingDiarySaving: DiarySaving {
                              completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         keptPhotos.append(Update(entry: entry, diaryID: diaryID, expectedUserID: expectedUserID,
                                  existing: existingImageURLs, uploads: []))
-        completion(.success(.savedKeepingPhotos))
+        completion(keepingOutcome)
     }
 }
 

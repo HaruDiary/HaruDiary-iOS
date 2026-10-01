@@ -92,7 +92,7 @@ struct DiaryEmptyState: View {
                 Button(action: action) {
                     Label(actionTitle, systemImage: actionSystemImage)
                         .font(DiaryTheme.Fonts.section)
-                        .foregroundStyle(DiaryTheme.Colors.surface)
+                        .foregroundStyle(DiaryTheme.Colors.onBrand)
                         .padding(.horizontal, DiaryTheme.Spacing.section)
                         .frame(minHeight: DiaryTheme.Size.touchTarget)
                         .background(DiaryTheme.Colors.brand, in: Capsule())

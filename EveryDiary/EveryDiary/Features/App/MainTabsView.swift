@@ -159,6 +159,10 @@ struct MainTabsView: View {
             if let textSize = dependencies.textSize {
                 TextSizeSettingsView(controller: textSize)
             }
+        case .appearance:
+            if let appearance = dependencies.appearance {
+                AppearanceSettingsView(controller: appearance)
+            }
         case .trash:
             TrashScreen(shell: shell, tab: tab, makeModule: dependencies.makeTrashModule)
         case .export:

@@ -36,6 +36,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         profilePhotoKeeper?.start()
         let textSize = AppTextSizeController(store: UserDefaultsTextSizeStore())
         live.textSize = textSize
+        let appearance = AppAppearanceController(store: UserDefaultsAppearanceStore())
+        live.appearance = appearance
 
         // Every screen is SwiftUI; this window only hosts the root view.
         let shell = AppShell()
@@ -44,11 +46,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.rootViewController = root
         // SwiftUI sheets, covers and alerts are presented from the root; messages wait until they close.
         shell.isCoveredByPresentedScreen = { [weak root] in root?.presentedViewController != nil }
-        window.overrideUserInterfaceStyle = .light
+        appearance.attach(to: window)
         textSize.attach(to: window)
         window.makeKeyAndVisible()
 
-        appLock.applyTextSize = { [weak textSize] in textSize?.attach(to: $0) }
+        appLock.configureWindow = { [weak textSize, weak appearance] in
+            textSize?.attach(to: $0)
+            appearance?.attach(to: $0)
+        }
         appLock.onTurnedOff = { [weak shell] in
             shell?.announce("앱 잠금을 껐어요", message: "설정 › 잠금에서 새 암호를 정할 수 있어요.", duration: 2.5)
         }

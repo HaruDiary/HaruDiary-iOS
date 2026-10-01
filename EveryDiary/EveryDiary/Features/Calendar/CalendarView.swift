@@ -217,7 +217,7 @@ struct CalendarMonthGrid: View {
                     .font(DiaryTheme.Fonts.body.weight(isSelected || isToday ? .bold : .regular))
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
-                    .foregroundStyle(isSelected ? DiaryTheme.Colors.surface : kindColor ?? (isToday ? DiaryTheme.Colors.brand : DiaryTheme.Colors.text))
+                    .foregroundStyle(isSelected ? DiaryTheme.Colors.onBrand : kindColor ?? (isToday ? DiaryTheme.Colors.brand : DiaryTheme.Colors.text))
                     .frame(maxWidth: .infinity, minHeight: dayHeight)
                     .background {
                         if isSelected {
@@ -416,9 +416,9 @@ struct CalendarYearSheet: View {
                         VStack(spacing: 4) {
                             Text("\(month)월")
                                 .font(.body.weight(isShown || isThisMonth ? .bold : .regular))
-                                .foregroundStyle(isShown ? DiaryTheme.Colors.surface : isThisMonth ? DiaryTheme.Colors.brand : DiaryTheme.Colors.text)
+                                .foregroundStyle(isShown ? DiaryTheme.Colors.onBrand : isThisMonth ? DiaryTheme.Colors.brand : DiaryTheme.Colors.text)
                             Circle()
-                                .fill(written.contains(month) ? (isShown ? DiaryTheme.Colors.surface : DiaryTheme.Colors.brand) : .clear)
+                                .fill(written.contains(month) ? (isShown ? DiaryTheme.Colors.onBrand : DiaryTheme.Colors.brand) : .clear)
                                 .frame(width: 4, height: 4)
                         }
                         .frame(maxWidth: .infinity, minHeight: 56)

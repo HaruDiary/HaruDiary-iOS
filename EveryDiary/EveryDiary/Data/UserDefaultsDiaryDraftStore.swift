@@ -2,7 +2,10 @@ import Foundation
 
 @MainActor
 final class UserDefaultsDiaryDraftStore: DiaryDraftStoring {
+    /// The writing of a new diary.
     static let key = "diaryDraft.v1"
+    /// The changes being made to a stored diary; the latest edited diary only.
+    static let editKey = "diaryDraft.edit.v1"
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -10,16 +13,26 @@ final class UserDefaultsDiaryDraftStore: DiaryDraftStoring {
     }
 
     /// A value that cannot be read (from a later version) counts as no draft.
-    func load() -> StoredDiaryDraft? {
-        defaults.data(forKey: Self.key).flatMap { try? JSONDecoder().decode(StoredDiaryDraft.self, from: $0) }
+    func load(diaryID: String?) -> StoredDiaryDraft? {
+        guard let draft = read(diaryID == nil ? Self.key : Self.editKey) else { return nil }
+        return draft.diaryID == diaryID ? draft : nil
     }
 
     func save(_ draft: StoredDiaryDraft) {
         guard let data = try? JSONEncoder().encode(draft) else { return }
-        defaults.set(data, forKey: Self.key)
+        defaults.set(data, forKey: draft.diaryID == nil ? Self.key : Self.editKey)
     }
 
-    func clear() {
-        defaults.removeObject(forKey: Self.key)
+    func clear(diaryID: String?) {
+        guard let diaryID else {
+            defaults.removeObject(forKey: Self.key)
+            return
+        }
+        // Changes kept for another diary are left alone.
+        if read(Self.editKey)?.diaryID == diaryID { defaults.removeObject(forKey: Self.editKey) }
+    }
+
+    private func read(_ key: String) -> StoredDiaryDraft? {
+        defaults.data(forKey: key).flatMap { try? JSONDecoder().decode(StoredDiaryDraft.self, from: $0) }
     }
 }

@@ -96,7 +96,7 @@ struct DiarySheetButton: View {
         Button(action: action) {
             Text(title)
                 .font(.headline)
-                .foregroundStyle(.white)
+                .foregroundStyle(DiaryTheme.Colors.onBrand)
                 .frame(maxWidth: .infinity, minHeight: DiaryTheme.SignIn.buttonHeight)
                 .background(DiaryTheme.Colors.brand, in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
         }

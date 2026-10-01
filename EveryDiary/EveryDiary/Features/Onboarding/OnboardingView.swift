@@ -130,7 +130,7 @@ struct OnboardingView: View {
                 .padding(.vertical, DiaryTheme.Spacing.screen)
                 .frame(minHeight: DiaryTheme.Onboarding.buttonHeight)
                 .frame(maxWidth: .infinity)
-                .foregroundStyle(DiaryTheme.Colors.surface)
+                .foregroundStyle(DiaryTheme.Colors.onBrand)
                 .background(DiaryTheme.Colors.brand, in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
             }
             .buttonStyle(OnboardingPressStyle())

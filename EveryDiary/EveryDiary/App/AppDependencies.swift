@@ -16,6 +16,8 @@ struct AppDependencies {
     var reminders: DiaryReminders? = nil
     /// The app's text size, applied to its windows by the scene and changed from settings.
     var textSize: AppTextSizeController? = nil
+    /// Light or dark, applied to the app's windows by the scene and changed from settings.
+    var appearance: AppAppearanceController? = nil
     /// The profile photo kept on the device; shared, so every settings screen shows it without loading.
     var profilePhotos: ProfilePhotoLoader? = nil
 
@@ -35,7 +37,7 @@ struct AppDependencies {
 
     func makeSettingsModule() -> SettingsModule {
         SettingsModule(session: accountSession, signInGateway: signInGateway, makeTrashModule: makeTrashModule,
-                       reminders: reminders, textSize: textSize, profilePhotos: profilePhotos)
+                       reminders: reminders, textSize: textSize, appearance: appearance, profilePhotos: profilePhotos)
     }
 
     func makeDiaryExportViewModel() -> DiaryExportViewModel {

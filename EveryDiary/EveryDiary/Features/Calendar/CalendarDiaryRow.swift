@@ -15,7 +15,7 @@ struct CalendarDiaryRow: View {
                     .lineLimit(2)
                 HStack(spacing: DiaryTheme.Spacing.small) {
                     if !entry.weather.isEmpty {
-                        Image(entry.weather).resizable().scaledToFit().frame(width: 20, height: 20)
+                        DiaryWeatherIcon(name: entry.weather)
                     }
                     if !entry.emotion.isEmpty {
                         Image(entry.emotion).resizable().scaledToFit().frame(width: 20, height: 20)
