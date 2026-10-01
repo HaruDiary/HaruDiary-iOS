@@ -33,7 +33,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let textSize = AppTextSizeController(store: UserDefaultsTextSizeStore())
         textSize.attach(to: window)
         live.textSize = textSize
-        appLock.applyTextSize = { [weak textSize] in textSize?.apply(to: $0) }
+        appLock.applyTextSize = { [weak textSize] in textSize?.attach(to: $0) }
         let dependencies = live
         OnboardingModule.install(in: window) { TabBarController(dependencies: dependencies) }
         //강제로 다크모드 해제

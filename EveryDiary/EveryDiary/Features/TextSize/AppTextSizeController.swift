@@ -34,14 +34,15 @@ final class AppTextSizeController {
         applyToWindows()
     }
 
-    /// The window is not kept alive by this.
+    /// The window follows the setting and the phone's text size from now on, also a window created later
+    /// such as the lock screen's. The window is not kept alive by this.
     func attach(to window: UIWindow) {
+        windows.removeAll { $0() == nil }
         windows.append { [weak window] in window }
         apply(to: window)
     }
 
-    /// For a window created later that should match, e.g. the lock screen's.
-    func apply(to window: UIWindow) {
+    private func apply(to window: UIWindow) {
         let system = Self.steps.firstIndex(of: UIApplication.shared.preferredContentSizeCategory) ?? AppTextSize.defaultStep
         if let step = setting.step(systemStep: system) {
             window.traitOverrides.preferredContentSizeCategory = Self.steps[step]
