@@ -15,6 +15,8 @@ final class CalendarViewModel {
     private(set) var index: CalendarDiaryIndex
     private(set) var displayedMonth: Date
     private(set) var selectedDate: Date
+    /// The day the calendar marks as today. Observed, so the marker moves when `refreshToday()` finds a new day.
+    private(set) var today: CalendarDay
     let calendar: Calendar
 
     @ObservationIgnored private let feed: UserDiaryFeed
@@ -27,12 +29,26 @@ final class CalendarViewModel {
         let today = now()
         displayedMonth = calendar.dateInterval(of: .month, for: today)?.start ?? today
         selectedDate = calendar.startOfDay(for: today)
+        self.today = CalendarDay(date: today, calendar: calendar)
         index = CalendarDiaryIndex(entries: [], calendar: calendar, now: today)
         feed.onEvent = { [weak self] in self?.apply($0) }
     }
 
     var selectedDay: CalendarDay {
         CalendarDay(date: selectedDate, calendar: calendar)
+    }
+
+    /// Called at midnight and when the app comes back to the front, so yesterday does not stay marked.
+    func refreshToday() {
+        let current = CalendarDay(date: now(), calendar: calendar)
+        if current != today { today = current }
+    }
+
+    static let minimumYear = 2011
+
+    /// The months of `year` that have a diary, for the year overview.
+    func monthsWithDiaries(in year: Int) -> Set<Int> {
+        Set(index.decoratedDays.lazy.filter { $0.year == year }.map(\.month))
     }
 
     var selectedEntries: [DiaryEntry] {
@@ -45,7 +61,7 @@ final class CalendarViewModel {
 
     var canMoveToPreviousMonth: Bool {
         guard let previous = calendar.date(byAdding: .month, value: -1, to: displayedMonth) else { return false }
-        return calendar.component(.year, from: previous) >= 2011
+        return calendar.component(.year, from: previous) >= Self.minimumYear
     }
 
     func start() {
@@ -65,9 +81,26 @@ final class CalendarViewModel {
         displayedMonth = calendar.dateInterval(of: .month, for: date)?.start ?? date
     }
 
+    /// Jumps to a month picked in the year overview. Today is selected in the current month, otherwise the 1st.
+    func showMonth(year: Int, month: Int) {
+        guard year >= Self.minimumYear, (1...12).contains(month),
+              let start = calendar.date(from: DateComponents(year: year, month: month, day: 1)) else { return }
+        let now = now()
+        if calendar.isDate(now, equalTo: start, toGranularity: .month) {
+            select(now)
+        } else {
+            select(start)
+        }
+    }
+
+    func showToday() {
+        refreshToday()
+        select(now())
+    }
+
     func moveMonth(by offset: Int) {
         guard let next = calendar.date(byAdding: .month, value: offset, to: displayedMonth),
-              calendar.component(.year, from: next) >= 2011 else { return }
+              calendar.component(.year, from: next) >= Self.minimumYear else { return }
         displayedMonth = next
         selectedDate = calendar.startOfDay(for: next)
     }

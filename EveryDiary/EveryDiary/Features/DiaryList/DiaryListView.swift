@@ -12,54 +12,46 @@ struct DiaryListView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             DiaryTheme.Colors.background.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: DiaryTheme.Spacing.medium) {
-                header
-                searchField
-                content
-            }
+            list
             DiaryWriteButton { leaveSearch(then: onWriteDiary) }
         }
+        .diaryStatusBarBackground()
     }
 
+    // The title and search field are rows too, so the whole screen scrolls together, like the calendar tab.
     private var header: some View {
-        HStack {
-            Text("하루일기")
-                .font(DiaryTheme.Fonts.title)
-                .accessibilityAddTraits(.isHeader)
-            Spacer()
-            Button { leaveSearch(then: onOpenSettings) } label: {
-                Image(systemName: "gearshape").font(.system(size: DiaryTheme.Size.icon))
-                    .frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
-            }
-            .accessibilityLabel("설정")
-        }
-        .foregroundStyle(DiaryTheme.Colors.brand)
-        .padding(.horizontal, DiaryTheme.Spacing.screen)
+        DiaryTabHeader(title: "하루일기", onOpenSettings: { leaveSearch(then: onOpenSettings) })
+            .listRowInsets(EdgeInsets(top: DiaryTheme.Spacing.screen, leading: DiaryTheme.Spacing.screen,
+                                      bottom: DiaryTheme.Spacing.medium, trailing: DiaryTheme.Spacing.screen))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
     }
 
     private var searchField: some View {
         DiarySearchField(text: $viewModel.query, isFocused: $isSearchFocused)
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        if viewModel.sections.isEmpty && !viewModel.isUploadingDiary {
-            placeholder
-        } else {
-            list
-        }
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: DiaryTheme.Spacing.small, trailing: 0))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
     }
 
     // A List (not a ScrollView) so rows get the system swipe actions, like Mail.
     private var list: some View {
         List {
-            if viewModel.isSearching {
+            header
+            searchField
+            if viewModel.sections.isEmpty && !viewModel.isUploadingDiary {
+                placeholder
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, DiaryTheme.Spacing.section * 3)
+                    .diaryCardRow()
+            }
+            if viewModel.isSearching && !viewModel.sections.isEmpty {
                 Text("검색 결과 \(viewModel.visibleCount)개")
                     .font(DiaryTheme.Fonts.caption)
                     .foregroundStyle(DiaryTheme.Colors.secondaryText)
                     .diaryCardRow()
             }
-            if viewModel.state == .failed {
+            if viewModel.state == .failed && !viewModel.sections.isEmpty {
                 DiaryLoadFailure(onRetry: viewModel.retry).diaryCardRow()
             }
             if viewModel.isUploadingDiary {
@@ -117,10 +109,8 @@ struct DiaryListView: View {
         switch viewModel.state {
         case .idle, .loading:
             ProgressView("일기를 불러오는 중이에요")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .failed:
             DiaryLoadFailure(onRetry: viewModel.retry)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .loaded:
             if viewModel.isSearching {
                 DiaryEmptyState(

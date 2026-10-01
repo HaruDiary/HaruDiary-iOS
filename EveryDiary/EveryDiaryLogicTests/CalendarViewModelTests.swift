@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import XCTest
 import UIKit
 
@@ -258,6 +259,65 @@ final class CalendarViewModelTests: XCTestCase {
         XCTAssertEqual(model.calendar.component(.year, from: model.displayedMonth), 2026)
         XCTAssertEqual(model.calendar.component(.month, from: model.displayedMonth), 1)
         XCTAssertEqual(model.calendar.component(.day, from: model.selectedDate), 1)
+    }
+
+    func testTodayComesFromTheInjectedClock() throws {
+        let (model, _, _) = try makeModel()
+        XCTAssertEqual(model.today, CalendarDay(year: 2026, month: 9, day: 15))
+        model.moveMonth(by: 2)
+        XCTAssertEqual(model.today, CalendarDay(year: 2026, month: 9, day: 15), "Moving the calendar does not move today")
+    }
+
+    func testTodayMarkerMovesAfterMidnightWhenRefreshed() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
+        var clock = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-09-30T14:59:00Z")) // 23:59 in Seoul
+        let model = CalendarViewModel(repository: FakeDiaryRepository(), session: FakeDiarySession(userID: "user-a"),
+                                      calendar: calendar, now: { clock })
+        XCTAssertEqual(model.today, CalendarDay(year: 2026, month: 9, day: 30))
+
+        clock = clock.addingTimeInterval(120)
+        XCTAssertEqual(model.today, CalendarDay(year: 2026, month: 9, day: 30), "Unchanged until the calendar is told the day changed")
+        var changes = 0
+        withObservationTracking { _ = model.today } onChange: { changes += 1 }
+        model.refreshToday()
+        XCTAssertEqual(model.today, CalendarDay(year: 2026, month: 10, day: 1))
+        XCTAssertEqual(changes, 1, "Views reading today are redrawn")
+        XCTAssertEqual(model.selectedDay, CalendarDay(year: 2026, month: 9, day: 30), "The selection is left where the user put it")
+    }
+
+    func testYearOverviewJumpsToAMonthAndSelectsTodayInTheCurrentMonth() throws {
+        let (model, _, _) = try makeModel()
+        model.showMonth(year: 2024, month: 2)
+        XCTAssertEqual(model.selectedDay, CalendarDay(year: 2024, month: 2, day: 1))
+        XCTAssertEqual(model.calendar.component(.month, from: model.displayedMonth), 2)
+        XCTAssertEqual(model.calendar.component(.year, from: model.displayedMonth), 2024)
+
+        model.showMonth(year: 2026, month: 9)
+        XCTAssertEqual(model.selectedDay, CalendarDay(year: 2026, month: 9, day: 15))
+
+        model.showMonth(year: 2010, month: 12)
+        model.showMonth(year: 2026, month: 13)
+        XCTAssertEqual(model.selectedDay, CalendarDay(year: 2026, month: 9, day: 15), "Out of range is ignored")
+
+        model.moveMonth(by: 5)
+        model.showToday()
+        XCTAssertEqual(model.selectedDay, model.today)
+    }
+
+    func testYearOverviewMarksMonthsWithDiaries() async throws {
+        let (model, repository, _) = try makeModel()
+        model.start()
+        try await waitUntil { repository.observations.count == 1 }
+        var august = entry("aug")
+        august.dateString = "2026-08-03 09:00:00 +0900"
+        var lastYear = entry("old")
+        lastYear.dateString = "2025-12-31 23:00:00 +0900"
+        repository.observations[0].continuation.yield([entry("a", day: 15), entry("b", day: 20), august, lastYear, entry("gone", day: 9, isDeleted: true)])
+        try await waitUntil { model.state == .loaded }
+        XCTAssertEqual(model.monthsWithDiaries(in: 2026), [8, 9])
+        XCTAssertEqual(model.monthsWithDiaries(in: 2025), [12])
+        XCTAssertEqual(model.monthsWithDiaries(in: 2024), [])
     }
 }
 

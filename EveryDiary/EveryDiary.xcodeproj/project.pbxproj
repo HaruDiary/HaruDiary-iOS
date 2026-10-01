@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		97BD82315E90341005AD00B4 /* TabBarCollapseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D2735F01230F1B69AD2203 /* TabBarCollapseTests.swift */; };
+		5492BBED461017CD89C480A0 /* TabBar/TabBarCollapse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F35C373D080A4732AC5AB8F /* TabBar/TabBarCollapse.swift */; };
+		55FEA4DAEAA524E7AF6063CB /* TabBar/TabBarCollapse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F35C373D080A4732AC5AB8F /* TabBar/TabBarCollapse.swift */; };
+		7F99C28243F475AE7E3874A3 /* TabBar/DiaryTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC0D169012C956C2777B843 /* TabBar/DiaryTabBar.swift */; };
+		D47E62F3AEA7273991C3406B /* DiaryTabHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = F97B71008AB60D5196889786 /* DiaryTabHeader.swift */; };
 		4B005F748B1E5517923677A7 /* PhotoSkeleton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */; };
 		2FDFF42697C6012BFA76146A /* DiaryEditorViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E94119F25F06D502A982397 /* DiaryEditorViewModelTests.swift */; };
 		CB9E36BF189F3B465DAB14FA /* DiaryEditor/DiaryEditorModule+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CC059E79CE3150358018128 /* DiaryEditor/DiaryEditorModule+UIKit.swift */; };
@@ -399,6 +404,7 @@
 		7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarViewModel.swift"; sourceTree = "<group>"; };
 		77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule.swift"; sourceTree = "<group>"; };
 		2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarViewModelTests.swift"; sourceTree = "<group>"; };
+		F6D2735F01230F1B69AD2203 /* TabBarCollapseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TabBarCollapseTests.swift"; sourceTree = "<group>"; };
 		3E94119F25F06D502A982397 /* DiaryEditorViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditorViewModelTests.swift"; sourceTree = "<group>"; };
 		1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryReminderTests.swift"; sourceTree = "<group>"; };
 		584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LockViewModelTests.swift"; sourceTree = "<group>"; };
@@ -447,6 +453,7 @@
 		6324AE064574465A82455BD2 /* DayKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKind.swift"; sourceTree = "<group>"; };
 		7A315EFCB13B4E5C9FFEA2D8 /* DayKindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DayKindTests.swift"; sourceTree = "<group>"; };
 		8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWeatherIcon.swift"; sourceTree = "<group>"; };
+		F97B71008AB60D5196889786 /* DiaryTabHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryTabHeader.swift"; sourceTree = "<group>"; };
 		31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoSkeleton.swift"; sourceTree = "<group>"; };
 		0E851EEAA92546DAB5CA3FFE /* DiaryDocumentDecoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryDocumentDecoding.swift"; sourceTree = "<group>"; };
 		1FAAA1DC7DFF409D9B8A4315 /* DiaryDocumentDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryDocumentDecodingTests.swift"; sourceTree = "<group>"; };
@@ -467,6 +474,8 @@
 		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
 		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
 		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		1F35C373D080A4732AC5AB8F /* TabBar/TabBarCollapse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TabBar/TabBarCollapse.swift"; sourceTree = "<group>"; };
+		9FC0D169012C956C2777B843 /* TabBar/DiaryTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TabBar/DiaryTabBar.swift"; sourceTree = "<group>"; };
 		1CC059E79CE3150358018128 /* DiaryEditor/DiaryEditorModule+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryEditorModule+UIKit.swift"; sourceTree = "<group>"; };
 		1418DC5A4907664FF55A05BA /* DiaryEditor/DiaryEditorHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryEditorHostingController.swift"; sourceTree = "<group>"; };
 		CED06D6A8AE46B0CBF9A6190 /* DiaryEditor/DiaryPhotoViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryPhotoViews.swift"; sourceTree = "<group>"; };
@@ -769,6 +778,7 @@
 				B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				F6D2735F01230F1B69AD2203 /* TabBarCollapseTests.swift */,
 				3E94119F25F06D502A982397 /* DiaryEditorViewModelTests.swift */,
 				1087188C0105EFAB9A68CA78 /* DiaryReminderTests.swift */,
 				584D1033FDF4DA7EE56B2CE7 /* LockViewModelTests.swift */,
@@ -883,6 +893,8 @@
 				0164EEF24CAF405DB960DEC7 /* SettingsModule+UIKit.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
+				1F35C373D080A4732AC5AB8F /* TabBar/TabBarCollapse.swift */,
+				9FC0D169012C956C2777B843 /* TabBar/DiaryTabBar.swift */,
 				1CC059E79CE3150358018128 /* DiaryEditor/DiaryEditorModule+UIKit.swift */,
 				1418DC5A4907664FF55A05BA /* DiaryEditor/DiaryEditorHostingController.swift */,
 				CED06D6A8AE46B0CBF9A6190 /* DiaryEditor/DiaryPhotoViews.swift */,
@@ -953,6 +965,7 @@
 				62BF793D2C564195ACDAF15B /* ProfileAvatarView.swift */,
 				DEBC2E2935FB4A6F8D9D09CF /* DiaryListComponents.swift */,
 				8E727DDBFC694029844D5F26 /* DiaryWeatherIcon.swift */,
+				F97B71008AB60D5196889786 /* DiaryTabHeader.swift */,
 				31BFAEA84541D70C6D0F06DB /* PhotoSkeleton.swift */,
 				4D68D4420386455C94759513 /* DiaryWriteButton.swift */,
 				040BD821321645E60FF1909E /* DiaryTheme.swift */,
@@ -1085,6 +1098,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				97BD82315E90341005AD00B4 /* TabBarCollapseTests.swift in Sources */,
+				5492BBED461017CD89C480A0 /* TabBar/TabBarCollapse.swift in Sources */,
 				2FDFF42697C6012BFA76146A /* DiaryEditorViewModelTests.swift in Sources */,
 				B3FDFD39AA6A0315EBC562B6 /* DiaryEditor/DiaryEditorViewModel.swift in Sources */,
 				55061C4C17D75A27A51B8974 /* DiaryEditor/DiaryDraft.swift in Sources */,
@@ -1177,6 +1192,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55FEA4DAEAA524E7AF6063CB /* TabBar/TabBarCollapse.swift in Sources */,
+				7F99C28243F475AE7E3874A3 /* TabBar/DiaryTabBar.swift in Sources */,
+				D47E62F3AEA7273991C3406B /* DiaryTabHeader.swift in Sources */,
 				4B005F748B1E5517923677A7 /* PhotoSkeleton.swift in Sources */,
 				CB9E36BF189F3B465DAB14FA /* DiaryEditor/DiaryEditorModule+UIKit.swift in Sources */,
 				69416B9FCE2A0B85CCE3CD23 /* DiaryEditor/DiaryEditorHostingController.swift in Sources */,

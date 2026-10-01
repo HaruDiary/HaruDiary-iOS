@@ -28,9 +28,16 @@ class MotivationVC: UIViewController {
     
     required init?(coder: NSCoder) { return nil }
     
-    private lazy var settingButton : UIBarButtonItem = {
-        let button = UIBarButtonItem(title: "세팅뷰 이동",image: UIImage(named: "setting"), target: self, action: #selector(tabSettingBTN))
-        return button
+    // The same title and buttons as the other tabs, in white over the picture.
+    private lazy var header: UIHostingController<DiaryTabHeader> = {
+        let header = UIHostingController(rootView: DiaryTabHeader(
+            title: "여정", tint: .white,
+            extra: .init(systemImage: "square.grid.2x2", label: "나의 여정") { [weak self] in self?.honorVCBTN() },
+            onOpenSettings: { [weak self] in self?.tabSettingBTN() }
+        ))
+        header.view.backgroundColor = .clear
+        header.safeAreaRegions = []
+        return header
     }()
     
     private lazy var writeDiaryButton : UIButton = {
@@ -39,11 +46,6 @@ class MotivationVC: UIViewController {
         button.setImage(UIImage(named: "writeLight"), for: .normal)
         button.addTarget(self, action: #selector(tabWriteDiaryBTN), for: .touchUpInside)
         return button
-    }()
-    
-    private lazy var honorVCButton : UIBarButtonItem = {
-        let honorVCButton = UIBarButtonItem(title: "", image: UIImage(named: "honor"), target: self, action: #selector(honorVCBTN))
-        return honorVCButton
     }()
     
     private lazy var monthLabel: UILabel = {
@@ -131,6 +133,7 @@ class MotivationVC: UIViewController {
     @objc private func tabSettingBTN() {
         let settingVC = makeSettings()
         settingVC.hidesBottomBarWhenPushed = true
+        showNavigationBarForPush()
         navigationController?.pushViewController(settingVC, animated: true)
     }
     
@@ -149,7 +152,13 @@ class MotivationVC: UIViewController {
     @objc private func honorVCBTN() {
         let honorVC = JourneyCollectionHostingController(viewModel: viewModel)
         honorVC.hidesBottomBarWhenPushed = true
+        showNavigationBarForPush()
         navigationController?.pushViewController(honorVC, animated: true)
+    }
+
+    private func showNavigationBarForPush() {
+        navigationController?.setNavigationBarHidden(false, animated: true)
+        navigationController?.navigationBar.tintColor = DiaryTheme.Colors.brandUIKit
     }
     
     func addSubview() {
@@ -159,6 +168,9 @@ class MotivationVC: UIViewController {
         scene.view.backgroundColor = .clear
         // The sky fills the screen behind the navigation bar, as the old background image did.
         scene.safeAreaRegions = []
+        addChild(header)
+        view.addSubview(header.view)
+        header.didMove(toParent: self)
         view.addSubview(writeDiaryButton)
         view.addSubview(monthLabel)
         view.addSubview(countLabel)
@@ -173,16 +185,21 @@ class MotivationVC: UIViewController {
     }
     
     func autoLayout() {
+        // The picture fills the whole screen; the floating tab bar sits over its ground.
         scene.view.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
-            make.bottom.equalTo(view.safeAreaLayoutGuide)
+            make.edges.equalToSuperview()
         }
         writeDiaryButton.snp.makeConstraints { make in
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-10)
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-32)
         }
-        monthLabel.snp.makeConstraints { make in
+        // The same place as the list and calendar headers: the screen padding on every side.
+        header.view.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            make.leading.trailing.equalToSuperview().inset(16)
+        }
+        monthLabel.snp.makeConstraints { make in
+            make.top.equalTo(header.view.snp.bottom).offset(20)
             make.centerX.equalToSuperview()
         }
         countLabel.snp.makeConstraints { make in
@@ -199,10 +216,10 @@ class MotivationVC: UIViewController {
         }
     }
     
+    // The tab draws its own header; pushed screens show the navigation bar again.
     private func setNavigationBar() {
-        navigationItem.rightBarButtonItem = settingButton
-        navigationItem.leftBarButtonItem = honorVCButton
-        navigationController?.navigationBar.tintColor = .white
+        navigationController?.setNavigationBarHidden(true, animated: true)
+        navigationItem.backButtonTitle = "여정"
     }
 }
 
