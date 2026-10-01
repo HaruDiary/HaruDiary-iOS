@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		23ADEF145B05BBEC66BFD53D /* Onboarding/OnboardingIllustration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F15D4A5EECAEE2058D791F /* Onboarding/OnboardingIllustration.swift */; };
 		27208A0EE5C3AA6A380DE3B1 /* Appearance/AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69ED7EB74BA9B680048E8824 /* Appearance/AppearanceSettingsView.swift */; };
 		0109A5C30A57A63E5DB716C5 /* Appearance/AppAppearanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3ED1D8A71005C3F8725D57 /* Appearance/AppAppearanceController.swift */; };
 		AB35C51B88E0642093DEA0C5 /* Appearance/AppAppearanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3ED1D8A71005C3F8725D57 /* Appearance/AppAppearanceController.swift */; };
@@ -407,6 +408,7 @@
 		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
 		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
 		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		F6F15D4A5EECAEE2058D791F /* Onboarding/OnboardingIllustration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Onboarding/OnboardingIllustration.swift"; sourceTree = "<group>"; };
 		69ED7EB74BA9B680048E8824 /* Appearance/AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Appearance/AppearanceSettingsView.swift"; sourceTree = "<group>"; };
 		DE3ED1D8A71005C3F8725D57 /* Appearance/AppAppearanceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Appearance/AppAppearanceController.swift"; sourceTree = "<group>"; };
 		242CFFCA802D8B70E29948F5 /* Settings/DiaryExportScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/DiaryExportScreen.swift"; sourceTree = "<group>"; };
@@ -735,6 +737,7 @@
 				B470769C0A454C869F7E2BAE /* ProfileEditView.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
+				F6F15D4A5EECAEE2058D791F /* Onboarding/OnboardingIllustration.swift */,
 				69ED7EB74BA9B680048E8824 /* Appearance/AppearanceSettingsView.swift */,
 				DE3ED1D8A71005C3F8725D57 /* Appearance/AppAppearanceController.swift */,
 				242CFFCA802D8B70E29948F5 /* Settings/DiaryExportScreen.swift */,
@@ -1060,6 +1063,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				23ADEF145B05BBEC66BFD53D /* Onboarding/OnboardingIllustration.swift in Sources */,
 				27208A0EE5C3AA6A380DE3B1 /* Appearance/AppearanceSettingsView.swift in Sources */,
 				AB35C51B88E0642093DEA0C5 /* Appearance/AppAppearanceController.swift in Sources */,
 				5756A6B402E8CB1FD2A48442 /* UserDefaultsAppearanceStore.swift in Sources */,

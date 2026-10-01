@@ -163,11 +163,8 @@ private struct OnboardingPageView: View {
         GeometryReader { geometry in
             ScrollView {
                 VStack(spacing: DiaryTheme.Spacing.section) {
-                    Image(page.imageName)
-                        .resizable()
-                        .scaledToFit()
+                    OnboardingIllustration(page: page)
                         .frame(height: illustrationHeight(in: geometry.size))
-                        .accessibilityHidden(true)
 
                     VStack(spacing: DiaryTheme.Spacing.medium) {
                         Text(page.title)
@@ -219,16 +216,16 @@ private struct OnboardingPressStyle: ButtonStyle {
     OnboardingPreview(page: .record)
 }
 
-#Preview("불빛") {
-    OnboardingPreview(page: .light)
+#Preview("캘린더") {
+    OnboardingPreview(page: .calendar)
+}
+
+#Preview("다시 보기") {
+    OnboardingPreview(page: .memories)
 }
 
 #Preview("여정") {
     OnboardingPreview(page: .journey)
-}
-
-#Preview("캘린더") {
-    OnboardingPreview(page: .revisit)
 }
 
 #Preview("간직하기 · 큰 글자") {

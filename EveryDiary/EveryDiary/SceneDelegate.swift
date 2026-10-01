@@ -95,7 +95,7 @@ extension SceneDelegate {
     private func addBlurEffect() {
         guard let window = window, blurEffectView == nil else { return }
         
-        let blurEffect = UIBlurEffect(style: .light)
+        let blurEffect = UIBlurEffect(style: .systemMaterial)
         blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView?.frame = window.bounds
         blurEffectView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
