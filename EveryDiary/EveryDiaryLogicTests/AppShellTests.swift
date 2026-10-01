@@ -34,7 +34,7 @@ final class AppShellTests: XCTestCase {
         shell.push(.settings)
         shell.updateBarVisibility()
         XCTAssertTrue(shell.tabBar.isHidden)
-        XCTAssertTrue(shell.isShowing(.settings))
+        XCTAssertTrue(shell.isShowing(.settings, inTab: 0))
 
         shell.select(1)
         XCTAssertFalse(shell.tabBar.isHidden, "The other tab is on its first screen")
@@ -60,6 +60,36 @@ final class AppShellTests: XCTestCase {
         shell.saveFinished(.failed(isUpdate: true))
         XCTAssertEqual(shell.savedCount, 2)
         XCTAssertEqual(shell.toasts.current?.title, "업데이트 실패")
+    }
+
+    func testSettingsOpenInTwoTabsAreToldApart() {
+        let shell = AppShell()
+        shell.push(.settings)
+        shell.select(2)
+        shell.push(.settings)
+        shell.push(.trash)
+
+        // Leaving the calendar tab's settings: the list tab's settings must not keep it "showing".
+        shell.paths[2] = []
+        XCTAssertFalse(shell.isShowing(.settings, inTab: 2))
+        XCTAssertFalse(shell.isShowing(.trash, inTab: 2))
+        XCTAssertTrue(shell.isShowing(.settings, inTab: 0))
+    }
+
+    func testMessagesWaitUntilTheSheetOverTheTabsCloses() {
+        let shell = AppShell()
+        shell.write()
+        shell.announce("앱 잠금을 껐어요", message: "설정에서 새 암호를 정할 수 있어요.")
+        shell.invitePasscodeSetup()
+        XCTAssertNil(shell.toasts.current, "Under the editor sheet nobody would see it")
+        XCTAssertFalse(shell.isAskingForPasscode)
+
+        shell.editor = nil
+        XCTAssertEqual(shell.toasts.current?.title, "앱 잠금을 껐어요")
+        XCTAssertTrue(shell.isAskingForPasscode)
+
+        shell.announce("삭제 완료", message: "휴지통으로 이동하였습니다.")
+        XCTAssertEqual(shell.toasts.current?.title, "삭제 완료", "Shown at once when nothing covers the tabs")
     }
 
     func testOnlyOneEditorOpensAtATime() {

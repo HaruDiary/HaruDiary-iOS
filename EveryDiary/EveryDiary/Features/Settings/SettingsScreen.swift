@@ -4,6 +4,8 @@ import SwiftUI
 /// Settings inside a tab's navigation stack: the rows push their screens, sign-in and web pages open over it.
 struct SettingsScreen: View {
     let shell: AppShell
+    /// The tab whose navigation stack holds this screen.
+    let tab: Int
     @State private var module: Once<SettingsModule>
     @State private var values = SettingsRowValues()
     @State private var webPage: WebPage?
@@ -12,8 +14,9 @@ struct SettingsScreen: View {
 
     private let calendar = Calendar.current
 
-    init(shell: AppShell, makeModule: @escaping @MainActor () -> SettingsModule) {
+    init(shell: AppShell, tab: Int, makeModule: @escaping @MainActor () -> SettingsModule) {
         self.shell = shell
+        self.tab = tab
         _module = State(initialValue: Once(makeModule))
     }
 
@@ -44,7 +47,7 @@ struct SettingsScreen: View {
         }
         .onDisappear {
             // Leaving settings ends the account observation; opening a screen from it does not.
-            if !shell.isShowing(.settings) { viewModel.stop() }
+            if !shell.isShowing(.settings, inTab: tab) { viewModel.stop() }
         }
         .sheet(item: $webPage) { page in
             SafariView(url: page.url).ignoresSafeArea()

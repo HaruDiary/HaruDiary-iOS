@@ -3,10 +3,13 @@ import SwiftUI
 /// The trash inside settings' navigation stack.
 struct TrashScreen: View {
     let shell: AppShell
+    /// The tab whose navigation stack holds this screen.
+    let tab: Int
     @State private var module: Once<TrashModule>
 
-    init(shell: AppShell, makeModule: @escaping @MainActor () -> TrashModule) {
+    init(shell: AppShell, tab: Int, makeModule: @escaping @MainActor () -> TrashModule) {
         self.shell = shell
+        self.tab = tab
         _module = State(initialValue: Once(makeModule))
     }
 
@@ -19,13 +22,13 @@ struct TrashScreen: View {
             .onAppear { viewModel.start() }
             .onDisappear {
                 // Leaving the trash ends the subscription and any automatic deletion still running.
-                if !shell.isShowing(.trash) { viewModel.stop() }
+                if !shell.isShowing(.trash, inTab: tab) { viewModel.stop() }
             }
             .onChange(of: viewModel.notice) { _, notice in
                 guard let notice else { return }
                 viewModel.notice = nil
                 let text = Self.text(for: notice)
-                shell.toasts.show(text.title, message: text.message, duration: 1.5)
+                shell.announce(text.title, message: text.message, duration: 1.5)
             }
             .onChange(of: shell.savedCount) {
                 // The subscription already shows saved changes; only a failed load starts again.

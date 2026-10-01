@@ -44,9 +44,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         appLock.applyTextSize = { [weak textSize] in textSize?.attach(to: $0) }
         appLock.onTurnedOff = { [weak shell] in
-            shell?.toasts.show("앱 잠금을 껐어요", message: "설정 › 잠금에서 새 암호를 정할 수 있어요.", duration: 2.5)
+            shell?.announce("앱 잠금을 껐어요", message: "설정 › 잠금에서 새 암호를 정할 수 있어요.", duration: 2.5)
         }
-        appLock.onAskForPasscode = { [weak shell] in shell?.isAskingForPasscode = true }
+        appLock.onAskForPasscode = { [weak shell] in shell?.invitePasscodeSetup() }
         appLock.attach(to: window)
         appLock.lockIfNeeded()
     }

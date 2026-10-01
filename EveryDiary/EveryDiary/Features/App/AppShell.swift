@@ -40,11 +40,17 @@ final class AppShell {
 
     /// One path per tab; a tab keeps its pushed screens while another is shown.
     var paths: [[AppRoute]] = [[], [], []]
-    var editor: DiaryEditorRequest?
-    var isSigningIn = false
+    var editor: DiaryEditorRequest? {
+        didSet { showWhatWaitedForTheSheet() }
+    }
+    var isSigningIn = false {
+        didSet { showWhatWaitedForTheSheet() }
+    }
     /// After the earlier biometrics-only lock: invites the user to set the app passcode that replaces it.
     var isAskingForPasscode = false
-    var isSettingPasscode = false
+    var isSettingPasscode = false {
+        didSet { showWhatWaitedForTheSheet() }
+    }
 
     /// Goes up when a diary was saved; screens whose loading failed load again.
     private(set) var savedCount = 0
@@ -52,6 +58,9 @@ final class AppShell {
     private(set) var scrollToTopCount = 0
 
     @ObservationIgnored private var collapse = TabBarCollapse()
+    /// Messages that arrived while a sheet covered the tabs; they would not be seen under it.
+    @ObservationIgnored private var waitingMessages: [DiaryToastMessage] = []
+    @ObservationIgnored private var passcodeInvitationWaits = false
 
     // MARK: - Tabs
 
@@ -70,8 +79,46 @@ final class AppShell {
         paths[tabBar.selected].append(route)
     }
 
-    func isShowing(_ route: AppRoute) -> Bool {
-        paths.contains { $0.contains(route) }
+    /// Each tab has its own settings and trash screens, so only that tab's path is looked at.
+    func isShowing(_ route: AppRoute, inTab tab: Int) -> Bool {
+        paths.indices.contains(tab) && paths[tab].contains(route)
+    }
+
+    // MARK: - Messages
+
+    /// A sheet (the editor, sign-in, passcode setup) covers the tabs and what is shown over them.
+    var isCoveredBySheet: Bool {
+        editor != nil || isSigningIn || isSettingPasscode
+    }
+
+    /// Shows a short message over the tabs, or as soon as the sheet covering them has closed.
+    func announce(_ title: String, message: String, duration: Double = 2.0) {
+        guard !isCoveredBySheet else {
+            waitingMessages.append(DiaryToastMessage(title: title, message: message, duration: duration))
+            return
+        }
+        toasts.show(title, message: message, duration: duration)
+    }
+
+    func invitePasscodeSetup() {
+        guard !isCoveredBySheet else {
+            passcodeInvitationWaits = true
+            return
+        }
+        isAskingForPasscode = true
+    }
+
+    private func showWhatWaitedForTheSheet() {
+        guard !isCoveredBySheet else { return }
+        // One message is shown at a time; the latest one is the one still worth reading.
+        if let message = waitingMessages.last {
+            waitingMessages = []
+            toasts.show(message.title, message: message.message, duration: message.duration)
+        }
+        if passcodeInvitationWaits {
+            passcodeInvitationWaits = false
+            isAskingForPasscode = true
+        }
     }
 
     /// The bar belongs to each tab's first screen; pushed screens hide it, and so does the keyboard,
@@ -121,11 +168,11 @@ final class AppShell {
         case .saved:
             break
         case .savedWithMissingPhotos(let count):
-            toasts.show("사진 저장 실패", message: "글은 저장했습니다. 사진 \(count)장은 저장하지 못했습니다.")
+            announce("사진 저장 실패", message: "글은 저장했습니다. 사진 \(count)장은 저장하지 못했습니다.")
         case .savedKeepingPhotos:
-            toasts.show("사진은 그대로 두었어요", message: "사진을 모두 불러오기 전에 저장해서 글만 저장했습니다.")
+            announce("사진은 그대로 두었어요", message: "사진을 모두 불러오기 전에 저장해서 글만 저장했습니다.")
         case .failed(let isUpdate):
-            toasts.show(isUpdate ? "업데이트 실패" : "업로드 실패", message: "일기를 저장하지 못했습니다.\n잠시 후 다시 시도해주세요.")
+            announce(isUpdate ? "업데이트 실패" : "업로드 실패", message: "일기를 저장하지 못했습니다.\n잠시 후 다시 시도해주세요.")
         }
         if case .failed = report { return }
         savedCount += 1

@@ -39,7 +39,7 @@ struct MainTabsView: View {
                             .safeAreaPadding(.bottom, DiaryTabBar.expandedHeight + 8)
                             .navigationTitle(tab.title)
                             .toolbar(.hidden, for: .navigationBar)
-                            .navigationDestination(for: AppRoute.self, destination: destination)
+                            .navigationDestination(for: AppRoute.self) { destination($0, tab: tab.id) }
                     }
                     // The tab leaving fades away while the next one fades in, settling from slightly smaller.
                     .opacity(tab.id == selected ? 1 : 0)
@@ -113,10 +113,10 @@ struct MainTabsView: View {
     // MARK: - Pushed screens
 
     @ViewBuilder
-    private func destination(_ route: AppRoute) -> some View {
+    private func destination(_ route: AppRoute, tab: Int) -> some View {
         switch route {
         case .settings:
-            SettingsScreen(shell: shell, makeModule: dependencies.makeSettingsModule)
+            SettingsScreen(shell: shell, tab: tab, makeModule: dependencies.makeSettingsModule)
         case .reminders:
             ReminderSettingsScreen(reminders: dependencies.reminders)
         case .lock:
@@ -126,7 +126,7 @@ struct MainTabsView: View {
                 TextSizeSettingsView(controller: textSize)
             }
         case .trash:
-            TrashScreen(shell: shell, makeModule: dependencies.makeTrashModule)
+            TrashScreen(shell: shell, tab: tab, makeModule: dependencies.makeTrashModule)
         case .calendarDay:
             CalendarDayScreen(shell: shell, module: modules.value.calendar)
         case .journeyYears:
@@ -162,9 +162,9 @@ private struct DiaryListScreen: View {
             viewModel.notice = nil
             switch notice {
             case .movedToTrash:
-                shell.toasts.show("삭제 완료", message: "휴지통으로 이동하였습니다.", duration: 1.0)
+                shell.announce("삭제 완료", message: "휴지통으로 이동하였습니다.", duration: 1.0)
             case .trashFailed:
-                shell.toasts.show("삭제 실패", message: "휴지통으로 이동하지 못했습니다.\n잠시 후 다시 시도해주세요.", duration: 1.5)
+                shell.announce("삭제 실패", message: "휴지통으로 이동하지 못했습니다.\n잠시 후 다시 시도해주세요.", duration: 1.5)
             }
         }
         .onChange(of: shell.savedCount) {
