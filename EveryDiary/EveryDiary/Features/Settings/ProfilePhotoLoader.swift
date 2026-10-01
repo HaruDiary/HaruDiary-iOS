@@ -39,4 +39,9 @@ final class ProfilePhotoLoader: ProfilePhotoStoring {
         files.removeAll()
         shown = nil
     }
+
+    func keepOnly(_ url: URL) {
+        files.keepOnly(url)
+        if let shown, shown.url != url { self.shown = nil }
+    }
 }

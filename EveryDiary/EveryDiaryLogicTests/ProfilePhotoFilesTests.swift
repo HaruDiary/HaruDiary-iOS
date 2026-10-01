@@ -55,6 +55,35 @@ final class ProfilePhotoFilesTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
     }
 
+    func testAnotherAccountsPhotoIsDroppedWhileTheShownOneStays() throws {
+        // Two files can only be there when they were written apart; `store` itself keeps one.
+        let files = ProfilePhotoFiles(directory: directory)
+        files.store(Data([1]), for: first)
+        let other = directory.appendingPathComponent("uid999_profile-Z9.jpg")
+        try Data([9]).write(to: other)
+
+        files.keepOnly(first)
+
+        XCTAssertEqual(files.data(for: first), Data([1]))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: other.path))
+
+        // The account now shows another photo: the kept one is not its photo and goes.
+        files.keepOnly(second)
+        XCTAssertNil(files.data(for: first))
+    }
+
+    func testLoaderForgetsThePreviousAccountsPhotoInMemoryToo() throws {
+        let jpeg = try XCTUnwrap(Self.jpeg())
+        let loader = ProfilePhotoLoader(files: ProfilePhotoFiles(directory: directory)) { _ in throw URLError(.notConnectedToInternet) }
+        loader.store(jpeg, for: first)
+
+        loader.keepOnly(first)
+        XCTAssertNotNil(loader.image(for: first), "The shown account's photo stays")
+
+        loader.keepOnly(second)
+        XCTAssertNil(loader.image(for: first))
+    }
+
     func testLoaderGivesAStoredPhotoWithoutDownloading() async throws {
         let jpeg = try XCTUnwrap(Self.jpeg())
         var downloads = 0

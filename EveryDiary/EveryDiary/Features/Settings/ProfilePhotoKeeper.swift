@@ -1,8 +1,8 @@
 import Foundation
 
 /// Removes the profile photo kept on the device as soon as the account no longer shows it, wherever that
-/// happens: a sign-out from settings, an account deletion, or a sign-out the app does by itself
-/// (a revoked Apple credential) while settings are closed.
+/// happens: a sign-out from settings, an account deletion, a sign-out the app does by itself
+/// (a revoked Apple credential) while settings are closed, or another account signing in.
 @MainActor
 final class ProfilePhotoKeeper {
     private let session: any AccountSession
@@ -24,8 +24,12 @@ final class ProfilePhotoKeeper {
         observation = Task { [weak self] in
             for await snapshot in accounts {
                 guard !Task.isCancelled else { return }
-                if case .photo = ProfilePicture(storedURL: snapshot?.photoURL) { continue }
-                self?.photos.removeAll()
+                if case .photo(let url) = ProfilePicture(storedURL: snapshot?.photoURL) {
+                    // Another account with its own photo: the previous account's photo goes, this one's stays.
+                    self?.photos.keepOnly(url)
+                } else {
+                    self?.photos.removeAll()
+                }
             }
         }
     }

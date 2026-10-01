@@ -183,10 +183,12 @@ final class SettingsViewModelTests: XCTestCase {
         defer { keeper.stop() }
         XCTAssertEqual(session.observationCount, 1)
 
-        // Signed in with an uploaded photo: kept.
+        // Signed in with an uploaded photo: that photo is kept, any other account's is dropped.
         var snapshot = member()
         snapshot.photoURL = uploadedPhoto.absoluteString
         session.send(snapshot)
+        try await waitUntil { photos.keptOnly == [self.uploadedPhoto] }
+        XCTAssertEqual(photos.removeCount, 0)
         // The app signs the user out by itself (a revoked Apple credential): removed.
         session.send(nil)
         try await waitUntil { photos.removeCount == 1 }
@@ -431,8 +433,11 @@ final class FakeProfilePhotos: ProfilePhotoStoring {
     private(set) var stored: [(jpeg: Data, url: URL)] = []
     var removeCount = 0
 
+    private(set) var keptOnly: [URL] = []
+
     func store(_ jpeg: Data, for url: URL) { stored.append((jpeg, url)) }
     func removeAll() { removeCount += 1 }
+    func keepOnly(_ url: URL) { keptOnly.append(url) }
 }
 
 @MainActor
