@@ -3,6 +3,8 @@ import Foundation
 /// Sign-out and account deletion for the signed-in user.
 @MainActor
 protocol AccountSession {
+    /// The account as it is right now, so a screen can show it before the first observed value arrives.
+    var currentAccount: AccountSnapshot? { get }
     /// Emits the current account first, then again after sign-in, sign-out or a profile change.
     func observeAccount() -> AsyncStream<AccountSnapshot?>
     func signOut() throws

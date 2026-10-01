@@ -107,6 +107,12 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
   사진 파일은 일기 사진과 같은 `{uid}/` 폴더 바로 아래에 두어 탈퇴 시 함께 지워진다.
 - 사진 URL 중 앱 Storage의 `{uid}/profile-…` 파일만 "올린 사진"으로 본다. Google 계정 사진이나 일기 사진 주소는 기본 이미지로 본다.
   사진 주소에는 접근 토큰이 있어 기록하지 않는다.
+- 올린 프로필 사진은 기기에도 둔다(`ProfilePhotoFiles`, 캐시 폴더의 `ProfilePhoto/`, 한 장만). 설정을 열 때 내려받지 않고 바로 그린다.
+  - 방금 올린 사진은 올린 JPEG를 그대로 보관한다. 다른 기기에서 올렸거나 캐시가 비워졌으면 한 번 내려받아 보관한다.
+  - 파일 이름은 사진의 Storage 경로다. 사진을 바꾸면 경로가 달라져 이전 파일을 읽지 않는다. 접근 토큰은 이름에 쓰지 않는다.
+  - 로그아웃·탈퇴하거나 기본 프로필로 바꾸면 보관한 사진을 지운다.
+  - 설정 화면은 열릴 때의 계정(`AccountSession.currentAccount`)으로 바로 그린다. 이전에는 첫 관찰 값이 오기 전까지
+    로그인 전 모습이 잠깐 보였다.
 - 기존 `googleProfile`·`appleProfile` 이미지 자산은 참조를 없앴고, 앱 확인 후 별도로 삭제한다.
 - 손님에서 가입(연결)한 직후에는 항상, 그 외 로그인은 닉네임이 없을 때 닉네임 입력을 묻는다. "나중에"로 건너뛸 수 있다.
 - 닉네임은 Firebase Auth 표시 이름에 저장한다. 일기 데이터·스키마는 바뀌지 않는다.
@@ -157,6 +163,8 @@ Firestore에는 탈퇴 표시가 없다. 일기나 사진은 있는데 Firebase 
 | `Domain/Account/ProfileAvatar.swift` | 기본 프로필 색상과 저장 값(이전 값 호환) |
 | `Domain/Account/ProfilePicture.swift` | 기본 아바타/올린 사진 구분, 편집 화면 선택값 |
 | `Features/Settings/ProfilePhotoPreparation.swift` | 앨범 사진 정사각형·크기 제한·JPEG 재인코딩 |
+| `Domain/Account/ProfilePhotoStoring.swift`, `Data/ProfilePhotoFiles.swift` | 올린 프로필 사진의 기기 보관 |
+| `Features/Settings/ProfilePhotoLoader.swift` | 보관한 사진을 바로 주고, 없으면 한 번 내려받아 보관 |
 | `DesignSystem/ProfileAvatarView.swift` | 프로필 이미지 그림(SwiftUI, 설정 셀용 이미지 변환) |
 | `Features/Settings/ProfileEditView.swift` | 프로필 이미지·닉네임 편집 화면(SwiftUI) |
 | `Domain/Account/AppleRefreshTokenStore.swift` | Apple 사용자 ID 보관 규칙(`AppleSignInSecrets`), 예전 토큰 삭제 |

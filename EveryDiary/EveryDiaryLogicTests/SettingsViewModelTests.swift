@@ -101,6 +101,79 @@ final class SettingsViewModelTests: XCTestCase {
         try await waitUntil { model.profile.picture == .photo(self.uploadedPhoto) }
     }
 
+    func testTheAccountKnownAtOpeningIsShownBeforeAnythingIsObserved() {
+        let session = FakeAccountSession()
+        var snapshot = member()
+        snapshot.photoURL = uploadedPhoto.absoluteString
+        session.currentAccount = snapshot
+
+        let model = SettingsViewModel(session: session)
+
+        XCTAssertTrue(model.profile.isLoggedIn)
+        XCTAssertEqual(model.profile.name, "하루")
+        XCTAssertEqual(model.profile.picture, .photo(uploadedPhoto))
+    }
+
+    func testANewlyUploadedPhotoIsKeptOnTheDevice() async throws {
+        let session = FakeAccountSession()
+        let photos = FakeProfilePhotos()
+        let model = SettingsViewModel(session: session, photos: photos)
+        model.start()
+        defer { model.stop() }
+        session.send(member())
+        try await waitUntil { model.canManageAccount }
+        photos.removeCount = 0
+
+        let saved = await model.updateProfile(nickname: "하루", picture: .newPhoto(Data([7])))
+
+        XCTAssertTrue(saved)
+        XCTAssertEqual(photos.stored.map(\.url), [session.photoURLAfterUpload])
+        XCTAssertEqual(photos.stored.map(\.jpeg), [Data([7])])
+        XCTAssertEqual(photos.removeCount, 0)
+    }
+
+    func testTheKeptPhotoStaysWhileItIsShownAndGoesWithIt() async throws {
+        let session = FakeAccountSession()
+        let photos = FakeProfilePhotos()
+        let model = SettingsViewModel(session: session, photos: photos)
+        model.start()
+        defer { model.stop() }
+        var snapshot = member()
+        snapshot.photoURL = uploadedPhoto.absoluteString
+        session.send(snapshot)
+        try await waitUntil { model.profile.picture == .photo(self.uploadedPhoto) }
+        XCTAssertEqual(photos.removeCount, 0)
+
+        // Keeping the photo while changing the nickname does not touch it.
+        let kept = await model.updateProfile(nickname: "새 이름", picture: .currentPhoto(uploadedPhoto))
+        XCTAssertTrue(kept)
+        XCTAssertEqual(photos.removeCount, 0)
+        XCTAssertTrue(photos.stored.isEmpty)
+
+        // Changing to an avatar removes it, and so does signing out.
+        let changed = await model.updateProfile(nickname: "새 이름", picture: .avatar(.mint))
+        XCTAssertTrue(changed)
+        XCTAssertEqual(photos.removeCount, 1)
+        session.send(nil)
+        try await waitUntil { photos.removeCount == 2 }
+    }
+
+    func testAFailedSaveKeepsNoPhoto() async throws {
+        let session = FakeAccountSession()
+        let photos = FakeProfilePhotos()
+        let model = SettingsViewModel(session: session, photos: photos)
+        model.start()
+        defer { model.stop() }
+        session.send(member())
+        try await waitUntil { model.canManageAccount }
+        session.profileError = URLError(.notConnectedToInternet)
+
+        let saved = await model.updateProfile(nickname: "하루", picture: .newPhoto(Data([7])))
+
+        XCTAssertFalse(saved)
+        XCTAssertTrue(photos.stored.isEmpty)
+    }
+
     // MARK: - Nickname
 
     func testNicknameRules() throws {
@@ -315,6 +388,15 @@ final class SettingsViewModelTests: XCTestCase {
 }
 
 @MainActor
+final class FakeProfilePhotos: ProfilePhotoStoring {
+    private(set) var stored: [(jpeg: Data, url: URL)] = []
+    var removeCount = 0
+
+    func store(_ jpeg: Data, for url: URL) { stored.append((jpeg, url)) }
+    func removeAll() { removeCount += 1 }
+}
+
+@MainActor
 final class FakeAccountSession: AccountSession {
     private(set) var observationCount = 0
     private(set) var isTerminated = false
@@ -323,6 +405,7 @@ final class FakeAccountSession: AccountSession {
     var signOutError: Error?
     var deleteError: Error?
     var suspendsDeletion = false
+    var currentAccount: AccountSnapshot?
     private var continuation: AsyncStream<AccountSnapshot?>.Continuation?
     private var pendingDeletion: CheckedContinuation<Void, Never>?
 
@@ -390,6 +473,7 @@ final class FakeAccountSession: AccountSession {
 /// For dependency-assembly tests that never open settings.
 @MainActor
 final class UnusedAccountSession: AccountSession {
+    var currentAccount: AccountSnapshot? { nil }
     func observeAccount() -> AsyncStream<AccountSnapshot?> { AsyncStream { $0.finish() } }
     func signOut() throws { XCTFail("Settings is not used here") }
     func updateProfile(nickname: String, picture: ProfilePictureSelection) async throws -> ProfilePicture {
