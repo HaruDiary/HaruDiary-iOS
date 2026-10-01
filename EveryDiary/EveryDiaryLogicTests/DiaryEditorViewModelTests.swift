@@ -193,6 +193,69 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertNil(drafts.stored)
     }
 
+    func testWritingKeptForItsWriterIsNotRewrittenAfterASignOutOrAnAccountSwitch() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        model.draft.title = "A가 쓰던 글"
+        let kept = drafts.stored
+        XCTAssertEqual(kept?.userID, "user-a")
+
+        // The app signs out by itself; a late place and more typing must not turn the draft into nobody's.
+        saver.userID = nil
+        model.draft.currentLocationInfo = "37.5, 127.0"
+        model.draft.content = "로그아웃 뒤에 친 글"
+        XCTAssertEqual(drafts.stored, kept)
+
+        // Another account signs in while the editor is still open.
+        saver.userID = "user-b"
+        model.draft.content = "B로 바뀐 뒤에 친 글"
+        XCTAssertEqual(drafts.stored, kept)
+
+        // B's next new diary does not get A's writing; A's is dropped, as before.
+        let next = makeModel(drafts: drafts)
+        next.startComposing()
+        XCTAssertEqual(next.draft.title, "")
+        XCTAssertNil(next.notice)
+    }
+
+    func testChangesKeptForTheirWriterAreNotRewrittenAfterASignOut() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.open(stored(), editing: true)
+        model.draft.title = "A가 고친 제목"
+        let kept = drafts.storedEdit
+
+        saver.userID = "user-b"
+        model.draft.title = "B로 바뀐 뒤 고친 제목"
+        XCTAssertEqual(drafts.storedEdit, kept)
+
+        saver.userID = "user-a"
+        let next = makeModel(drafts: drafts)
+        next.open(stored(), editing: true)
+        XCTAssertEqual(next.draft.title, "A가 고친 제목", "The writer gets the changes back")
+    }
+
+    func testWritingStartedWithoutAnAccountBecomesTheNewAccounts() {
+        let drafts = FakeDraftStore()
+        saver.userID = nil
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        model.draft.title = "계정 없이 쓴 글"
+        XCTAssertNil(drafts.stored?.userID)
+
+        // Saving makes an account; from then on the writing is that account's.
+        saver.userID = "anonymous-1"
+        model.draft.content = "이어서"
+        XCTAssertEqual(drafts.stored?.userID, "anonymous-1")
+
+        // And it stays that account's when someone else signs in.
+        saver.userID = "user-b"
+        model.draft.content = "다른 계정"
+        XCTAssertEqual(drafts.stored?.content, "이어서")
+        XCTAssertEqual(drafts.stored?.userID, "anonymous-1")
+    }
+
     func testAnotherAccountsWritingIsNotShownAndNotKept() {
         let drafts = FakeDraftStore()
         drafts.stored = StoredDiaryDraft(title: "남의 글", content: "", date: lastWeek, emotion: "", weather: "", photoCount: 0, userID: "user-b")

@@ -128,6 +128,9 @@ final class DiaryEditorViewModel {
     private let drafts: (any DiaryDraftStoring)?
     /// The writing was given up or saved: nothing is kept any more.
     private var isDraftSettled = false
+    /// Who is writing, fixed when the writing starts. What is kept is kept for this account, also when the
+    /// app signs out or another account signs in while the editor is open.
+    private var draftUserID: String?
 
     private var entry: DiaryEntry?
     private var editingUserID: String?
@@ -165,11 +168,12 @@ final class DiaryEditorViewModel {
     func startComposing(on day: Date? = nil) {
         mode = .compose
         isDraftSettled = false
+        draftUserID = saver.currentUserID
         let fresh = DiaryDraft(date: composeDate(for: day))
         // Read before the draft is set: setting it stores it, and an empty one clears what was kept.
         let kept = drafts?.load(diaryID: nil)
         initialDraft = fresh
-        if let kept, !kept.isEmpty, kept.belongs(to: saver.currentUserID) {
+        if let kept, !kept.isEmpty, kept.belongs(to: draftUserID) {
             // Writing left unsaved (the app was closed, or the save failed) comes back as it was, with its own day.
             var restored = fresh
             restored.title = kept.title
@@ -206,6 +210,7 @@ final class DiaryEditorViewModel {
         self.entry = entry
         mode = editing ? .edit : .read
         editingUserID = saver.currentUserID
+        draftUserID = editingUserID
         draft = DiaryDraft(entry: entry)
         initialDraft = draft
         existingImageURLs = entry.imageURL ?? []
@@ -228,7 +233,7 @@ final class DiaryEditorViewModel {
     /// Every change to the writing is kept, so closing the app or a failed save does not lose it:
     /// a new diary's writing, or what was changed in a stored diary.
     private func keepDraft() {
-        guard !isDraftSettled, let drafts else { return }
+        guard !isDraftSettled, let drafts, isWriterStillSignedIn() else { return }
         switch mode {
         case .compose:
             let kept = keptDraft(diaryID: nil, photoCount: photos.count)
@@ -248,7 +253,20 @@ final class DiaryEditorViewModel {
 
     private func keptDraft(diaryID: String?, photoCount: Int) -> StoredDiaryDraft {
         StoredDiaryDraft(title: draft.title, content: draft.content, date: draft.date, emotion: draft.emotion,
-                         weather: draft.weather, photoCount: photoCount, userID: saver.currentUserID, diaryID: diaryID)
+                         weather: draft.weather, photoCount: photoCount, userID: draftUserID, diaryID: diaryID)
+    }
+
+    /// After a sign-out or an account switch nothing more is kept: what was kept stays the writer's as it was,
+    /// and is never rewritten as nobody's or the next account's.
+    private func isWriterStillSignedIn() -> Bool {
+        let current = saver.currentUserID
+        if current == draftUserID { return true }
+        // Writing started before any account existed: the account made since (saving makes one) is the writer's.
+        if draftUserID == nil, let current {
+            draftUserID = current
+            return true
+        }
+        return false
     }
 
     private func hasSameWriting(_ lhs: DiaryDraft, _ rhs: DiaryDraft) -> Bool {
@@ -259,7 +277,9 @@ final class DiaryEditorViewModel {
     /// Changes to this diary that were not saved (the app was closed, or the save failed) come back.
     /// Changes to its photos are not kept: the stored photos are shown as they are.
     private func restoreKeptChanges() {
-        guard let diaryID = entry?.id, let userID = saver.currentUserID,
+        // Reading may have been opened under another account than the one editing now.
+        draftUserID = saver.currentUserID
+        guard let diaryID = entry?.id, let userID = draftUserID,
               let kept = drafts?.load(diaryID: diaryID), kept.userID == userID else { return }
         var restored = draft
         restored.title = kept.title
