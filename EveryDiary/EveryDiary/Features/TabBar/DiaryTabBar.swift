@@ -22,7 +22,8 @@ final class DiaryTabBarState {
 }
 
 /// A floating pill of icons, like Instagram's: it shrinks while the content scrolls down and grows back when
-/// tapped or when the content scrolls up. A tap on the shrunk bar only grows it, so no tab opens by accident.
+/// tapped or when the content scrolls up. A touch on the shrunk bar only grows it, so no tab opens by accident;
+/// with VoiceOver the tabs are always selectable.
 struct DiaryTabBar: View {
     let state: DiaryTabBarState
     let onSelect: (Int) -> Void
@@ -54,14 +55,14 @@ struct DiaryTabBar: View {
                    height: collapsed ? Self.collapsedHeight : Self.expandedHeight)
             .background { background }
             .overlay {
-                // While shrunk the whole bar is one target that grows it back.
+                // While shrunk a touch anywhere on the bar only grows it back.
+                // VoiceOver skips this step: the shrinking is only visual, so the tabs stay directly selectable
+                // (selecting one also grows the bar).
                 if collapsed {
                     Color.clear
                         .contentShape(Capsule())
                         .onTapGesture(perform: onExpand)
-                        .accessibilityElement()
-                        .accessibilityLabel("탭 막대 펼치기")
-                        .accessibilityAddTraits(.isButton)
+                        .accessibilityHidden(true)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
