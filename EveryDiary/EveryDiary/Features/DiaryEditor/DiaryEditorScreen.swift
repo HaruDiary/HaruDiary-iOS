@@ -19,7 +19,7 @@ struct DiaryEditorScreen: View {
             viewModel.onSaveStarted = onSaveStarted
             viewModel.onSaveFinished = onSaveFinished
             switch request.purpose {
-            case .compose: viewModel.startComposing()
+            case .compose: viewModel.startComposing(on: request.day)
             case .read(let entry): viewModel.open(entry, editing: false)
             case .edit(let entry): viewModel.open(entry, editing: true)
             }

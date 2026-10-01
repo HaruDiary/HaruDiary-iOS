@@ -25,6 +25,8 @@ struct DiaryEditorRequest: Identifiable {
     let purpose: Purpose
     /// The list shows a "saving" row while a new diary written from it is uploaded.
     var showsUploadInList = false
+    /// For a new diary: the day it is for, when one was picked before opening (the calendar's selected day).
+    var day: Date? = nil
 }
 
 /// What the tabs share: the floating tab bar, the editor sheet, short messages and the paths of pushed screens.
@@ -166,9 +168,9 @@ final class AppShell {
 
     // MARK: - Editor
 
-    func write(showsUploadInList: Bool = false) {
+    func write(showsUploadInList: Bool = false, on day: Date? = nil) {
         guard editor == nil else { return }
-        editor = DiaryEditorRequest(purpose: .compose, showsUploadInList: showsUploadInList)
+        editor = DiaryEditorRequest(purpose: .compose, showsUploadInList: showsUploadInList, day: day)
     }
 
     func read(_ entry: DiaryEntry) {

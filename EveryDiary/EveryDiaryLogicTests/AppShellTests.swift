@@ -118,5 +118,13 @@ final class AppShellTests: XCTestCase {
         shell.write()
         XCTAssertEqual(shell.editor?.id, first, "A second tap while the sheet is opening is ignored")
         XCTAssertEqual(shell.editor?.showsUploadInList, true)
+        XCTAssertNil(shell.editor?.day)
+    }
+
+    func testWritingFromTheCalendarCarriesItsSelectedDay() {
+        let shell = AppShell()
+        let day = Date(timeIntervalSince1970: 1_790_000_000)
+        shell.write(on: day)
+        XCTAssertEqual(shell.editor?.day, day)
     }
 }

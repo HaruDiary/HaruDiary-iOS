@@ -215,7 +215,8 @@ private struct CalendarScreen: View {
             viewModel: viewModel, imageLoader: module.imageLoader,
             onSelectDiary: { shell.read($0) },
             onOpenDayList: { shell.push(.calendarDay) },
-            onWriteDiary: { shell.write() },
+            // A diary written from the calendar is for the day selected in it.
+            onWriteDiary: { shell.write(on: viewModel.selectedDate) },
             onOpenSettings: { shell.push(.settings) },
             tabRoot: TabRoot(shell: shell, tab: 2)
         )
@@ -235,7 +236,7 @@ private struct CalendarDayScreen: View {
     var body: some View {
         let viewModel = module.viewModel
         CalendarDayListView(viewModel: viewModel, imageLoader: module.imageLoader,
-                            onSelectDiary: { shell.read($0) }, onWriteDiary: { shell.write() })
+                            onSelectDiary: { shell.read($0) }, onWriteDiary: { shell.write(on: viewModel.selectedDate) })
             .navigationTitle(title(viewModel))
             .navigationBarTitleDisplayMode(.inline)
     }

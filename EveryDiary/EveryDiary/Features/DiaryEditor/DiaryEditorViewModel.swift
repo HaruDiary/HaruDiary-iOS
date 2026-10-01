@@ -140,9 +140,11 @@ final class DiaryEditorViewModel {
 
     // MARK: - Opening
 
-    func startComposing() {
+    /// `day` is a day picked before opening (the calendar's selected day). The diary is written for it at the
+    /// current time of day, like a date chosen in the editor. Today, a day to come or no day means now.
+    func startComposing(on day: Date? = nil) {
         mode = .compose
-        draft = DiaryDraft(date: now())
+        draft = DiaryDraft(date: composeDate(for: day))
         initialDraft = draft
         refreshWeather()
         Task { [weak self] in
@@ -152,6 +154,13 @@ final class DiaryEditorViewModel {
             initialDraft.currentLocationInfo = coordinate.stored
         }
         loadAttribution()
+    }
+
+    private func composeDate(for day: Date?) -> Date {
+        let now = now()
+        guard let day, day < now, !calendar.isDate(day, inSameDayAs: now) else { return now }
+        let time = calendar.dateComponents([.hour, .minute, .second], from: now)
+        return calendar.date(bySettingHour: time.hour ?? 0, minute: time.minute ?? 0, second: time.second ?? 0, of: day) ?? day
     }
 
     func open(_ entry: DiaryEntry, editing: Bool) {

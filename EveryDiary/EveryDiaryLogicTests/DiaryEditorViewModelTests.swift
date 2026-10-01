@@ -87,6 +87,40 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(saver.created.first?.dateString, DateFormatter.yyyyMMddHHmmss.string(from: lastWeek))
     }
 
+    func testNewDiaryOpenedForAPickedDayIsWrittenForThatDay() async throws {
+        let model = makeModel()
+        // The calendar gives the start of its selected day.
+        model.startComposing(on: calendar.startOfDay(for: lastWeek))
+
+        // The day is the picked one, at the current time of day, and nothing counts as changed yet.
+        XCTAssertEqual(model.draft.date, lastWeek)
+        XCTAssertFalse(model.hasChanges)
+        XCTAssertFalse(model.isToday)
+        XCTAssertEqual(model.weather, .notToday)
+
+        model.draft.title = "지난 일"
+        XCTAssertTrue(model.save())
+        try await waitUntil { saver.created.count == 1 }
+        XCTAssertEqual(saver.created.first?.dateString, DateFormatter.yyyyMMddHHmmss.string(from: lastWeek))
+        XCTAssertEqual(saver.created.first?.weatherDescription, "Unknown")
+        XCTAssertEqual(weather.lookups, 0)
+    }
+
+    func testNewDiaryOpenedForTodayOrADayToComeIsWrittenNow() {
+        let model = makeModel()
+        model.startComposing(on: calendar.startOfDay(for: today))
+        XCTAssertEqual(model.draft.date, today)
+        XCTAssertTrue(model.isToday)
+
+        // A day to come cannot be written for, as in the editor's own date picker.
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: today))!
+        model.startComposing(on: tomorrow)
+        XCTAssertEqual(model.draft.date, today)
+
+        model.startComposing()
+        XCTAssertEqual(model.draft.date, today)
+    }
+
     func testWeatherStillLoadingLeavesTheLookupToSaving() {
         weather.hangs = true
         let model = makeModel()
