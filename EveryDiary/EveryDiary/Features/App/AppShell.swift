@@ -61,6 +61,10 @@ final class AppShell {
     /// Messages that arrived while a sheet covered the tabs; they would not be seen under it.
     @ObservationIgnored private var waitingMessages: [DiaryToastMessage] = []
     @ObservationIgnored private var passcodeInvitationWaits = false
+    @ObservationIgnored private var waiting: Task<Void, Never>?
+    /// True while anything is presented over the tabs: also sheets the screens open themselves (profile editing,
+    /// a web page, a month's picture, an alert). Set by the scene, which can see what its window presents.
+    @ObservationIgnored var isCoveredByPresentedScreen: @MainActor () -> Bool = { false }
 
     // MARK: - Tabs
 
@@ -86,15 +90,16 @@ final class AppShell {
 
     // MARK: - Messages
 
-    /// A sheet (the editor, sign-in, passcode setup) covers the tabs and what is shown over them.
+    /// Something covers the tabs and what is shown over them: a sheet of the shell or one a screen opened.
     var isCoveredBySheet: Bool {
-        editor != nil || isSigningIn || isSettingPasscode
+        editor != nil || isSigningIn || isSettingPasscode || isCoveredByPresentedScreen()
     }
 
     /// Shows a short message over the tabs, or as soon as the sheet covering them has closed.
     func announce(_ title: String, message: String, duration: Double = 2.0) {
         guard !isCoveredBySheet else {
             waitingMessages.append(DiaryToastMessage(title: title, message: message, duration: duration))
+            waitUntilUncovered()
             return
         }
         toasts.show(title, message: message, duration: duration)
@@ -103,9 +108,23 @@ final class AppShell {
     func invitePasscodeSetup() {
         guard !isCoveredBySheet else {
             passcodeInvitationWaits = true
+            waitUntilUncovered()
             return
         }
         isAskingForPasscode = true
+    }
+
+    /// A sheet a screen opened itself does not tell the shell when it closes, so it is looked at again shortly.
+    private func waitUntilUncovered() {
+        guard waiting == nil else { return }
+        waiting = Task { [weak self] in
+            while let self, self.isCoveredBySheet {
+                try? await Task.sleep(for: .milliseconds(300))
+                if Task.isCancelled { return }
+            }
+            self?.waiting = nil
+            self?.showWhatWaitedForTheSheet()
+        }
     }
 
     private func showWhatWaitedForTheSheet() {

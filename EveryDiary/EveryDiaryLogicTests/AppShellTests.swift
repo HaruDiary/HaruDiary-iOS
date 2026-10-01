@@ -92,6 +92,24 @@ final class AppShellTests: XCTestCase {
         XCTAssertEqual(shell.toasts.current?.title, "삭제 완료", "Shown at once when nothing covers the tabs")
     }
 
+    func testMessagesAlsoWaitForSheetsTheScreensOpenThemselves() async throws {
+        let shell = AppShell()
+        var profileSheetIsOpen = true
+        shell.isCoveredByPresentedScreen = { profileSheetIsOpen }
+
+        shell.announce("앱 잠금을 껐어요", message: "설정에서 새 암호를 정할 수 있어요.")
+        shell.invitePasscodeSetup()
+        XCTAssertNil(shell.toasts.current)
+        XCTAssertFalse(shell.isAskingForPasscode)
+
+        profileSheetIsOpen = false
+        for _ in 0..<300 where shell.toasts.current == nil {
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+        XCTAssertEqual(shell.toasts.current?.title, "앱 잠금을 껐어요", "Shown soon after the sheet closed")
+        XCTAssertTrue(shell.isAskingForPasscode)
+    }
+
     func testOnlyOneEditorOpensAtATime() {
         let shell = AppShell()
         shell.write(showsUploadInList: true)

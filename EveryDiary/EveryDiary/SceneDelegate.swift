@@ -38,6 +38,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let root = UIHostingController(rootView: AppRootView(shell: shell, dependencies: live))
         root.view.backgroundColor = DiaryTheme.Colors.backgroundUIKit
         window.rootViewController = root
+        // SwiftUI sheets, covers and alerts are presented from the root; messages wait until they close.
+        shell.isCoveredByPresentedScreen = { [weak root] in root?.presentedViewController != nil }
         window.overrideUserInterfaceStyle = .light
         textSize.attach(to: window)
         window.makeKeyAndVisible()
