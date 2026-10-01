@@ -212,11 +212,18 @@ final class DiaryEditorViewModelTests: XCTestCase {
         model.draft.content = "B로 바뀐 뒤에 친 글"
         XCTAssertEqual(drafts.stored, kept)
 
-        // B's next new diary does not get A's writing; A's is dropped, as before.
+        // B's next new diary does not get A's writing, and opening it does not drop A's writing either.
         let next = makeModel(drafts: drafts)
         next.startComposing()
         XCTAssertEqual(next.draft.title, "")
         XCTAssertNil(next.notice)
+        XCTAssertEqual(drafts.stored, kept)
+
+        // A signs in again and continues.
+        saver.userID = "user-a"
+        let back = makeModel(drafts: drafts)
+        back.startComposing()
+        XCTAssertEqual(back.draft.title, "A가 쓰던 글")
     }
 
     func testChangesKeptForTheirWriterAreNotRewrittenAfterASignOut() {
@@ -256,16 +263,24 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(drafts.stored?.userID, "anonymous-1")
     }
 
-    func testAnotherAccountsWritingIsNotShownAndNotKept() {
+    func testAnotherAccountsWritingIsNotShownAndStaysUntilThisAccountWrites() {
         let drafts = FakeDraftStore()
-        drafts.stored = StoredDiaryDraft(title: "남의 글", content: "", date: lastWeek, emotion: "", weather: "", photoCount: 0, userID: "user-b")
+        let others = StoredDiaryDraft(title: "남의 글", content: "", date: lastWeek, emotion: "", weather: "", photoCount: 0, userID: "user-b")
+        drafts.stored = others
         let model = makeModel(drafts: drafts)
 
         model.startComposing()
 
         XCTAssertEqual(model.draft.title, "")
         XCTAssertNil(model.notice)
-        XCTAssertNil(drafts.stored)
+        XCTAssertEqual(drafts.stored, others, "Opening the editor does not drop the other account's writing")
+
+        // One new diary's writing is kept at a time: this account's writing takes its place.
+        model.draft.title = "내 글"
+        XCTAssertEqual(drafts.stored?.title, "내 글")
+        XCTAssertEqual(drafts.stored?.userID, "user-a")
+        model.draft.title = ""
+        XCTAssertNil(drafts.stored, "Its own writing is cleared as before")
     }
 
     func testWritingFromBeforeAnAccountExistedComesBackWithItsPhotoCount() {

@@ -184,7 +184,7 @@ final class DiaryEditorViewModel {
             draft = restored
             notice = .draftRestored(photoCount: kept.photoCount)
         } else {
-            // Another account's writing is not shown, and not kept either.
+            // Another account's writing is not shown. It stays kept for its writer until this account writes.
             draft = fresh
         }
         refreshWeather()
@@ -237,7 +237,12 @@ final class DiaryEditorViewModel {
         switch mode {
         case .compose:
             let kept = keptDraft(diaryID: nil, photoCount: photos.count)
-            if kept.isEmpty { drafts.clear(diaryID: nil) } else { drafts.save(kept) }
+            if !kept.isEmpty {
+                drafts.save(kept)
+            } else if drafts.load(diaryID: nil)?.belongs(to: draftUserID) == true {
+                // Only this writer's own kept writing is cleared by an empty editor, never another account's.
+                drafts.clear(diaryID: nil)
+            }
         case .edit:
             guard let diaryID = entry?.id else { return }
             // Only changed writing is kept; an edit that changed nothing, or only photos, has nothing to bring back.
