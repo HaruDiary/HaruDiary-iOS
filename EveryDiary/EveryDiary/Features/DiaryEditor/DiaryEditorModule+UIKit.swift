@@ -1,3 +1,4 @@
+import Contacts
 import CoreLocation
 import ImageIO
 import Photos
@@ -77,10 +78,13 @@ private final class LiveDiaryLocating: NSObject, DiaryLocating, CLLocationManage
     }
 
     func placeName(for coordinate: DiaryCoordinate) async -> String? {
-        // The place's own name when it has one, as the previous editor showed.
+        // As the previous editor showed: the place's own name, otherwise its full address.
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        let placemark = try? await CLGeocoder().reverseGeocodeLocation(location).first
-        return placemark?.name ?? placemark?.locality
+        guard let placemark = try? await CLGeocoder().reverseGeocodeLocation(location).first else { return nil }
+        if let name = placemark.name { return name }
+        guard let address = placemark.postalAddress else { return nil }
+        let formatted = CNPostalAddressFormatter.string(from: address, style: .mailingAddress)
+        return formatted.isEmpty ? nil : formatted
     }
 
     private func finish(_ coordinate: DiaryCoordinate?) {
