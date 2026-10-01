@@ -50,10 +50,6 @@ final class AppTextSizeTests: XCTestCase {
         XCTAssertEqual(controller.setting, .extraLarge)
         XCTAssertEqual(store.textSize, .extraLarge)
     }
-}
-
-private final class MemoryTextSizeStore: AppTextSizeStoring {
-    var textSize: AppTextSize = .system
 
     // MARK: - Light and dark
 
@@ -95,4 +91,8 @@ private final class MemoryTextSizeStore: AppTextSizeStoring {
         XCTAssertEqual(lock.overrideUserInterfaceStyle, .light)
         XCTAssertEqual(AppAppearance.allCases.map(\.title), ["시스템 설정", "라이트", "다크"])
     }
+}
+
+private final class MemoryTextSizeStore: AppTextSizeStoring {
+    var textSize: AppTextSize = .system
 }

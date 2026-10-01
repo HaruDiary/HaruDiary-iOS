@@ -172,6 +172,13 @@ final class DiaryExtrasTests: XCTestCase {
         XCTAssertEqual(written.map(\.name), ["하루일기-20261001.txt"])
         XCTAssertTrue(written[0].text.contains("일기 2개"))
 
+        // A later snapshot leaves the file alone: it may be in the share sheet.
+        repository.continuation?.yield([entry("a", 2026, 9, 29)])
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertEqual(model.state, .ready(file: file, diaryCount: 2))
+        XCTAssertEqual(written.count, 1)
+        XCTAssertTrue(removed.isEmpty)
+
         model.stop()
         XCTAssertEqual(removed, [file])
         XCTAssertEqual(model.state, .loading)

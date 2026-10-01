@@ -63,7 +63,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     func sceneDidDisconnect(_ scene: UIScene) {
-        
+        // The account listener must not outlive the scene; a reconnected scene starts its own.
+        profilePhotoKeeper?.stop()
+        profilePhotoKeeper = nil
     }
     
     func sceneDidBecomeActive(_ scene: UIScene) {

@@ -14,6 +14,10 @@ final class ProfilePhotoKeeper {
         self.photos = photos
     }
 
+    deinit {
+        observation?.cancel()
+    }
+
     func start() {
         guard observation == nil else { return }
         let accounts = session.observeAccount()

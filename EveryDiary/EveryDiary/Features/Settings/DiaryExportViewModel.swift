@@ -57,7 +57,9 @@ final class DiaryExportViewModel {
             if case .ready = state { return }
             state = .loading
         case .received(let entries):
-            removeFile()
+            // The file on screen may be in the share sheet right now: it stays as it is until the screen
+            // is left or the account changes. Opening the screen again makes a new one.
+            if case .ready = state { return }
             let count = DiaryExport.exportable(entries).count
             guard count > 0 else {
                 state = .empty

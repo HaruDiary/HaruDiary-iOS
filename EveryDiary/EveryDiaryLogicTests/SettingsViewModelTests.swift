@@ -198,6 +198,21 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertTrue(photos.stored.isEmpty)
     }
 
+    func testTheAccountObservationEndsWhenTheKeeperStopsOrIsReleased() async throws {
+        let session = FakeAccountSession()
+        var keeper: ProfilePhotoKeeper? = ProfilePhotoKeeper(session: session, photos: FakeProfilePhotos())
+        keeper?.start()
+        keeper?.stop()
+        try await waitUntil { session.isTerminated }
+
+        // Released without being stopped (the scene went away): the listener goes too.
+        let released = FakeAccountSession()
+        keeper = ProfilePhotoKeeper(session: released, photos: FakeProfilePhotos())
+        keeper?.start()
+        keeper = nil
+        try await waitUntil { released.isTerminated }
+    }
+
     // MARK: - Nickname
 
     func testNicknameRules() throws {
