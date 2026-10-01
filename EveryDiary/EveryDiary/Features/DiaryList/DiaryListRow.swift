@@ -89,16 +89,27 @@ struct DiaryListRow: View {
         !entry.weather.isEmpty || !entry.emotion.isEmpty
     }
 
+    /// As wide as the photo under them: the weather at its leading edge and the mood at its trailing edge.
+    /// One icon alone sits at the trailing edge.
+    @ViewBuilder
     private var icons: some View {
-        HStack(spacing: DiaryTheme.Spacing.small) {
+        let row = HStack(spacing: DiaryTheme.Spacing.small) {
             if !entry.weather.isEmpty {
-                DiaryWeatherIcon(name: entry.weather)
+                DiaryWeatherIcon(name: entry.weather, size: Self.iconSize)
             }
+            if dynamicTypeSize.isAccessibilitySize == false { Spacer(minLength: 0) }
             if !entry.emotion.isEmpty {
-                Image(entry.emotion).resizable().scaledToFit().frame(width: 20, height: 20)
+                Image(entry.emotion).resizable().scaledToFit().frame(width: Self.iconSize, height: Self.iconSize)
             }
         }
+        if dynamicTypeSize.isAccessibilitySize {
+            row
+        } else {
+            row.frame(width: DiaryListThumbnail.side)
+        }
     }
+
+    private static let iconSize: CGFloat = 24
 
     private var dayColor: Color? {
         guard let date else { return nil }
