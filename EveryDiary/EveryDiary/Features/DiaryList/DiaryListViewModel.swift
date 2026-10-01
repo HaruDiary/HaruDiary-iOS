@@ -18,6 +18,8 @@ final class DiaryListViewModel {
 
     private(set) var state: LoadState = .idle
     private(set) var sections: [DiaryListSection] = []
+    /// Diaries written on today's date in earlier years.
+    private(set) var memories: [DiaryMemory] = []
     private(set) var isUploadingDiary = false
     /// A one-time message for the screen to show and then clear.
     var notice: Notice?
@@ -115,7 +117,13 @@ final class DiaryListViewModel {
         }
     }
 
+    /// Called when the list is shown again and when the day changes, so yesterday's memories do not stay.
+    func refreshToday() {
+        memories = DiaryMemories.onThisDay(from: entries, today: now(), calendar: calendar)
+    }
+
     private func rebuildSections() {
         sections = DiaryListIndex.sections(from: entries, matching: query, calendar: calendar)
+        refreshToday()
     }
 }

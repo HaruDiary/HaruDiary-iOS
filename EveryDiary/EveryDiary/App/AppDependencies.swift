@@ -38,6 +38,15 @@ struct AppDependencies {
                        reminders: reminders, textSize: textSize, profilePhotos: profilePhotos)
     }
 
+    func makeDiaryExportViewModel() -> DiaryExportViewModel {
+        DiaryExportViewModel(repository: diaryRepository, session: userSession, calendar: calendar, now: now)
+    }
+
+    /// Nil where no photo is kept on the device.
+    func makeProfilePhotoKeeper() -> ProfilePhotoKeeper? {
+        profilePhotos.map { ProfilePhotoKeeper(session: accountSession, photos: $0) }
+    }
+
     func makeDiaryListModule() -> DiaryListModule {
         DiaryListModule(repository: diaryRepository, session: userSession, trash: diaryTrash,
                         imageLoader: calendarImageLoader, calendar: calendar, now: now)

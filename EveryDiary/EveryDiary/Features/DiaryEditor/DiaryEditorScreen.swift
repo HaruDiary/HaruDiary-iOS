@@ -52,6 +52,12 @@ struct DiaryEditorScreen: View {
             viewModel.notice = nil
             show(notice)
         }
+        // A notice set while the editor was opening (writing brought back) is not a change to this screen.
+        .onAppear {
+            guard let notice = viewModel.notice else { return }
+            viewModel.notice = nil
+            show(notice)
+        }
         .diaryToast(toasts)
     }
 
@@ -90,6 +96,10 @@ struct DiaryEditorScreen: View {
             toasts.show("사진을 불러오지 못했어요", message: "사진 \(count)장을 읽을 수 없어 넣지 못했어요.\niCloud 사진은 내려받은 뒤 다시 골라주세요.", duration: 3.0)
         case .photoLimitReached:
             toasts.show("사진은 3장까지", message: "사진을 지운 뒤 다시 추가해주세요.")
+        case .draftRestored(let photoCount):
+            toasts.show("쓰던 글을 불러왔어요",
+                        message: photoCount > 0 ? "저장하지 못한 글이에요. 사진 \(photoCount)장은 다시 넣어주세요." : "저장하지 못한 글을 이어서 쓸 수 있어요.",
+                        duration: 3.0)
         case .signInRequired:
             toasts.show("로그인 필요", message: "일기를 연 계정으로 다시 로그인해주세요.")
         }

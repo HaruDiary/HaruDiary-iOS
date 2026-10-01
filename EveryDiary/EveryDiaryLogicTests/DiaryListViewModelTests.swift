@@ -81,6 +81,25 @@ final class DiaryListViewModelTests: XCTestCase {
         XCTAssertEqual(ids(model), ["recovered"])
     }
 
+    func testDiariesOfTodaysDateInEarlierYearsAreShownAsMemories() async throws {
+        // `now` is 2026-09-15 in the test calendar.
+        let (model, repository, _, _) = try makeModel()
+        model.start()
+        try await waitUntil { repository.observations.count == 1 }
+        var lastYear = entry("last-year")
+        lastYear.dateString = "2025-09-15 20:00:00 +0900"
+        var deleted = entry("deleted-last-year", isDeleted: true)
+        deleted.dateString = "2025-09-15 21:00:00 +0900"
+
+        repository.send([entry("today"), lastYear, deleted, entry("another-day", day: 14)])
+        try await waitUntil { model.state == .loaded }
+
+        XCTAssertEqual(model.memories.map(\.yearsAgo), [1])
+        XCTAssertEqual(model.memories.first?.entries.map(\.id), ["last-year"])
+        // The same diary stays in its own month below.
+        XCTAssertTrue(ids(model).contains("last-year"))
+    }
+
     func testSearchFiltersLiveSnapshotWithoutAnotherSubscription() async throws {
         let (model, repository, _, _) = try makeModel()
         model.start()

@@ -12,7 +12,8 @@ import WeatherKit
 enum DiaryEditorModule {
     static func makeViewModel(saver: any DiarySaving) -> DiaryEditorViewModel {
         DiaryEditorViewModel(saver: saver, downloader: StoragePhotoDownloader(), weather: LiveDiaryWeather(),
-                             locating: LiveDiaryLocating(), calendar: .current, now: Date.init)
+                             locating: LiveDiaryLocating(), calendar: .current, now: Date.init,
+                             drafts: UserDefaultsDiaryDraftStore())
     }
 }
 

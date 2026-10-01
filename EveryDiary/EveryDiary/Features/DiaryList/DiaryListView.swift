@@ -23,6 +23,10 @@ struct DiaryListView: View {
             }
         }
         .diaryStatusBarBackground()
+        .onAppear { viewModel.refreshToday() }
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+            Task { @MainActor in viewModel.refreshToday() }
+        }
         // The search screen is opened to type: the keyboard comes up once the screen has slid in
         // (focus asked for during the slide is dropped).
         .task {
@@ -78,6 +82,25 @@ struct DiaryListView: View {
             }
             if viewModel.isUploadingDiary {
                 DiarySavingRow().diaryCardRow()
+            }
+            if !isSearchScreen {
+                ForEach(viewModel.memories) { memory in
+                    Section {
+                        ForEach(memory.entries, id: \.id) { entry in
+                            row(for: entry).diaryCardRow()
+                        }
+                    } header: {
+                        Label("\(memory.yearsAgo)년 전 오늘", systemImage: "clock.arrow.circlepath")
+                            .font(DiaryTheme.Fonts.section)
+                            .foregroundStyle(DiaryTheme.Colors.brand)
+                            .textCase(nil)
+                            .padding(.horizontal, DiaryTheme.Spacing.screen)
+                            .frame(maxWidth: .infinity, minHeight: DiaryTheme.Size.touchTarget, alignment: .leading)
+                            .background(DiaryTheme.Colors.background)
+                            .listRowInsets(EdgeInsets())
+                            .accessibilityAddTraits(.isHeader)
+                    }
+                }
             }
             ForEach(viewModel.sections) { section in
                 Section {

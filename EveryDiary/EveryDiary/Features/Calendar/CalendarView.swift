@@ -29,6 +29,8 @@ struct CalendarView: View {
                             .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         CalendarLoadStatus(viewModel: viewModel)
                         selectedDaySection
+                        CalendarMoodSection(summary: viewModel.displayedMoodSummary,
+                                            month: viewModel.calendar.component(.month, from: viewModel.displayedMonth))
                     }
                     .padding(DiaryTheme.Spacing.screen)
                     .padding(.bottom, DiaryTheme.Size.floatingButtonClearance)
@@ -148,7 +150,7 @@ struct CalendarMonthGrid: View {
                             if let date {
                                 dayButton(date)
                             } else {
-                                Color.clear.frame(height: dayHeight + DiaryTheme.Spacing.small)
+                                Color.clear.frame(height: dayHeight + 4 + Self.markSize)
                                     .accessibilityHidden(true)
                             }
                         }
@@ -204,6 +206,7 @@ struct CalendarMonthGrid: View {
         let isSelected = day == viewModel.selectedDay
         let isToday = day == viewModel.today
         let hasDiary = viewModel.index.decoratedDays.contains(day)
+        let emotion = viewModel.index.emotion(on: day)
         // Saturday blue, Sunday and public holidays red, as in the diary list.
         let kind = DayKind(date: date, calendar: viewModel.calendar)
         let kindColor: Color? = kind == .saturday ? DiaryTheme.Colors.saturday : kind == .holiday ? DiaryTheme.Colors.holiday : nil
@@ -224,13 +227,21 @@ struct CalendarMonthGrid: View {
                             Circle().strokeBorder(DiaryTheme.Colors.brand, lineWidth: 1.5)
                         }
                     }
-                Circle().fill(hasDiary ? DiaryTheme.Colors.brand : .clear).frame(width: 4, height: 4)
+                // Under the number: the day's mood, or a dot for a diary without one. Every day keeps the same height.
+                Group {
+                    if let emotion {
+                        Image(emotion).resizable().scaledToFit()
+                    } else {
+                        Circle().fill(hasDiary ? DiaryTheme.Colors.brand : .clear).frame(width: 4, height: 4)
+                    }
+                }
+                .frame(width: Self.markSize, height: Self.markSize)
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(isToday ? "오늘, " : "")\(day.year)년 \(day.month)월 \(day.day)일\(isPublicHoliday ? ", 공휴일" : "")\(hasDiary ? ", 일기 있음" : "")")
+        .accessibilityLabel("\(isToday ? "오늘, " : "")\(day.year)년 \(day.month)월 \(day.day)일\(isPublicHoliday ? ", 공휴일" : "")\(hasDiary ? ", 일기 있음" : "")\(emotion.flatMap(DiaryConditions.emotionLabel).map { ", 기분 \($0)" } ?? "")")
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 
@@ -242,6 +253,9 @@ struct CalendarMonthGrid: View {
         default: nil
         }
     }
+
+    /// The mood picture or diary dot under a day's number.
+    private static let markSize: CGFloat = 14
 
     private var weekdaySymbols: [String] {
         let formatter = DateFormatter()
@@ -259,6 +273,70 @@ struct CalendarMonthGrid: View {
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "yyyy년 M월"
         return formatter.string(from: viewModel.displayedMonth)
+    }
+}
+
+/// The moods of the month on screen: how many days were written and which moods the diaries carry.
+struct CalendarMoodSection: View {
+    let summary: MonthMoodSummary
+    let month: Int
+
+    var body: some View {
+        if summary.diaryCount > 0 {
+            VStack(alignment: .leading, spacing: DiaryTheme.Spacing.medium) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("\(month)월의 기분")
+                        .font(DiaryTheme.Fonts.section)
+                        .foregroundStyle(DiaryTheme.Colors.brand)
+                        .accessibilityAddTraits(.isHeader)
+                    Spacer()
+                    Text("\(summary.daysWritten)일 · 일기 \(summary.diaryCount)개")
+                        .font(DiaryTheme.Fonts.caption)
+                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                }
+                if summary.moods.isEmpty {
+                    Text("기분을 남긴 일기가 아직 없어요")
+                        .font(DiaryTheme.Fonts.caption)
+                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                } else {
+                    VStack(spacing: DiaryTheme.Spacing.small) {
+                        ForEach(summary.moods) { mood in
+                            row(mood)
+                        }
+                    }
+                }
+            }
+            .padding(DiaryTheme.Spacing.screen)
+            .background(DiaryTheme.Colors.surface, in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
+        }
+    }
+
+    /// The bar is the mood's share of the month's moods.
+    private func row(_ mood: MonthMoodSummary.Mood) -> some View {
+        let share = summary.moodCount > 0 ? Double(mood.count) / Double(summary.moodCount) : 0
+        let label = DiaryConditions.emotionLabel(mood.emotion) ?? "기분"
+        return HStack(spacing: DiaryTheme.Spacing.medium) {
+            Image(mood.emotion).resizable().scaledToFit().frame(width: 24, height: 24)
+            Text(label)
+                .font(DiaryTheme.Fonts.body)
+                .foregroundStyle(DiaryTheme.Colors.text)
+                .frame(minWidth: 64, alignment: .leading)
+            GeometryReader { geometry in
+                Capsule().fill(DiaryTheme.Colors.selection.opacity(0.5))
+                    .overlay(alignment: .leading) {
+                        Capsule().fill(DiaryTheme.Colors.brand.opacity(0.7))
+                            .frame(width: max(geometry.size.width * share, 6))
+                    }
+            }
+            .frame(height: 8)
+            Text("\(mood.count)")
+                .font(DiaryTheme.Fonts.caption.weight(.semibold))
+                .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                .monospacedDigit()
+                .frame(minWidth: 20, alignment: .trailing)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(label) \(mood.count)개")
     }
 }
 

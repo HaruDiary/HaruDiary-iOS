@@ -17,9 +17,9 @@ final class DiaryEditorViewModelTests: XCTestCase {
     private let weather = FakeWeatherLooking()
     private let locating = FakeLocating()
 
-    private func makeModel() -> DiaryEditorViewModel {
+    private func makeModel(drafts: (any DiaryDraftStoring)? = nil) -> DiaryEditorViewModel {
         DiaryEditorViewModel(saver: saver, downloader: downloader, weather: weather, locating: locating,
-                             calendar: calendar, now: { [today] in today })
+                             calendar: calendar, now: { [today] in today }, drafts: drafts)
     }
 
     private func waitUntil(_ condition: @MainActor () -> Bool, file: StaticString = #filePath, line: UInt = #line) async throws {
@@ -108,6 +108,125 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(saver.created.first?.dateString, DateFormatter.yyyyMMddHHmmss.string(from: lastWeek))
         XCTAssertEqual(saver.created.first?.weatherDescription, "Unknown")
         XCTAssertEqual(weather.lookups, 0)
+    }
+
+    // MARK: - Kept writing
+
+    func testWritingOfANewDiaryIsKeptAndComesBackTheNextTime() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        XCTAssertNil(drafts.stored, "Nothing written, nothing kept")
+
+        model.draft.title = "쓰던 글"
+        model.draft.content = "여기까지 썼다"
+        model.draft.emotion = "Grinning face"
+        model.selectDate(lastWeek)
+        XCTAssertEqual(drafts.stored, StoredDiaryDraft(title: "쓰던 글", content: "여기까지 썼다", date: lastWeek, emotion: "Grinning face",
+                                                       weather: "", photoCount: 0, userID: "user-a"))
+
+        // The app is closed and opened again: another editor, the same store.
+        let next = makeModel(drafts: drafts)
+        next.startComposing()
+
+        XCTAssertEqual(next.draft.title, "쓰던 글")
+        XCTAssertEqual(next.draft.content, "여기까지 썼다")
+        XCTAssertEqual(next.draft.emotion, "Grinning face")
+        XCTAssertEqual(next.draft.date, lastWeek)
+        XCTAssertEqual(next.notice, .draftRestored(photoCount: 0))
+        XCTAssertTrue(next.hasChanges, "Closing asks before the writing is lost")
+    }
+
+    func testClearingTheWritingKeepsNothing() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        model.draft.title = "제목"
+        XCTAssertNotNil(drafts.stored)
+
+        model.draft.title = ""
+
+        XCTAssertNil(drafts.stored)
+    }
+
+    func testGivingUpTheWritingForgetsIt() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        model.draft.title = "버릴 글"
+
+        model.discardDraft()
+        // A late change (the place arriving) must not bring it back.
+        model.draft.currentLocationInfo = "37.5, 127.0"
+
+        XCTAssertNil(drafts.stored)
+        let next = makeModel(drafts: drafts)
+        next.startComposing()
+        XCTAssertEqual(next.draft.title, "")
+        XCTAssertNil(next.notice)
+    }
+
+    func testASavedDiaryIsNoLongerKeptButAFailedSaveKeepsIt() async throws {
+        let drafts = FakeDraftStore()
+        saver.outcome = .failure(DiarySaveError.signedOut)
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        model.draft.title = "저장 실패할 글"
+        var report: DiarySaveReport?
+        model.onSaveFinished = { report = $0 }
+
+        XCTAssertTrue(model.save())
+        try await waitUntil { report != nil }
+        XCTAssertEqual(report, .failed(isUpdate: false))
+        XCTAssertEqual(drafts.stored?.title, "저장 실패할 글", "The writing waits for the next try")
+
+        // The next editor brings it back, and saving it clears it.
+        saver.outcome = .success(.saved)
+        let next = makeModel(drafts: drafts)
+        next.startComposing()
+        XCTAssertEqual(next.draft.title, "저장 실패할 글")
+        report = nil
+        next.onSaveFinished = { report = $0 }
+        XCTAssertTrue(next.save())
+        try await waitUntil { report != nil }
+        XCTAssertEqual(report, .saved)
+        XCTAssertNil(drafts.stored)
+    }
+
+    func testAnotherAccountsWritingIsNotShownAndNotKept() {
+        let drafts = FakeDraftStore()
+        drafts.stored = StoredDiaryDraft(title: "남의 글", content: "", date: lastWeek, emotion: "", weather: "", photoCount: 0, userID: "user-b")
+        let model = makeModel(drafts: drafts)
+
+        model.startComposing()
+
+        XCTAssertEqual(model.draft.title, "")
+        XCTAssertNil(model.notice)
+        XCTAssertNil(drafts.stored)
+    }
+
+    func testWritingFromBeforeAnAccountExistedComesBackWithItsPhotoCount() {
+        let drafts = FakeDraftStore()
+        drafts.stored = StoredDiaryDraft(title: "계정 없이 쓴 글", content: "", date: lastWeek, emotion: "", weather: "u_sun", photoCount: 2, userID: nil)
+        let model = makeModel(drafts: drafts)
+
+        // Opened from the calendar for another day: the kept writing and its own day win.
+        model.startComposing(on: calendar.date(byAdding: .day, value: -1, to: today))
+
+        XCTAssertEqual(model.draft.title, "계정 없이 쓴 글")
+        XCTAssertEqual(model.draft.weather, "u_sun")
+        XCTAssertEqual(model.draft.date, lastWeek)
+        XCTAssertEqual(model.notice, .draftRestored(photoCount: 2))
+    }
+
+    func testEditingAStoredDiaryKeepsNothing() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.open(stored(), editing: true)
+
+        model.draft.title = "고친 제목"
+
+        XCTAssertNil(drafts.stored)
     }
 
     func testSavingAnEditedDiaryTellsItIsNotNew() {
@@ -621,6 +740,15 @@ private extension UIImage {
         UIColor.systemPurple.setFill()
         context.fill(CGRect(x: 0, y: 0, width: 2, height: 2))
     }
+}
+
+@MainActor
+private final class FakeDraftStore: DiaryDraftStoring {
+    var stored: StoredDiaryDraft?
+
+    func load() -> StoredDiaryDraft? { stored }
+    func save(_ draft: StoredDiaryDraft) { stored = draft }
+    func clear() { stored = nil }
 }
 
 @MainActor

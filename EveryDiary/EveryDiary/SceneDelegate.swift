@@ -15,6 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var blurEffectView: UIVisualEffectView?
     private lazy var appLock = AppLockPresenter.live()
     private var reminders: DiaryReminders?
+    private var profilePhotoKeeper: ProfilePhotoKeeper?
     // Created after FirebaseApp.configure() in AppDelegate.
     private lazy var appleCredentialMonitor = AppleCredentialMonitor(
         auth: .auth(),
@@ -30,6 +31,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let reminders = live.makeDiaryReminders()
         live.reminders = reminders
         self.reminders = reminders
+        // Follows the account for as long as the app runs, also while settings are closed.
+        profilePhotoKeeper = live.makeProfilePhotoKeeper()
+        profilePhotoKeeper?.start()
         let textSize = AppTextSizeController(store: UserDefaultsTextSizeStore())
         live.textSize = textSize
 

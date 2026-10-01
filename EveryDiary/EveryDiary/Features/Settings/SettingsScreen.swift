@@ -28,6 +28,7 @@ struct SettingsScreen: View {
             openLock: { shell.push(.lock) },
             openTextSize: { shell.push(.textSize) },
             openTrash: { shell.push(.trash) },
+            openExport: { shell.push(.export) },
             openWebPage: { webPage = WebPage(url: $0) },
             signIn: { shell.isSigningIn = true },
             confirmWithAppleThenDelete: { Task { await confirmWithAppleThenDelete() } },

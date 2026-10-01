@@ -174,6 +174,30 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertTrue(photos.stored.isEmpty)
     }
 
+    func testThePhotoIsRemovedWhenTheAccountLosesItWhileSettingsAreClosed() async throws {
+        let session = FakeAccountSession()
+        let photos = FakeProfilePhotos()
+        let keeper = ProfilePhotoKeeper(session: session, photos: photos)
+        keeper.start()
+        keeper.start()
+        defer { keeper.stop() }
+        XCTAssertEqual(session.observationCount, 1)
+
+        // Signed in with an uploaded photo: kept.
+        var snapshot = member()
+        snapshot.photoURL = uploadedPhoto.absoluteString
+        session.send(snapshot)
+        // The app signs the user out by itself (a revoked Apple credential): removed.
+        session.send(nil)
+        try await waitUntil { photos.removeCount == 1 }
+
+        // An avatar or no picture needs no kept photo either.
+        snapshot.photoURL = ProfileAvatar.mint.storedURL
+        session.send(snapshot)
+        try await waitUntil { photos.removeCount == 2 }
+        XCTAssertTrue(photos.stored.isEmpty)
+    }
+
     // MARK: - Nickname
 
     func testNicknameRules() throws {

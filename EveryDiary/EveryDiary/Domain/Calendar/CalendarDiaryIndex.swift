@@ -43,6 +43,15 @@ struct CalendarDiaryIndex {
         groupedEntries[day] ?? []
     }
 
+    /// The mood shown on a day in the calendar: that of the day's latest diary that has one.
+    func emotion(on day: CalendarDay) -> String? {
+        groupedEntries[day]?.lazy.map(\.emotion).first { !$0.isEmpty }
+    }
+
+    func moodSummary(year: Int, month: Int) -> MonthMoodSummary {
+        MonthMoodSummary(entriesByDay: groupedEntries.filter { $0.key.year == year && $0.key.month == month }.map(\.value))
+    }
+
     var decoratedDays: Set<CalendarDay> {
         Set(groupedEntries.keys)
     }

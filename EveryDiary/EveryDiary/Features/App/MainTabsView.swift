@@ -161,6 +161,8 @@ struct MainTabsView: View {
             }
         case .trash:
             TrashScreen(shell: shell, tab: tab, makeModule: dependencies.makeTrashModule)
+        case .export:
+            DiaryExportScreen(makeViewModel: dependencies.makeDiaryExportViewModel)
         case .search:
             DiarySearchScreen(shell: shell, makeModule: dependencies.makeDiaryListModule)
         case .calendarDay:

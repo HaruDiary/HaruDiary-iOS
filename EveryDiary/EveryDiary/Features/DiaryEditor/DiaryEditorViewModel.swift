@@ -86,6 +86,8 @@ final class DiaryEditorViewModel {
         case photosStillLoading
         /// Picked photos that could not be read, e.g. not downloaded from iCloud.
         case photosNotLoaded(Int)
+        /// Writing that was not saved before was brought back; its photos (so many) have to be picked again.
+        case draftRestored(photoCount: Int)
     }
 
     /// Asked after picking a photo that has a place: add that place to the diary?
@@ -94,8 +96,12 @@ final class DiaryEditorViewModel {
     }
 
     private(set) var mode: Mode = .compose
-    var draft: DiaryDraft
-    private(set) var photos: [EditorPhoto] = []
+    var draft: DiaryDraft {
+        didSet { keepDraft() }
+    }
+    private(set) var photos: [EditorPhoto] = [] {
+        didSet { keepDraft() }
+    }
     /// Photos still arriving, each shown as a placeholder until all of them are in.
     private(set) var loadingPhotoCount = 0
     private(set) var weather: WeatherState = .notToday
@@ -116,6 +122,10 @@ final class DiaryEditorViewModel {
     private let locating: any DiaryLocating
     private let calendar: Calendar
     private let now: () -> Date
+    /// Keeps the writing of a new diary on the device; nil where nothing is kept (tests, previews).
+    private let drafts: (any DiaryDraftStoring)?
+    /// The writing was given up or saved: nothing is kept any more.
+    private var isDraftSettled = false
 
     private var entry: DiaryEntry?
     private var editingUserID: String?
@@ -132,7 +142,9 @@ final class DiaryEditorViewModel {
     private var loadGeneration = 0
 
     init(saver: any DiarySaving, downloader: any DiaryPhotoDownloading, weather: any DiaryWeatherLooking,
-         locating: any DiaryLocating, calendar: Calendar, now: @escaping () -> Date) {
+         locating: any DiaryLocating, calendar: Calendar, now: @escaping () -> Date,
+         drafts: (any DiaryDraftStoring)? = nil) {
+        self.drafts = drafts
         self.saver = saver
         self.downloader = downloader
         self.weatherLooking = weather
@@ -150,8 +162,25 @@ final class DiaryEditorViewModel {
     /// current time of day, like a date chosen in the editor. Today, a day to come or no day means now.
     func startComposing(on day: Date? = nil) {
         mode = .compose
-        draft = DiaryDraft(date: composeDate(for: day))
-        initialDraft = draft
+        isDraftSettled = false
+        let fresh = DiaryDraft(date: composeDate(for: day))
+        // Read before the draft is set: setting it stores it, and an empty one clears what was kept.
+        let kept = drafts?.load()
+        initialDraft = fresh
+        if let kept, !kept.isEmpty, kept.belongs(to: saver.currentUserID) {
+            // Writing left unsaved (the app was closed, or the save failed) comes back as it was, with its own day.
+            var restored = fresh
+            restored.title = kept.title
+            restored.content = kept.content
+            restored.date = min(kept.date, now())
+            restored.emotion = kept.emotion
+            restored.weather = kept.weather
+            draft = restored
+            notice = .draftRestored(photoCount: kept.photoCount)
+        } else {
+            // Another account's writing is not shown, and not kept either.
+            draft = fresh
+        }
         refreshWeather()
         Task { [weak self] in
             guard let self, let coordinate = await locating.currentCoordinate() else { return }
@@ -178,6 +207,20 @@ final class DiaryEditorViewModel {
         existingImageURLs = entry.imageURL ?? []
         loadStoredPhotos(existingImageURLs)
         refreshPlaceName()
+    }
+
+    /// Called when the writing is given up ("나가기"): what was kept goes too.
+    func discardDraft() {
+        isDraftSettled = true
+        if mode == .compose { drafts?.clear() }
+    }
+
+    /// Every change to a new diary's writing is kept, so closing the app or a failed save does not lose it.
+    private func keepDraft() {
+        guard mode == .compose, !isDraftSettled, let drafts else { return }
+        let kept = StoredDiaryDraft(title: draft.title, content: draft.content, date: draft.date, emotion: draft.emotion,
+                                    weather: draft.weather, photoCount: photos.count, userID: saver.currentUserID)
+        if kept.isEmpty { drafts.clear() } else { drafts.save(kept) }
     }
 
     /// The pencil of the read screen: the same diary becomes editable in place.
@@ -465,6 +508,11 @@ final class DiaryEditorViewModel {
         case .failure(let error):
             print("Error saving diary: \(type(of: error))")
             report = .failed(isUpdate: isUpdate)
+        }
+        // A new diary that was saved needs its kept writing no more; after a failure it stays for the next try.
+        if !isUpdate, report != .failed(isUpdate: false) {
+            isDraftSettled = true
+            drafts?.clear()
         }
         onSaveFinished?(report)
     }
