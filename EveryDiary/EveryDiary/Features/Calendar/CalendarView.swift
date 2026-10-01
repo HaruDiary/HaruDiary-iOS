@@ -77,8 +77,7 @@ struct CalendarView: View {
 struct CalendarMonthGrid: View {
     let viewModel: CalendarViewModel
     @ScaledMetric(relativeTo: .body) private var dayHeight: CGFloat = DiaryTheme.Size.touchTarget
-    @State private var isShowingDatePicker = false
-    @State private var dateToSelect = Date(timeIntervalSince1970: 0)
+    @State private var isShowingYear = false
     /// Which way the month last moved: a later month slides in from the right, an earlier one from the left.
     @State private var movesForward = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -92,16 +91,17 @@ struct CalendarMonthGrid: View {
                 .disabled(!viewModel.canMoveToPreviousMonth)
                 .accessibilityLabel("이전 달")
                 Spacer()
-                Button {
-                    dateToSelect = viewModel.selectedDate
-                    isShowingDatePicker = true
-                } label: {
-                    Text(monthTitle).font(DiaryTheme.Fonts.title)
-                        .monospacedDigit()
-                        .contentTransition(.numericText(countsDown: !movesForward))
-                        .frame(minHeight: DiaryTheme.Size.touchTarget)
+                Button { isShowingYear = true } label: {
+                    HStack(spacing: 4) {
+                        Text(monthTitle).font(DiaryTheme.Fonts.title)
+                            .monospacedDigit()
+                            .contentTransition(.numericText(countsDown: !movesForward))
+                        // Says the title opens something: the year overview.
+                        Image(systemName: "chevron.down").font(.caption.weight(.bold))
+                    }
+                    .frame(minHeight: DiaryTheme.Size.touchTarget)
                 }
-                .accessibilityLabel("\(monthTitle), 날짜로 이동")
+                .accessibilityLabel("\(monthTitle), 다른 달 고르기")
                 Spacer()
                 Button { move(forward: true) { viewModel.moveMonth(by: 1) } } label: {
                     Image(systemName: "chevron.right").frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
@@ -135,36 +135,14 @@ struct CalendarMonthGrid: View {
             }
             .clipped()
         }
-        .sheet(isPresented: $isShowingDatePicker) {
-            NavigationStack {
-                Group {
-                    if let minimumDate = viewModel.calendar.date(from: DateComponents(year: 2011, month: 1, day: 1)) {
-                        DatePicker("날짜 선택", selection: $dateToSelect, in: minimumDate..., displayedComponents: .date)
-                    } else {
-                        DatePicker("날짜 선택", selection: $dateToSelect, displayedComponents: .date)
-                    }
-                }
-                .datePickerStyle(.graphical)
-                .padding(DiaryTheme.Spacing.screen)
-                .navigationTitle("날짜로 이동")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("취소") { isShowingDatePicker = false }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("이동") {
-                            let target = dateToSelect
-                            move(forward: target >= viewModel.displayedMonth) { viewModel.select(target) }
-                            isShowingDatePicker = false
-                        }
-                    }
+        .sheet(isPresented: $isShowingYear) {
+            CalendarYearSheet(viewModel: viewModel) { year, month in
+                isShowingYear = false
+                guard let target = viewModel.calendar.date(from: DateComponents(year: year, month: month ?? viewModel.today.month, day: 1)) else { return }
+                move(forward: target >= viewModel.displayedMonth) {
+                    if let month { viewModel.showMonth(year: year, month: month) } else { viewModel.showToday() }
                 }
             }
-            .environment(\.calendar, viewModel.calendar)
-            .environment(\.timeZone, viewModel.calendar.timeZone)
-            .environment(\.locale, Locale(identifier: "ko_KR"))
-            .tint(DiaryTheme.Colors.brand)
         }
     }
 
@@ -187,17 +165,23 @@ struct CalendarMonthGrid: View {
     private func dayButton(_ date: Date) -> some View {
         let day = CalendarDay(date: date, calendar: viewModel.calendar)
         let isSelected = day == viewModel.selectedDay
+        let isToday = day == viewModel.today
         let hasDiary = viewModel.index.decoratedDays.contains(day)
         return Button { viewModel.select(date) } label: {
             VStack(spacing: 4) {
                 Text("\(day.day)")
-                    .font(DiaryTheme.Fonts.body.weight(isSelected ? .semibold : .regular))
+                    .font(DiaryTheme.Fonts.body.weight(isSelected || isToday ? .bold : .regular))
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
-                    .foregroundStyle(isSelected ? DiaryTheme.Colors.surface : DiaryTheme.Colors.text)
+                    .foregroundStyle(isSelected ? DiaryTheme.Colors.surface : isToday ? DiaryTheme.Colors.brand : DiaryTheme.Colors.text)
                     .frame(maxWidth: .infinity, minHeight: dayHeight)
                     .background {
-                        if isSelected { Circle().fill(DiaryTheme.Colors.brand) }
+                        if isSelected {
+                            Circle().fill(DiaryTheme.Colors.brand)
+                        } else if isToday {
+                            // Today keeps a ring wherever the selection is.
+                            Circle().strokeBorder(DiaryTheme.Colors.brand, lineWidth: 1.5)
+                        }
                     }
                 Circle().fill(hasDiary ? DiaryTheme.Colors.brand : .clear).frame(width: 4, height: 4)
             }
@@ -205,7 +189,7 @@ struct CalendarMonthGrid: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(day.year)년 \(day.month)월 \(day.day)일\(hasDiary ? ", 일기 있음" : "")")
+        .accessibilityLabel("\(isToday ? "오늘, " : "")\(day.year)년 \(day.month)월 \(day.day)일\(hasDiary ? ", 일기 있음" : "")")
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 
@@ -249,5 +233,98 @@ struct CalendarLoadStatus: View {
         case .loaded:
             EmptyView()
         }
+    }
+}
+
+/// A whole year at a glance: pick a month to go straight to it. Opened from the month title.
+struct CalendarYearSheet: View {
+    let viewModel: CalendarViewModel
+    /// The picked year and month; a nil month means today.
+    let onPick: (Int, Int?) -> Void
+    @State private var year: Int
+
+    init(viewModel: CalendarViewModel, onPick: @escaping (Int, Int?) -> Void) {
+        self.viewModel = viewModel
+        self.onPick = onPick
+        _year = State(initialValue: viewModel.calendar.component(.year, from: viewModel.displayedMonth))
+    }
+
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: DiaryTheme.Spacing.medium), count: 3)
+
+    var body: some View {
+        let shownYear = viewModel.calendar.component(.year, from: viewModel.displayedMonth)
+        let shownMonth = viewModel.calendar.component(.month, from: viewModel.displayedMonth)
+        let today = viewModel.today
+        let written = viewModel.monthsWithDiaries(in: year)
+        VStack(spacing: DiaryTheme.Spacing.section) {
+            HStack {
+                Button { withAnimation(.easeInOut(duration: 0.2)) { year -= 1 } } label: {
+                    Image(systemName: "chevron.left")
+                        .frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
+                }
+                .disabled(year <= CalendarViewModel.minimumYear)
+                .accessibilityLabel("이전 해")
+                Spacer()
+                Text("\(String(year))년")
+                    .font(DiaryTheme.Fonts.title)
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                    .accessibilityAddTraits(.isHeader)
+                Spacer()
+                Button { withAnimation(.easeInOut(duration: 0.2)) { year += 1 } } label: {
+                    Image(systemName: "chevron.right")
+                        .frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
+                }
+                .accessibilityLabel("다음 해")
+            }
+            .foregroundStyle(DiaryTheme.Colors.brand)
+            .padding(.top, DiaryTheme.Spacing.section)
+
+            LazyVGrid(columns: columns, spacing: DiaryTheme.Spacing.medium) {
+                ForEach(1...12, id: \.self) { month in
+                    let isShown = year == shownYear && month == shownMonth
+                    let isThisMonth = year == today.year && month == today.month
+                    Button { onPick(year, month) } label: {
+                        VStack(spacing: 4) {
+                            Text("\(month)월")
+                                .font(.body.weight(isShown || isThisMonth ? .bold : .regular))
+                                .foregroundStyle(isShown ? DiaryTheme.Colors.surface : isThisMonth ? DiaryTheme.Colors.brand : DiaryTheme.Colors.text)
+                            Circle()
+                                .fill(written.contains(month) ? (isShown ? DiaryTheme.Colors.surface : DiaryTheme.Colors.brand) : .clear)
+                                .frame(width: 4, height: 4)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 56)
+                        .background {
+                            if isShown {
+                                RoundedRectangle(cornerRadius: DiaryTheme.Radius.card).fill(DiaryTheme.Colors.brand)
+                            } else {
+                                RoundedRectangle(cornerRadius: DiaryTheme.Radius.card).fill(DiaryTheme.Colors.surface)
+                            }
+                        }
+                        .overlay {
+                            if isThisMonth && !isShown {
+                                RoundedRectangle(cornerRadius: DiaryTheme.Radius.card)
+                                    .strokeBorder(DiaryTheme.Colors.brand, lineWidth: 1.5)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("\(String(year))년 \(month)월\(isThisMonth ? ", 이번 달" : "")\(written.contains(month) ? ", 일기 있음" : "")")
+                    .accessibilityAddTraits(isShown ? .isSelected : [])
+                }
+            }
+            Button { onPick(today.year, nil) } label: {
+                Text("오늘로 가기")
+                    .font(.headline)
+                    .foregroundStyle(DiaryTheme.Colors.brand)
+                    .frame(maxWidth: .infinity, minHeight: DiaryTheme.Size.touchTarget)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, DiaryTheme.Spacing.screen)
+        .background(DiaryTheme.Colors.background)
+        .presentationDetents([.height(440)])
+        .presentationDragIndicator(.visible)
+        .presentationCornerRadius(28)
     }
 }

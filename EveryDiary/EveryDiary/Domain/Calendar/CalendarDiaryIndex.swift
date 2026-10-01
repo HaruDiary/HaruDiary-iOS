@@ -5,6 +5,12 @@ struct CalendarDay: Hashable {
     let month: Int
     let day: Int
 
+    init(year: Int, month: Int, day: Int) {
+        self.year = year
+        self.month = month
+        self.day = day
+    }
+
     init(date: Date, calendar: Calendar) {
         year = calendar.component(.year, from: date)
         month = calendar.component(.month, from: date)

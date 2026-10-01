@@ -127,9 +127,6 @@ struct DiaryEditorView: View {
             VStack(alignment: .leading, spacing: DiaryTheme.Spacing.medium) {
                 DiaryDateCard(date: viewModel.draft.date, isToday: viewModel.isToday) { sheet = .date }
                 conditionChips
-                if viewModel.mode == .compose {
-                    DiaryWeatherNote(state: viewModel.weather, attribution: viewModel.attribution)
-                }
                 titleField
                 contentField
                 if viewModel.isLoadingPhotos || !viewModel.photos.isEmpty {
@@ -159,7 +156,11 @@ struct DiaryEditorView: View {
                                hasValue: !viewModel.draft.weather.isEmpty) {
                 DiaryWeatherIcon(name: viewModel.draft.weather, size: 20)
             } action: { sheet = .weather }
-            Spacer(minLength: 0)
+            Spacer(minLength: DiaryTheme.Spacing.small)
+            // The live weather sits at the end of the same row, so the title comes right below.
+            if viewModel.mode == .compose {
+                DiaryWeatherNote(state: viewModel.weather, attribution: viewModel.attribution)
+            }
         }
     }
 
@@ -335,56 +336,61 @@ struct DiaryConditionChip<Icon: View>: View {
     }
 }
 
-/// Current weather for a diary written today, with Apple Weather's attribution as WeatherKit requires.
+/// Current weather for a diary written today, with Apple Weather's attribution below it as WeatherKit requires.
+/// Small and right-aligned, to sit at the end of the mood and weather row.
 struct DiaryWeatherNote: View {
     let state: DiaryEditorViewModel.WeatherState
     let attribution: WeatherAttribution?
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: symbol)
-                .foregroundStyle(DiaryTheme.Colors.secondaryText)
-            Text(text)
-                .foregroundStyle(DiaryTheme.Colors.secondaryText)
-            Spacer(minLength: 0)
-            if case .loaded = state, let attribution {
-                Link(destination: attribution.legalPage) {
-                    HStack(spacing: 4) {
-                        AsyncImage(url: colorScheme == .dark ? attribution.darkMark : attribution.lightMark) { image in
-                            image.resizable().scaledToFit()
-                        } placeholder: {
-                            Text("Apple 날씨")
-                        }
-                        .frame(height: 12)
-                        Text("법적 고지").underline()
-                    }
+        if let text {
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(text)
                     .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .accessibilityLabel(accessibilityText)
+                if case .loaded = state, let attribution {
+                    Link(destination: attribution.legalPage) {
+                        HStack(spacing: 4) {
+                            AsyncImage(url: colorScheme == .dark ? attribution.darkMark : attribution.lightMark) { image in
+                                image.resizable().scaledToFit()
+                            } placeholder: {
+                                Text("Apple 날씨")
+                            }
+                            .frame(height: 11)
+                            Text("법적 고지").underline()
+                        }
+                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                    }
+                    .accessibilityLabel("Apple 날씨 데이터 출처와 법적 고지")
                 }
-                .accessibilityLabel("Apple 날씨 데이터 출처와 법적 고지")
             }
-        }
-        .font(DiaryTheme.Fonts.caption)
-        .padding(.horizontal, 4)
-    }
-
-    private var symbol: String {
-        switch state {
-        case .notToday: return "clock.arrow.circlepath"
-        case .loading: return "cloud"
-        case .loaded: return "thermometer.medium"
-        case .failed: return "exclamationmark.circle"
+            .font(DiaryTheme.Fonts.caption)
+            .layoutPriority(-1)
         }
     }
 
-    private var text: String {
+    /// Nothing for a diary of another day: current weather does not describe it.
+    private var text: String? {
         switch state {
-        case .notToday: return "오늘이 아닌 날은 날씨를 기록하지 않아요"
-        case .loading: return "지금 날씨를 불러오는 중…"
-        case .loaded(let description, let celsius): return "지금 날씨 · \(description) \(Int(celsius.rounded()))℃"
+        case .notToday: return nil
+        case .loading: return "날씨 불러오는 중…"
+        case .loaded(let description, let celsius): return "\(description) \(Int(celsius.rounded()))℃"
+        case .failed(.noLocation): return "위치를 알 수 없어요"
+        case .failed(.network): return "인터넷 연결 없음"
+        case .failed: return "날씨 정보 없음"
+        }
+    }
+
+    private var accessibilityText: String {
+        switch state {
+        case .loaded(let description, let celsius): return "지금 날씨, \(description) \(Int(celsius.rounded()))도"
         case .failed(.noLocation): return "위치를 알 수 없어 날씨를 불러오지 못했어요"
         case .failed(.network): return "인터넷 연결이 없어 날씨를 불러오지 못했어요"
         case .failed: return "날씨를 불러오지 못했어요"
+        default: return text ?? ""
         }
     }
 }

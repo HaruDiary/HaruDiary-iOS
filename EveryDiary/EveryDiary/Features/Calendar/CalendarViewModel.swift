@@ -35,6 +35,18 @@ final class CalendarViewModel {
         CalendarDay(date: selectedDate, calendar: calendar)
     }
 
+    /// Read from the clock each time, so the marker moves on while the app stays open.
+    var today: CalendarDay {
+        CalendarDay(date: now(), calendar: calendar)
+    }
+
+    static let minimumYear = 2011
+
+    /// The months of `year` that have a diary, for the year overview.
+    func monthsWithDiaries(in year: Int) -> Set<Int> {
+        Set(index.decoratedDays.lazy.filter { $0.year == year }.map(\.month))
+    }
+
     var selectedEntries: [DiaryEntry] {
         index.entries(on: selectedDay)
     }
@@ -45,7 +57,7 @@ final class CalendarViewModel {
 
     var canMoveToPreviousMonth: Bool {
         guard let previous = calendar.date(byAdding: .month, value: -1, to: displayedMonth) else { return false }
-        return calendar.component(.year, from: previous) >= 2011
+        return calendar.component(.year, from: previous) >= Self.minimumYear
     }
 
     func start() {
@@ -65,9 +77,25 @@ final class CalendarViewModel {
         displayedMonth = calendar.dateInterval(of: .month, for: date)?.start ?? date
     }
 
+    /// Jumps to a month picked in the year overview. Today is selected in the current month, otherwise the 1st.
+    func showMonth(year: Int, month: Int) {
+        guard year >= Self.minimumYear, (1...12).contains(month),
+              let start = calendar.date(from: DateComponents(year: year, month: month, day: 1)) else { return }
+        let now = now()
+        if calendar.isDate(now, equalTo: start, toGranularity: .month) {
+            select(now)
+        } else {
+            select(start)
+        }
+    }
+
+    func showToday() {
+        select(now())
+    }
+
     func moveMonth(by offset: Int) {
         guard let next = calendar.date(byAdding: .month, value: offset, to: displayedMonth),
-              calendar.component(.year, from: next) >= 2011 else { return }
+              calendar.component(.year, from: next) >= Self.minimumYear else { return }
         displayedMonth = next
         selectedDate = calendar.startOfDay(for: next)
     }
