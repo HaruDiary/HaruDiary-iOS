@@ -8,31 +8,30 @@
 
 ## 생성과 전달 경로
 
-`SceneDelegate` → `AppDependencies.live()` → `TabBarController` → `CalendarModule` → `CalendarHostingController`
+`SceneDelegate` → `AppDependencies.live()` → `AppRootView` → `MainTabsView` → 각 탭의 모듈(`DiaryListModule`·`JourneyModule`·`CalendarModule`)
 
-`SceneDelegate` → `AppDependencies.live()` → `TabBarController` → `DiaryListModule` → `DiaryListHostingController`
+`MainTabsView` → `AppShell`(탭 막대·화면 경로·편집기 시트·짧은 안내) → `DiaryEditorScreen` / `SettingsScreen` / `TrashScreen`
 
-`SceneDelegate` → `AppDependencies.live()` → `TabBarController` → `makeWriteDiary` → `DiaryEditorHostingController`
+화면과 탐색은 모두 SwiftUI다. 자세한 구조는 [SwiftUI 앱 틀](APP_SHELL.md)에 있다.
 
 | 구성 | 책임 |
 |---|---|
 | `App/AppDependencies.swift` | 조회·세션·휴지통 이동(`DiaryTrashing`)·작성 저장(`DiarySaving`)·이미지 로더·Calendar·현재 시각 의존성을 보관하고 기능을 생성 |
-`TabBarController` → 각 탭(목록·여정·캘린더)의 설정 버튼 → `SettingsModule` → `SettingsHostingController` → `TrashModule`
+각 탭(목록·여정·캘린더)의 설정 버튼 → `SettingsScreen`(`SettingsModule`) → `TrashScreen`(`TrashModule`)
 
 | 구성 | 책임 |
 |---|---|
 | `App/AppDependencies.swift` | 조회·세션·계정(`AccountSession`)·휴지통(`DiaryTrashing`)·이미지 로더·Calendar·현재 시각 의존성을 보관하고 기능을 생성 |
 | `App/AppDependencies+Live.swift` | 운영 Firebase 및 기존 이미지 캐시를 연결 |
 | `Features/Calendar/CalendarModule.swift` | 전달받은 서비스로 독립적인 화면 상태 생성 |
-| `Features/Calendar/CalendarModule+UIKit.swift` | 생성한 상태와 이미지 로더를 UIKit hosting controller에 연결 |
-| `Features/DiaryList/DiaryListModule.swift`, `+UIKit.swift` | 일기 목록 상태 생성과 UIKit hosting controller 연결. Calendar와 같은 조회·세션을 재사용 |
+| `Features/DiaryList/DiaryListModule.swift` | 일기 목록 상태 생성. Calendar와 같은 조회·세션을 재사용 |
 | `Domain/DiarySaving.swift`, `Data/LiveDiarySaving.swift` | 인증·사진 저장·일기 쓰기 계약과 기존 Firebase 구현, 단일 저장 결과를 조립 |
 
 휴지통 이동 계약(`DiaryTrashing`)은 요청한 사용자 경로의 휴지통 필드만 수정한다.
-일기 작성·수정 화면은 모든 UIKit 진입점에서 필수 factory를 전달받으며
+일기 작성·수정 화면은 `AppShell`이 여는 시트 하나로 모이며
 화면 내부에서 `AppDependencies.live()`나 새 Firebase 저장 의존성을 만들지 않는다.
-| `Features/Trash/TrashModule.swift`, `+UIKit.swift` | 휴지통 상태 생성과 hosting controller 연결 |
-| `Features/Settings/SettingsModule.swift`, `+UIKit.swift` | 설정 상태 생성과 `SettingsHostingController` 연결. 휴지통은 같은 의존성으로 생성. 교체 전 UIKit 탭의 `SettingVC()`만 `AppDependencies.live()`를 사용 |
+| `Features/Trash/TrashModule.swift` | 휴지통 상태 생성 |
+| `Features/Settings/SettingsModule.swift` | 설정 상태 생성. 휴지통은 같은 의존성으로 생성. 교체 전 UIKit 탭의 `SettingVC()`만 `AppDependencies.live()`를 사용 |
 
 일기 쓰기 경계는 휴지통 이동이라는 첫 사용처와 함께 `DiaryTrashing`으로 추가했다. 운영 구현은 요청한 사용자 경로의 휴지통 필드만 수정한다. 휴지통 화면과 함께 복원·영구 삭제를 같은 경계에 추가했다.
 

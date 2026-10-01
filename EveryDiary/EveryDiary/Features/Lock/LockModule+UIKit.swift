@@ -9,30 +9,14 @@ enum LockModule {
         AppLock(store: LiveAppLockStore())
     }
 
-    static func makeSettingsViewController() -> UIViewController {
-        LockSettingsHostingController(viewModel: LockSettingsViewModel(lock: makeLock(), owner: LiveDeviceOwnerAuthenticator()))
-    }
-}
-
-// Remove this UIKit bridge when settings move to SwiftUI.
-@MainActor
-final class LockSettingsHostingController: UIHostingController<LockSettingsView> {
-    init(viewModel: LockSettingsViewModel) {
-        super.init(rootView: LockSettingsView(viewModel: viewModel))
-        title = "잠금"
-    }
-
-    required init?(coder: NSCoder) { return nil }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
-        navigationController?.navigationBar.tintColor = DiaryTheme.Colors.brandUIKit
+    static func makeSettingsViewModel() -> LockSettingsViewModel {
+        LockSettingsViewModel(lock: makeLock(), owner: LiveDeviceOwnerAuthenticator())
     }
 }
 
 /// Covers the scene's window with the lock screen in a window of its own, so nothing below can be touched
-/// or seen (also in the app switcher) until it is unlocked.
+/// or seen (also in the app switcher) until it is unlocked. The lock screen is SwiftUI; the window is UIKit,
+/// because a SwiftUI overlay would not cover open sheets.
 @MainActor
 final class AppLockPresenter {
     private let makeLock: @MainActor () -> AppLock
@@ -42,6 +26,10 @@ final class AppLockPresenter {
     private var screen: LockScreenViewModel?
     /// Gives the lock screen's window the app's text size, and keeps it up to date while the lock is shown.
     var applyTextSize: ((UIWindow) -> Void)?
+    /// The passcode was forgotten and the lock was turned off after the device owner was confirmed.
+    var onTurnedOff: (() -> Void)?
+    /// After the earlier biometrics-only lock: invite the user to set the app passcode that replaces it.
+    var onAskForPasscode: (() -> Void)?
 
     init(makeLock: @escaping @MainActor () -> AppLock, owner: any DeviceOwnerAuthenticating) {
         self.makeLock = makeLock
@@ -102,28 +90,9 @@ final class AppLockPresenter {
         case .unlocked:
             break
         case .unlockedAndTurnedOff:
-            TemporaryAlert.presentOnTopScreen(with: "앱 잠금을 껐어요",
-                                              message: "설정 › 잠금에서 새 암호를 정할 수 있어요.", interval: 2.5)
+            onTurnedOff?()
         case .unlockedAskingForPasscode:
-            askForPasscode()
+            onAskForPasscode?()
         }
-    }
-
-    /// After the earlier biometrics-only lock: invite the user to set the app passcode that replaces it.
-    private func askForPasscode() {
-        guard var top = mainWindow?.rootViewController else { return }
-        while let presented = top.presentedViewController { top = presented }
-        let alert = UIAlertController(title: "앱 암호를 정해주세요",
-                                      message: "이제 하루일기는 앱 암호로 잠가요. 암호를 정하면 Face ID도 계속 쓸 수 있어요.",
-                                      preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "나중에", style: .cancel))
-        alert.addAction(UIAlertAction(title: "암호 정하기", style: .default) { [weak top] _ in
-            let flow = PasscodeFlowViewModel(purpose: .create, lock: LockModule.makeLock())
-            let sheet = UIHostingController(rootView: AnyView(EmptyView()))
-            sheet.rootView = AnyView(PasscodeFlowView(viewModel: flow, onClose: { [weak sheet] in sheet?.dismiss(animated: true) }))
-            sheet.isModalInPresentation = true
-            top?.present(sheet, animated: true)
-        })
-        top.present(alert, animated: true)
     }
 }

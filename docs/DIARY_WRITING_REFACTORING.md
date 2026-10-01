@@ -41,8 +41,7 @@ SwiftUI 작성 화면은 후속 범위다. 저장 필드명이나 서버 마이�
 ## SwiftUI 작성·수정·읽기 화면
 
 `WriteDiaryVC`를 `Features/DiaryEditor`의 SwiftUI 화면으로 교체했다(목업 03·04·06~10·28).
-여는 쪽의 코드는 그대로다. `DiaryEditorHostingController`가 기존 `enterDiary(to:with:)`,
-`delegate`, `loadingDiaryDelegate`를 제공한다. 저장 흐름은 위의 `DiarySaving` 경계를 그대로 쓴다.
+편집기는 `AppShell`이 여는 시트(`DiaryEditorScreen`)다. 저장 흐름은 위의 `DiarySaving` 경계를 그대로 쓴다.
 
 - `DiaryEditorViewModel`이 초안·사진·날씨·위치·저장을 맡는다. 화면은 표시와 입력만 한다.
   저장은 편집기가 닫힌 뒤에도 뷰모델이 끝까지 진행하고, 결과는 편집기를 연 화면에 알린다. `DiaryWriteRetention` 전역 보관은 더 쓰지 않는다.
@@ -51,7 +50,9 @@ SwiftUI 작성 화면은 후속 범위다. 저장 필드명이나 서버 마이�
 - 날씨는 새 일기를 오늘 날짜로 쓸 때만 보여 준다. Apple 날씨 표기와 법적 고지 링크를 함께 둔다.
   편집기가 받은 날씨를 그대로 저장한다. 아직 받는 중일 때만 저장 단계에서 다시 조회한다(`DiaryWeatherStamp`).
   오늘이 아니거나 조회에 실패하면 이전처럼 `"Unknown"`/`0`을 저장한다.
-- 사진은 PHPicker(최대 3장, 선택 순서, 기존 선택 표시)를 그대로 쓴다. 번호·삭제·크게 보기를 제공한다.
+- 사진은 SwiftUI `PhotosPicker`(최대 3장, 선택 순서, 기존 선택 표시)로 고른다. 번호·삭제·크게 보기를 제공한다.
+  읽지 못한 사진(예: iCloud에서 내려받지 않은 사진)은 넣지 않고 몇 장을 못 넣었는지 알린다.
+  사진 보관함 접근을 거부해도 사진을 고를 수 있다(촬영 정보는 파일에서 읽는다).
   저장소 metadata 형식은 이전과 같다. 사진 보관함 접근이 제한되어 있어 촬영 시각·위치를 보관함에서 못 읽으면
   사진 파일의 EXIF에서 읽고, 그래도 없으면 metadata 없이 사진을 넣는다. 이전에는 이 경우 사진이 조용히 빠졌다.
 - 사진을 불러오는 동안에는 스피너 대신 사진 자리에 빛이 지나가는 스켈레톤(`PhotoSkeleton`)을 보여 준다.

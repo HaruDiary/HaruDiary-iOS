@@ -7,6 +7,7 @@ struct DiaryListView: View {
     let onEditDiary: (DiaryEntry) -> Void
     let onWriteDiary: () -> Void
     let onOpenSettings: () -> Void
+    var tabRoot: TabRoot? = nil
     @FocusState private var isSearchFocused: Bool
 
     var body: some View {
@@ -25,6 +26,7 @@ struct DiaryListView: View {
                                       bottom: DiaryTheme.Spacing.medium, trailing: DiaryTheme.Spacing.screen))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
+            .id(TabRoot.topID)
     }
 
     private var searchField: some View {
@@ -36,6 +38,12 @@ struct DiaryListView: View {
 
     // A List (not a ScrollView) so rows get the system swipe actions, like Mail.
     private var list: some View {
+        ScrollViewReader { proxy in
+            listContent.tabRoot(tabRoot, proxy: proxy)
+        }
+    }
+
+    private var listContent: some View {
         List {
             header
             searchField

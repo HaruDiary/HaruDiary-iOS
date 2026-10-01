@@ -145,7 +145,7 @@ struct ProfileEditView: View {
                 .frame(minHeight: DiaryTheme.Size.touchTarget)
                 .background(DiaryTheme.Colors.selection.opacity(0.35), in: RoundedRectangle(cornerRadius: 12))
             HStack {
-                Text(problem.map(NicknameAlert.problemMessage) ?? "일기에서 불릴 이름이에요.")
+                Text(problem.map(\.message) ?? "일기에서 불릴 이름이에요.")
                     .foregroundStyle(problem == nil ? DiaryTheme.Colors.secondaryText : DiaryTheme.Colors.error)
                 Spacer()
                 Text("\(nickname.trimmingCharacters(in: .whitespacesAndNewlines).count)/\(Nickname.maxLength)")

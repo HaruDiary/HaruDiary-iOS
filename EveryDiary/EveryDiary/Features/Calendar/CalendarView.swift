@@ -7,23 +7,29 @@ struct CalendarView: View {
     let onOpenDayList: () -> Void
     let onWriteDiary: () -> Void
     let onOpenSettings: () -> Void
+    var tabRoot: TabRoot? = nil
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             DiaryTheme.Colors.background.ignoresSafeArea()
-            ScrollView {
-                VStack(alignment: .leading, spacing: DiaryTheme.Spacing.section) {
-                    DiaryTabHeader(title: "캘린더", onOpenSettings: onOpenSettings)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DiaryTheme.Spacing.section) {
+                        DiaryTabHeader(title: "캘린더", onOpenSettings: onOpenSettings)
 
-                    CalendarMonthGrid(viewModel: viewModel)
-                        // Keep seven date columns legible; surrounding text still follows the full accessibility size.
-                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                    CalendarLoadStatus(viewModel: viewModel)
-                    selectedDaySection
+                        CalendarMonthGrid(viewModel: viewModel)
+                            // Keep seven date columns legible; surrounding text still follows the full accessibility size.
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                        CalendarLoadStatus(viewModel: viewModel)
+                        selectedDaySection
+                    }
+                    .padding(DiaryTheme.Spacing.screen)
+                    .padding(.bottom, DiaryTheme.Size.floatingButtonClearance)
+                    // The whole content, so scrolling to the top also restores the space above the title.
+                    .id(TabRoot.topID)
                 }
-                .padding(DiaryTheme.Spacing.screen)
-                .padding(.bottom, DiaryTheme.Size.floatingButtonClearance)
+                .tabRoot(tabRoot, proxy: proxy)
             }
             DiaryWriteButton(action: onWriteDiary)
         }

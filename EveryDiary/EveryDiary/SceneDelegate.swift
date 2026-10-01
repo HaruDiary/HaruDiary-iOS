@@ -6,6 +6,7 @@
 //
 
 import FirebaseAuth
+import SwiftUI
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -21,7 +22,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     )
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-       
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         self.window = window
@@ -31,14 +31,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         live.reminders = reminders
         self.reminders = reminders
         let textSize = AppTextSizeController(store: UserDefaultsTextSizeStore())
-        textSize.attach(to: window)
         live.textSize = textSize
-        appLock.applyTextSize = { [weak textSize] in textSize?.attach(to: $0) }
-        let dependencies = live
-        OnboardingModule.install(in: window) { TabBarController(dependencies: dependencies) }
-        //강제로 다크모드 해제
+
+        // Every screen is SwiftUI; this window only hosts the root view.
+        let shell = AppShell()
+        let root = UIHostingController(rootView: AppRootView(shell: shell, dependencies: live))
+        root.view.backgroundColor = DiaryTheme.Colors.backgroundUIKit
+        window.rootViewController = root
         window.overrideUserInterfaceStyle = .light
+        textSize.attach(to: window)
         window.makeKeyAndVisible()
+
+        appLock.applyTextSize = { [weak textSize] in textSize?.attach(to: $0) }
+        appLock.onTurnedOff = { [weak shell] in
+            shell?.toasts.show("앱 잠금을 껐어요", message: "설정 › 잠금에서 새 암호를 정할 수 있어요.", duration: 2.5)
+        }
+        appLock.onAskForPasscode = { [weak shell] in shell?.isAskingForPasscode = true }
         appLock.attach(to: window)
         appLock.lockIfNeeded()
     }

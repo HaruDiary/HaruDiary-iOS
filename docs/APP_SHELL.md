@@ -1,0 +1,44 @@
+# SwiftUI 앱 틀
+
+화면·탭·내비게이션·시트·알림이 모두 SwiftUI다. UIKit의 `UITabBarController`, `UINavigationController`,
+화면별 `UIHostingController` 연결 코드는 없다.
+
+## 구조
+
+| 구성 | 책임 |
+|---|---|
+| `Features/App/AppRootView` | 첫 실행이면 온보딩, 끝나면 탭 화면. 온보딩 중에는 탭을 만들지 않아 일기 구독이 시작되지 않는다 |
+| `Features/App/MainTabsView` | 세 탭(각자 `NavigationStack`), 떠 있는 탭 막대, 편집기 시트, 로그인 화면, 짧은 안내 |
+| `Features/App/AppShell` | 탭이 함께 쓰는 상태: 선택된 탭, 탭별 화면 경로(`AppRoute`), 편집기 요청, 안내, 탭 막대 축소 |
+| `Features/App/TabRoot` | 탭 첫 화면의 스크롤을 탭 막대와 잇는다(축소, 같은 탭을 다시 누르면 맨 위로) |
+| `DesignSystem/DiaryToast` | 잠깐 떴다 사라지는 안내. 이전의 자동으로 닫히던 액션 시트를 대체 |
+
+- 탭은 처음 열 때 만들어진다. 그때 그 탭의 일기 구독이 시작된다(이전의 UIKit 탭과 같다).
+- 탭을 바꾸면 이전 탭이 사라지며 다음 탭이 조금 작은 크기에서 제자리로 나타난다. 동작 줄이기에서는 페이드만 한다.
+- 탭 막대는 각 탭의 첫 화면에만 보인다. 화면을 밀어 넣거나 키보드가 올라오면 숨는다.
+- 스크롤에 따른 탭 막대 축소는 iOS 18 이상에서만 동작한다(`onScrollGeometryChange`). iOS 17에서는 항상 큰 상태다.
+- 편집기는 `AppShell.editor`로 여는 시트 하나다. 저장은 시트가 닫힌 뒤에도 진행되고, 결과는 `AppShell.saveFinished`가 안내한다.
+  저장에 성공하면 `savedCount`가 올라가고, 불러오기에 실패해 있던 화면이 다시 불러온다.
+- 쓰던 내용이 있으면 편집기를 아래로 끌어 닫을 수 없다. 닫기 버튼이 "작성을 그만할까요?"를 묻는다.
+  (이전에는 끌어내리려 하면 같은 질문이 떴다. SwiftUI에는 그 시점을 알려 주는 방법이 없다.)
+
+## UIKit이 남아 있는 곳
+
+SwiftUI에 대응하는 기능이 없어서 남긴 것들이며, 화면을 그리지는 않는다.
+
+| 파일 | 이유 |
+|---|---|
+| `AppDelegate`, `SceneDelegate` | 앱 시작(Firebase 설정, 알림 delegate, Google 로그인 URL)과 창 생성. 창에는 `AppRootView` 하나만 올린다 |
+| `Features/Lock/LockModule+UIKit` | 잠금 화면을 별도 창으로 덮는다. SwiftUI 오버레이는 열려 있는 시트를 덮지 못한다. 잠금 화면 자체는 SwiftUI |
+| `Features/TextSize/AppTextSizeController` | 글자 크기를 창에 적용한다. SwiftUI의 `dynamicTypeSize`는 시트까지 전달되지 않는 것을 확인했다 |
+| `Features/App/SystemBridges` | Google 로그인 시트가 요구하는 맨 위 뷰 컨트롤러 찾기, 앱 안 브라우저(`SFSafariViewController`) |
+| `UIImage`를 쓰는 코드 | 사진 데이터 형식(JPEG 변환, 썸네일 캐시). 화면 코드가 아니다 |
+
+## 확인
+
+시뮬레이터(iOS 26.5)에서 확인: 세 탭 표시와 전환, 스크롤 시 탭 막대 축소·누르면 복귀·같은 탭 다시 누르면 맨 위로,
+검색 키보드에서 탭 막대 숨김, 설정과 그 아래 화면(알림·잠금·글자 크기·휴지통), 나의 여정 → 연도 → 월 그림,
+일기 쓰기 시트(빈 제목 안내, 사진 고르기, 작성 취소 확인), 일기 읽기, 큰 글자가 시트에도 적용되는 것.
+
+확인하지 못함: 실제 저장과 그 뒤 안내, 로그인 화면(Apple·Google), 회원 탈퇴 전 Apple 확인, 잠금 화면과 암호 설정 안내,
+온보딩에서 탭으로 넘어가는 전환, iOS 17·18, 실기기.

@@ -78,6 +78,8 @@ final class DiaryEditorViewModel {
         case signInRequired
         case photoLimitReached
         case photosStillLoading
+        /// Picked photos that could not be read, e.g. not downloaded from iCloud.
+        case photosNotLoaded(Int)
     }
 
     /// Asked after picking a photo that has a place: add that place to the diary?
@@ -251,8 +253,11 @@ final class DiaryEditorViewModel {
 
     /// `picked` are the photos the picker returned, in selection order; `pickedIDs` includes photos it could not load.
     func finishPicking(_ picked: [EditorPhoto], pickedIDs: [String]) {
+        let expectedNew = loadingPhotoCount
         loadingPhotoCount = 0
         isPickingPhotos = false
+        // A picked photo that could not be read is not added; the user is told instead of it silently missing.
+        if picked.count < expectedNew { notice = .photosNotLoaded(expectedNew - picked.count) }
         let merged = DiaryPhotoPicking.merge(current: photos, picked: picked, pickedIDs: pickedIDs) { $0.assetIdentifier }
         if merged.map(\.id) != photos.map(\.id) { photosChanged = true }
         photos = merged
