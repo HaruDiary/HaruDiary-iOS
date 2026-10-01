@@ -130,9 +130,9 @@ struct CalendarMonthGrid: View {
             }
             .foregroundStyle(DiaryTheme.Colors.brand)
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: DiaryTheme.Spacing.small) {
-                ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
+                ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { column, symbol in
                     Text(symbol).font(DiaryTheme.Fonts.caption)
-                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                        .foregroundStyle(weekdayColor(column: column) ?? DiaryTheme.Colors.secondaryText)
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -154,6 +154,19 @@ struct CalendarMonthGrid: View {
                 }
             }
             .clipped()
+            // Swiping the days sideways turns the month, like the arrows. Up and down still scrolls the screen.
+            .contentShape(Rectangle())
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 24).onEnded { drag in
+                    let across = drag.translation.width
+                    guard abs(across) > 50, abs(across) > abs(drag.translation.height) * 1.5 else { return }
+                    if across < 0 {
+                        move(forward: true) { viewModel.moveMonth(by: 1) }
+                    } else if viewModel.canMoveToPreviousMonth {
+                        move(forward: false) { viewModel.moveMonth(by: -1) }
+                    }
+                }
+            )
         }
         .sheet(isPresented: $isShowingYear) {
             CalendarYearSheet(viewModel: viewModel) { year, month in
@@ -187,13 +200,17 @@ struct CalendarMonthGrid: View {
         let isSelected = day == viewModel.selectedDay
         let isToday = day == viewModel.today
         let hasDiary = viewModel.index.decoratedDays.contains(day)
+        // Saturday blue, Sunday and public holidays red, as in the diary list.
+        let kind = DayKind(date: date, calendar: viewModel.calendar)
+        let kindColor: Color? = kind == .saturday ? DiaryTheme.Colors.saturday : kind == .holiday ? DiaryTheme.Colors.holiday : nil
+        let isPublicHoliday = kind == .holiday && viewModel.calendar.component(.weekday, from: date) != 1
         return Button { viewModel.select(date) } label: {
             VStack(spacing: 4) {
                 Text("\(day.day)")
                     .font(DiaryTheme.Fonts.body.weight(isSelected || isToday ? .bold : .regular))
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
-                    .foregroundStyle(isSelected ? DiaryTheme.Colors.surface : isToday ? DiaryTheme.Colors.brand : DiaryTheme.Colors.text)
+                    .foregroundStyle(isSelected ? DiaryTheme.Colors.surface : kindColor ?? (isToday ? DiaryTheme.Colors.brand : DiaryTheme.Colors.text))
                     .frame(maxWidth: .infinity, minHeight: dayHeight)
                     .background {
                         if isSelected {
@@ -209,8 +226,17 @@ struct CalendarMonthGrid: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(isToday ? "오늘, " : "")\(day.year)년 \(day.month)월 \(day.day)일\(hasDiary ? ", 일기 있음" : "")")
+        .accessibilityLabel("\(isToday ? "오늘, " : "")\(day.year)년 \(day.month)월 \(day.day)일\(isPublicHoliday ? ", 공휴일" : "")\(hasDiary ? ", 일기 있음" : "")")
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
+
+    /// The header follows the days under it: Sunday red, Saturday blue.
+    private func weekdayColor(column: Int) -> Color? {
+        switch (viewModel.calendar.firstWeekday - 1 + column) % 7 {
+        case 0: DiaryTheme.Colors.holiday
+        case 6: DiaryTheme.Colors.saturday
+        default: nil
+        }
     }
 
     private var weekdaySymbols: [String] {
