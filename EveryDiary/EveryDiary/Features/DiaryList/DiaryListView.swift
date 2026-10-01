@@ -13,6 +13,7 @@ struct DiaryListView: View {
     /// The pushed search screen: the same list under a search field, without the tab's title and write button.
     var isSearchScreen = false
     @FocusState private var isSearchFocused: Bool
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -23,7 +24,12 @@ struct DiaryListView: View {
             }
         }
         .diaryStatusBarBackground()
+        // "Years ago today" follows the date: when the list is shown, at midnight, and on return to the app
+        // (a day change while the app was suspended is not announced).
         .onAppear { viewModel.refreshToday() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { viewModel.refreshToday() }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
             Task { @MainActor in viewModel.refreshToday() }
         }

@@ -100,6 +100,31 @@ final class DiaryListViewModelTests: XCTestCase {
         XCTAssertTrue(ids(model).contains("last-year"))
     }
 
+    func testMemoriesFollowTheDateWhenTheListIsAskedAgain() async throws {
+        // The app stayed open (or suspended) past midnight: no new snapshot arrives, the screen asks again.
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 9 * 3600))
+        var clock = now
+        let repository = ListRepository()
+        let model = DiaryListViewModel(repository: repository, session: ListSession(userID: "user-a"), trash: ListTrash(),
+                                       calendar: calendar, now: { clock })
+        model.start()
+        try await waitUntil { repository.observations.count == 1 }
+        var lastYearToday = entry("last-year-15th")
+        lastYearToday.dateString = "2025-09-15 20:00:00 +0900"
+        var lastYearTomorrow = entry("last-year-16th")
+        lastYearTomorrow.dateString = "2025-09-16 20:00:00 +0900"
+        repository.send([lastYearToday, lastYearTomorrow])
+        try await waitUntil { model.state == .loaded }
+        XCTAssertEqual(model.memories.first?.entries.map(\.id), ["last-year-15th"])
+
+        clock = now.addingTimeInterval(24 * 3600)
+        XCTAssertEqual(model.memories.first?.entries.map(\.id), ["last-year-15th"], "Nothing asked yet")
+        model.refreshToday()
+
+        XCTAssertEqual(model.memories.first?.entries.map(\.id), ["last-year-16th"])
+    }
+
     func testSearchFiltersLiveSnapshotWithoutAnotherSubscription() async throws {
         let (model, repository, _, _) = try makeModel()
         model.start()
