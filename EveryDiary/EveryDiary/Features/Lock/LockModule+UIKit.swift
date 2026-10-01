@@ -40,7 +40,7 @@ final class AppLockPresenter {
     private weak var mainWindow: UIWindow?
     private var lockWindow: UIWindow?
     private var screen: LockScreenViewModel?
-    /// Gives the lock screen's window the app's text size.
+    /// Gives the lock screen's window the app's text size, and keeps it up to date while the lock is shown.
     var applyTextSize: ((UIWindow) -> Void)?
 
     init(makeLock: @escaping @MainActor () -> AppLock, owner: any DeviceOwnerAuthenticating) {
