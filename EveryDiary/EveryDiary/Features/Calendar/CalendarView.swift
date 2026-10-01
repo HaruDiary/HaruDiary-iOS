@@ -79,11 +79,14 @@ struct CalendarMonthGrid: View {
     @ScaledMetric(relativeTo: .body) private var dayHeight: CGFloat = DiaryTheme.Size.touchTarget
     @State private var isShowingDatePicker = false
     @State private var dateToSelect = Date(timeIntervalSince1970: 0)
+    /// Which way the month last moved: a later month slides in from the right, an earlier one from the left.
+    @State private var movesForward = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: DiaryTheme.Spacing.medium) {
             HStack {
-                Button { viewModel.moveMonth(by: -1) } label: {
+                Button { move(forward: false) { viewModel.moveMonth(by: -1) } } label: {
                     Image(systemName: "chevron.left").frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
                 }
                 .disabled(!viewModel.canMoveToPreviousMonth)
@@ -94,11 +97,13 @@ struct CalendarMonthGrid: View {
                     isShowingDatePicker = true
                 } label: {
                     Text(monthTitle).font(DiaryTheme.Fonts.title)
+                        .monospacedDigit()
+                        .contentTransition(.numericText(countsDown: !movesForward))
                         .frame(minHeight: DiaryTheme.Size.touchTarget)
                 }
                 .accessibilityLabel("\(monthTitle), 날짜로 이동")
                 Spacer()
-                Button { viewModel.moveMonth(by: 1) } label: {
+                Button { move(forward: true) { viewModel.moveMonth(by: 1) } } label: {
                     Image(systemName: "chevron.right").frame(width: DiaryTheme.Size.touchTarget, height: DiaryTheme.Size.touchTarget)
                 }
                 .accessibilityLabel("다음 달")
@@ -110,17 +115,25 @@ struct CalendarMonthGrid: View {
                         .foregroundStyle(DiaryTheme.Colors.secondaryText)
                         .frame(maxWidth: .infinity)
                 }
+            }
+            // The weekday row stays; only the days of the month slide.
+            ZStack(alignment: .top) {
                 if let month = viewModel.month {
-                    ForEach(Array(month.cells.enumerated()), id: \.offset) { _, date in
-                        if let date {
-                            dayButton(date)
-                        } else {
-                            Color.clear.frame(height: dayHeight + DiaryTheme.Spacing.small)
-                                .accessibilityHidden(true)
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: DiaryTheme.Spacing.small) {
+                        ForEach(Array(month.cells.enumerated()), id: \.offset) { _, date in
+                            if let date {
+                                dayButton(date)
+                            } else {
+                                Color.clear.frame(height: dayHeight + DiaryTheme.Spacing.small)
+                                    .accessibilityHidden(true)
+                            }
                         }
                     }
+                    .id(viewModel.displayedMonth)
+                    .transition(monthTransition)
                 }
             }
+            .clipped()
         }
         .sheet(isPresented: $isShowingDatePicker) {
             NavigationStack {
@@ -141,7 +154,8 @@ struct CalendarMonthGrid: View {
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("이동") {
-                            viewModel.select(dateToSelect)
+                            let target = dateToSelect
+                            move(forward: target >= viewModel.displayedMonth) { viewModel.select(target) }
                             isShowingDatePicker = false
                         }
                     }
@@ -151,6 +165,22 @@ struct CalendarMonthGrid: View {
             .environment(\.timeZone, viewModel.calendar.timeZone)
             .environment(\.locale, Locale(identifier: "ko_KR"))
             .tint(DiaryTheme.Colors.brand)
+        }
+    }
+
+    private var monthTransition: AnyTransition {
+        guard !reduceMotion else { return .opacity }
+        return .asymmetric(
+            insertion: .move(edge: movesForward ? .trailing : .leading).combined(with: .opacity),
+            removal: .move(edge: movesForward ? .leading : .trailing).combined(with: .opacity)
+        )
+    }
+
+    /// The direction is set one step before the month changes, so the month leaving also knows which way to go.
+    private func move(forward: Bool, _ change: @escaping () -> Void) {
+        movesForward = forward
+        Task { @MainActor in
+            withAnimation(.easeInOut(duration: 0.3), change)
         }
     }
 
