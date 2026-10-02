@@ -47,7 +47,11 @@ match /users/{userId} {
 ```
 
 2026-10-02에 운영 프로젝트의 규칙에 `match /users/{userId}` 블록을 추가해 게시했다(그 전에는 `diaries` 아래만 허용돼 있었다).
-규칙 파일은 저장소에 없다. 콘솔에서 확인해야 한다.
+게시된 규칙 전체는 저장소의 [`firestore.rules`](../firestore.rules)에 있다.
+
+- 이 파일은 기록용이다. 저장소에 Firebase 배포 설정(`firebase.json`)이 없어, 파일을 고쳐도 운영에 적용되지 않는다.
+- 규칙을 바꿀 때는 콘솔의 Firestore › 규칙에 게시하고, 같은 내용으로 이 파일도 고쳐 같은 PR에 넣는다.
+- Storage 규칙은 아직 저장소에 없다.
 
 ## 한계
 
