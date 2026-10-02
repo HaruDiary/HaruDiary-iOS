@@ -11,6 +11,9 @@ final class UserDirectoryUpdater {
     private let calendar: Calendar
     private let now: () -> Date
     private var observation: Task<Void, Never>?
+    /// What is being written right now, per account. The account's first value and the app coming to the front
+    /// arrive almost together at launch; the second one must not write the same entry again.
+    private var writing: [String: String] = [:]
 
     init(session: any AccountSession, directory: any UserDirectoryWriting, records: any UserDirectoryRecordStoring,
          calendar: Calendar, now: @escaping () -> Date) {
@@ -53,7 +56,9 @@ final class UserDirectoryUpdater {
         let seenAt = now()
         // The same account on the same day is written once; a changed nickname, e-mail or sign-in method at once.
         let record = Self.record(entry, day: calendar.startOfDay(for: seenAt))
-        guard records.lastWritten(userID: userID) != record else { return }
+        guard records.lastWritten(userID: userID) != record, writing[userID] != record else { return }
+        writing[userID] = record
+        defer { if writing[userID] == record { writing[userID] = nil } }
         do {
             try await directory.write(entry, userID: userID, seenAt: seenAt)
             records.setLastWritten(record, userID: userID)

@@ -123,6 +123,38 @@ final class UserDirectoryTests: XCTestCase {
         XCTAssertEqual(directory.writes.count, 2)
     }
 
+    func testTheSameEntryIsNotWrittenTwiceWhileAWriteIsStillRunning() async throws {
+        // At launch the account's first value and the app coming to the front arrive almost together.
+        let session = FakeAccountSession()
+        session.currentAccount = snapshot()
+        let directory = RecordingDirectory()
+        directory.holdsWrites = true
+        let updater = makeUpdater(session: session, directory: directory, now: { [self] in date(2) })
+        updater.start()
+        defer { updater.stop() }
+        session.send(snapshot())
+        try await waitUntil { directory.attempts == 1 }
+
+        await updater.refresh()
+        XCTAssertEqual(directory.attempts, 1, "The write still running covers it")
+
+        directory.release()
+        try await waitUntil { directory.writes.count == 1 }
+        await updater.refresh()
+        XCTAssertEqual(directory.attempts, 1)
+
+        // A change arriving while a write runs is still written.
+        directory.holdsWrites = true
+        session.send(snapshot(name: "새 이름"))
+        try await waitUntil { directory.attempts == 2 }
+        session.currentAccount = snapshot(name: "또 다른 이름")
+        async let changed: Void = updater.refresh()
+        try await waitUntil { directory.attempts == 3 }
+        directory.release()
+        await changed
+        XCTAssertEqual(directory.writes.map(\.entry.nickname), ["하루", "새 이름", "또 다른 이름"])
+    }
+
     func testNothingIsWrittenForNobodyAndEachAccountIsWrittenUnderItsOwnID() async throws {
         let session = FakeAccountSession()
         let directory = RecordingDirectory()
@@ -227,8 +259,19 @@ private final class RecordingDirectory: UserDirectoryWriting {
     private(set) var attempts = 0
     var error: Error?
 
+    /// Writes that end only when the test releases them.
+    var holdsWrites = false
+    private var held: [CheckedContinuation<Void, Never>] = []
+
+    func release() {
+        holdsWrites = false
+        held.forEach { $0.resume() }
+        held = []
+    }
+
     func write(_ entry: UserDirectoryEntry, userID: String, seenAt: Date) async throws {
         attempts += 1
+        if holdsWrites { await withCheckedContinuation { held.append($0) } }
         if let error { throw error }
         writes.append((entry, userID, seenAt))
     }
