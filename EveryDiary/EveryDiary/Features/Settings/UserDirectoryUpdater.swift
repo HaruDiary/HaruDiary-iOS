@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 
 /// Keeps `users/{userID}` describing the signed-in account for as long as the app runs.
@@ -55,9 +56,11 @@ final class UserDirectoryUpdater {
         }
     }
 
-    private static func record(_ entry: UserDirectoryEntry, day: Date) -> String {
-        [entry.supportCode, entry.nickname ?? "", entry.provider, entry.email ?? "", String(Int(day.timeIntervalSince1970))]
+    /// A digest, so the nickname and e-mail are not left readable on the device, also after a sign-out or a withdrawal.
+    static func record(_ entry: UserDirectoryEntry, day: Date) -> String {
+        let content = [entry.supportCode, entry.nickname ?? "", entry.provider, entry.email ?? "", String(Int(day.timeIntervalSince1970))]
             .joined(separator: "\u{1F}")
+        return SHA256.hash(data: Data(content.utf8)).map { String(format: "%02x", $0) }.joined()
     }
 }
 

@@ -27,7 +27,7 @@ Firestore의 `users` 아래 문서 이름은 Firebase 로그인 계정의 ID(UID
 - 앱이 켜져 있는 동안 `UserDirectoryUpdater`가 계정을 지켜보고(`AccountSession.observeAccount`), 로그인한 계정의 정보를 그 계정의 문서에 쓴다.
 - `setData(merge: true)`로 써서 문서의 다른 필드는 건드리지 않는다.
 - 같은 계정·같은 내용은 하루에 한 번만 쓴다. 닉네임·이메일·로그인 방식이 바뀌면 바로 쓴다. 마지막으로 쓴 내용은 기기에 기억한다
-  (UserDefaults `userDirectory.lastWritten.{UID}`).
+  (UserDefaults `userDirectory.lastWritten.{UID}`). 내용 자체가 아니라 그 해시만 둔다. 닉네임과 이메일이 기기에 읽을 수 있게 남지 않는다.
 - 쓰기에 실패하면(오프라인, 보안 규칙이 막는 경우) 로그만 남기고 다음에 다시 시도한다. 앱의 다른 기능은 이 문서에 의존하지 않는다.
 - 설정 화면의 "개인정보 처리방침" 아래 줄에 "문의용 코드"를 보여 주고, 누르면 복사한다. 로그아웃·회원 탈퇴 줄과 붙어 있지 않게 했다.
 - 회원 탈퇴 때 일기와 사진을 지운 뒤 `users/{UID}` 문서도 지운다. 보안 규칙이 삭제를 막으면 그대로 두고 탈퇴를 계속한다
@@ -62,4 +62,7 @@ match /users/{userId} {
   - Apple 계정: `supportCode`·`nickname`·`provider`(`apple`)·`lastSeenAt`. 이 계정은 이메일이 없어 `email` 필드는 생기지 않았다.
   - Google 계정: 위 필드에 더해 `email`이 기록됐다(`provider`는 `google`).
 - 설정 화면에 문의용 코드가 보이고, 누르면 클립보드에 복사되는 것을 확인했다.
-- 확인하지 못함: 손님 계정, 닉네임 변경 직후의 갱신, 탈퇴 때 문서가 지워지는 것.
+- 탈퇴(Apple 테스트 계정, 사용자가 직접 실행): `users/{UID}` 문서와 그 아래 일기가 지워진 것을 콘솔에서 확인했다.
+  기기에서는 쓰던 글이 없고, 위젯용 쓴 날 기록이 비워졌으며, 앱이 로그인 화면으로 돌아갔다.
+- 확인하지 못함: 손님 계정, 닉네임 변경 직후의 갱신. 탈퇴한 계정이 Authentication과 Storage에서 지워졌는지는
+  콘솔 목록의 첫 쪽만 보여 확정하지 못했다.

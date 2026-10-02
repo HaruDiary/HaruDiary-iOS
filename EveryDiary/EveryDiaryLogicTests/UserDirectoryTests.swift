@@ -147,6 +147,23 @@ final class UserDirectoryTests: XCTestCase {
         XCTAssertEqual(directory.writes.count, 1)
     }
 
+    func testWhatIsRememberedOnTheDeviceDoesNotShowTheNicknameOrEmail() async throws {
+        let records = MemoryDirectoryRecords()
+        let session = FakeAccountSession()
+        let directory = RecordingDirectory()
+        let updater = makeUpdater(session: session, directory: directory, records: records, now: { [self] in date(2) })
+        updater.start()
+        defer { updater.stop() }
+        session.send(snapshot())
+        try await waitUntil { directory.writes.count == 1 }
+
+        let kept = try XCTUnwrap(records.lastWritten(userID: uid))
+        XCTAssertFalse(kept.contains("a@example.com"))
+        XCTAssertFalse(kept.contains("하루"))
+        XCTAssertFalse(kept.contains("A3F9"))
+        XCTAssertEqual(kept.count, 64)
+    }
+
     // MARK: - Settings
 
     func testSettingsShowTheSupportCodeOfTheSignedInAccount() async throws {
