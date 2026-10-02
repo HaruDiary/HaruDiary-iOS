@@ -2,24 +2,51 @@ import FirebaseFirestore
 import FirebaseStorage
 import Foundation
 
-/// Erases `users/{userID}/diaries` and the photos under the user's Storage folder.
+/// Erases `users/{userID}/diaries`, the photos under the user's Storage folder and the `users/{userID}` document.
 @MainActor
 final class FirebaseUserDataEraser: UserDataErasing {
     private let database: Firestore
     private let storage: Storage
+    private let directory: (any UserDirectorySuspending)?
 
-    init(database: Firestore, storage: Storage) {
+    init(database: Firestore, storage: Storage, directory: (any UserDirectorySuspending)? = nil) {
         self.database = database
         self.storage = storage
+        self.directory = directory
     }
 
     /// Another device signed in to the same account can still save while this runs, so passes repeat until
     /// a fresh read finds nothing. Data that keeps appearing stops the deletion and the account is kept.
     func eraseAllData(userID: String) async throws {
-        for _ in 0..<3 {
-            if try await erasePass(userID: userID) == 0 { return }
+        // This device stops writing the account's entry: written after its deletion, it would come back.
+        // A write already under way is waited for, so nothing is erased while it can still arrive.
+        // Writing stays stopped when the data is erased (the account is deleted next) and resumes when erasing fails.
+        try await directory?.suspendWrites(userID: userID)
+        do {
+            for _ in 0..<3 {
+                if try await erasePass(userID: userID) == 0 { return }
+            }
+            throw UserDataErasureError.dataKeepsAppearing
+        } catch {
+            directory?.resumeWrites(userID: userID)
+            throw error
         }
-        throw UserDataErasureError.dataKeepsAppearing
+    }
+
+    /// `users/{userID}` itself holds the account's support code, nickname and e-mail. It is erased in every pass
+    /// and counted as found, so one that another device wrote back is seen and erased by the next pass.
+    /// Rules that do not allow it are not a reason to keep the account: nothing could be written there either.
+    /// Any other failure stops the deletion so it can be retried.
+    private func eraseDirectoryEntry(userID: String) async throws -> Int {
+        let reference = database.collection("users").document(userID)
+        do {
+            guard try await reference.getDocument(source: .server).exists else { return 0 }
+            try await reference.delete()
+            return 1
+        } catch let error as NSError where error.domain == FirestoreErrorDomain && error.code == FirestoreErrorCode.permissionDenied.rawValue {
+            print("Reading or deleting the user's directory entry is not allowed; left as it is")
+            return 0
+        }
     }
 
     /// Files uploaded to the user's folder but never saved in a diary (e.g. an interrupted save).
@@ -63,7 +90,8 @@ final class FirebaseUserDataEraser: UserDataErasing {
             references[start..<min(start + 400, references.count)].forEach { batch.deleteDocument($0) }
             try await batch.commit()
         }
-        let found = references.count + photoURLs.count + folderItems.count
+        let directoryEntries = try await eraseDirectoryEntry(userID: userID)
+        let found = references.count + photoURLs.count + folderItems.count + directoryEntries
         if found > 0 {
             print("Erased account data: \(references.count) diaries, \(photoURLs.count + folderItems.count) photo files")
         }

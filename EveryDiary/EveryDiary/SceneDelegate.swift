@@ -17,6 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private var reminders: DiaryReminders?
     private var profilePhotoKeeper: ProfilePhotoKeeper?
     private var widgetUpdater: DiaryWidgetUpdater?
+    private var userDirectoryUpdater: UserDirectoryUpdater?
     // Created after FirebaseApp.configure() in AppDelegate.
     private lazy var appleCredentialMonitor = AppleCredentialMonitor(
         auth: .auth(),
@@ -38,6 +39,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // The home screen widget shows the days written; it is told whenever they change.
         widgetUpdater = live.makeDiaryWidgetUpdater()
         widgetUpdater?.start()
+        // The account's support code, nickname and sign-in method, kept next to its diaries.
+        userDirectoryUpdater = live.makeUserDirectoryUpdater()
+        userDirectoryUpdater?.start()
         let textSize = AppTextSizeController(store: UserDefaultsTextSizeStore())
         live.textSize = textSize
         let appearance = AppAppearanceController(store: UserDefaultsAppearanceStore())
@@ -72,6 +76,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         profilePhotoKeeper = nil
         widgetUpdater?.stop()
         widgetUpdater = nil
+        userDirectoryUpdater?.stop()
+        userDirectoryUpdater = nil
     }
     
     func sceneDidBecomeActive(_ scene: UIScene) {
@@ -80,6 +86,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         appLock.didBecomeActive()
         // Moves the reminder window forward and brings back today's reminder after midnight.
         if let reminders { Task { await reminders.refresh() } }
+        // The last visit in the user document follows the day, also while the account stays the same.
+        if let userDirectoryUpdater { Task { await userDirectoryUpdater.refresh() } }
     }
     
     // Hides the diary in the app switcher while the lock is on; the lock itself appears on entering the background.

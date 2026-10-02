@@ -48,7 +48,8 @@ final class FirebaseSocialSignInGateway: SocialSignInGateway {
         _ = try await auth.signIn(with: try Self.authCredential(credential))
         // Only after the sign-in succeeded. The guest can no longer be reached, as before.
         // Deleting it often fails because Firebase requires a recent sign-in, and the app cannot sign in to it again.
-        // Such guests are found and removed by scripts/admin/withdrawn-account-data.mjs (--delete-inactive-guests).
+        // Such guests are found and removed by scripts/admin/withdrawn-account-data.mjs (--delete-inactive-guests),
+        // together with the diaries and the user document they left under users/{uid}.
         if let guest, guest.isAnonymous {
             do {
                 try await guest.delete()
