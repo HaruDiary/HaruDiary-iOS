@@ -55,6 +55,9 @@ final class DiaryWidgetTests: XCTestCase {
 
         XCTAssertTrue(status.wroteToday)
         XCTAssertEqual(status.month, 10)
+        XCTAssertEqual(status.day, 2)
+        XCTAssertEqual(status.weekday, 6, "2026-10-02 is a Friday")
+        XCTAssertTrue(DiaryWidgetPhrases.written.contains(status.phrase))
         XCTAssertEqual(status.daysWrittenThisMonth, 2, "September's days do not count for October")
         XCTAssertEqual(status.daysInMonth, 31)
         XCTAssertEqual(status.week.map(\.day), [26, 27, 28, 29, 30, 1, 2])
@@ -76,6 +79,9 @@ final class DiaryWidgetTests: XCTestCase {
         let nextDay = snapshot.status(on: date(2026, 11, 1, hour: 0), calendar: calendar)
         XCTAssertFalse(nextDay.wroteToday)
         XCTAssertEqual(nextDay.month, 11)
+        XCTAssertEqual(nextDay.day, 1)
+        XCTAssertEqual(nextDay.weekday, 1, "2026-11-01 is a Sunday")
+        XCTAssertTrue(DiaryWidgetPhrases.notWritten.contains(nextDay.phrase))
         XCTAssertEqual(nextDay.daysWrittenThisMonth, 0)
         XCTAssertEqual(nextDay.daysInMonth, 30)
         XCTAssertEqual(nextDay.week.suffix(3).map(\.isWritten), [true, true, false])
@@ -87,6 +93,44 @@ final class DiaryWidgetTests: XCTestCase {
         XCTAssertEqual(status.daysWrittenThisMonth, 0)
         XCTAssertEqual(status.daysInMonth, 29)
         XCTAssertEqual(status.week.filter(\.isWritten).count, 0)
+    }
+
+    // MARK: - Phrases
+
+    func testThePhraseFitsTodaysStateAndStaysWithinItsHours() {
+        // 00:00–05:59 is one stretch: a redraw inside it does not change the line.
+        let early = DiaryWidgetPhrases.phrase(wroteToday: false, at: date(2026, 10, 2, hour: 0), calendar: calendar)
+        XCTAssertEqual(DiaryWidgetPhrases.phrase(wroteToday: false, at: date(2026, 10, 2, hour: 5), calendar: calendar), early)
+        XCTAssertTrue(DiaryWidgetPhrases.notWritten.contains(early))
+
+        // Writing the diary changes the line to one for a written day.
+        let written = DiaryWidgetPhrases.phrase(wroteToday: true, at: date(2026, 10, 2, hour: 5), calendar: calendar)
+        XCTAssertTrue(DiaryWidgetPhrases.written.contains(written))
+        XCTAssertFalse(DiaryWidgetPhrases.notWritten.contains(written))
+    }
+
+    func testPhrasesVaryOverTheDaysAndAllOfThemComeUp() {
+        var seen = Set<String>()
+        var changes = 0
+        var previous: String?
+        for day in 0..<60 {
+            for hour in stride(from: 0, to: 24, by: DiaryWidgetPhrases.hoursPerPhrase) {
+                let at = calendar.date(byAdding: .hour, value: day * 24 + hour, to: date(2026, 10, 1, hour: 0))!
+                let phrase = DiaryWidgetPhrases.phrase(wroteToday: false, at: at, calendar: calendar)
+                seen.insert(phrase)
+                if let previous, previous != phrase { changes += 1 }
+                previous = phrase
+            }
+        }
+        XCTAssertEqual(seen, Set(DiaryWidgetPhrases.notWritten), "Every line is shown sooner or later")
+        XCTAssertGreaterThan(changes, 200, "The line changes at most of the 239 boundaries")
+        XCTAssertEqual(Set(DiaryWidgetPhrases.written).count, DiaryWidgetPhrases.written.count)
+        XCTAssertEqual(Set(DiaryWidgetPhrases.notWritten).count, DiaryWidgetPhrases.notWritten.count)
+    }
+
+    func testTheWidgetIsRedrawnWhenThePhraseChangesIncludingMidnight() {
+        let times = DiaryWidgetPhrases.changeTimes(onDayOf: date(2026, 10, 2, hour: 15), calendar: calendar)
+        XCTAssertEqual(times, [0, 6, 12, 18].map { date(2026, 10, 2, hour: $0) })
     }
 
     // MARK: - Store

@@ -35,14 +35,15 @@ struct DiaryStatusProvider: TimelineProvider {
                                                                          : store.load().status(on: now, calendar: calendar)))
     }
 
-    /// Today as it is now, then each of the next days from its midnight: "today" moves on without the app.
+    /// Now, then every time the line changes over the next days. Each midnight is among them,
+    /// so "today" moves on without the app.
     func getTimeline(in context: Context, completion: @escaping (Timeline<DiaryStatusEntry>) -> Void) {
         let snapshot = store.load()
         let now = Date()
         var dates = [now]
-        let today = calendar.startOfDay(for: now)
-        for offset in 1...3 {
-            if let midnight = calendar.date(byAdding: .day, value: offset, to: today) { dates.append(midnight) }
+        for offset in 0...2 {
+            guard let day = calendar.date(byAdding: .day, value: offset, to: now) else { continue }
+            dates += DiaryWidgetPhrases.changeTimes(onDayOf: day, calendar: calendar).filter { $0 > now }
         }
         let entries = dates.map { DiaryStatusEntry(date: $0, status: snapshot.status(on: $0, calendar: calendar)) }
         completion(Timeline(entries: entries, policy: .atEnd))
@@ -61,32 +62,60 @@ struct DiaryStatusWidgetView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
-        switch family {
-        case .systemMedium:
+        DiaryStatusContent(status: status, showsWeek: family == .systemMedium)
+    }
+}
+
+/// What the widget draws; the medium size adds the last week.
+struct DiaryStatusContent: View {
+    let status: DiaryWidgetStatus
+    let showsWeek: Bool
+
+    var body: some View {
+        if showsWeek {
             HStack(alignment: .center, spacing: 16) {
                 summary
                 Divider()
                 week
             }
-        default:
+        } else {
             summary
         }
     }
 
-    /// Today's state, and the month as a count and a bar.
+    /// Today's date with whether its diary is written, a line to go with it, and the month as a count and a bar.
     private var summary: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Image(systemName: status.wroteToday ? "checkmark.circle.fill" : "pencil.circle")
-                .font(.system(size: 30, weight: .semibold))
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top, spacing: 4) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("\(status.month)월 \(status.day)일")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(DiaryTheme.Colors.text)
+                    Text(Self.weekdayNames[(status.weekday - 1) % 7] + "요일")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: status.wroteToday ? "checkmark.circle.fill" : "pencil.circle")
+                    .font(.system(size: 24, weight: .semibold))
+                    .foregroundStyle(DiaryTheme.Colors.brand)
+            }
+            Text(status.wroteToday ? "오늘 일기를 썼어요" : "아직 쓰지 않았어요")
+                .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(DiaryTheme.Colors.brand)
-            Text(status.wroteToday ? "오늘 일기를\n썼어요" : "오늘 일기를\n아직 안 썼어요")
-                .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(DiaryTheme.Colors.text)
-                .lineLimit(2)
+                .lineLimit(1)
                 .minimumScaleFactor(0.8)
-            Spacer(minLength: 0)
-            Text("\(status.month)월 · \(status.daysWrittenThisMonth)/\(status.daysInMonth)일")
-                .font(.system(size: 12, weight: .semibold))
+                .padding(.top, 8)
+            Text(status.phrase)
+                .font(.system(size: 12))
+                .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 3)
+            Spacer(minLength: 4)
+            Text("이번 달 \(status.daysWrittenThisMonth)/\(status.daysInMonth)일")
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(DiaryTheme.Colors.secondaryText)
             GeometryReader { geometry in
                 Capsule().fill(DiaryTheme.Colors.selection.opacity(0.6))
@@ -95,11 +124,12 @@ struct DiaryStatusWidgetView: View {
                             .frame(width: geometry.size.width * monthShare)
                     }
             }
-            .frame(height: 6)
+            .frame(height: 5)
+            .padding(.top, 4)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(status.wroteToday ? "오늘 일기를 썼어요" : "오늘 일기를 아직 안 썼어요"). \(status.month)월에 \(status.daysInMonth)일 중 \(status.daysWrittenThisMonth)일 썼어요.")
+        .accessibilityLabel("\(status.month)월 \(status.day)일 \(Self.weekdayNames[(status.weekday - 1) % 7])요일. \(status.wroteToday ? "오늘 일기를 썼어요" : "오늘 일기를 아직 쓰지 않았어요"). \(status.phrase) 이번 달에 \(status.daysInMonth)일 중 \(status.daysWrittenThisMonth)일 썼어요.")
     }
 
     private var monthShare: CGFloat {
