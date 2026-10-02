@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		22C34B28B9C8A3F275F32267 /* UserDirectoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1629939DE890D540742A2DAB /* UserDirectoryTests.swift */; };
+		6D74060FA6E6BED8F04460EE /* Settings/UserDirectoryUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 592B9CE42F1A4A4BCD82D38D /* Settings/UserDirectoryUpdater.swift */; };
+		AE1856772E811EB597880132 /* Settings/UserDirectoryUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 592B9CE42F1A4A4BCD82D38D /* Settings/UserDirectoryUpdater.swift */; };
+		0EA5B1488626CA3724AD8047 /* FirebaseUserDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4383C46CD2FCBEDE364E612E /* FirebaseUserDirectory.swift */; };
+		C48BA99418D02162FF7CC14B /* Account/UserDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734F263DF76EED1C306EBA32 /* Account/UserDirectory.swift */; };
+		FC87C86E198FF9DC5F1C3343 /* Account/UserDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734F263DF76EED1C306EBA32 /* Account/UserDirectory.swift */; };
 		ADC7AE09F582CA8696E5266D /* EveryDiaryWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417112067B0F5217C3AB8F4C /* EveryDiaryWidgetBundle.swift */; };
 		66AD42EF1E4894CFE7A70D23 /* DiaryStatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3288C2B42703FCCE464998F3 /* DiaryStatusWidget.swift */; };
 		384168BA40344C0420DCF96B /* DiaryTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040BD821321645E60FF1909E /* DiaryTheme.swift */; };
@@ -379,6 +385,7 @@
 		7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarViewModel.swift"; sourceTree = "<group>"; };
 		77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule.swift"; sourceTree = "<group>"; };
 		2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarViewModelTests.swift"; sourceTree = "<group>"; };
+		1629939DE890D540742A2DAB /* UserDirectoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDirectoryTests.swift"; sourceTree = "<group>"; };
 		504838721C809DBB167CB1E0 /* DiaryWidgetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWidgetTests.swift"; sourceTree = "<group>"; };
 		A1C176ECEA236810D4B7D8E7 /* DiaryExtrasTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryExtrasTests.swift"; sourceTree = "<group>"; };
 		AEFA5DF78819334F0FBD1D4A /* ProfilePhotoFilesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfilePhotoFilesTests.swift"; sourceTree = "<group>"; };
@@ -406,6 +413,7 @@
 		10B0DDC556D00782C3F47643 /* CalendarImageLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarImageLoading.swift"; sourceTree = "<group>"; };
 		62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListIndex.swift"; sourceTree = "<group>"; };
 		B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDiaryFeed.swift"; sourceTree = "<group>"; };
+		734F263DF76EED1C306EBA32 /* Account/UserDirectory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/UserDirectory.swift"; sourceTree = "<group>"; };
 		4A3B72582B927130D3C62327 /* Widget/DiaryWidgetSnapshot+Entries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Widget/DiaryWidgetSnapshot+Entries.swift"; sourceTree = "<group>"; };
 		22BAD655E2521C2A75EEC896 /* Widget/DiaryWidgetSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Widget/DiaryWidgetSnapshot.swift"; sourceTree = "<group>"; };
 		3D812A6B172810F2147CBF45 /* Appearance/AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Appearance/AppAppearance.swift"; sourceTree = "<group>"; };
@@ -457,6 +465,7 @@
 		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
 		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
 		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		592B9CE42F1A4A4BCD82D38D /* Settings/UserDirectoryUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/UserDirectoryUpdater.swift"; sourceTree = "<group>"; };
 		F9ACE056FE8D3ECEEDB3875F /* Widget/DiaryWidgetModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Widget/DiaryWidgetModule.swift"; sourceTree = "<group>"; };
 		5B1915541D5AECDD22011077 /* Widget/DiaryWidgetUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Widget/DiaryWidgetUpdater.swift"; sourceTree = "<group>"; };
 		F6F15D4A5EECAEE2058D791F /* Onboarding/OnboardingIllustration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Onboarding/OnboardingIllustration.swift"; sourceTree = "<group>"; };
@@ -519,6 +528,7 @@
 		B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoPreparation.swift"; sourceTree = "<group>"; };
 		55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleRefreshTokenStore.swift"; sourceTree = "<group>"; };
 		47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainSecretStore.swift"; sourceTree = "<group>"; };
+		4383C46CD2FCBEDE364E612E /* FirebaseUserDirectory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseUserDirectory.swift"; sourceTree = "<group>"; };
 		89F774B139ECAB088AF62902 /* UserDefaultsDiaryWidgetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaultsDiaryWidgetStore.swift"; sourceTree = "<group>"; };
 		DFDFADA0A4AD2266CF8EFC4E /* UserDefaultsAppearanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaultsAppearanceStore.swift"; sourceTree = "<group>"; };
 		E63D5878DA5CB9FC2219A092 /* UserDefaultsDiaryDraftStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaultsDiaryDraftStore.swift"; sourceTree = "<group>"; };
@@ -693,6 +703,7 @@
 				B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				1629939DE890D540742A2DAB /* UserDirectoryTests.swift */,
 				504838721C809DBB167CB1E0 /* DiaryWidgetTests.swift */,
 				A1C176ECEA236810D4B7D8E7 /* DiaryExtrasTests.swift */,
 				AEFA5DF78819334F0FBD1D4A /* ProfilePhotoFilesTests.swift */,
@@ -744,6 +755,7 @@
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B72A1C010000000000000003 /* DiarySaving.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				734F263DF76EED1C306EBA32 /* Account/UserDirectory.swift */,
 				4A3B72582B927130D3C62327 /* Widget/DiaryWidgetSnapshot+Entries.swift */,
 				22BAD655E2521C2A75EEC896 /* Widget/DiaryWidgetSnapshot.swift */,
 				3D812A6B172810F2147CBF45 /* Appearance/AppAppearance.swift */,
@@ -786,6 +798,7 @@
 				832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */,
 				156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */,
 				47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */,
+				4383C46CD2FCBEDE364E612E /* FirebaseUserDirectory.swift */,
 				89F774B139ECAB088AF62902 /* UserDefaultsDiaryWidgetStore.swift */,
 				DFDFADA0A4AD2266CF8EFC4E /* UserDefaultsAppearanceStore.swift */,
 				E63D5878DA5CB9FC2219A092 /* UserDefaultsDiaryDraftStore.swift */,
@@ -813,6 +826,7 @@
 				B470769C0A454C869F7E2BAE /* ProfileEditView.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
+				592B9CE42F1A4A4BCD82D38D /* Settings/UserDirectoryUpdater.swift */,
 				F9ACE056FE8D3ECEEDB3875F /* Widget/DiaryWidgetModule.swift */,
 				5B1915541D5AECDD22011077 /* Widget/DiaryWidgetUpdater.swift */,
 				F6F15D4A5EECAEE2058D791F /* Onboarding/OnboardingIllustration.swift */,
@@ -1064,6 +1078,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22C34B28B9C8A3F275F32267 /* UserDirectoryTests.swift in Sources */,
+				6D74060FA6E6BED8F04460EE /* Settings/UserDirectoryUpdater.swift in Sources */,
+				C48BA99418D02162FF7CC14B /* Account/UserDirectory.swift in Sources */,
 				5808A0B588B1661382695630 /* DiaryWidgetTests.swift in Sources */,
 				8B350151EF30A90429BB5508 /* Widget/DiaryWidgetUpdater.swift in Sources */,
 				2525C9F21BF2DA9DEF3D6040 /* UserDefaultsDiaryWidgetStore.swift in Sources */,
@@ -1186,6 +1203,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AE1856772E811EB597880132 /* Settings/UserDirectoryUpdater.swift in Sources */,
+				0EA5B1488626CA3724AD8047 /* FirebaseUserDirectory.swift in Sources */,
+				FC87C86E198FF9DC5F1C3343 /* Account/UserDirectory.swift in Sources */,
 				A048CF71009B5322A43AB157 /* Widget/DiaryWidgetModule.swift in Sources */,
 				C54C86BA4C5A128A0C7307F3 /* Widget/DiaryWidgetUpdater.swift in Sources */,
 				70A24D23BE4E15A391A65670 /* UserDefaultsDiaryWidgetStore.swift in Sources */,

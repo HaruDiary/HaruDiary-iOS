@@ -2,7 +2,7 @@ import FirebaseFirestore
 import FirebaseStorage
 import Foundation
 
-/// Erases `users/{userID}/diaries` and the photos under the user's Storage folder.
+/// Erases `users/{userID}/diaries`, the photos under the user's Storage folder and the `users/{userID}` document.
 @MainActor
 final class FirebaseUserDataEraser: UserDataErasing {
     private let database: Firestore
@@ -17,9 +17,23 @@ final class FirebaseUserDataEraser: UserDataErasing {
     /// a fresh read finds nothing. Data that keeps appearing stops the deletion and the account is kept.
     func eraseAllData(userID: String) async throws {
         for _ in 0..<3 {
-            if try await erasePass(userID: userID) == 0 { return }
+            if try await erasePass(userID: userID) == 0 {
+                try await eraseDirectoryEntry(userID: userID)
+                return
+            }
         }
         throw UserDataErasureError.dataKeepsAppearing
+    }
+
+    /// `users/{userID}` itself holds the account's support code, nickname and e-mail; it goes last, with the diaries gone.
+    /// Rules that do not allow it are not a reason to keep the account: nothing could be written there either.
+    /// Any other failure stops the deletion so it can be retried.
+    private func eraseDirectoryEntry(userID: String) async throws {
+        do {
+            try await database.collection("users").document(userID).delete()
+        } catch let error as NSError where error.domain == FirestoreErrorDomain && error.code == FirestoreErrorCode.permissionDenied.rawValue {
+            print("Deleting the user's directory entry is not allowed; left as it is")
+        }
     }
 
     /// Files uploaded to the user's folder but never saved in a diary (e.g. an interrupted save).

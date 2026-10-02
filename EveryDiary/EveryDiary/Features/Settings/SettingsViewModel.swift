@@ -31,6 +31,8 @@ final class SettingsViewModel {
     private(set) var isSavingProfile = false
     /// The picture the member picked; nil until one is saved.
     private(set) var picture: ProfilePicture?
+    /// The code the user reads out when asking for help; nil when nobody is signed in.
+    private(set) var supportCode: String?
     var notice: Notice?
 
     @ObservationIgnored private let session: any AccountSession
@@ -47,6 +49,7 @@ final class SettingsViewModel {
         let current = session.currentAccount
         account = AccountState(current)
         picture = ProfilePicture(storedURL: current?.photoURL)
+        supportCode = current?.userID.flatMap(SupportCode.make(userID:))
     }
 
     var profile: Profile { Self.profile(for: account, picture: picture) }
@@ -64,6 +67,7 @@ final class SettingsViewModel {
             for await snapshot in accounts {
                 self?.account = AccountState(snapshot)
                 self?.picture = ProfilePicture(storedURL: snapshot?.photoURL)
+                self?.supportCode = snapshot?.userID.flatMap(SupportCode.make(userID:))
                 self?.forgetPhotoNoLongerShown()
             }
         }

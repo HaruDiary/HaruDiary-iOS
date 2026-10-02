@@ -26,6 +26,7 @@ extension AppDependencies {
             calendar: .current,
             now: Date.init
         )
+        dependencies.userDirectory = FirebaseUserDirectory(database: .firestore())
         dependencies.diaryDrafts = UserDefaultsDiaryDraftStore()
         dependencies.profilePhotos = ProfilePhotoLoader(files: .inCaches())
         return dependencies

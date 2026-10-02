@@ -18,6 +18,8 @@ struct AppDependencies {
     var textSize: AppTextSizeController? = nil
     /// Light or dark, applied to the app's windows by the scene and changed from settings.
     var appearance: AppAppearanceController? = nil
+    /// Describes the signed-in account in `users/{userID}` so accounts can be told apart; nil where nothing is written.
+    var userDirectory: (any UserDirectoryWriting)? = nil
     /// Unsaved writing kept on the device; one store for every editor.
     var diaryDrafts: (any DiaryDraftStoring)? = nil
     /// The profile photo kept on the device; shared, so every settings screen shows it without loading.

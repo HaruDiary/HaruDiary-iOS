@@ -154,6 +154,7 @@ final class FirebaseAccountSession: AccountSession {
 
     nonisolated private static func snapshot(_ user: User) -> AccountSnapshot {
         AccountSnapshot(isEmailVerified: user.isEmailVerified, email: user.shownEmail, displayName: user.shownName,
-                        providerIDs: user.providerData.map(\.providerID), photoURL: user.photoURL?.absoluteString)
+                        providerIDs: user.providerData.map(\.providerID), photoURL: user.photoURL?.absoluteString,
+                        userID: user.uid)
     }
 }

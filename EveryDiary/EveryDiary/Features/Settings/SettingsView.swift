@@ -47,6 +47,7 @@ struct SettingsView: View {
     @State private var isConfirmingDeletion = false
     @State private var alert: SettingsAlert?
     @State private var savedToast = false
+    @State private var copiedCode = false
 
     var body: some View {
         List {
@@ -78,9 +79,33 @@ struct SettingsView: View {
             }
             Section {
             } footer: {
-                Text(values.version)
-                    .font(DiaryTheme.Fonts.caption)
-                    .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                VStack(alignment: .leading, spacing: DiaryTheme.Spacing.small) {
+                    if let code = viewModel.supportCode {
+                        // Read out when asking for help; tapping copies it.
+                        Button {
+                            UIPasteboard.general.string = code
+                            copiedCode = true
+                            Task {
+                                try? await Task.sleep(for: .seconds(1.5))
+                                copiedCode = false
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text(copiedCode ? "문의용 코드를 복사했어요" : "문의용 코드 \(code)")
+                                    .monospacedDigit()
+                                Image(systemName: copiedCode ? "checkmark" : "doc.on.doc")
+                            }
+                            .frame(minHeight: DiaryTheme.Size.touchTarget)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("문의용 코드 \(code)")
+                        .accessibilityHint("코드를 복사합니다. 문의할 때 알려주세요.")
+                    }
+                    Text(values.version)
+                }
+                .font(DiaryTheme.Fonts.caption)
+                .foregroundStyle(DiaryTheme.Colors.secondaryText)
             }
         }
         .listStyle(.insetGrouped)
@@ -244,6 +269,8 @@ struct SettingsView: View {
             actions.accountChanged()
             alert = SettingsAlert(title: "회원 탈퇴", message: "회원 탈퇴가 완료되었습니다.", afterConfirm: actions.signIn)
         case .profileSaved:
+            // The account's observers (the user directory among them) hear of the new nickname.
+            actions.accountChanged()
             isEditingProfile = false
             savedToast = true
             Task {
