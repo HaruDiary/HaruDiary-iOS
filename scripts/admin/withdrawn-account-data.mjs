@@ -1,4 +1,4 @@
-// Finds diaries and photos left by accounts that no longer exist in Firebase Auth
+// Finds diaries, photos and user documents left by accounts that no longer exist in Firebase Auth
 // (withdrawn before account deletion erased data, or anonymous accounts removed when linking).
 //
 // Also reports guest (anonymous) accounts unused for a long time: a guest left behind when switching to an
@@ -42,6 +42,11 @@ for (const doc of (await db.collectionGroup("diaries").get()).docs) {
   diariesByUser.get(uid).push(doc);
 }
 
+// users/{uid} itself holds what the app writes about an account (support code, nickname, sign-in method, e-mail).
+// Only documents that were written exist here; an account can have one without any diary.
+const directoryDocs = new Map();
+for (const doc of (await db.collection("users").get()).docs) directoryDocs.set(doc.id, doc.ref);
+
 // The app stores photos as `{uid}/{file}`. Other files (bucket root, older folders such as `diary_…/`)
 // cannot be tied to an account and are only reported, never deleted.
 const looksLikeUserID = (name) => /^[A-Za-z0-9]{28}$/.test(name);
@@ -57,7 +62,7 @@ for (const file of files) {
   target.get(key).push(file);
 }
 
-const candidates = [...new Set([...diariesByUser.keys(), ...filesByOwner.keys()])];
+const candidates = [...new Set([...diariesByUser.keys(), ...filesByOwner.keys(), ...directoryDocs.keys()])];
 const existing = new Set();
 const records = new Map();
 for (let i = 0; i < candidates.length; i += 100) {
@@ -100,10 +105,11 @@ withdrawn.forEach((uid, index) => {
   diaryCount += diaries;
   fileCount += photos;
   // Account IDs are shortened so the output can be shared.
-  console.log(`#${index + 1} ${uid.slice(0, 6)}…  diaries ${diaries}, photo files ${photos}`);
+  console.log(`#${index + 1} ${uid.slice(0, 6)}…  diaries ${diaries}, photo files ${photos}, user document ${directoryDocs.has(uid) ? "yes" : "no"}`);
 });
 console.log(`Accounts checked: ${candidates.length}, still existing: ${existing.size}`);
-console.log(`Withdrawn accounts with data: ${withdrawn.length} (diaries ${diaryCount}, photo files ${fileCount})`);
+const withdrawnDocs = withdrawn.filter((uid) => directoryDocs.has(uid)).length;
+console.log(`Withdrawn accounts with data: ${withdrawn.length} (diaries ${diaryCount}, photo files ${fileCount}, user documents ${withdrawnDocs})`);
 let guestDiaries = 0;
 let guestFiles = 0;
 inactiveGuests.forEach((uid) => {
@@ -129,6 +135,8 @@ const eraseData = async (uid) => {
     refs.slice(i, i + 400).forEach((ref) => batch.delete(ref));
     await batch.commit();
   }
+  // Last, like the app's own withdrawal: the user document goes once the diaries are gone.
+  await directoryDocs.get(uid)?.delete();
 };
 
 if (shouldDeleteGuests) {

@@ -86,6 +86,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         appLock.didBecomeActive()
         // Moves the reminder window forward and brings back today's reminder after midnight.
         if let reminders { Task { await reminders.refresh() } }
+        // The last visit in the user document follows the day, also while the account stays the same.
+        if let userDirectoryUpdater { Task { await userDirectoryUpdater.refresh() } }
     }
     
     // Hides the diary in the app switcher while the lock is on; the lock itself appears on entering the background.

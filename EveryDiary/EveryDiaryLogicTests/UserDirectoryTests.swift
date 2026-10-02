@@ -91,6 +91,38 @@ final class UserDirectoryTests: XCTestCase {
         XCTAssertEqual(directory.writes[2].seenAt, date(3))
     }
 
+    func testTheLastVisitMovesOnWhenTheAppReturnsOnAnotherDayWithTheSameAccount() async throws {
+        let session = FakeAccountSession()
+        let directory = RecordingDirectory()
+        var clock = date(2, hour: 23)
+        let updater = makeUpdater(session: session, directory: directory, now: { clock })
+
+        // Not started: nothing is written.
+        session.currentAccount = snapshot()
+        await updater.refresh()
+        XCTAssertTrue(directory.writes.isEmpty)
+
+        updater.start()
+        defer { updater.stop() }
+        session.send(snapshot())
+        try await waitUntil { directory.writes.count == 1 }
+
+        // Back to the front the same day: nothing. No account event arrives over midnight.
+        await updater.refresh()
+        XCTAssertEqual(directory.writes.count, 1)
+
+        clock = date(3, hour: 0)
+        await updater.refresh()
+        XCTAssertEqual(directory.writes.count, 2)
+        XCTAssertEqual(directory.writes[1].seenAt, date(3, hour: 0))
+
+        // Signed out meanwhile: nothing to write.
+        session.currentAccount = nil
+        clock = date(4)
+        await updater.refresh()
+        XCTAssertEqual(directory.writes.count, 2)
+    }
+
     func testNothingIsWrittenForNobodyAndEachAccountIsWrittenUnderItsOwnID() async throws {
         let session = FakeAccountSession()
         let directory = RecordingDirectory()

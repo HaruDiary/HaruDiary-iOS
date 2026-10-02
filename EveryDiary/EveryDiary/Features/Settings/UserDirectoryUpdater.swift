@@ -41,6 +41,13 @@ final class UserDirectoryUpdater {
         observation = nil
     }
 
+    /// Called when the app comes to the front. The account is only observed when it changes, so an app left
+    /// open over midnight would otherwise keep yesterday as the last visit.
+    func refresh() async {
+        guard observation != nil else { return }
+        await update(session.currentAccount)
+    }
+
     private func update(_ snapshot: AccountSnapshot?) async {
         guard let snapshot, let userID = snapshot.userID, let entry = UserDirectoryEntry(snapshot) else { return }
         let seenAt = now()
