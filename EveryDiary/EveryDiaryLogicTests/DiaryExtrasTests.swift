@@ -280,6 +280,22 @@ final class DiaryExtrasTests: XCTestCase {
         XCTAssertFalse(store.isBeingSaved(draft))
     }
 
+    func testClearAllDropsBothKeptDrafts() throws {
+        let suite = "diary-draft-tests-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = UserDefaultsDiaryDraftStore(defaults: defaults)
+        var draft = StoredDiaryDraft(title: "제목", content: "", date: date(2026, 9, 30), emotion: "", weather: "", photoCount: 0, userID: "user-a")
+        store.save(draft)
+        draft.diaryID = "diary-1"
+        store.save(draft)
+
+        store.clearAll()
+
+        XCTAssertNil(store.load(diaryID: nil))
+        XCTAssertNil(store.load(diaryID: "diary-1"))
+    }
+
     func testADraftStoredBeforeEditsWereKeptIsStillRead() throws {
         // Written by the first version of the store, without `diaryID`.
         let old = #"{"title":"제목","content":"","date":0,"emotion":"","weather":"","photoCount":1}"#

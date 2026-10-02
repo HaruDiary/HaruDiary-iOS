@@ -12,8 +12,8 @@ struct SettingsModule {
 
     init(session: any AccountSession, signInGateway: any SocialSignInGateway, makeTrashModule: @escaping () -> TrashModule,
          reminders: DiaryReminders? = nil, textSize: AppTextSizeController? = nil, appearance: AppAppearanceController? = nil,
-         profilePhotos: ProfilePhotoLoader? = nil) {
-        viewModel = SettingsViewModel(session: session, photos: profilePhotos)
+         profilePhotos: ProfilePhotoLoader? = nil, diaryDrafts: (any DiaryDraftStoring)? = nil) {
+        viewModel = SettingsViewModel(session: session, photos: profilePhotos, drafts: diaryDrafts)
         self.profilePhotos = profilePhotos
         self.signInGateway = signInGateway
         self.makeTrashModule = makeTrashModule

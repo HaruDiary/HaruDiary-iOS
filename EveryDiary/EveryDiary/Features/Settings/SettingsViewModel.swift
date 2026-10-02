@@ -35,11 +35,14 @@ final class SettingsViewModel {
 
     @ObservationIgnored private let session: any AccountSession
     @ObservationIgnored private let photos: (any ProfilePhotoStoring)?
+    /// Unsaved writing kept on the device; it goes with the diaries when the account is withdrawn.
+    @ObservationIgnored private let drafts: (any DiaryDraftStoring)?
     @ObservationIgnored private var observation: Task<Void, Never>?
 
-    init(session: any AccountSession, photos: (any ProfilePhotoStoring)? = nil) {
+    init(session: any AccountSession, photos: (any ProfilePhotoStoring)? = nil, drafts: (any DiaryDraftStoring)? = nil) {
         self.session = session
         self.photos = photos
+        self.drafts = drafts
         // The account known right now, so the profile is not drawn signed out before the first observed value.
         let current = session.currentAccount
         account = AccountState(current)
@@ -146,12 +149,15 @@ final class SettingsViewModel {
         defer { isDeletingAccount = false }
         do {
             try await session.deleteAccount(appleAuthorization: appleAuthorization)
+            drafts?.clearAll()
             notice = .accountDeleted
         } catch AccountDeletionError.requiresRecentLogin {
             notice = .deletionNeedsRecentLogin
         } catch AccountDeletionError.dataErasureFailed {
             notice = .dataErasureFailed
         } catch AccountDeletionError.dataErasedNeedsRecentLogin {
+            // The diaries are already erased; the writing kept on the device goes with them.
+            drafts?.clearAll()
             notice = .dataErasedNeedsRecentLogin
         } catch AccountDeletionError.appleConfirmationRequired {
             notice = .appleConfirmationFailed

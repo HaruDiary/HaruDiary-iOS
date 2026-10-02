@@ -969,7 +969,7 @@ private extension UIImage {
 }
 
 @MainActor
-private final class FakeDraftStore: DiaryDraftStoring {
+final class FakeDraftStore: DiaryDraftStoring {
     /// The new diary's writing.
     var stored: StoredDiaryDraft?
     /// The changes kept for a stored diary.
@@ -985,6 +985,11 @@ private final class FakeDraftStore: DiaryDraftStoring {
 
     func clear(diaryID: String?) {
         if diaryID == nil { stored = nil } else if storedEdit?.diaryID == diaryID { storedEdit = nil }
+    }
+
+    func clearAll() {
+        stored = nil
+        storedEdit = nil
     }
 
     private var saving: [StoredDiaryDraft] = []

@@ -39,7 +39,8 @@ struct AppDependencies {
 
     func makeSettingsModule() -> SettingsModule {
         SettingsModule(session: accountSession, signInGateway: signInGateway, makeTrashModule: makeTrashModule,
-                       reminders: reminders, textSize: textSize, appearance: appearance, profilePhotos: profilePhotos)
+                       reminders: reminders, textSize: textSize, appearance: appearance, profilePhotos: profilePhotos,
+                       diaryDrafts: diaryDrafts)
     }
 
     func makeDiaryExportViewModel() -> DiaryExportViewModel {

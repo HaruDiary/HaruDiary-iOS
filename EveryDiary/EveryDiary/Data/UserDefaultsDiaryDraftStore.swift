@@ -34,6 +34,11 @@ final class UserDefaultsDiaryDraftStore: DiaryDraftStoring {
         if read(Self.editKey)?.diaryID == diaryID { defaults.removeObject(forKey: Self.editKey) }
     }
 
+    func clearAll() {
+        defaults.removeObject(forKey: Self.key)
+        defaults.removeObject(forKey: Self.editKey)
+    }
+
     func setSaving(_ isSaving: Bool, _ draft: StoredDiaryDraft) {
         saving.removeAll { $0 == draft }
         if isSaving { saving.append(draft) }
