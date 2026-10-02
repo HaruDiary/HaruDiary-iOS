@@ -66,6 +66,9 @@ struct SettingsView: View {
                 row("개인정보 처리방침", systemImage: "hand.raised", value: nil) {
                     actions.openWebPage(AppLinks.privacyPolicy)
                 }
+                if let code = viewModel.supportCode {
+                    supportCodeRow(code)
+                }
             }
             if viewModel.profile.isLoggedIn {
                 Section {
@@ -79,33 +82,9 @@ struct SettingsView: View {
             }
             Section {
             } footer: {
-                VStack(alignment: .leading, spacing: DiaryTheme.Spacing.small) {
-                    if let code = viewModel.supportCode {
-                        // Read out when asking for help; tapping copies it.
-                        Button {
-                            UIPasteboard.general.string = code
-                            copiedCode = true
-                            Task {
-                                try? await Task.sleep(for: .seconds(1.5))
-                                copiedCode = false
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Text(copiedCode ? "문의용 코드를 복사했어요" : "문의용 코드 \(code)")
-                                    .monospacedDigit()
-                                Image(systemName: copiedCode ? "checkmark" : "doc.on.doc")
-                            }
-                            .frame(minHeight: DiaryTheme.Size.touchTarget)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("문의용 코드 \(code)")
-                        .accessibilityHint("코드를 복사합니다. 문의할 때 알려주세요.")
-                    }
-                    Text(values.version)
-                }
-                .font(DiaryTheme.Fonts.caption)
-                .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                Text(values.version)
+                    .font(DiaryTheme.Fonts.caption)
+                    .foregroundStyle(DiaryTheme.Colors.secondaryText)
             }
         }
         .listStyle(.insetGrouped)
@@ -240,6 +219,42 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    /// The code to read out when asking for help; tapping copies it. Kept away from the account actions,
+    /// so reaching for it cannot land on sign-out or withdrawal.
+    private func supportCodeRow(_ code: String) -> some View {
+        Button {
+            UIPasteboard.general.string = code
+            copiedCode = true
+            Task {
+                try? await Task.sleep(for: .seconds(1.5))
+                copiedCode = false
+            }
+        } label: {
+            HStack(spacing: DiaryTheme.Spacing.medium) {
+                Image(systemName: "questionmark.bubble")
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(DiaryTheme.Colors.brand)
+                    .frame(width: DiaryTheme.Size.icon)
+                Text("문의용 코드")
+                    .foregroundStyle(DiaryTheme.Colors.text)
+                Spacer(minLength: DiaryTheme.Spacing.small)
+                Text(copiedCode ? "복사했어요" : code)
+                    .foregroundStyle(copiedCode ? DiaryTheme.Colors.brand : DiaryTheme.Colors.secondaryText)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                Image(systemName: copiedCode ? "checkmark" : "doc.on.doc")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(copiedCode ? DiaryTheme.Colors.brand : DiaryTheme.Colors.secondaryText)
+            }
+            .font(DiaryTheme.Fonts.body)
+            .frame(minHeight: DiaryTheme.Size.touchTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("문의용 코드 \(code)")
+        .accessibilityHint("코드를 복사합니다. 문의할 때 알려주세요.")
     }
 
     private func destructiveRow(_ title: String, systemImage: String, action: @escaping () -> Void) -> some View {
