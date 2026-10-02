@@ -54,13 +54,16 @@ protocol UserDirectoryRecordStoring {
 /// Stops the writing of an account's entry while the account is being withdrawn.
 @MainActor
 protocol UserDirectorySuspending: AnyObject {
-    func suspendWrites(userID: String)
+    /// Returns once no write of the account's entry is under way; throws when one does not finish in time.
+    func suspendWrites(userID: String) async throws
     func resumeWrites(userID: String)
 }
 
 enum UserDirectoryError: Error {
     /// The account is being withdrawn; its entry must not be written back.
     case suspended
+    /// A write that started before the withdrawal has not finished; the entry is not deleted under it.
+    case writeStillInProgress
 }
 
 /// A directory whose writes can be stopped per account. A withdrawal deletes `users/{userID}`; a write arriving
@@ -69,18 +72,43 @@ enum UserDirectoryError: Error {
 final class SuspendableUserDirectory: UserDirectoryWriting, UserDirectorySuspending {
     private let directory: any UserDirectoryWriting
     private var suspended: Set<String> = []
+    /// Writes that were started and have not finished, per account.
+    private var inProgress: [String: Int] = [:]
+    /// How long a withdrawal waits for a write under way. Offline it never finishes, and the withdrawal fails instead.
+    private let patience: TimeInterval
 
-    init(_ directory: any UserDirectoryWriting) {
+    init(_ directory: any UserDirectoryWriting, patience: TimeInterval = 10) {
         self.directory = directory
+        self.patience = patience
     }
 
     func write(_ entry: UserDirectoryEntry, userID: String, seenAt: Date) async throws {
         guard !suspended.contains(userID) else { throw UserDirectoryError.suspended }
+        inProgress[userID, default: 0] += 1
+        defer {
+            let left = inProgress[userID, default: 1] - 1
+            inProgress[userID] = left > 0 ? left : nil
+        }
         try await directory.write(entry, userID: userID, seenAt: seenAt)
     }
 
-    func suspendWrites(userID: String) {
+    /// A write started before this would finish after the deletion and put the entry back, so the withdrawal
+    /// waits for it. When it does not finish, writing goes on as before and the withdrawal is not carried out.
+    func suspendWrites(userID: String) async throws {
         suspended.insert(userID)
+        let started = Date()
+        while inProgress[userID] != nil {
+            guard Date().timeIntervalSince(started) < patience else {
+                suspended.remove(userID)
+                throw UserDirectoryError.writeStillInProgress
+            }
+            do {
+                try await Task.sleep(nanoseconds: 20_000_000)
+            } catch {
+                suspended.remove(userID)
+                throw error
+            }
+        }
     }
 
     func resumeWrites(userID: String) {

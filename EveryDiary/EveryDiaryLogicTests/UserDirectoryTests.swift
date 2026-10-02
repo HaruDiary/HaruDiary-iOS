@@ -168,7 +168,7 @@ final class UserDirectoryTests: XCTestCase {
         try await waitUntil { recording.writes.count == 1 }
 
         // The withdrawal starts; a change or a new day must not put the entry back.
-        directory.suspendWrites(userID: uid)
+        try await directory.suspendWrites(userID: uid)
         clock = date(3)
         session.currentAccount = snapshot(name: "새 이름")
         await updater.refresh()
@@ -185,6 +185,59 @@ final class UserDirectoryTests: XCTestCase {
         session.currentAccount = snapshot(name: "새 이름")
         await updater.refresh()
         XCTAssertEqual(recording.writes.last?.entry.nickname, "새 이름")
+    }
+
+    func testAWithdrawalWaitsForAWriteThatIsUnderWay() async throws {
+        let recording = RecordingDirectory()
+        recording.holdsWrites = true
+        let directory = SuspendableUserDirectory(recording)
+        let entry = try XCTUnwrap(UserDirectoryEntry(snapshot()))
+        let write = Task { try await directory.write(entry, userID: uid, seenAt: date(2)) }
+        try await waitUntil { recording.attempts == 1 }
+
+        // The entry would be deleted once this returns; it must not return while the write can still arrive.
+        var isSuspended = false
+        let suspension = Task {
+            try await directory.suspendWrites(userID: uid)
+            isSuspended = true
+        }
+        try await Task.sleep(nanoseconds: 60_000_000)
+        XCTAssertFalse(isSuspended)
+
+        recording.release()
+        try await write.value
+        try await suspension.value
+        XCTAssertTrue(isSuspended)
+        XCTAssertEqual(recording.writes.count, 1)
+        do {
+            try await directory.write(entry, userID: uid, seenAt: date(3))
+            XCTFail("Written during the withdrawal")
+        } catch {
+            XCTAssertEqual(error as? UserDirectoryError, .suspended)
+        }
+    }
+
+    func testAWithdrawalIsNotCarriedOutWhileAWriteNeverFinishes() async throws {
+        let recording = RecordingDirectory()
+        recording.holdsWrites = true
+        let directory = SuspendableUserDirectory(recording, patience: 0.05)
+        let entry = try XCTUnwrap(UserDirectoryEntry(snapshot()))
+        let write = Task { try await directory.write(entry, userID: uid, seenAt: date(2)) }
+        try await waitUntil { recording.attempts == 1 }
+
+        do {
+            try await directory.suspendWrites(userID: uid)
+            XCTFail("The entry would be deleted under a write")
+        } catch {
+            XCTAssertEqual(error as? UserDirectoryError, .writeStillInProgress)
+        }
+
+        // The account stays, so its entry goes on being written.
+        recording.release()
+        try await write.value
+        recording.holdsWrites = false
+        try await directory.write(entry, userID: uid, seenAt: date(3))
+        XCTAssertEqual(recording.writes.count, 2)
     }
 
     func testNothingIsWrittenForNobodyAndEachAccountIsWrittenUnderItsOwnID() async throws {

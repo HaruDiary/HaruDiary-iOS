@@ -19,8 +19,9 @@ final class FirebaseUserDataEraser: UserDataErasing {
     /// a fresh read finds nothing. Data that keeps appearing stops the deletion and the account is kept.
     func eraseAllData(userID: String) async throws {
         // This device stops writing the account's entry: written after its deletion, it would come back.
-        // It stays stopped when the data is erased (the account is deleted next) and resumes when erasing fails.
-        directory?.suspendWrites(userID: userID)
+        // A write already under way is waited for, so nothing is erased while it can still arrive.
+        // Writing stays stopped when the data is erased (the account is deleted next) and resumes when erasing fails.
+        try await directory?.suspendWrites(userID: userID)
         do {
             for _ in 0..<3 {
                 if try await erasePass(userID: userID) == 0 { return }
