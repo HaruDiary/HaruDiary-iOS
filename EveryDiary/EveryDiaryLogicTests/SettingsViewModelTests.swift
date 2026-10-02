@@ -339,6 +339,54 @@ final class SettingsViewModelTests: XCTestCase {
         return model
     }
 
+    func testWithdrawalDropsTheWritingKeptOnTheDeviceButAFailedOneKeepsIt() async throws {
+        let drafts = FakeDraftStore()
+        let new = StoredDiaryDraft(title: "쓰던 글", content: "", date: Date(timeIntervalSince1970: 0), emotion: "", weather: "", photoCount: 0, userID: "user-a")
+        var edit = new
+        edit.diaryID = "diary-1"
+        drafts.stored = new
+        drafts.storedEdit = edit
+        let session = FakeAccountSession()
+        let model = SettingsViewModel(session: session, drafts: drafts)
+        model.start()
+        defer { model.stop() }
+        session.send(member())
+        try await waitUntil { model.canManageAccount }
+
+        // Nothing was erased: the writing stays.
+        session.deleteError = AccountDeletionError.dataErasureFailed
+        await model.deleteAccount()
+        XCTAssertEqual(drafts.stored, new)
+        XCTAssertEqual(drafts.storedEdit, edit)
+
+        // Signing out keeps it too: the writer may come back.
+        model.signOut()
+        XCTAssertEqual(drafts.stored, new)
+
+        session.deleteError = nil
+        await model.deleteAccount()
+        XCTAssertEqual(model.notice, .accountDeleted)
+        XCTAssertNil(drafts.stored)
+        XCTAssertNil(drafts.storedEdit)
+    }
+
+    func testWritingGoesWhenTheDiariesWereErasedEvenIfTheAccountRemains() async throws {
+        let drafts = FakeDraftStore()
+        drafts.stored = StoredDiaryDraft(title: "쓰던 글", content: "", date: Date(timeIntervalSince1970: 0), emotion: "", weather: "", photoCount: 0, userID: "user-a")
+        let session = FakeAccountSession()
+        let model = SettingsViewModel(session: session, drafts: drafts)
+        model.start()
+        defer { model.stop() }
+        session.send(member())
+        try await waitUntil { model.canManageAccount }
+
+        session.deleteError = AccountDeletionError.dataErasedNeedsRecentLogin
+        await model.deleteAccount()
+
+        XCTAssertEqual(model.notice, .dataErasedNeedsRecentLogin)
+        XCTAssertNil(drafts.stored)
+    }
+
     func testAccountDeletionSuccessIsReportedOnlyAfterItSucceeds() async throws {
         let session = FakeAccountSession()
         let model = try await signedInModel(session)

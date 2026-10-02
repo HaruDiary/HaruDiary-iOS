@@ -7,6 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ADC7AE09F582CA8696E5266D /* EveryDiaryWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417112067B0F5217C3AB8F4C /* EveryDiaryWidgetBundle.swift */; };
+		66AD42EF1E4894CFE7A70D23 /* DiaryStatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3288C2B42703FCCE464998F3 /* DiaryStatusWidget.swift */; };
+		384168BA40344C0420DCF96B /* DiaryTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040BD821321645E60FF1909E /* DiaryTheme.swift */; };
+		F1AA847DE68F008524C3202E /* Widget/DiaryWidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BAD655E2521C2A75EEC896 /* Widget/DiaryWidgetSnapshot.swift */; };
+		D06F949F14A9CCF10212339B /* UserDefaultsDiaryWidgetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F774B139ECAB088AF62902 /* UserDefaultsDiaryWidgetStore.swift */; };
+		C07E6741D454A75E26B8938C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6BABC3712B85D109009267B3 /* Assets.xcassets */; };
+		03C4158178F78A459965181E /* EveryDiaryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 42AE1D94C324A74EF6D93BE8 /* EveryDiaryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5808A0B588B1661382695630 /* DiaryWidgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504838721C809DBB167CB1E0 /* DiaryWidgetTests.swift */; };
+		A048CF71009B5322A43AB157 /* Widget/DiaryWidgetModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9ACE056FE8D3ECEEDB3875F /* Widget/DiaryWidgetModule.swift */; };
+		8B350151EF30A90429BB5508 /* Widget/DiaryWidgetUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B1915541D5AECDD22011077 /* Widget/DiaryWidgetUpdater.swift */; };
+		C54C86BA4C5A128A0C7307F3 /* Widget/DiaryWidgetUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B1915541D5AECDD22011077 /* Widget/DiaryWidgetUpdater.swift */; };
+		2525C9F21BF2DA9DEF3D6040 /* UserDefaultsDiaryWidgetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F774B139ECAB088AF62902 /* UserDefaultsDiaryWidgetStore.swift */; };
+		70A24D23BE4E15A391A65670 /* UserDefaultsDiaryWidgetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F774B139ECAB088AF62902 /* UserDefaultsDiaryWidgetStore.swift */; };
+		82B5DBE1287AE6E1BC77EE07 /* Widget/DiaryWidgetSnapshot+Entries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3B72582B927130D3C62327 /* Widget/DiaryWidgetSnapshot+Entries.swift */; };
+		5743DA7EFA5BEAE2E1EEDB5B /* Widget/DiaryWidgetSnapshot+Entries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3B72582B927130D3C62327 /* Widget/DiaryWidgetSnapshot+Entries.swift */; };
+		8207047CC06456629CFB5268 /* Widget/DiaryWidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BAD655E2521C2A75EEC896 /* Widget/DiaryWidgetSnapshot.swift */; };
+		FC5ADD20F1052ED1E4222111 /* Widget/DiaryWidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BAD655E2521C2A75EEC896 /* Widget/DiaryWidgetSnapshot.swift */; };
 		23ADEF145B05BBEC66BFD53D /* Onboarding/OnboardingIllustration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F15D4A5EECAEE2058D791F /* Onboarding/OnboardingIllustration.swift */; };
 		27208A0EE5C3AA6A380DE3B1 /* Appearance/AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69ED7EB74BA9B680048E8824 /* Appearance/AppearanceSettingsView.swift */; };
 		0109A5C30A57A63E5DB716C5 /* Appearance/AppAppearanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3ED1D8A71005C3F8725D57 /* Appearance/AppAppearanceController.swift */; };
@@ -284,7 +301,36 @@
 		0B67131882814099B395D5CA /* AppleAuthorization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 980D440F9AED465DB3E2447A /* AppleAuthorization.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		4D41F14066C7CA6CA813EC4E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6BABC35D2B85D107009267B3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7CCF4B9123A0518A687DC37F;
+			remoteInfo = EveryDiaryWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0543EACF3545E5F15064FBA2 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				03C4158178F78A459965181E /* EveryDiaryWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		42AE1D94C324A74EF6D93BE8 /* EveryDiaryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EveryDiaryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		417112067B0F5217C3AB8F4C /* EveryDiaryWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveryDiaryWidgetBundle.swift; sourceTree = "<group>"; };
+		3288C2B42703FCCE464998F3 /* DiaryStatusWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryStatusWidget.swift; sourceTree = "<group>"; };
+		035B57CFBC42536A22533051 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0317F91441E725305156E940 /* EveryDiaryWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EveryDiaryWidget.entitlements; sourceTree = "<group>"; };
 		DF262DA4226F234E94F6E745 /* WeatherConditionTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WeatherConditionTextTests.swift"; sourceTree = "<group>"; };
 		9E3026DE6317CC2DE447B39A /* WeatherConditionText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Weather/WeatherConditionText.swift"; sourceTree = "<group>"; };
 		F833704BAE8065DBB55B9AC5 /* JourneyYearProgressTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JourneyYearProgressTests.swift"; sourceTree = "<group>"; };
@@ -333,6 +379,7 @@
 		7954D96D8DD8ECD2917A08BB /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarViewModel.swift"; sourceTree = "<group>"; };
 		77DBABCAF98263DEC4897EE6 /* CalendarModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarModule.swift"; sourceTree = "<group>"; };
 		2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarViewModelTests.swift"; sourceTree = "<group>"; };
+		504838721C809DBB167CB1E0 /* DiaryWidgetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryWidgetTests.swift"; sourceTree = "<group>"; };
 		A1C176ECEA236810D4B7D8E7 /* DiaryExtrasTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryExtrasTests.swift"; sourceTree = "<group>"; };
 		AEFA5DF78819334F0FBD1D4A /* ProfilePhotoFilesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfilePhotoFilesTests.swift"; sourceTree = "<group>"; };
 		6C2E15A44DE6D6662D3783CB /* AppShellTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppShellTests.swift"; sourceTree = "<group>"; };
@@ -359,6 +406,8 @@
 		10B0DDC556D00782C3F47643 /* CalendarImageLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar/CalendarImageLoading.swift"; sourceTree = "<group>"; };
 		62134B7E7C864C9AADA811DD /* DiaryListIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryListIndex.swift"; sourceTree = "<group>"; };
 		B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDiaryFeed.swift"; sourceTree = "<group>"; };
+		4A3B72582B927130D3C62327 /* Widget/DiaryWidgetSnapshot+Entries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Widget/DiaryWidgetSnapshot+Entries.swift"; sourceTree = "<group>"; };
+		22BAD655E2521C2A75EEC896 /* Widget/DiaryWidgetSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Widget/DiaryWidgetSnapshot.swift"; sourceTree = "<group>"; };
 		3D812A6B172810F2147CBF45 /* Appearance/AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Appearance/AppAppearance.swift"; sourceTree = "<group>"; };
 		ACED7F303A4B3B80A5C80B63 /* DiaryList/DiaryExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryList/DiaryExport.swift"; sourceTree = "<group>"; };
 		F5134942E1956F14E3646864 /* DiaryEditor/DiaryPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiaryEditor/DiaryPrompts.swift"; sourceTree = "<group>"; };
@@ -408,6 +457,8 @@
 		F393DB3464574FF0991E1DB5 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AccountSession.swift"; sourceTree = "<group>"; };
 		31E1D481E3CA497EA4058710 /* FirebaseAccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FirebaseAccountSession.swift"; sourceTree = "<group>"; };
 		E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/SettingsViewModel.swift"; sourceTree = "<group>"; };
+		F9ACE056FE8D3ECEEDB3875F /* Widget/DiaryWidgetModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Widget/DiaryWidgetModule.swift"; sourceTree = "<group>"; };
+		5B1915541D5AECDD22011077 /* Widget/DiaryWidgetUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Widget/DiaryWidgetUpdater.swift"; sourceTree = "<group>"; };
 		F6F15D4A5EECAEE2058D791F /* Onboarding/OnboardingIllustration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Onboarding/OnboardingIllustration.swift"; sourceTree = "<group>"; };
 		69ED7EB74BA9B680048E8824 /* Appearance/AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Appearance/AppearanceSettingsView.swift"; sourceTree = "<group>"; };
 		DE3ED1D8A71005C3F8725D57 /* Appearance/AppAppearanceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Appearance/AppAppearanceController.swift"; sourceTree = "<group>"; };
@@ -468,6 +519,7 @@
 		B6C7C37911DC4486A8645A5F /* ProfilePhotoPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Settings/ProfilePhotoPreparation.swift"; sourceTree = "<group>"; };
 		55CB1E597DED4997A4238DE1 /* AppleRefreshTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Account/AppleRefreshTokenStore.swift"; sourceTree = "<group>"; };
 		47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeychainSecretStore.swift"; sourceTree = "<group>"; };
+		89F774B139ECAB088AF62902 /* UserDefaultsDiaryWidgetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaultsDiaryWidgetStore.swift"; sourceTree = "<group>"; };
 		DFDFADA0A4AD2266CF8EFC4E /* UserDefaultsAppearanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaultsAppearanceStore.swift"; sourceTree = "<group>"; };
 		E63D5878DA5CB9FC2219A092 /* UserDefaultsDiaryDraftStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaultsDiaryDraftStore.swift"; sourceTree = "<group>"; };
 		7AF72E1A925632795709CB96 /* ProfilePhotoFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfilePhotoFiles.swift"; sourceTree = "<group>"; };
@@ -483,6 +535,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		329DA9ABC93970045861E3CA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6BABC3622B85D107009267B3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -508,6 +567,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9D27D2C73990C24A589900BB /* EveryDiaryWidget */ = {
+			isa = PBXGroup;
+			children = (
+				417112067B0F5217C3AB8F4C /* EveryDiaryWidgetBundle.swift */,
+				3288C2B42703FCCE464998F3 /* DiaryStatusWidget.swift */,
+				035B57CFBC42536A22533051 /* Info.plist */,
+				0317F91441E725305156E940 /* EveryDiaryWidget.entitlements */,
+			);
+			path = EveryDiaryWidget;
+			sourceTree = "<group>";
+		};
 		1AF880D62B8DC125004076EB /* Service */ = {
 			isa = PBXGroup;
 			children = (
@@ -544,6 +614,7 @@
 		6BABC35C2B85D107009267B3 = {
 			isa = PBXGroup;
 			children = (
+				9D27D2C73990C24A589900BB /* EveryDiaryWidget */,
 				6BABC3672B85D107009267B3 /* EveryDiary */,
 				6BABC3662B85D107009267B3 /* Products */,
 				6BABC3C92B85D805009267B3 /* Frameworks */,
@@ -554,6 +625,7 @@
 		6BABC3662B85D107009267B3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				42AE1D94C324A74EF6D93BE8 /* EveryDiaryWidgetExtension.appex */,
 				6BABC3652B85D107009267B3 /* EveryDiary.app */,
 				0EC03C7CA06E85F659010A76 /* EveryDiaryLogicTests.xctest */,
 			);
@@ -621,6 +693,7 @@
 				B72A1C010000000000000005 /* DiarySaveCoordinatorTests.swift */,
 				DBE0EEADBE369B514CBF7315 /* OnboardingViewModelTests.swift */,
 				2EE6BC8C88F9752CFF4E3AD8 /* CalendarViewModelTests.swift */,
+				504838721C809DBB167CB1E0 /* DiaryWidgetTests.swift */,
 				A1C176ECEA236810D4B7D8E7 /* DiaryExtrasTests.swift */,
 				AEFA5DF78819334F0FBD1D4A /* ProfilePhotoFilesTests.swift */,
 				6C2E15A44DE6D6662D3783CB /* AppShellTests.swift */,
@@ -671,6 +744,8 @@
 				DFCF0745505E4B1487AB4DD5 /* DiaryTrashing.swift */,
 				B72A1C010000000000000003 /* DiarySaving.swift */,
 				B256FBF53D744776A59BC8DE /* UserDiaryFeed.swift */,
+				4A3B72582B927130D3C62327 /* Widget/DiaryWidgetSnapshot+Entries.swift */,
+				22BAD655E2521C2A75EEC896 /* Widget/DiaryWidgetSnapshot.swift */,
 				3D812A6B172810F2147CBF45 /* Appearance/AppAppearance.swift */,
 				ACED7F303A4B3B80A5C80B63 /* DiaryList/DiaryExport.swift */,
 				F5134942E1956F14E3646864 /* DiaryEditor/DiaryPrompts.swift */,
@@ -711,6 +786,7 @@
 				832136B93DD0453C92F3A7A9 /* AppleCredentialMonitor.swift */,
 				156963BA02984F9DB97C4979 /* AppleSignInRecords.swift */,
 				47B1EF5375044CB0BD7F6627 /* KeychainSecretStore.swift */,
+				89F774B139ECAB088AF62902 /* UserDefaultsDiaryWidgetStore.swift */,
 				DFDFADA0A4AD2266CF8EFC4E /* UserDefaultsAppearanceStore.swift */,
 				E63D5878DA5CB9FC2219A092 /* UserDefaultsDiaryDraftStore.swift */,
 				7AF72E1A925632795709CB96 /* ProfilePhotoFiles.swift */,
@@ -737,6 +813,8 @@
 				B470769C0A454C869F7E2BAE /* ProfileEditView.swift */,
 				A1D40C7B1D02405CB104C056 /* SettingsModule.swift */,
 				E3ECA5F57CD74BECA445114B /* SettingsViewModel.swift */,
+				F9ACE056FE8D3ECEEDB3875F /* Widget/DiaryWidgetModule.swift */,
+				5B1915541D5AECDD22011077 /* Widget/DiaryWidgetUpdater.swift */,
 				F6F15D4A5EECAEE2058D791F /* Onboarding/OnboardingIllustration.swift */,
 				69ED7EB74BA9B680048E8824 /* Appearance/AppearanceSettingsView.swift */,
 				DE3ED1D8A71005C3F8725D57 /* Appearance/AppAppearanceController.swift */,
@@ -841,6 +919,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		7CCF4B9123A0518A687DC37F /* EveryDiaryWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4B0C0C6683299A537B0D6A20 /* Build configuration list for PBXNativeTarget "EveryDiaryWidgetExtension" */;
+			buildPhases = (
+				BF22BB7D18B002A25331A3D2 /* Sources */,
+				329DA9ABC93970045861E3CA /* Frameworks */,
+				E2875614BEA3AA3EAC92158A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EveryDiaryWidgetExtension;
+			productName = EveryDiaryWidgetExtension;
+			productReference = 42AE1D94C324A74EF6D93BE8 /* EveryDiaryWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		16B7F90EA32768033AE26ACF /* EveryDiaryLogicTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 64F7513E028402C85DA8D06E /* Build configuration list for PBXNativeTarget "EveryDiaryLogicTests" */;
@@ -865,10 +960,12 @@
 				D2F0EF322BAAAD28008736F1 /* Sources */,
 				6BABC3622B85D107009267B3 /* Frameworks */,
 				6BABC3632B85D107009267B3 /* Resources */,
+				0543EACF3545E5F15064FBA2 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				9FC5EDFCF5EFA100574B2367 /* PBXTargetDependency */,
 			);
 			name = EveryDiary;
 			packageProductDependencies = (
@@ -915,12 +1012,21 @@
 			projectRoot = "";
 			targets = (
 				6BABC3642B85D107009267B3 /* EveryDiary */,
+				7CCF4B9123A0518A687DC37F /* EveryDiaryWidgetExtension */,
 				16B7F90EA32768033AE26ACF /* EveryDiaryLogicTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		E2875614BEA3AA3EAC92158A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C07E6741D454A75E26B8938C /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6BABC3632B85D107009267B3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -942,10 +1048,27 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		BF22BB7D18B002A25331A3D2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ADC7AE09F582CA8696E5266D /* EveryDiaryWidgetBundle.swift in Sources */,
+				66AD42EF1E4894CFE7A70D23 /* DiaryStatusWidget.swift in Sources */,
+				384168BA40344C0420DCF96B /* DiaryTheme.swift in Sources */,
+				F1AA847DE68F008524C3202E /* Widget/DiaryWidgetSnapshot.swift in Sources */,
+				D06F949F14A9CCF10212339B /* UserDefaultsDiaryWidgetStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		62C9A6D98AA05616ECE4BAEE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5808A0B588B1661382695630 /* DiaryWidgetTests.swift in Sources */,
+				8B350151EF30A90429BB5508 /* Widget/DiaryWidgetUpdater.swift in Sources */,
+				2525C9F21BF2DA9DEF3D6040 /* UserDefaultsDiaryWidgetStore.swift in Sources */,
+				82B5DBE1287AE6E1BC77EE07 /* Widget/DiaryWidgetSnapshot+Entries.swift in Sources */,
+				8207047CC06456629CFB5268 /* Widget/DiaryWidgetSnapshot.swift in Sources */,
 				0109A5C30A57A63E5DB716C5 /* Appearance/AppAppearanceController.swift in Sources */,
 				9348DAFF835820AA247CEE3A /* UserDefaultsAppearanceStore.swift in Sources */,
 				83A0510B765B5835DD5DE2E8 /* Appearance/AppAppearance.swift in Sources */,
@@ -1063,6 +1186,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A048CF71009B5322A43AB157 /* Widget/DiaryWidgetModule.swift in Sources */,
+				C54C86BA4C5A128A0C7307F3 /* Widget/DiaryWidgetUpdater.swift in Sources */,
+				70A24D23BE4E15A391A65670 /* UserDefaultsDiaryWidgetStore.swift in Sources */,
+				5743DA7EFA5BEAE2E1EEDB5B /* Widget/DiaryWidgetSnapshot+Entries.swift in Sources */,
+				FC5ADD20F1052ED1E4222111 /* Widget/DiaryWidgetSnapshot.swift in Sources */,
 				23ADEF145B05BBEC66BFD53D /* Onboarding/OnboardingIllustration.swift in Sources */,
 				27208A0EE5C3AA6A380DE3B1 /* Appearance/AppearanceSettingsView.swift in Sources */,
 				AB35C51B88E0642093DEA0C5 /* Appearance/AppAppearanceController.swift in Sources */,
@@ -1232,7 +1360,73 @@
 		};
 /* End PBXVariantGroup section */
 
+/* Begin PBXTargetDependency section */
+		9FC5EDFCF5EFA100574B2367 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7CCF4B9123A0518A687DC37F /* EveryDiaryWidgetExtension */;
+			targetProxy = 4D41F14066C7CA6CA813EC4E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		F8E4BA6A3EC42239575C4472 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = EveryDiaryWidget/EveryDiaryWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UP9KCDW7ZZ;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EveryDiaryWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "하루일기";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.HexaDiary.EveryDiary.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		0737340CB0D11077EDB57AE5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = EveryDiaryWidget/EveryDiaryWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UP9KCDW7ZZ;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EveryDiaryWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "하루일기";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.HexaDiary.EveryDiary.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 		6BABC3772B85D109009267B3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1470,6 +1664,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4B0C0C6683299A537B0D6A20 /* Build configuration list for PBXNativeTarget "EveryDiaryWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F8E4BA6A3EC42239575C4472 /* Debug */,
+				0737340CB0D11077EDB57AE5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		64F7513E028402C85DA8D06E /* Build configuration list for PBXNativeTarget "EveryDiaryLogicTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

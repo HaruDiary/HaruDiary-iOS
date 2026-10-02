@@ -16,6 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private lazy var appLock = AppLockPresenter.live()
     private var reminders: DiaryReminders?
     private var profilePhotoKeeper: ProfilePhotoKeeper?
+    private var widgetUpdater: DiaryWidgetUpdater?
     // Created after FirebaseApp.configure() in AppDelegate.
     private lazy var appleCredentialMonitor = AppleCredentialMonitor(
         auth: .auth(),
@@ -34,6 +35,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Follows the account for as long as the app runs, also while settings are closed.
         profilePhotoKeeper = live.makeProfilePhotoKeeper()
         profilePhotoKeeper?.start()
+        // The home screen widget shows the days written; it is told whenever they change.
+        widgetUpdater = live.makeDiaryWidgetUpdater()
+        widgetUpdater?.start()
         let textSize = AppTextSizeController(store: UserDefaultsTextSizeStore())
         live.textSize = textSize
         let appearance = AppAppearanceController(store: UserDefaultsAppearanceStore())
@@ -66,6 +70,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // The account listener must not outlive the scene; a reconnected scene starts its own.
         profilePhotoKeeper?.stop()
         profilePhotoKeeper = nil
+        widgetUpdater?.stop()
+        widgetUpdater = nil
     }
     
     func sceneDidBecomeActive(_ scene: UIScene) {
