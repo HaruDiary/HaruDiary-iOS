@@ -6,12 +6,14 @@ import Foundation
 extension AppDependencies {
     static func live() -> AppDependencies {
         let appleRecords = AppleSignInRecords(secrets: AppleSignInSecrets(secrets: KeychainSecretStore(), legacy: .standard))
+        // One directory for the updater and the withdrawal, so a withdrawal can stop the account's entry being written.
+        let userDirectory = SuspendableUserDirectory(FirebaseUserDirectory(database: .firestore()))
         var dependencies = AppDependencies(
             diaryRepository: FirebaseDiaryReadingRepository(database: .firestore()),
             userSession: FirebaseDiaryUserSession(auth: .auth()),
             accountSession: FirebaseAccountSession(
                 auth: .auth(),
-                dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage()),
+                dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage(), directory: userDirectory),
                 storage: .storage(),
                 appleRecords: appleRecords
             ),
@@ -26,7 +28,7 @@ extension AppDependencies {
             calendar: .current,
             now: Date.init
         )
-        dependencies.userDirectory = FirebaseUserDirectory(database: .firestore())
+        dependencies.userDirectory = userDirectory
         dependencies.diaryDrafts = UserDefaultsDiaryDraftStore()
         dependencies.profilePhotos = ProfilePhotoLoader(files: .inCaches())
         return dependencies

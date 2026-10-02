@@ -155,6 +155,38 @@ final class UserDirectoryTests: XCTestCase {
         XCTAssertEqual(directory.writes.map(\.entry.nickname), ["하루", "새 이름", "또 다른 이름"])
     }
 
+    func testAnAccountBeingWithdrawnIsNotWrittenBack() async throws {
+        let recording = RecordingDirectory()
+        let directory = SuspendableUserDirectory(recording)
+        let session = FakeAccountSession()
+        var clock = date(2)
+        let updater = UserDirectoryUpdater(session: session, directory: directory, records: MemoryDirectoryRecords(),
+                                           calendar: calendar, now: { clock })
+        updater.start()
+        defer { updater.stop() }
+        session.send(snapshot())
+        try await waitUntil { recording.writes.count == 1 }
+
+        // The withdrawal starts; a change or a new day must not put the entry back.
+        directory.suspendWrites(userID: uid)
+        clock = date(3)
+        session.currentAccount = snapshot(name: "새 이름")
+        await updater.refresh()
+        XCTAssertEqual(recording.attempts, 1)
+
+        // Another account on the same device is written as usual.
+        let other = "zz99XX88yy77WW66vv55UU44tt33"
+        session.currentAccount = snapshot(userID: other)
+        await updater.refresh()
+        XCTAssertEqual(recording.writes.map(\.userID), [uid, other])
+
+        // The withdrawal failed and the account stays: its entry is written again.
+        directory.resumeWrites(userID: uid)
+        session.currentAccount = snapshot(name: "새 이름")
+        await updater.refresh()
+        XCTAssertEqual(recording.writes.last?.entry.nickname, "새 이름")
+    }
+
     func testNothingIsWrittenForNobodyAndEachAccountIsWrittenUnderItsOwnID() async throws {
         let session = FakeAccountSession()
         let directory = RecordingDirectory()

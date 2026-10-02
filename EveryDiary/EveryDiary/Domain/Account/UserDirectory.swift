@@ -50,3 +50,40 @@ protocol UserDirectoryRecordStoring {
     func lastWritten(userID: String) -> String?
     func setLastWritten(_ record: String, userID: String)
 }
+
+/// Stops the writing of an account's entry while the account is being withdrawn.
+@MainActor
+protocol UserDirectorySuspending: AnyObject {
+    func suspendWrites(userID: String)
+    func resumeWrites(userID: String)
+}
+
+enum UserDirectoryError: Error {
+    /// The account is being withdrawn; its entry must not be written back.
+    case suspended
+}
+
+/// A directory whose writes can be stopped per account. A withdrawal deletes `users/{userID}`; a write arriving
+/// after that would put the support code, nickname and e-mail back for an account that is gone.
+@MainActor
+final class SuspendableUserDirectory: UserDirectoryWriting, UserDirectorySuspending {
+    private let directory: any UserDirectoryWriting
+    private var suspended: Set<String> = []
+
+    init(_ directory: any UserDirectoryWriting) {
+        self.directory = directory
+    }
+
+    func write(_ entry: UserDirectoryEntry, userID: String, seenAt: Date) async throws {
+        guard !suspended.contains(userID) else { throw UserDirectoryError.suspended }
+        try await directory.write(entry, userID: userID, seenAt: seenAt)
+    }
+
+    func suspendWrites(userID: String) {
+        suspended.insert(userID)
+    }
+
+    func resumeWrites(userID: String) {
+        suspended.remove(userID)
+    }
+}
