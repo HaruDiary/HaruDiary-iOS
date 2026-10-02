@@ -37,6 +37,14 @@ final class ProfilePhotoFiles: ProfilePhotoStoring {
         try? files.removeItem(at: directory)
     }
 
+    func keepOnly(_ url: URL) {
+        let kept = file(for: url).lastPathComponent
+        guard let names = try? files.contentsOfDirectory(atPath: directory.path) else { return }
+        for name in names where name != kept {
+            try? files.removeItem(at: directory.appendingPathComponent(name))
+        }
+    }
+
     /// Each upload has its own Storage path (`uid/profile-….jpg`), so a changed photo never reads the old file.
     private func file(for url: URL) -> URL {
         let name = ProfilePicture.storagePath(of: url) ?? url.absoluteString

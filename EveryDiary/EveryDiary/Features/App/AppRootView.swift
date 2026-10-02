@@ -31,7 +31,5 @@ struct AppRootView: View {
                     .transition(.opacity)
             }
         }
-        // The app is designed for light appearance only.
-        .preferredColorScheme(.light)
     }
 }

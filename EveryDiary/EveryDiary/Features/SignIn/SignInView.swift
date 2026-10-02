@@ -6,6 +6,7 @@ struct SignInView: View {
     let onApple: () -> Void
     let onGoogle: () -> Void
     let onFinish: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ZStack {
@@ -18,11 +19,8 @@ struct SignInView: View {
                     .foregroundStyle(DiaryTheme.Colors.brand)
                     .multilineTextAlignment(.center)
                     .accessibilityAddTraits(.isHeader)
-                Image("onboarding-mockup-keep")
-                    .resizable()
-                    .scaledToFit()
+                OnboardingIllustration(page: .keep)
                     .frame(maxHeight: DiaryTheme.SignIn.illustrationMaxHeight)
-                    .accessibilityHidden(true)
                 Text("소중한 기록을 안전하게 보관하세요.")
                     .font(DiaryTheme.Fonts.body)
                     .foregroundStyle(DiaryTheme.Colors.secondaryText)
@@ -83,7 +81,9 @@ struct SignInView: View {
         VStack(spacing: DiaryTheme.Spacing.medium) {
             // Apple's button style: Apple logo and title in white on black. The system button cannot be used
             // because it follows the app's languages, and the app does not list Korean, so it would read English.
-            providerButton(title: "Apple로 계속하기", foreground: .white, background: .black, action: onApple) {
+            // On a dark screen the black button would not stand out, so it turns white, as Apple's own does.
+            providerButton(title: "Apple로 계속하기", foreground: colorScheme == .dark ? .black : .white,
+                           background: colorScheme == .dark ? .white : .black, action: onApple) {
                 Image(systemName: "apple.logo")
                     .font(.title3)
             }

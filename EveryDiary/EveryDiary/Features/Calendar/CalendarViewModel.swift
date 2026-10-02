@@ -51,6 +51,12 @@ final class CalendarViewModel {
         Set(index.decoratedDays.lazy.filter { $0.year == year }.map(\.month))
     }
 
+    /// How the month on screen felt.
+    var displayedMoodSummary: MonthMoodSummary {
+        index.moodSummary(year: calendar.component(.year, from: displayedMonth),
+                          month: calendar.component(.month, from: displayedMonth))
+    }
+
     var selectedEntries: [DiaryEntry] {
         index.entries(on: selectedDay)
     }

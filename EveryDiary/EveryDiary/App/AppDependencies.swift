@@ -16,6 +16,10 @@ struct AppDependencies {
     var reminders: DiaryReminders? = nil
     /// The app's text size, applied to its windows by the scene and changed from settings.
     var textSize: AppTextSizeController? = nil
+    /// Light or dark, applied to the app's windows by the scene and changed from settings.
+    var appearance: AppAppearanceController? = nil
+    /// Unsaved writing kept on the device; one store for every editor.
+    var diaryDrafts: (any DiaryDraftStoring)? = nil
     /// The profile photo kept on the device; shared, so every settings screen shows it without loading.
     var profilePhotos: ProfilePhotoLoader? = nil
 
@@ -35,7 +39,16 @@ struct AppDependencies {
 
     func makeSettingsModule() -> SettingsModule {
         SettingsModule(session: accountSession, signInGateway: signInGateway, makeTrashModule: makeTrashModule,
-                       reminders: reminders, textSize: textSize, profilePhotos: profilePhotos)
+                       reminders: reminders, textSize: textSize, appearance: appearance, profilePhotos: profilePhotos)
+    }
+
+    func makeDiaryExportViewModel() -> DiaryExportViewModel {
+        DiaryExportViewModel(repository: diaryRepository, session: userSession, calendar: calendar, now: now)
+    }
+
+    /// Nil where no photo is kept on the device.
+    func makeProfilePhotoKeeper() -> ProfilePhotoKeeper? {
+        profilePhotos.map { ProfilePhotoKeeper(session: accountSession, photos: $0) }
     }
 
     func makeDiaryListModule() -> DiaryListModule {

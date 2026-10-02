@@ -55,6 +55,97 @@ final class ProfilePhotoFilesTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
     }
 
+    func testAnotherAccountsPhotoIsDroppedWhileTheShownOneStays() throws {
+        // Two files can only be there when they were written apart; `store` itself keeps one.
+        let files = ProfilePhotoFiles(directory: directory)
+        files.store(Data([1]), for: first)
+        let other = directory.appendingPathComponent("uid999_profile-Z9.jpg")
+        try Data([9]).write(to: other)
+
+        files.keepOnly(first)
+
+        XCTAssertEqual(files.data(for: first), Data([1]))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: other.path))
+
+        // The account now shows another photo: the kept one is not its photo and goes.
+        files.keepOnly(second)
+        XCTAssertNil(files.data(for: first))
+    }
+
+    func testLoaderForgetsThePreviousAccountsPhotoInMemoryToo() throws {
+        let jpeg = try XCTUnwrap(Self.jpeg())
+        let loader = ProfilePhotoLoader(files: ProfilePhotoFiles(directory: directory)) { _ in throw URLError(.notConnectedToInternet) }
+        loader.store(jpeg, for: first)
+
+        loader.keepOnly(first)
+        XCTAssertNotNil(loader.image(for: first), "The shown account's photo stays")
+
+        loader.keepOnly(second)
+        XCTAssertNil(loader.image(for: first))
+    }
+
+    func testADownloadEndingAfterTheAccountChangedIsNotKept() async throws {
+        let jpeg = try XCTUnwrap(Self.jpeg())
+        let files = ProfilePhotoFiles(directory: directory)
+        var release: CheckedContinuation<Void, Never>?
+        let loader = ProfilePhotoLoader(files: files) { _ in
+            await withCheckedContinuation { release = $0 }
+            return jpeg
+        }
+        loader.keepOnly(first)
+
+        // A's photo is being downloaded when B signs in.
+        async let late = loader.load(first)
+        try await waitUntil { release != nil }
+        loader.keepOnly(second)
+        release?.resume()
+        let lateImage = await late
+
+        XCTAssertNil(lateImage)
+        XCTAssertNil(files.data(for: first), "A's photo is not written back")
+        XCTAssertNil(loader.image(for: first))
+
+        // The same after a sign-out.
+        release = nil
+        loader.keepOnly(first)
+        async let afterSignOut = loader.load(first)
+        try await waitUntil { release != nil }
+        loader.removeAll()
+        release?.resume()
+        let signedOutImage = await afterSignOut
+        XCTAssertNil(signedOutImage)
+        XCTAssertNil(files.data(for: first))
+    }
+
+    func testADownloadOfTheShownAccountsPhotoIsKeptAsBefore() async throws {
+        let jpeg = try XCTUnwrap(Self.jpeg())
+        let files = ProfilePhotoFiles(directory: directory)
+        var release: CheckedContinuation<Void, Never>?
+        let loader = ProfilePhotoLoader(files: files) { _ in
+            await withCheckedContinuation { release = $0 }
+            return jpeg
+        }
+
+        // The account becomes known while its own photo is downloaded, and is told again later.
+        async let loading = loader.load(first)
+        try await waitUntil { release != nil }
+        loader.keepOnly(first)
+        loader.keepOnly(first)
+        release?.resume()
+        let image = await loading
+
+        XCTAssertNotNil(image)
+        XCTAssertNotNil(files.data(for: first))
+    }
+
+    private func waitUntil(_ condition: @MainActor () -> Bool, file: StaticString = #filePath, line: UInt = #line) async throws {
+        for _ in 0..<2000 {
+            if condition() { return }
+            try await Task.sleep(nanoseconds: 1_000_000)
+        }
+        XCTFail("Timed out", file: file, line: line)
+    }
+
     func testLoaderGivesAStoredPhotoWithoutDownloading() async throws {
         let jpeg = try XCTUnwrap(Self.jpeg())
         var downloads = 0

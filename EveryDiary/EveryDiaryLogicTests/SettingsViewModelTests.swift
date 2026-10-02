@@ -174,6 +174,47 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertTrue(photos.stored.isEmpty)
     }
 
+    func testThePhotoIsRemovedWhenTheAccountLosesItWhileSettingsAreClosed() async throws {
+        let session = FakeAccountSession()
+        let photos = FakeProfilePhotos()
+        let keeper = ProfilePhotoKeeper(session: session, photos: photos)
+        keeper.start()
+        keeper.start()
+        defer { keeper.stop() }
+        XCTAssertEqual(session.observationCount, 1)
+
+        // Signed in with an uploaded photo: that photo is kept, any other account's is dropped.
+        var snapshot = member()
+        snapshot.photoURL = uploadedPhoto.absoluteString
+        session.send(snapshot)
+        try await waitUntil { photos.keptOnly == [self.uploadedPhoto] }
+        XCTAssertEqual(photos.removeCount, 0)
+        // The app signs the user out by itself (a revoked Apple credential): removed.
+        session.send(nil)
+        try await waitUntil { photos.removeCount == 1 }
+
+        // An avatar or no picture needs no kept photo either.
+        snapshot.photoURL = ProfileAvatar.mint.storedURL
+        session.send(snapshot)
+        try await waitUntil { photos.removeCount == 2 }
+        XCTAssertTrue(photos.stored.isEmpty)
+    }
+
+    func testTheAccountObservationEndsWhenTheKeeperStopsOrIsReleased() async throws {
+        let session = FakeAccountSession()
+        var keeper: ProfilePhotoKeeper? = ProfilePhotoKeeper(session: session, photos: FakeProfilePhotos())
+        keeper?.start()
+        keeper?.stop()
+        try await waitUntil { session.isTerminated }
+
+        // Released without being stopped (the scene went away): the listener goes too.
+        let released = FakeAccountSession()
+        keeper = ProfilePhotoKeeper(session: released, photos: FakeProfilePhotos())
+        keeper?.start()
+        keeper = nil
+        try await waitUntil { released.isTerminated }
+    }
+
     // MARK: - Nickname
 
     func testNicknameRules() throws {
@@ -392,8 +433,11 @@ final class FakeProfilePhotos: ProfilePhotoStoring {
     private(set) var stored: [(jpeg: Data, url: URL)] = []
     var removeCount = 0
 
+    private(set) var keptOnly: [URL] = []
+
     func store(_ jpeg: Data, for url: URL) { stored.append((jpeg, url)) }
     func removeAll() { removeCount += 1 }
+    func keepOnly(_ url: URL) { keptOnly.append(url) }
 }
 
 @MainActor

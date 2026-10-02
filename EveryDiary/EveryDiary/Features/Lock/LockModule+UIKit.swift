@@ -25,7 +25,8 @@ final class AppLockPresenter {
     private var lockWindow: UIWindow?
     private var screen: LockScreenViewModel?
     /// Gives the lock screen's window the app's text size, and keeps it up to date while the lock is shown.
-    var applyTextSize: ((UIWindow) -> Void)?
+    /// Gives the lock screen's window the app's text size and light or dark appearance.
+    var configureWindow: ((UIWindow) -> Void)?
     /// The passcode was forgotten and the lock was turned off after the device owner was confirmed.
     var onTurnedOff: (() -> Void)?
     /// After the earlier biometrics-only lock: invite the user to set the app passcode that replaces it.
@@ -55,8 +56,7 @@ final class AppLockPresenter {
         let model = LockScreenViewModel(lock: lock, owner: owner)
         let window = UIWindow(windowScene: scene)
         window.windowLevel = .alert + 1
-        window.overrideUserInterfaceStyle = .light
-        applyTextSize?(window)
+        configureWindow?(window)
         window.rootViewController = UIHostingController(rootView: LockScreenView(viewModel: model))
         window.makeKeyAndVisible()
         lockWindow = window

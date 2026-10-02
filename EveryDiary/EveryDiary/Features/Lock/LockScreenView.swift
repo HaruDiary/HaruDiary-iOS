@@ -79,7 +79,7 @@ struct LockScreenView: View {
             } label: {
                 Text("잠금 해제")
                     .font(DiaryTheme.Fonts.section)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(DiaryTheme.Colors.onBrand)
                     .frame(maxWidth: .infinity, minHeight: DiaryTheme.SignIn.buttonHeight)
                     .background(DiaryTheme.Colors.brand, in: RoundedRectangle(cornerRadius: DiaryTheme.SignIn.buttonRadius))
             }

@@ -50,6 +50,47 @@ final class AppTextSizeTests: XCTestCase {
         XCTAssertEqual(controller.setting, .extraLarge)
         XCTAssertEqual(store.textSize, .extraLarge)
     }
+
+    // MARK: - Light and dark
+
+    func testAppearanceStoreRemembersTheChoiceAndFallsBackToThePhone() throws {
+        let suite = "AppAppearanceTests-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let store = UserDefaultsAppearanceStore(defaults: defaults)
+        XCTAssertEqual(store.appearance, .system)
+
+        store.appearance = .dark
+        XCTAssertEqual(UserDefaultsAppearanceStore(defaults: defaults).appearance, .dark)
+
+        defaults.set("sepia", forKey: UserDefaultsAppearanceStore.key)
+        XCTAssertEqual(store.appearance, .system, "A value this version does not know follows the phone")
+    }
+
+    @MainActor
+    func testAppearanceIsAppliedToWindowsAttachedBeforeAndAfterTheChoice() throws {
+        let suite = "AppAppearanceTests-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let controller = AppAppearanceController(store: UserDefaultsAppearanceStore(defaults: defaults))
+        let main = UIWindow()
+        controller.attach(to: main)
+        XCTAssertEqual(main.overrideUserInterfaceStyle, .unspecified, "Following the phone needs no override")
+
+        controller.select(.dark)
+        XCTAssertEqual(main.overrideUserInterfaceStyle, .dark)
+        XCTAssertEqual(UserDefaultsAppearanceStore(defaults: defaults).appearance, .dark)
+
+        // A window made later, such as the lock screen's.
+        let lock = UIWindow()
+        controller.attach(to: lock)
+        XCTAssertEqual(lock.overrideUserInterfaceStyle, .dark)
+
+        controller.select(.light)
+        XCTAssertEqual(main.overrideUserInterfaceStyle, .light)
+        XCTAssertEqual(lock.overrideUserInterfaceStyle, .light)
+        XCTAssertEqual(AppAppearance.allCases.map(\.title), ["시스템 설정", "라이트", "다크"])
+    }
 }
 
 private final class MemoryTextSizeStore: AppTextSizeStoring {

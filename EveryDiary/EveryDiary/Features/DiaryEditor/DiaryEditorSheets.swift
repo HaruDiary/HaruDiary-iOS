@@ -6,6 +6,8 @@ struct DiaryDateSheet: View {
     @State private var selection: Date
     @Environment(\.dismiss) private var dismiss
 
+    @Environment(\.colorScheme) private var colorScheme
+
     init(date: Date, onDone: @escaping (Date) -> Void) {
         self.onDone = onDone
         _selection = State(initialValue: date)
@@ -21,7 +23,8 @@ struct DiaryDateSheet: View {
                 .datePickerStyle(.graphical)
                 .labelsHidden()
                 .environment(\.locale, Locale(identifier: "ko_KR"))
-                .tint(DiaryTheme.Colors.brand)
+                // The picker writes the chosen day in white on the tint; dark mode's light purple would hide it.
+                .tint(colorScheme == .dark ? Color(red: 0.49, green: 0.34, blue: 0.86) : DiaryTheme.Colors.brand)
             DiarySheetButton(title: "선택 완료") {
                 onDone(selection)
                 dismiss()
@@ -96,7 +99,7 @@ struct DiarySheetButton: View {
         Button(action: action) {
             Text(title)
                 .font(.headline)
-                .foregroundStyle(.white)
+                .foregroundStyle(DiaryTheme.Colors.onBrand)
                 .frame(maxWidth: .infinity, minHeight: DiaryTheme.SignIn.buttonHeight)
                 .background(DiaryTheme.Colors.brand, in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
         }

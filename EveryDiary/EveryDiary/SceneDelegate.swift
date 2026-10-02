@@ -15,6 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var blurEffectView: UIVisualEffectView?
     private lazy var appLock = AppLockPresenter.live()
     private var reminders: DiaryReminders?
+    private var profilePhotoKeeper: ProfilePhotoKeeper?
     // Created after FirebaseApp.configure() in AppDelegate.
     private lazy var appleCredentialMonitor = AppleCredentialMonitor(
         auth: .auth(),
@@ -30,8 +31,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let reminders = live.makeDiaryReminders()
         live.reminders = reminders
         self.reminders = reminders
+        // Follows the account for as long as the app runs, also while settings are closed.
+        profilePhotoKeeper = live.makeProfilePhotoKeeper()
+        profilePhotoKeeper?.start()
         let textSize = AppTextSizeController(store: UserDefaultsTextSizeStore())
         live.textSize = textSize
+        let appearance = AppAppearanceController(store: UserDefaultsAppearanceStore())
+        live.appearance = appearance
 
         // Every screen is SwiftUI; this window only hosts the root view.
         let shell = AppShell()
@@ -40,11 +46,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.rootViewController = root
         // SwiftUI sheets, covers and alerts are presented from the root; messages wait until they close.
         shell.isCoveredByPresentedScreen = { [weak root] in root?.presentedViewController != nil }
-        window.overrideUserInterfaceStyle = .light
+        appearance.attach(to: window)
         textSize.attach(to: window)
         window.makeKeyAndVisible()
 
-        appLock.applyTextSize = { [weak textSize] in textSize?.attach(to: $0) }
+        appLock.configureWindow = { [weak textSize, weak appearance] in
+            textSize?.attach(to: $0)
+            appearance?.attach(to: $0)
+        }
         appLock.onTurnedOff = { [weak shell] in
             shell?.announce("앱 잠금을 껐어요", message: "설정 › 잠금에서 새 암호를 정할 수 있어요.", duration: 2.5)
         }
@@ -54,7 +63,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     func sceneDidDisconnect(_ scene: UIScene) {
-        
+        // The account listener must not outlive the scene; a reconnected scene starts its own.
+        profilePhotoKeeper?.stop()
+        profilePhotoKeeper = nil
     }
     
     func sceneDidBecomeActive(_ scene: UIScene) {
@@ -86,7 +97,7 @@ extension SceneDelegate {
     private func addBlurEffect() {
         guard let window = window, blurEffectView == nil else { return }
         
-        let blurEffect = UIBlurEffect(style: .light)
+        let blurEffect = UIBlurEffect(style: .systemMaterial)
         blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView?.frame = window.bounds
         blurEffectView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]

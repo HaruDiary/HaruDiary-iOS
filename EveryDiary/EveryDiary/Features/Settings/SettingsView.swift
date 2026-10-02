@@ -8,6 +8,7 @@ final class SettingsRowValues {
     var reminder = ""
     var lock = ""
     var textSize = ""
+    var appearance = ""
     var version = ""
 }
 
@@ -21,7 +22,9 @@ struct SettingsActions {
     var openReminders: () -> Void
     var openLock: () -> Void
     var openTextSize: () -> Void
+    var openAppearance: () -> Void
     var openTrash: () -> Void
+    var openExport: () -> Void
     /// Opens a web page inside the app.
     var openWebPage: (URL) -> Void
     var signIn: () -> Void
@@ -54,7 +57,9 @@ struct SettingsView: View {
                 row("알림", systemImage: "bell", value: values.reminder, action: actions.openReminders)
                 row("잠금", systemImage: "lock", value: values.lock, action: actions.openLock)
                 row("글자 크기", systemImage: "textformat.size", value: values.textSize, action: actions.openTextSize)
+                row("화면 모드", systemImage: "circle.lefthalf.filled", value: values.appearance, action: actions.openAppearance)
                 row("최근 삭제한 항목", systemImage: "trash", value: nil, action: actions.openTrash)
+                row("일기 내보내기", systemImage: "square.and.arrow.up", value: nil, action: actions.openExport)
             }
             Section {
                 row("개인정보 처리방침", systemImage: "hand.raised", value: nil) {
@@ -173,7 +178,7 @@ struct SettingsView: View {
                 } else {
                     Text("로그인")
                         .font(DiaryTheme.Fonts.caption.weight(.semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(DiaryTheme.Colors.onBrand)
                         .padding(.horizontal, DiaryTheme.Spacing.medium)
                         .padding(.vertical, 6)
                         .background(DiaryTheme.Colors.brand, in: Capsule())

@@ -14,6 +14,8 @@ struct DiaryEditorView: View {
 
     @State private var sheet: EditorSheet?
     @State private var viewerStart: PhotoViewerRequest?
+    /// How many questions were passed with "another question".
+    @State private var promptSkip = 0
     @FocusState private var focus: Field?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -57,7 +59,10 @@ struct DiaryEditorView: View {
         }
         .alert("작성을 그만할까요?", isPresented: $viewModel.showsDiscardConfirmation) {
             Button("계속 작성", role: .cancel) {}
-            Button("나가기", role: .destructive, action: actions.close)
+            Button("나가기", role: .destructive) {
+                viewModel.discardDraft()
+                actions.close()
+            }
         } message: {
             Text("저장하지 않은 내용은 사라져요.")
         }
@@ -129,6 +134,7 @@ struct DiaryEditorView: View {
                 DiaryDateCard(date: viewModel.draft.date, isToday: viewModel.isToday) { sheet = .date }
                 conditionChips
                 titleField
+                if viewModel.mode == .compose { promptLine }
                 contentField
                 if viewModel.isLoadingPhotos || !viewModel.photos.isEmpty {
                     DiaryPhotoStrip(photos: viewModel.photos, loadingCount: viewModel.loadingPhotoCount, isEditable: true,
@@ -183,6 +189,31 @@ struct DiaryEditorView: View {
             .padding(.horizontal, DiaryTheme.Spacing.screen)
             .frame(minHeight: 52)
             .background(DiaryTheme.Colors.surface, in: RoundedRectangle(cornerRadius: DiaryTheme.Radius.card))
+    }
+
+    /// A question to start writing from, for a new diary. It is only shown, never stored.
+    private var promptLine: some View {
+        let prompt = DiaryPrompts.prompt(on: viewModel.draft.date, calendar: .current, skip: promptSkip)
+        return HStack(alignment: .center, spacing: DiaryTheme.Spacing.small) {
+            Image(systemName: "lightbulb")
+                .foregroundStyle(DiaryTheme.Colors.brand)
+                .accessibilityHidden(true)
+            Text(prompt)
+                .font(DiaryTheme.Fonts.caption)
+                .foregroundStyle(DiaryTheme.Colors.secondaryText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityLabel("오늘의 질문: \(prompt)")
+            Button { promptSkip += 1 } label: {
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(DiaryTheme.Colors.brand)
+                    .frame(width: DiaryTheme.Size.touchTarget, height: 32)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("다른 질문 보기")
+        }
+        .padding(.leading, DiaryTheme.Spacing.small)
     }
 
     private var contentField: some View {

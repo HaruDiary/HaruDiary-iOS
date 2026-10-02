@@ -27,7 +27,9 @@ struct SettingsScreen: View {
             openReminders: { shell.push(.reminders) },
             openLock: { shell.push(.lock) },
             openTextSize: { shell.push(.textSize) },
+            openAppearance: { shell.push(.appearance) },
             openTrash: { shell.push(.trash) },
+            openExport: { shell.push(.export) },
             openWebPage: { webPage = WebPage(url: $0) },
             signIn: { shell.isSigningIn = true },
             confirmWithAppleThenDelete: { Task { await confirmWithAppleThenDelete() } },
@@ -63,6 +65,7 @@ struct SettingsScreen: View {
         values.reminder = SettingsSummary.reminder(UserDefaultsReminderStore(calendar: calendar).settings, calendar: calendar)
         values.lock = SettingsSummary.lock(LockModule.makeLock().mode, biometry: LiveDeviceOwnerAuthenticator().biometry)
         values.textSize = module.value.textSize?.setting.title ?? AppTextSize.system.title
+        values.appearance = module.value.appearance?.setting.title ?? AppAppearance.system.title
         let info = Bundle.main.infoDictionary
         values.version = SettingsSummary.version(short: info?["CFBundleShortVersionString"] as? String,
                                                  build: info?["CFBundleVersion"] as? String)

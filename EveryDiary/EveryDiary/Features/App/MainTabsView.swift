@@ -84,7 +84,7 @@ struct MainTabsView: View {
         .onChange(of: shell.paths) { shell.updateBarVisibility() }
         .sheet(item: $shell.editor) { request in
             DiaryEditorScreen(
-                request: request, saver: dependencies.diarySaving,
+                request: request, saver: dependencies.diarySaving, drafts: dependencies.diaryDrafts,
                 onSaveStarted: { [list = modules.value.list.viewModel] start in
                     // One editor saves once, so its request names the save.
                     shell.saveStarted(DiarySaveInProgress(id: request.id, day: start.day, isNew: start.isNew,
@@ -159,8 +159,14 @@ struct MainTabsView: View {
             if let textSize = dependencies.textSize {
                 TextSizeSettingsView(controller: textSize)
             }
+        case .appearance:
+            if let appearance = dependencies.appearance {
+                AppearanceSettingsView(controller: appearance)
+            }
         case .trash:
             TrashScreen(shell: shell, tab: tab, makeModule: dependencies.makeTrashModule)
+        case .export:
+            DiaryExportScreen(makeViewModel: dependencies.makeDiaryExportViewModel)
         case .search:
             DiarySearchScreen(shell: shell, makeModule: dependencies.makeDiaryListModule)
         case .calendarDay:

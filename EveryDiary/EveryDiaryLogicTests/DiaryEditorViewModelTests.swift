@@ -17,9 +17,9 @@ final class DiaryEditorViewModelTests: XCTestCase {
     private let weather = FakeWeatherLooking()
     private let locating = FakeLocating()
 
-    private func makeModel() -> DiaryEditorViewModel {
+    private func makeModel(drafts: (any DiaryDraftStoring)? = nil) -> DiaryEditorViewModel {
         DiaryEditorViewModel(saver: saver, downloader: downloader, weather: weather, locating: locating,
-                             calendar: calendar, now: { [today] in today })
+                             calendar: calendar, now: { [today] in today }, drafts: drafts)
     }
 
     private func waitUntil(_ condition: @MainActor () -> Bool, file: StaticString = #filePath, line: UInt = #line) async throws {
@@ -108,6 +108,351 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(saver.created.first?.dateString, DateFormatter.yyyyMMddHHmmss.string(from: lastWeek))
         XCTAssertEqual(saver.created.first?.weatherDescription, "Unknown")
         XCTAssertEqual(weather.lookups, 0)
+    }
+
+    // MARK: - Kept writing
+
+    func testWritingOfANewDiaryIsKeptAndComesBackTheNextTime() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        XCTAssertNil(drafts.stored, "Nothing written, nothing kept")
+
+        model.draft.title = "쓰던 글"
+        model.draft.content = "여기까지 썼다"
+        model.draft.emotion = "Grinning face"
+        model.selectDate(lastWeek)
+        XCTAssertEqual(drafts.stored, StoredDiaryDraft(title: "쓰던 글", content: "여기까지 썼다", date: lastWeek, emotion: "Grinning face",
+                                                       weather: "", photoCount: 0, userID: "user-a"))
+
+        // The app is closed and opened again: another editor, the same store.
+        let next = makeModel(drafts: drafts)
+        next.startComposing()
+
+        XCTAssertEqual(next.draft.title, "쓰던 글")
+        XCTAssertEqual(next.draft.content, "여기까지 썼다")
+        XCTAssertEqual(next.draft.emotion, "Grinning face")
+        XCTAssertEqual(next.draft.date, lastWeek)
+        XCTAssertEqual(next.notice, .draftRestored(photoCount: 0))
+        XCTAssertTrue(next.hasChanges, "Closing asks before the writing is lost")
+    }
+
+    func testClearingTheWritingKeepsNothing() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        model.draft.title = "제목"
+        XCTAssertNotNil(drafts.stored)
+
+        model.draft.title = ""
+
+        XCTAssertNil(drafts.stored)
+    }
+
+    func testGivingUpTheWritingForgetsIt() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        model.draft.title = "버릴 글"
+
+        model.discardDraft()
+        // A late change (the place arriving) must not bring it back.
+        model.draft.currentLocationInfo = "37.5, 127.0"
+
+        XCTAssertNil(drafts.stored)
+        let next = makeModel(drafts: drafts)
+        next.startComposing()
+        XCTAssertEqual(next.draft.title, "")
+        XCTAssertNil(next.notice)
+    }
+
+    func testASavedDiaryIsNoLongerKeptButAFailedSaveKeepsIt() async throws {
+        let drafts = FakeDraftStore()
+        saver.outcome = .failure(DiarySaveError.signedOut)
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        model.draft.title = "저장 실패할 글"
+        var report: DiarySaveReport?
+        model.onSaveFinished = { report = $0 }
+
+        XCTAssertTrue(model.save())
+        try await waitUntil { report != nil }
+        XCTAssertEqual(report, .failed(isUpdate: false))
+        XCTAssertEqual(drafts.stored?.title, "저장 실패할 글", "The writing waits for the next try")
+
+        // The next editor brings it back, and saving it clears it.
+        saver.outcome = .success(.saved)
+        let next = makeModel(drafts: drafts)
+        next.startComposing()
+        XCTAssertEqual(next.draft.title, "저장 실패할 글")
+        report = nil
+        next.onSaveFinished = { report = $0 }
+        XCTAssertTrue(next.save())
+        try await waitUntil { report != nil }
+        XCTAssertEqual(report, .saved)
+        XCTAssertNil(drafts.stored)
+    }
+
+    func testASaveStillRunningNeitherComesBackNorClearsWhatTheNextEditorKeeps() async throws {
+        let drafts = FakeDraftStore()
+        saver.holdsCreate = true
+        let first = makeModel(drafts: drafts)
+        first.startComposing()
+        first.draft.title = "저장 중인 글"
+        var report: DiarySaveReport?
+        first.onSaveFinished = { report = $0 }
+        XCTAssertTrue(first.save())
+        try await waitUntil { saver.heldCreate != nil }
+        XCTAssertEqual(drafts.stored?.title, "저장 중인 글", "Kept until the save has succeeded")
+
+        // The editor closed when the save started; the user writes again while it runs.
+        let second = makeModel(drafts: drafts)
+        second.startComposing()
+        XCTAssertEqual(second.draft.title, "", "Writing that is being saved is not written again")
+        XCTAssertNil(second.notice)
+        XCTAssertEqual(drafts.stored?.title, "저장 중인 글", "An empty editor does not drop it either")
+        second.draft.title = "다음 글"
+        // A late change in the closed editor must not overwrite the next editor's writing.
+        first.draft.currentLocationInfo = "37.5, 127.0"
+        XCTAssertEqual(drafts.stored?.title, "다음 글")
+
+        // The first save succeeds: the next editor's writing stays.
+        saver.heldCreate?(.success(.saved))
+        try await waitUntil { report != nil }
+        XCTAssertEqual(report, .saved)
+        XCTAssertEqual(drafts.stored?.title, "다음 글")
+    }
+
+    func testAnEditStillBeingSavedDoesNotComeBackAndItsEndClearsOnlyItsOwnChanges() async throws {
+        let drafts = FakeDraftStore()
+        let first = makeModel(drafts: drafts)
+        first.open(stored(), editing: true)
+        first.draft.title = "저장 중인 수정"
+        saver.holdsKeeping = true
+        XCTAssertTrue(first.save())
+        XCTAssertNotNil(saver.heldKeeping)
+
+        // Edited again while the save runs: the stored diary as it is, not the changes being saved.
+        let second = makeModel(drafts: drafts)
+        second.open(stored(), editing: true)
+        XCTAssertEqual(second.draft.title, "산책")
+        XCTAssertNil(second.notice)
+        second.draft.title = "그 사이의 새 수정"
+
+        saver.heldKeeping?(.success(.savedKeepingPhotos))
+        XCTAssertEqual(drafts.storedEdit?.title, "그 사이의 새 수정")
+    }
+
+    func testWritingKeptForItsWriterIsNotRewrittenAfterASignOutOrAnAccountSwitch() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        model.draft.title = "A가 쓰던 글"
+        let kept = drafts.stored
+        XCTAssertEqual(kept?.userID, "user-a")
+
+        // The app signs out by itself; a late place and more typing must not turn the draft into nobody's.
+        saver.userID = nil
+        model.draft.currentLocationInfo = "37.5, 127.0"
+        model.draft.content = "로그아웃 뒤에 친 글"
+        XCTAssertEqual(drafts.stored, kept)
+
+        // Another account signs in while the editor is still open.
+        saver.userID = "user-b"
+        model.draft.content = "B로 바뀐 뒤에 친 글"
+        XCTAssertEqual(drafts.stored, kept)
+
+        // B's next new diary does not get A's writing, and opening it does not drop A's writing either.
+        let next = makeModel(drafts: drafts)
+        next.startComposing()
+        XCTAssertEqual(next.draft.title, "")
+        XCTAssertNil(next.notice)
+        XCTAssertEqual(drafts.stored, kept)
+
+        // A signs in again and continues.
+        saver.userID = "user-a"
+        let back = makeModel(drafts: drafts)
+        back.startComposing()
+        XCTAssertEqual(back.draft.title, "A가 쓰던 글")
+    }
+
+    func testChangesKeptForTheirWriterAreNotRewrittenAfterASignOut() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.open(stored(), editing: true)
+        model.draft.title = "A가 고친 제목"
+        let kept = drafts.storedEdit
+
+        saver.userID = "user-b"
+        model.draft.title = "B로 바뀐 뒤 고친 제목"
+        XCTAssertEqual(drafts.storedEdit, kept)
+
+        saver.userID = "user-a"
+        let next = makeModel(drafts: drafts)
+        next.open(stored(), editing: true)
+        XCTAssertEqual(next.draft.title, "A가 고친 제목", "The writer gets the changes back")
+    }
+
+    func testWritingStartedWithoutAnAccountBecomesTheNewAccounts() {
+        let drafts = FakeDraftStore()
+        saver.userID = nil
+        let model = makeModel(drafts: drafts)
+        model.startComposing()
+        model.draft.title = "계정 없이 쓴 글"
+        XCTAssertNil(drafts.stored?.userID)
+
+        // Saving makes an account; from then on the writing is that account's.
+        saver.userID = "anonymous-1"
+        model.draft.content = "이어서"
+        XCTAssertEqual(drafts.stored?.userID, "anonymous-1")
+
+        // And it stays that account's when someone else signs in.
+        saver.userID = "user-b"
+        model.draft.content = "다른 계정"
+        XCTAssertEqual(drafts.stored?.content, "이어서")
+        XCTAssertEqual(drafts.stored?.userID, "anonymous-1")
+    }
+
+    func testAnotherAccountsWritingIsNotShownAndStaysUntilThisAccountWrites() {
+        let drafts = FakeDraftStore()
+        let others = StoredDiaryDraft(title: "남의 글", content: "", date: lastWeek, emotion: "", weather: "", photoCount: 0, userID: "user-b")
+        drafts.stored = others
+        let model = makeModel(drafts: drafts)
+
+        model.startComposing()
+
+        XCTAssertEqual(model.draft.title, "")
+        XCTAssertNil(model.notice)
+        XCTAssertEqual(drafts.stored, others, "Opening the editor does not drop the other account's writing")
+
+        // One new diary's writing is kept at a time: this account's writing takes its place.
+        model.draft.title = "내 글"
+        XCTAssertEqual(drafts.stored?.title, "내 글")
+        XCTAssertEqual(drafts.stored?.userID, "user-a")
+        model.draft.title = ""
+        XCTAssertNil(drafts.stored, "Its own writing is cleared as before")
+    }
+
+    func testWritingFromBeforeAnAccountExistedComesBackWithItsPhotoCount() {
+        let drafts = FakeDraftStore()
+        drafts.stored = StoredDiaryDraft(title: "계정 없이 쓴 글", content: "", date: lastWeek, emotion: "", weather: "u_sun", photoCount: 2, userID: nil)
+        let model = makeModel(drafts: drafts)
+
+        // Opened from the calendar for another day: the kept writing and its own day win.
+        model.startComposing(on: calendar.date(byAdding: .day, value: -1, to: today))
+
+        XCTAssertEqual(model.draft.title, "계정 없이 쓴 글")
+        XCTAssertEqual(model.draft.weather, "u_sun")
+        XCTAssertEqual(model.draft.date, lastWeek)
+        XCTAssertEqual(model.notice, .draftRestored(photoCount: 2))
+    }
+
+    func testChangesToAStoredDiaryAreKeptApartFromANewDiarysWriting() {
+        let drafts = FakeDraftStore()
+        drafts.stored = StoredDiaryDraft(title: "새 일기", content: "", date: today, emotion: "", weather: "", photoCount: 0, userID: "user-a")
+        let model = makeModel(drafts: drafts)
+        model.open(stored(), editing: true)
+        XCTAssertNil(drafts.storedEdit, "Nothing changed, nothing kept")
+
+        model.draft.title = "고친 제목"
+        model.draft.emotion = "Neutral face"
+
+        XCTAssertEqual(drafts.storedEdit, StoredDiaryDraft(title: "고친 제목", content: "강변", date: lastWeek, emotion: "Neutral face",
+                                                           weather: "u_sun", photoCount: 0, userID: "user-a", diaryID: "diary-1"))
+        XCTAssertEqual(drafts.stored?.title, "새 일기", "The new diary's writing is untouched")
+
+        // Put back as it was: nothing to keep.
+        model.draft.title = "산책"
+        model.draft.emotion = "Grinning face"
+        XCTAssertNil(drafts.storedEdit)
+    }
+
+    func testKeptChangesComeBackWhenTheSameDiaryIsEditedAgain() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.open(stored(), editing: true)
+        model.draft.content = "강변을 오래 걸었다"
+
+        // The app is closed and opened again, and the diary is edited again.
+        let next = makeModel(drafts: drafts)
+        next.open(stored(), editing: true)
+
+        XCTAssertEqual(next.draft.content, "강변을 오래 걸었다")
+        XCTAssertEqual(next.draft.title, "산책")
+        XCTAssertEqual(next.notice, .editRestored(photoCount: 0))
+        XCTAssertTrue(next.hasChanges, "Saving writes the change, closing asks first")
+
+        // Another diary is not given these changes.
+        let other = makeModel(drafts: drafts)
+        other.open(stored(id: "diary-2"), editing: true)
+        XCTAssertEqual(other.draft.content, "강변")
+        XCTAssertNil(other.notice)
+        XCTAssertEqual(drafts.storedEdit?.diaryID, "diary-1", "Opening another diary does not drop them")
+    }
+
+    func testKeptChangesComeBackWhenReadingTurnsIntoEditing() {
+        let drafts = FakeDraftStore()
+        drafts.storedEdit = StoredDiaryDraft(title: "고친 제목", content: "강변", date: lastWeek, emotion: "", weather: "",
+                                             photoCount: 2, userID: "user-a", diaryID: "diary-1")
+        let model = makeModel(drafts: drafts)
+
+        model.open(stored(), editing: false)
+        XCTAssertEqual(model.draft.title, "산책", "Reading shows the diary as it is stored")
+        XCTAssertNil(model.notice)
+
+        model.beginEditing()
+        XCTAssertEqual(model.draft.title, "고친 제목")
+        XCTAssertEqual(model.notice, .editRestored(photoCount: 2))
+    }
+
+    func testChangesKeptByAnotherAccountAreNotBroughtBack() {
+        let drafts = FakeDraftStore()
+        drafts.storedEdit = StoredDiaryDraft(title: "남이 고친 제목", content: "강변", date: lastWeek, emotion: "", weather: "",
+                                             photoCount: 0, userID: "user-b", diaryID: "diary-1")
+        let model = makeModel(drafts: drafts)
+
+        model.open(stored(), editing: true)
+
+        XCTAssertEqual(model.draft.title, "산책")
+        XCTAssertNil(model.notice)
+    }
+
+    func testSavedChangesAreKeptNoMoreButAFailedSaveKeepsThem() async throws {
+        let drafts = FakeDraftStore()
+        saver.keepingOutcome = .failure(DiarySaveError.signedOut)
+        let model = makeModel(drafts: drafts)
+        model.open(stored(), editing: true)
+        model.draft.title = "저장 실패할 수정"
+        var report: DiarySaveReport?
+        model.onSaveFinished = { report = $0 }
+
+        XCTAssertTrue(model.save())
+        try await waitUntil { report != nil }
+        XCTAssertEqual(report, .failed(isUpdate: true))
+        XCTAssertEqual(drafts.storedEdit?.title, "저장 실패할 수정")
+
+        saver.keepingOutcome = .success(.savedKeepingPhotos)
+        let next = makeModel(drafts: drafts)
+        next.open(stored(), editing: true)
+        XCTAssertEqual(next.draft.title, "저장 실패할 수정")
+        report = nil
+        next.onSaveFinished = { report = $0 }
+        XCTAssertTrue(next.save())
+        try await waitUntil { report != nil }
+        XCTAssertEqual(report, .saved)
+        XCTAssertNil(drafts.storedEdit)
+    }
+
+    func testGivingUpChangesForgetsThem() {
+        let drafts = FakeDraftStore()
+        let model = makeModel(drafts: drafts)
+        model.open(stored(), editing: true)
+        model.draft.title = "버릴 수정"
+        XCTAssertNotNil(drafts.storedEdit)
+
+        model.discardDraft()
+
+        XCTAssertNil(drafts.storedEdit)
     }
 
     func testSavingAnEditedDiaryTellsItIsNotNew() {
@@ -624,6 +969,35 @@ private extension UIImage {
 }
 
 @MainActor
+private final class FakeDraftStore: DiaryDraftStoring {
+    /// The new diary's writing.
+    var stored: StoredDiaryDraft?
+    /// The changes kept for a stored diary.
+    var storedEdit: StoredDiaryDraft?
+
+    func load(diaryID: String?) -> StoredDiaryDraft? {
+        diaryID == nil ? stored : (storedEdit?.diaryID == diaryID ? storedEdit : nil)
+    }
+
+    func save(_ draft: StoredDiaryDraft) {
+        if draft.diaryID == nil { stored = draft } else { storedEdit = draft }
+    }
+
+    func clear(diaryID: String?) {
+        if diaryID == nil { stored = nil } else if storedEdit?.diaryID == diaryID { storedEdit = nil }
+    }
+
+    private var saving: [StoredDiaryDraft] = []
+
+    func setSaving(_ isSaving: Bool, _ draft: StoredDiaryDraft) {
+        saving.removeAll { $0 == draft }
+        if isSaving { saving.append(draft) }
+    }
+
+    func isBeingSaved(_ draft: StoredDiaryDraft) -> Bool { saving.contains(draft) }
+}
+
+@MainActor
 private final class RecordingDiarySaving: DiarySaving {
     struct Update {
         let entry: DiaryEntry
@@ -637,6 +1011,8 @@ private final class RecordingDiarySaving: DiarySaving {
 
     var userID: String? = "user-a"
     var outcome: Result<DiarySaveOutcome, Error> = .success(.saved)
+    /// What an update that leaves the photos alone ends with.
+    var keepingOutcome: Result<DiarySaveOutcome, Error> = .success(.savedKeepingPhotos)
     private(set) var created: [DiaryEntry] = []
     private(set) var createdUploads: [[DiaryImageUpload]] = []
     private(set) var updated: [Update] = []
@@ -648,8 +1024,18 @@ private final class RecordingDiarySaving: DiarySaving {
                 completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         created.append(entry)
         createdUploads.append(uploads)
-        completion(outcome)
+        if holdsCreate {
+            heldCreate = completion
+        } else {
+            completion(outcome)
+        }
     }
+
+    /// Saves that end only when the test ends them, to look at what happens while a save runs.
+    var holdsCreate = false
+    private(set) var heldCreate: ((Result<DiarySaveOutcome, Error>) -> Void)?
+    var holdsKeeping = false
+    private(set) var heldKeeping: ((Result<DiarySaveOutcome, Error>) -> Void)?
 
     func update(_ entry: DiaryEntry, diaryID: String, expectedUserID: String, existingImageURLs: [String],
                 images uploads: [DiaryImageUpload], unreadablePhotoCount: Int,
@@ -677,7 +1063,11 @@ private final class RecordingDiarySaving: DiarySaving {
                              completion: @escaping (Result<DiarySaveOutcome, Error>) -> Void) {
         keptPhotos.append(Update(entry: entry, diaryID: diaryID, expectedUserID: expectedUserID,
                                  existing: existingImageURLs, uploads: []))
-        completion(.success(.savedKeepingPhotos))
+        if holdsKeeping {
+            heldKeeping = completion
+        } else {
+            completion(keepingOutcome)
+        }
     }
 }
 

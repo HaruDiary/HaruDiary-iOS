@@ -28,7 +28,7 @@ struct DiaryPhotoStrip: View {
                     .overlay(alignment: .topLeading) {
                         Text("\(index + 1)")
                             .font(.caption.weight(.bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(DiaryTheme.Colors.onBrand)
                             .frame(width: 22, height: 22)
                             .background(DiaryTheme.Colors.brand, in: Circle())
                             .overlay { Circle().strokeBorder(.white, lineWidth: 1.5) }

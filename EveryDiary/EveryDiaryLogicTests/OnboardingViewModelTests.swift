@@ -13,7 +13,7 @@ final class OnboardingViewModelTests: XCTestCase {
     func testNextVisitsAllPagesBeforeCompleting() {
         let store = ProgressStore()
         let model = OnboardingViewModel(store: store)
-        XCTAssertEqual(OnboardingPage.allCases.map(\.chapter), ["기록", "불빛", "여정", "캘린더", "보관"])
+        XCTAssertEqual(OnboardingPage.allCases.map(\.chapter), ["기록", "캘린더", "다시 보기", "여정", "보관"])
         XCTAssertEqual(OnboardingPage.allCases.count, 5)
         for expectedIndex in 1..<5 {
             model.advance()
