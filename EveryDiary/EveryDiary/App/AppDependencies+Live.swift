@@ -15,7 +15,8 @@ extension AppDependencies {
                 auth: .auth(),
                 dataEraser: FirebaseUserDataEraser(database: .firestore(), storage: .storage(), directory: userDirectory),
                 storage: .storage(),
-                appleRecords: appleRecords
+                appleRecords: appleRecords,
+                directory: userDirectory
             ),
             signInGateway: FirebaseSocialSignInGateway(auth: .auth(), appleRecords: appleRecords),
             diaryTrash: FirebaseDiaryTrash(database: .firestore()),

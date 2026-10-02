@@ -8,12 +8,16 @@ final class FirebaseAccountSession: AccountSession {
     private let dataEraser: any UserDataErasing
     private let storage: Storage
     private let appleRecords: AppleSignInRecords
+    /// The data eraser stops the writing of the account's directory entry; it resumes here when the account stays.
+    private let directory: (any UserDirectorySuspending)?
 
-    init(auth: Auth, dataEraser: any UserDataErasing, storage: Storage, appleRecords: AppleSignInRecords) {
+    init(auth: Auth, dataEraser: any UserDataErasing, storage: Storage, appleRecords: AppleSignInRecords,
+         directory: (any UserDirectorySuspending)? = nil) {
         self.auth = auth
         self.dataEraser = dataEraser
         self.storage = storage
         self.appleRecords = appleRecords
+        self.directory = directory
     }
 
     var currentAccount: AccountSnapshot? {
@@ -135,17 +139,23 @@ final class FirebaseAccountSession: AccountSession {
             let token = try await user.getIDTokenResult(forcingRefresh: true)
             signedInFor = token.issuedAtDate.timeIntervalSince(token.authDate)
         }
-        try await AccountDeletion.run(
-            signedInFor: signedInFor,
-            eraseData: { try await dataEraser.eraseAllData(userID: userID) },
-            deleteAccount: {
-                do {
-                    try await user.delete()
-                } catch let error as NSError where error.domain == AuthErrorDomain && error.code == AuthErrorCode.requiresRecentLogin.rawValue {
-                    throw AccountDeletionError.requiresRecentLogin
+        do {
+            try await AccountDeletion.run(
+                signedInFor: signedInFor,
+                eraseData: { try await dataEraser.eraseAllData(userID: userID) },
+                deleteAccount: {
+                    do {
+                        try await user.delete()
+                    } catch let error as NSError where error.domain == AuthErrorDomain && error.code == AuthErrorCode.requiresRecentLogin.rawValue {
+                        throw AccountDeletionError.requiresRecentLogin
+                    }
                 }
-            }
-        )
+            )
+        } catch {
+            // The account is still there (also when its data is already erased), so its entry is written again.
+            directory?.resumeWrites(userID: userID)
+            throw error
+        }
         if provider == .apple {
             appleRecords.forget()
             try? auth.signOut()
