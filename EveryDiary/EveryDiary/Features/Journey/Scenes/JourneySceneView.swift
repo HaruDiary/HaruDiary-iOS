@@ -104,7 +104,8 @@ struct JourneySceneRenderer {
     }
 
     func draw(_ element: SceneElement, in context: inout GraphicsContext) {
-        draw(element.path, color: element.color, lineWidth: element.lineWidth, glow: element.glow, in: &context)
+        draw(element.path, color: element.color, gradient: element.gradient, lineWidth: element.lineWidth, glow: element.glow,
+             blur: element.blur, in: &context)
     }
 
     /// `amount` 0 is off, 1 is fully on; values between blend the two.
@@ -119,21 +120,33 @@ struct JourneySceneRenderer {
         light.accents.forEach { draw($0, in: &layer) }
     }
 
-    func draw(_ path: CGPath, color: SceneColor, lineWidth: CGFloat?, glow: CGFloat, in context: inout GraphicsContext) {
+    func draw(_ path: CGPath, color: SceneColor, gradient: [SceneColor]? = nil, lineWidth: CGFloat?, glow: CGFloat, blur: CGFloat = 0,
+              in context: inout GraphicsContext) {
         let shape = Path(path).applying(transform)
+        let shading: GraphicsContext.Shading
+        if let gradient, gradient.count > 1 {
+            // Runs from the top of the shape to its bottom, so each shape carries its own light.
+            let box = path.boundingBoxOfPath
+            shading = .linearGradient(Gradient(colors: gradient.map { Color($0) }),
+                                      startPoint: CGPoint(x: box.midX, y: box.minY).applying(transform),
+                                      endPoint: CGPoint(x: box.midX, y: box.maxY).applying(transform))
+        } else {
+            shading = .color(Color(color))
+        }
         let paint = { (layer: inout GraphicsContext) in
             if let lineWidth {
-                layer.stroke(shape, with: .color(Color(color)), style: StrokeStyle(lineWidth: lineWidth * scale, lineCap: .round, lineJoin: .round))
+                layer.stroke(shape, with: shading, style: StrokeStyle(lineWidth: lineWidth * scale, lineCap: .round, lineJoin: .round))
             } else {
-                layer.fill(shape, with: .color(Color(color)))
+                layer.fill(shape, with: shading)
             }
         }
-        guard glow > 0 else {
+        guard glow > 0 || blur > 0 else {
             paint(&context)
             return
         }
         context.drawLayer { layer in
-            layer.addFilter(.shadow(color: Color(color), radius: glow * scale))
+            if blur > 0 { layer.addFilter(.blur(radius: blur * scale)) }
+            if glow > 0 { layer.addFilter(.shadow(color: Color(color), radius: glow * scale)) }
             paint(&layer)
         }
     }
