@@ -31,24 +31,44 @@ enum JourneySceneCatalog {
         let houses: [(x: CGFloat, width: CGFloat, height: CGFloat, base: CGFloat, columns: Int, rows: Int)] = [
             (18, 70, 84, 668, 3, 2), (100, 60, 66, 676, 2, 2), (172, 78, 104, 664, 3, 3), (262, 58, 76, 672, 2, 3), (330, 52, 92, 666, 2, 3)
         ]
-        var background: [SceneElement] = [
-            SceneElement(ScenePath.circle(300, 190, 28), SceneColor(0xF4F1DE), glow: 12),
-            SceneElement(snow, SceneColor(0xFFFFFF, opacity: 0.75), still: true),
-            SceneElement(ScenePath.ellipse(-120, 560, 640, 300), SceneColor(0xB9C4DE)),
-            SceneElement(ScenePath.ellipse(-60, 650, 510, 140), SceneColor(0xEEF2FA)),
-            SceneElement(ScenePath.rect(0, 672, 390, 28), SceneColor(0xEEF2FA))
-        ]
+        let snowLight = SceneColor(0xF7F9FF), snowShade = SceneColor(0xC4CFE8)
+        var background: [SceneElement] = SceneArt.stars(seed: 102, count: 110, area: CGRect(x: 0, y: 60, width: 390, height: 380))
+            + SceneArt.moon(300, 180, radius: 26, light: SceneColor(0xFBF8EA), shade: SceneColor(0xDCD9C8), halo: SceneColor(0xC9D8FF))
+            + [
+                SceneElement(snow, SceneColor(0xFFFFFF, opacity: 0.75), still: true),
+                // Snowy mountains far away, then a nearer ridge, each paler at the top where the snow catches the moon.
+                SceneElement(SceneArt.ridge(seed: 103, baseline: 570, height: 120, roughness: 0.58, bottom: 610), gradient: [SceneColor(0xE4EAF8), SceneColor(0x93A1C9), SceneColor(0x5F6E9C)]),
+                SceneElement(ScenePath.rect(0, 540, 390, 60), gradient: [SceneColor(0xA9B8DD, opacity: 0), SceneColor(0xA9B8DD, opacity: 0.45)], blur: 5),
+                SceneElement(SceneArt.ridge(seed: 104, baseline: 598, height: 70, roughness: 0.5, bottom: 625), gradient: [SceneColor(0xA7B5D9), SceneColor(0x4F5E8C)]),
+                SceneElement(SceneArt.pines(seed: 105, x: -10...400, base: 612, height: 26...48, spacing: 15), gradient: [SceneColor(0x3C4C7A), SceneColor(0x26335A)]),
+                SceneElement(SceneArt.hills([(-20, 628), (90, 610), (210, 622), (320, 604), (410, 618)]), gradient: [snowLight, snowShade]),
+                SceneElement(SceneArt.hills([(-20, 662), (120, 650), (260, 660), (410, 646)]), gradient: [SceneColor(0xEEF2FB), SceneColor(0xD4DCEF)])
+            ]
         var lights: [SceneLight] = []
         var smoke: [CGPath] = []
-        for house in houses {
+        var snowCaps: [CGPath] = [], icicles: [CGPath] = [], doors: [CGPath] = [], beams: [CGPath] = []
+        for (index, house) in houses.enumerated() {
             let top = house.base - house.height
             let roof = house.width * 0.45
             let chimneyX = house.x + house.width * 0.65
-            background.append(SceneElement(ScenePath.rect(chimneyX, top - roof * 0.9, 9, roof * 0.7), SceneColor(0x2A2440)))
-            background.append(SceneElement(ScenePath.rect(house.x, top, house.width, house.height), SceneColor(0x3A3350)))
+            background.append(SceneElement(ScenePath.rect(chimneyX, top - roof * 0.9, 9, roof * 0.7), gradient: [SceneColor(0x6A4A52), SceneColor(0x3A2A36)]))
+            snowCaps.append(ScenePath.rect(chimneyX - 1.5, top - roof * 0.9 - 3, 12, 4.5, corner: 2))
+            background.append(SceneElement(ScenePath.rect(house.x, top, house.width, house.height), gradient: [SceneColor(0x51476A), SceneColor(0x332B48)]))
+            // Timber beams on the walls.
+            beams.append(ScenePath.rect(house.x, top + 2, house.width, 2.5))
+            beams.append(ScenePath.rect(house.x, house.base - 4, house.width, 4))
             let roofLine = [(house.x - 7, top + 1), (house.x + house.width / 2, top - roof), (house.x + house.width + 7, top + 1)]
-            background.append(SceneElement(ScenePath.polygon(roofLine), SceneColor(0x2A2440)))
-            background.append(SceneElement(ScenePath.line(roofLine), SceneColor(0xF4F7FD), lineWidth: 5))
+            background.append(SceneElement(ScenePath.polygon(roofLine), gradient: [SceneColor(0x6B3E4E), SceneColor(0x3E2434)]))
+            // A thick layer of snow along the roof, drooping over the eaves.
+            snowCaps.append(ScenePath.polygon([(house.x - 10, top + 3), (house.x + house.width / 2, top - roof - 5), (house.x + house.width + 10, top + 3),
+                                               (house.x + house.width + 4, top + 6), (house.x + house.width / 2, top - roof + 4), (house.x - 4, top + 6)]))
+            var drip = SceneRandom(seed: 120 + UInt64(index))
+            var position = house.x - 2
+            while position < house.x + house.width {
+                let length = drip.next(3...8)
+                icicles.append(ScenePath.polygon([(position, top + 5), (position + 1.4, top + 5 + length), (position + 2.8, top + 5)]))
+                position += drip.next(5...9)
+            }
             smoke += [ScenePath.circle(chimneyX + 6, top - roof - 6, 4), ScenePath.circle(chimneyX + 11, top - roof - 17, 5.5),
                       ScenePath.circle(chimneyX + 18, top - roof - 31, 7)]
             let gap = (house.width - CGFloat(house.columns) * 10) / CGFloat(house.columns + 1)
@@ -59,40 +79,81 @@ enum JourneySceneCatalog {
                     let frame = ScenePath.group([ScenePath.line([(x + 5, y), (x + 5, y + 12)]), ScenePath.line([(x, y + 6), (x + 10, y + 6)])])
                     lights.append(SceneLight(ScenePath.rect(x, y, 10, 12, corner: 1.5), on: SceneColor(0xFFD27A), off: SceneColor(0x262040), glow: 6,
                                              accents: [SceneElement(frame, SceneColor(0xB9853A), lineWidth: 1)]))
+                    // A little snow on each sill.
+                    snowCaps.append(ScenePath.rect(x - 1.5, y + 12, 13, 2.2, corner: 1))
                 }
             }
+            if index == 2 || index == 0 {
+                doors.append(ScenePath.rect(house.x + house.width / 2 - 6, house.base - 18, 12, 18, corner: 2))
+            }
         }
+        background.append(SceneElement(ScenePath.group(beams), SceneColor(0x2A2238)))
+        background.append(SceneElement(ScenePath.group(doors), gradient: [SceneColor(0x8A5A3C), SceneColor(0x5E3A26)]))
+        background.append(SceneElement(ScenePath.group(snowCaps), gradient: [snowLight, SceneColor(0xDDE5F5)]))
+        background.append(SceneElement(ScenePath.group(icicles), SceneColor(0xE6EEFF, opacity: 0.85)))
+        // A snowy fence and a street lamp in front of the houses.
+        let posts = ScenePath.group(stride(from: CGFloat(4), through: 386, by: 18).map { ScenePath.rect($0, 676, 3, 16, corner: 1) })
+        let rails = ScenePath.group([ScenePath.rect(0, 680, 390, 2), ScenePath.rect(0, 687, 390, 2)])
+        background.append(SceneElement(ScenePath.group([posts, rails]), SceneColor(0x4A3A4A)))
+        background.append(SceneElement(ScenePath.group(stride(from: CGFloat(3), through: 385, by: 18).map { ScenePath.rect($0, 674.5, 5, 2.6, corner: 1.3) }), snowLight))
+        background.append(SceneElement(ScenePath.rect(0, 692, 390, 8), gradient: [SceneColor(0xEFF3FB), SceneColor(0xD6DEF0)]))
         var flakes = SceneRandom(seed: 111)
         let bigSnow = ScenePath.group((0..<22).map { _ in
             ScenePath.star(flakes.next(0...390), flakes.next(100...560), outer: flakes.next(2.5...4), inner: 1.1, points: 6)
         })
         let completion: [SceneElement] = [
-            // Aurora above the moon, so the moon stays clear.
-            SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 140), to: CGPoint(x: 410, y: 70), bend: 20, thickness: 34), SceneColor(0x6CFFC8, opacity: 0.2), glow: 18),
-            SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 200), to: CGPoint(x: 410, y: 105), bend: -10, thickness: 18), SceneColor(0xA394FF, opacity: 0.18), glow: 14),
+            // Aurora curtains above the moon, so the moon stays clear.
+            SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 120), to: CGPoint(x: 410, y: 60), bend: 30, thickness: 46),
+                         gradient: [SceneColor(0x7CFFD4, opacity: 0.05), SceneColor(0x6CFFC8, opacity: 0.32), SceneColor(0x4FD8FF, opacity: 0.05)], blur: 8),
+            SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 175), to: CGPoint(x: 410, y: 100), bend: -14, thickness: 28),
+                         gradient: [SceneColor(0xB59CFF, opacity: 0.05), SceneColor(0xA394FF, opacity: 0.28), SceneColor(0x6CFFC8, opacity: 0.04)], blur: 7),
             SceneElement(bigSnow, SceneColor(0xFFFFFF, opacity: 0.9), still: true),
-            SceneElement(ScenePath.group(smoke), SceneColor(0xFFFFFF, opacity: 0.45), still: true),
-            // Snowman in the lower right corner.
-            SceneElement(ScenePath.group([ScenePath.circle(370, 688, 10), ScenePath.circle(370, 672, 7)]), SceneColor(0xFFFFFF)),
-            SceneElement(ScenePath.group([ScenePath.rect(363, 663, 14, 3), ScenePath.rect(365, 654, 10, 10),
-                                          ScenePath.circle(367.5, 671, 1), ScenePath.circle(372.5, 671, 1), ScenePath.circle(370, 686, 1.2), ScenePath.circle(370, 691, 1.2)]),
+            SceneElement(ScenePath.group(smoke), SceneColor(0xFFFFFF, opacity: 0.4), blur: 1.5, still: true),
+            // Snowman in the lower right corner, with a hat, a scarf and twig arms.
+            SceneElement(ScenePath.group([ScenePath.line([(362, 672), (352, 664)]), ScenePath.line([(378, 672), (387, 663)])]), SceneColor(0x5E3A26), lineWidth: 1.4),
+            SceneElement(ScenePath.group([ScenePath.circle(370, 686, 11), ScenePath.circle(370, 669, 7.5)]), gradient: [SceneColor(0xFFFFFF), SceneColor(0xC9D4EC)]),
+            SceneElement(ScenePath.group([ScenePath.rect(362, 661, 16, 3, corner: 1), ScenePath.rect(364.5, 651, 11, 11, corner: 1),
+                                          ScenePath.circle(367.5, 668, 1), ScenePath.circle(372.5, 668, 1), ScenePath.circle(370, 683, 1.2), ScenePath.circle(370, 689, 1.2)]),
                          SceneColor(0x2A2440)),
-            SceneElement(ScenePath.rect(363, 677, 14, 3, corner: 1.5), SceneColor(0xE8505B)),
-            SceneElement(ScenePath.polygon([(370, 673), (377, 674.5), (370, 676)]), SceneColor(0xFF9A3C))
+            SceneElement(ScenePath.group([ScenePath.rect(362.5, 674.5, 15, 3.5, corner: 1.5), ScenePath.rect(374, 676, 4, 8, corner: 1.5)]), SceneColor(0xE8505B)),
+            SceneElement(ScenePath.polygon([(370, 670), (378, 671.5), (370, 673)]), SceneColor(0xFF9A3C))
         ]
-        return JourneyScene(month: 1, title: "눈 내린 마을", sky: [SceneColor(0x0E1B3D), SceneColor(0x3B4F7F), SceneColor(0x7C8DB5)],
+        return JourneyScene(month: 1, title: "눈 내린 마을", sky: [SceneColor(0x08122E), SceneColor(0x1D2E5C), SceneColor(0x4B5F94), SceneColor(0x8E9DC7)],
                             background: background, lights: lights, completion: completion, ambience: ambience(for: 1))
     }()
 
     // MARK: 2월 · 설날 청사초롱 — blue-and-red lanterns; when full, the moon, a kite and lit hanok windows
 
     static let newYearLanterns: JourneyScene = {
-        var background: [SceneElement] = [
-            SceneElement(ScenePath.rect(20, 600, 150, 100), SceneColor(0x2E2146)),
-            SceneElement(ScenePath.polygon([(0, 588), (20, 602), (170, 602), (190, 588), (160, 568), (30, 568)]), SceneColor(0x1A1230)),
-            SceneElement(ScenePath.rect(212, 592, 166, 108), SceneColor(0x2E2146)),
-            SceneElement(ScenePath.polygon([(192, 578), (212, 594), (378, 594), (398, 578), (362, 556), (246, 556)]), SceneColor(0x1A1230)),
-            SceneElement(ScenePath.rect(0, 680, 390, 20), SceneColor(0x20162F))
+        let roofOne = SceneArt.hanokRoof(95, 602, width: 196, height: 38)
+        let roofTwo = SceneArt.hanokRoof(295, 594, width: 214, height: 42)
+        // Wooden posts and the stone base of each house; the doors are paper screens.
+        let posts = ScenePath.group([CGFloat(22), 76, 110, 164, 214, 277, 312, 372].map { ScenePath.rect($0, 598, 5, 90) })
+        let screens = ScenePath.group([ScenePath.rect(84, 650, 22, 36, corner: 1), ScenePath.rect(286, 646, 24, 40, corner: 1)])
+        let screenFrames: [CGRect] = [CGRect(x: 84, y: 650, width: 22, height: 36), CGRect(x: 286, y: 646, width: 24, height: 40)]
+        let screenLattice = ScenePath.group(screenFrames.flatMap { frame -> [CGPath] in
+            let bars: [CGPath] = stride(from: frame.minY + 9, to: frame.maxY, by: 9).map { ScenePath.line([(frame.minX, $0), (frame.maxX, $0)]) }
+            return [ScenePath.line([(frame.midX, frame.minY), (frame.midX, frame.maxY)])] + bars
+        })
+        // A low stone wall with a tiled cap runs along the front.
+        var stones = SceneRandom(seed: 203)
+        let wallStones = ScenePath.group((0..<26).map { index in
+            ScenePath.rect(CGFloat(index % 13) * 30 + (index < 13 ? 0 : 15) + stones.next(-2...2), index < 13 ? 683 : 691, 27, 7, corner: 3)
+        })
+        var background: [SceneElement] = SceneArt.stars(seed: 201, count: 70, area: CGRect(x: 0, y: 70, width: 390, height: 220)) + [
+            SceneElement(SceneArt.ridge(seed: 202, baseline: 590, height: 110, roughness: 0.55, bottom: 640), gradient: [SceneColor(0x6B4C86), SceneColor(0x3D2A5A)]),
+            SceneElement(ScenePath.rect(0, 540, 390, 70), gradient: [SceneColor(0xE7A0B0, opacity: 0), SceneColor(0xE7A0B0, opacity: 0.28)], blur: 6),
+            SceneElement(SceneArt.ridge(seed: 204, baseline: 620, height: 50, roughness: 0.5, bottom: 700), gradient: [SceneColor(0x45305F), SceneColor(0x2A1D40)]),
+            SceneElement(ScenePath.group([ScenePath.rect(20, 600, 150, 100), ScenePath.rect(212, 592, 166, 108)]), gradient: [SceneColor(0x6A5677), SceneColor(0x45374F)]),
+            SceneElement(posts, gradient: [SceneColor(0x4A2E2A), SceneColor(0x2E1C1A)]),
+            SceneElement(screens, gradient: [SceneColor(0xC2AE92), SceneColor(0x96826E)]),
+            SceneElement(screenLattice, SceneColor(0x4A2E2A), lineWidth: 0.8),
+            SceneElement(ScenePath.group([roofOne.roof, roofTwo.roof]), gradient: [SceneColor(0x3A3550), SceneColor(0x1C1830)]),
+            SceneElement(ScenePath.group([roofOne.tiles, roofTwo.tiles]), SceneColor(0x5A5476, opacity: 0.8), lineWidth: 1.4),
+            SceneElement(ScenePath.group([roofOne.ridge, roofTwo.ridge]), SceneColor(0x5E587C), lineWidth: 4),
+            SceneElement(ScenePath.rect(0, 676, 390, 24), gradient: [SceneColor(0x3E3046), SceneColor(0x2A2030)]),
+            SceneElement(wallStones, gradient: [SceneColor(0x6E6070), SceneColor(0x4C4052)]),
+            SceneElement(ScenePath.rect(-4, 672, 398, 6, corner: 2), SceneColor(0x2A2440))
         ]
         let gold = SceneColor(0xF2C14E)
         func lantern(_ p: CGPoint) -> SceneLight {
@@ -120,7 +181,7 @@ enum JourneySceneCatalog {
             [ScenePath.line([(x + w / 2, y), (x + w / 2, y + h)]), ScenePath.line([(x, y + h / 2), (x + w, y + h / 2)]), ScenePath.rect(x, y, w, h)]
         })
         let completion: [SceneElement] = [
-            SceneElement(ScenePath.circle(300, 160, 28), SceneColor(0xFFF3C4), glow: 18),
+        ] + SceneArt.moon(300, 160, radius: 28, light: SceneColor(0xFFF6D6), shade: SceneColor(0xF0D9A0)) + [
             SceneElement(ScenePath.curve(from: CGPoint(x: 95, y: 190), to: CGPoint(x: 150, y: 560), control: CGPoint(x: 60, y: 420)), SceneColor(0xF7F1E3, opacity: 0.5), lineWidth: 0.8),
             SceneElement(ScenePath.rect(80, 150, 30, 40, corner: 2), SceneColor(0xF7F1E3)),
             SceneElement(ScenePath.rect(80, 150, 30, 7), SceneColor(0xE8505B)),
@@ -129,7 +190,7 @@ enum JourneySceneCatalog {
             SceneElement(ScenePath.group(windows.map { ScenePath.rect($0.0, $0.1, $0.2, $0.3) }), SceneColor(0xFFCF7A), glow: 10),
             SceneElement(lattice, SceneColor(0x9C6A2A), lineWidth: 1.2)
         ]
-        return JourneyScene(month: 2, title: "설날 청사초롱", sky: [SceneColor(0x1C1440), SceneColor(0x4B2E6B), SceneColor(0xC9738A)],
+        return JourneyScene(month: 2, title: "설날 청사초롱", sky: [SceneColor(0x150F36), SceneColor(0x3E2766), SceneColor(0x8E4F86), SceneColor(0xE08A8E)],
                             background: background, lights: lights, completion: completion, ambience: ambience(for: 2))
     }()
 
@@ -151,7 +212,7 @@ enum JourneySceneCatalog {
         }
         let rainbowColors: [UInt32] = [0xFF6B6B, 0xFFA94D, 0xFFE066, 0x69DB7C, 0x4DABF7, 0x9775FA]
         let rainbow = rainbowColors.enumerated().map { index, hex in
-            SceneElement(ScenePath.arc(195, 600, radius: 250 - CGFloat(index) * 8, from: .pi, to: 2 * .pi), SceneColor(hex, opacity: 0.4), lineWidth: 8)
+            SceneElement(ScenePath.arc(195, 600, radius: 250 - CGFloat(index) * 8, from: .pi, to: 2 * .pi), SceneColor(hex, opacity: 0.45), lineWidth: 8, blur: 1.5)
         }
         func butterfly(_ x: CGFloat, _ y: CGFloat, _ hex: UInt32) -> [SceneElement] {
             [SceneElement(ScenePath.group([ScenePath.ellipse(center: CGPoint(x: x - 5, y: y - 3), width: 10, height: 8, angle: -0.5),
@@ -160,24 +221,43 @@ enum JourneySceneCatalog {
                                            ScenePath.ellipse(center: CGPoint(x: x + 4, y: y + 4), width: 6, height: 5, angle: -0.4)]), SceneColor(hex), still: true),
              SceneElement(ScenePath.line([(x, y - 6), (x, y + 7)]), SceneColor(0x3B2A20), lineWidth: 1.4, still: true)]
         }
-        let rays = ScenePath.group((0..<12).map { index -> CGPath in
-            let angle = CGFloat(index) * .pi / 6
-            return ScenePath.line([(80 + cos(angle) * 33, 300 + sin(angle) * 33), (80 + cos(angle) * 45, 300 + sin(angle) * 45)])
+        var meadow = SceneRandom(seed: 305)
+        let farTrees = ScenePath.group((0..<9).map { index in
+            SceneArt.crown(seed: 310 + UInt64(index), 20 + CGFloat(index) * 44 + meadow.next(-8...8), 524 + meadow.next(-6...6), radius: meadow.next(9...14), puffs: 5)
         })
+        let path = CGMutablePath()
+        path.move(to: CGPoint(x: 150, y: 700))
+        path.addQuadCurve(to: CGPoint(x: 236, y: 600), control: CGPoint(x: 120, y: 640))
+        path.addQuadCurve(to: CGPoint(x: 262, y: 548), control: CGPoint(x: 290, y: 572))
+        path.addLine(to: CGPoint(x: 268, y: 548))
+        path.addQuadCurve(to: CGPoint(x: 252, y: 602), control: CGPoint(x: 300, y: 576))
+        path.addQuadCurve(to: CGPoint(x: 206, y: 700), control: CGPoint(x: 168, y: 640))
+        path.closeSubpath()
+        // A small cottage with a red roof on the far hill.
+        let cottage = ScenePath.rect(262, 528, 30, 20)
+        let cottageRoof = ScenePath.polygon([(258, 530), (277, 514), (296, 530)])
         return JourneyScene(
-            month: 3, title: "봄 들판", sky: [SceneColor(0x2E5E8C), SceneColor(0x6FA8C4), SceneColor(0xCFE8C0)],
+            month: 3, title: "봄 들판", sky: [SceneColor(0x3F7FBF), SceneColor(0x7DB6DE), SceneColor(0xBFE0EC), SceneColor(0xEAF4DC)],
             background: [
-                SceneElement(ScenePath.circle(80, 300, 26), SceneColor(0xFFF4C9, opacity: 0.95), glow: 10),
-                SceneElement(ScenePath.group([ScenePath.ellipse(220, 232, 96, 26), ScenePath.ellipse(250, 214, 58, 32)]), SceneColor(0xFFFFFF, opacity: 0.7)),
-                SceneElement(ScenePath.ellipse(-120, 540, 420, 260), SceneColor(0x8CC26F)),
-                SceneElement(ScenePath.ellipse(140, 555, 400, 240), SceneColor(0x74B060)),
-                SceneElement(ScenePath.ellipse(-50, 596, 490, 180), SceneColor(0x5E9A50)),
-                SceneElement(ScenePath.rect(0, 650, 390, 50), SceneColor(0x5E9A50)),
+                SceneElement(ScenePath.circle(80, 250, 70), SceneColor(0xFFF8D6, opacity: 0.25), blur: 22),
+                SceneElement(ScenePath.circle(80, 250, 24), gradient: [SceneColor(0xFFFDEB), SceneColor(0xFFF0B8)], glow: 14),
+                SceneElement(ScenePath.group([SceneArt.cloud(190, 210, width: 130), SceneArt.cloud(10, 360, width: 90), SceneArt.cloud(286, 330, width: 100)]),
+                             gradient: [SceneColor(0xFFFFFF, opacity: 0.95), SceneColor(0xDCEBF5, opacity: 0.9)]),
+                SceneElement(SceneArt.ridge(seed: 306, baseline: 540, height: 80, roughness: 0.5, bottom: 560), gradient: [SceneColor(0x9EBBD9), SceneColor(0xA9C9D8)]),
+                SceneElement(SceneArt.hills([(-30, 540), (80, 512), (200, 530), (300, 506), (420, 528)], bottom: 600), gradient: [SceneColor(0xB5DB8E), SceneColor(0x93C772)]),
+                SceneElement(farTrees, gradient: [SceneColor(0x7DB862), SceneColor(0x5A9A4A)]),
+                SceneElement(cottage, gradient: [SceneColor(0xFFF6E6), SceneColor(0xE6D8C0)]),
+                SceneElement(cottageRoof, SceneColor(0xD9534F)),
+                SceneElement(ScenePath.group([ScenePath.rect(268, 534, 6, 6), ScenePath.rect(281, 536, 6, 12)]), SceneColor(0x8A6A4A)),
+                SceneElement(SceneArt.hills([(-30, 576), (100, 552), (240, 570), (420, 548)]), gradient: [SceneColor(0x9CCF72), SceneColor(0x6FAE52)]),
+                SceneElement(path, gradient: [SceneColor(0xEBDDB8), SceneColor(0xD8C394)]),
+                SceneElement(SceneArt.grass(seed: 307, count: 90, x: 0...390, baseline: 600, height: 6...12, width: 2), SceneColor(0x5E9E48, opacity: 0.8)),
                 SceneElement(stems, SceneColor(0x3F7D3A), lineWidth: 1.5),
                 SceneElement(leaves, SceneColor(0x4E9447))
             ],
             lights: lights,
-            completion: rainbow + [SceneElement(rays, SceneColor(0xFFF4C9, opacity: 0.85), lineWidth: 2)]
+            foreground: [SceneElement(SceneArt.grass(seed: 308, count: 120, x: -5...395, baseline: 700, height: 6...14, width: 3), gradient: [SceneColor(0x6DB056), SceneColor(0x3F7D3A)])],
+            completion: rainbow
                 + butterfly(118, 480, 0xFFD43B) + butterfly(272, 452, 0xFF8FAB) + butterfly(330, 520, 0x9BE7FF),
             ambience: ambience(for: 3)
         )
@@ -205,16 +285,41 @@ enum JourneySceneCatalog {
         let carpet = ScenePath.group((0..<40).map { _ in
             ScenePath.ellipse(center: CGPoint(x: falling.next(0...390), y: falling.next(652...698)), width: 6, height: 3.5, angle: falling.next(0...3))
         })
+        // Soft pink masses behind the blossoms give the canopy its body.
+        let canopy = ScenePath.group([(CGFloat(195), CGFloat(400), CGFloat(120)), (105, 450, 78), (290, 452, 80), (150, 350, 72), (245, 345, 74), (195, 480, 70)].enumerated().map { index, spot in
+            SceneArt.crown(seed: 420 + UInt64(index), spot.0, spot.1, radius: spot.2, puffs: 8)
+        })
+        // Lighter puffs on the upper left, where the light falls on the canopy.
+        let canopyLight = ScenePath.group([(CGFloat(165), CGFloat(370), CGFloat(70)), (110, 430, 44), (220, 330, 46)].enumerated().map { index, spot in
+            SceneArt.crown(seed: 440 + UInt64(index), spot.0, spot.1, radius: spot.2, puffs: 6)
+        })
+        let reflection = SceneArt.shimmer(seed: 430, x: 76, top: 640, bottom: 690, width: 60, rows: 7)
+        // A stone lantern beside the tree.
+        let stoneLantern = ScenePath.group([ScenePath.rect(326, 628, 8, 30), ScenePath.rect(318, 610, 24, 18, corner: 2),
+                                            ScenePath.polygon([(312, 612), (330, 596), (348, 612)]), ScenePath.rect(316, 656, 28, 6, corner: 2)])
         return JourneyScene(
-            month: 4, title: "벚꽃나무", sky: [SceneColor(0x3A2552), SceneColor(0x9E5A8A), SceneColor(0xF0B3C4)],
-            background: [SceneElement(ScenePath.ellipse(-80, 630, 550, 160), SceneColor(0x5A3A5C)),
-                         SceneElement(ScenePath.rect(0, 670, 390, 30), SceneColor(0x5A3A5C))]
-                + tree(color: SceneColor(0x4A2C3A))
-                + [SceneElement(petals, SceneColor(0xFFC4D6, opacity: 0.7), still: true)],
+            month: 4, title: "벚꽃나무", sky: [SceneColor(0x2A1E4E), SceneColor(0x6E3E7E), SceneColor(0xC46C94), SceneColor(0xF6BCC6)],
+            background: SceneArt.stars(seed: 401, count: 50, area: CGRect(x: 0, y: 60, width: 390, height: 200)) + [
+                SceneElement(SceneArt.ridge(seed: 402, baseline: 640, height: 70, roughness: 0.5, bottom: 660), gradient: [SceneColor(0x9A5E8E), SceneColor(0x7A4A78)]),
+                SceneElement(ScenePath.rect(0, 600, 390, 60), gradient: [SceneColor(0xF6BCC6, opacity: 0), SceneColor(0xF6BCC6, opacity: 0.35)], blur: 6),
+                // A pond on the left catches the evening light.
+                SceneElement(ScenePath.ellipse(-40, 632, 250, 62), gradient: [SceneColor(0xE7A6C0), SceneColor(0x8E5C8E)]),
+                SceneElement(reflection, SceneColor(0xFFE1EA, opacity: 0.55)),
+                SceneElement(SceneArt.hills([(-30, 676), (120, 664), (230, 648), (420, 660)]), gradient: [SceneColor(0x6E4466), SceneColor(0x4A2C48)]),
+                SceneElement(canopy, gradient: [SceneColor(0xF7B3C8, opacity: 0.55), SceneColor(0xD87FA4, opacity: 0.55)]),
+                SceneElement(canopyLight, SceneColor(0xFFE1EA, opacity: 0.22)),
+                SceneElement(SceneArt.trunk(root: CGPoint(x: 195, y: 690), fork: CGPoint(x: 192, y: 540), width: 22, branches: [
+                    (CGPoint(x: 80, y: 440), 3), (CGPoint(x: 125, y: 370), 3), (CGPoint(x: 198, y: 320), 3), (CGPoint(x: 265, y: 360), 3),
+                    (CGPoint(x: 315, y: 438), 3), (CGPoint(x: 150, y: 470), 2.5), (CGPoint(x: 245, y: 468), 2.5)
+                ]), gradient: [SceneColor(0x5A3446), SceneColor(0x3A2030)]),
+                SceneElement(stoneLantern, gradient: [SceneColor(0x8A7A8E), SceneColor(0x5A4A62)]),
+                SceneElement(SceneArt.grass(seed: 403, count: 80, x: 0...390, baseline: 700, height: 5...12, width: 2.4), SceneColor(0x3E2440)),
+                SceneElement(petals, SceneColor(0xFFC4D6, opacity: 0.7), still: true)
+            ],
             lights: lights,
-            completion: [
-                SceneElement(ScenePath.circle(76, 190, 22), SceneColor(0xFFF1F4), glow: 16),
-                SceneElement(ScenePath.ellipse(-40, 660, 470, 44), SceneColor(0xFFC4D6, opacity: 0.55)),
+            completion: SceneArt.moon(76, 190, radius: 22, light: SceneColor(0xFFF4F6), shade: SceneColor(0xF2D2DC), halo: SceneColor(0xFFD6E2), seas: false) + [
+                SceneElement(ScenePath.rect(325, 613, 10, 12, corner: 1), SceneColor(0xFFD27A), glow: 8),
+                SceneElement(ScenePath.ellipse(-40, 664, 470, 40), SceneColor(0xFFC4D6, opacity: 0.5), blur: 3),
                 SceneElement(carpet, SceneColor(0xFFD9E4)),
                 SceneElement(fallingPetals, SceneColor(0xFFD1DF, opacity: 0.95), still: true)
             ],
@@ -226,12 +331,32 @@ enum JourneySceneCatalog {
 
     static let lotusLanterns: JourneyScene = {
         let colors = [SceneColor(0xFF8FB1), SceneColor(0xFFD66B), SceneColor(0x8EE3A1), SceneColor(0xFFA86B), SceneColor(0xC69CFF)]
-        var background: [SceneElement] = [
-            SceneElement(ScenePath.rect(60, 604, 270, 96), SceneColor(0x15183A)),
-            SceneElement(ScenePath.polygon([(20, 612), (50, 596), (80, 562), (310, 562), (340, 596), (370, 612), (330, 604), (60, 604)]), SceneColor(0x0E1029)),
-            SceneElement(ScenePath.rect(130, 530, 130, 34), SceneColor(0x15183A)),
-            SceneElement(ScenePath.polygon([(106, 538), (130, 518), (260, 518), (284, 538)]), SceneColor(0x0E1029)),
-            SceneElement(ScenePath.rect(170, 640, 50, 60, corner: 3), SceneColor(0x2A2F5A))
+        let lowerRoof = SceneArt.hanokRoof(195, 608, width: 330, height: 48)
+        let upperRoof = SceneArt.hanokRoof(195, 534, width: 176, height: 32)
+        // Red pillars and a painted green band under the eaves, as on a temple hall.
+        let pillars = ScenePath.group([CGFloat(64), 140, 244, 320].map { ScenePath.rect($0, 606, 6, 94) } + [ScenePath.rect(134, 532, 5, 34), ScenePath.rect(251, 532, 5, 34)])
+        let steps = ScenePath.group([ScenePath.rect(150, 688, 90, 6), ScenePath.rect(140, 694, 110, 6)])
+        // A stone pagoda to the right of the hall.
+        let pagodaRoofs: [CGPath] = (0..<4).map { tier -> CGPath in
+            let inset = CGFloat(tier) * 2, y = 640 - CGFloat(tier) * 18
+            return ScenePath.polygon([(340 + inset, y), (390 - inset, y), (384 - inset, y - 6), (346 + inset, y - 6)])
+        }
+        let pagoda = ScenePath.group([ScenePath.rect(352, 620, 26, 80), ScenePath.rect(362, 556, 6, 12)] + pagodaRoofs)
+        var background: [SceneElement] = SceneArt.stars(seed: 501, count: 60, area: CGRect(x: 0, y: 60, width: 390, height: 170)) + [
+            SceneElement(SceneArt.ridge(seed: 502, baseline: 600, height: 130, roughness: 0.55, bottom: 650), gradient: [SceneColor(0x2E3470), SceneColor(0x1A1D48)]),
+            SceneElement(ScenePath.rect(0, 560, 390, 70), gradient: [SceneColor(0x6A6FB0, opacity: 0), SceneColor(0x6A6FB0, opacity: 0.3)], blur: 6),
+            SceneElement(SceneArt.pines(seed: 503, x: -10...60, base: 640, height: 50...80, spacing: 22), SceneColor(0x111433)),
+            SceneElement(SceneArt.pines(seed: 504, x: 336...400, base: 630, height: 50...80, spacing: 24), SceneColor(0x111433)),
+            SceneElement(ScenePath.rect(130, 530, 130, 36), gradient: [SceneColor(0x2C2F5E), SceneColor(0x1C1F44)]),
+            SceneElement(ScenePath.rect(60, 604, 270, 96), gradient: [SceneColor(0x2C2F5E), SceneColor(0x1A1C40)]),
+            SceneElement(pillars, gradient: [SceneColor(0x8A2E36), SceneColor(0x5E1E26)]),
+            SceneElement(ScenePath.group([ScenePath.rect(60, 604, 270, 7), ScenePath.rect(130, 530, 130, 5)]), SceneColor(0x2F7A66)),
+            SceneElement(ScenePath.group([upperRoof.roof, lowerRoof.roof]), gradient: [SceneColor(0x262A52), SceneColor(0x10122C)]),
+            SceneElement(ScenePath.group([upperRoof.tiles, lowerRoof.tiles]), SceneColor(0x3E4378, opacity: 0.8), lineWidth: 1.4),
+            SceneElement(ScenePath.group([upperRoof.ridge, lowerRoof.ridge]), SceneColor(0x4A508A), lineWidth: 4),
+            SceneElement(ScenePath.rect(170, 640, 50, 48, corner: 3), gradient: [SceneColor(0x3A3F72), SceneColor(0x2A2F5A)]),
+            SceneElement(steps, gradient: [SceneColor(0x5A5E8E), SceneColor(0x3A3E6A)]),
+            SceneElement(pagoda, gradient: [SceneColor(0x6A6E9A), SceneColor(0x3E4270)])
         ]
         var lights: [SceneLight] = []
         for (row, (y, count)) in [(CGFloat(240), 8), (320, 8), (400, 8), (480, 7)].enumerated() {
@@ -255,14 +380,15 @@ enum JourneySceneCatalog {
             ScenePath.star(random.next(10...380), random.next(90...220), outer: random.next(3...5), inner: 1, points: 4)
         })
         return JourneyScene(
-            month: 5, title: "연등", sky: [SceneColor(0x0D1233), SceneColor(0x1F2A5C), SceneColor(0x3B3D7A)],
+            month: 5, title: "연등", sky: [SceneColor(0x090D2B), SceneColor(0x1A2356), SceneColor(0x37397A), SceneColor(0x5E4A8A)],
             background: background, lights: lights,
-            completion: [
-                SceneElement(ScenePath.circle(322, 150, 22), SceneColor(0xFFF4D6), glow: 16),
+            completion: SceneArt.moon(322, 150, radius: 22) + [
                 SceneElement(sparkles, SceneColor(0xFFFFFF, opacity: 0.85), glow: 4, still: true),
                 SceneElement(ScenePath.group([ScenePath.rect(92, 628, 40, 26, corner: 2), ScenePath.rect(258, 628, 40, 26, corner: 2), ScenePath.rect(150, 538, 90, 18, corner: 2)]),
                              SceneColor(0xFFCF7A), glow: 10),
-                SceneElement(ScenePath.rect(170, 640, 50, 60, corner: 3), SceneColor(0xFFB65C), glow: 14)
+                SceneElement(ScenePath.rect(170, 640, 50, 48, corner: 3), SceneColor(0xFFB65C), glow: 14),
+                SceneElement(ScenePath.group([ScenePath.line([(195, 640), (195, 688)])] + stride(from: CGFloat(652), to: 688, by: 12).map { ScenePath.line([(170, $0), (220, $0)]) }),
+                             SceneColor(0xB0702A, opacity: 0.8), lineWidth: 1)
             ],
             ambience: ambience(for: 5)
         )
@@ -271,21 +397,22 @@ enum JourneySceneCatalog {
     // MARK: 6월 · 반딧불이 숲 — fireflies gather; when full, a moonlit pond and a swarm of fireflies
 
     static let fireflyForest: JourneyScene = {
-        var random = SceneRandom(seed: 606)
-        var background: [SceneElement] = [
-            SceneElement(ScenePath.circle(310, 200, 34), SceneColor(0xF3F0D0, opacity: 0.08)),
-            SceneElement(ScenePath.circle(310, 200, 17), SceneColor(0xF3F0D0, opacity: 0.9), glow: 8)
+        var background: [SceneElement] = SceneArt.stars(seed: 601, count: 50, area: CGRect(x: 0, y: 60, width: 390, height: 260), color: SceneColor(0xE6F5E0))
+            + SceneArt.moon(310, 200, radius: 18, light: SceneColor(0xF6F3D8), shade: SceneColor(0xDCD8B4), halo: SceneColor(0xCFF0D0), seas: false)
+        // Three layers of forest, paler and hazier with distance.
+        background += [
+            SceneElement(SceneArt.ridge(seed: 602, baseline: 520, height: 70, roughness: 0.5, bottom: 560), gradient: [SceneColor(0x1F4E40), SceneColor(0x173D33)]),
+            SceneElement(SceneArt.pines(seed: 603, x: -10...400, base: 540, height: 40...70, spacing: 16), gradient: [SceneColor(0x1A4A3A), SceneColor(0x143A2E)]),
+            SceneElement(ScenePath.rect(0, 500, 390, 70), gradient: [SceneColor(0x9FD6B8, opacity: 0), SceneColor(0x9FD6B8, opacity: 0.18), SceneColor(0x9FD6B8, opacity: 0)], blur: 8),
+            SceneElement(SceneArt.pines(seed: 604, x: -20...410, base: 610, height: 90...150, spacing: 30), gradient: [SceneColor(0x0F3428), SceneColor(0x0B2A20)]),
+            SceneElement(ScenePath.rect(0, 590, 390, 50), gradient: [SceneColor(0x7FC4A0, opacity: 0), SceneColor(0x7FC4A0, opacity: 0.14), SceneColor(0x7FC4A0, opacity: 0)], blur: 8),
+            SceneElement(SceneArt.hills([(-30, 648), (130, 636), (260, 646), (420, 632)]), gradient: [SceneColor(0x0C2A20), SceneColor(0x061A14)]),
+            // A pond holding the moon.
+            SceneElement(ScenePath.ellipse(20, 650, 190, 32), gradient: [SceneColor(0x1E5060), SceneColor(0x0D2A36)]),
+            SceneElement(SceneArt.shimmer(seed: 605, x: 115, top: 656, bottom: 676, width: 40, rows: 5), SceneColor(0xF6F3D8, opacity: 0.4)),
+            SceneElement(SceneArt.pines(seed: 606, x: 300...420, base: 700, height: 150...210, spacing: 46), SceneColor(0x04140F)),
+            SceneElement(SceneArt.pines(seed: 607, x: -30...40, base: 700, height: 170...220, spacing: 50), SceneColor(0x04140F))
         ]
-        let backTrees = stride(from: CGFloat(-10), through: 400, by: 42).map { x -> CGPath in
-            let tip = random.next(470...525)
-            return ScenePath.polygon([(x, tip), (x - 30, 650), (x + 30, 650)])
-        }
-        let frontTrees = [CGFloat(-10), 72, 158, 246, 330, 408].map { x -> CGPath in
-            let tip = random.next(520...565)
-            return ScenePath.polygon([(x, tip), (x - 44, 700), (x + 44, 700)])
-        }
-        background.append(SceneElement(ScenePath.group(backTrees), SceneColor(0x0F3A2D)))
-        background.append(SceneElement(ScenePath.group(frontTrees), SceneColor(0x06201A)))
         let lights = scatter(count: 30, seed: 616, x: 12...378, y: 300...640, minimumDistance: 30).map { point in
             SceneLight(ScenePath.circle(point.x, point.y, 3.2), on: SceneColor(0xE9FF8C), off: SceneColor(0x1D4A3B),
                        offPath: ScenePath.circle(point.x, point.y, 1.5), glow: 11,
@@ -301,12 +428,12 @@ enum JourneySceneCatalog {
         return JourneyScene(
             month: 6, title: "반딧불이 숲", sky: [SceneColor(0x03110D), SceneColor(0x0A2A21), SceneColor(0x174537)],
             background: background, lights: lights,
+            foreground: [SceneElement(grass, SceneColor(0x041510)),
+                         SceneElement(SceneArt.grass(seed: 608, count: 40, x: 10...210, baseline: 686, height: 14...30, width: 2), SceneColor(0x062018))],
             completion: [
-                SceneElement(ScenePath.circle(310, 200, 46), SceneColor(0xF3F0D0, opacity: 0.1), glow: 20),
-                SceneElement(ScenePath.ellipse(20, 652, 180, 30), SceneColor(0x0D3444)),
-                SceneElement(ScenePath.ellipse(96, 660, 30, 5), SceneColor(0xF3F0D0, opacity: 0.45)),
-                SceneElement(smallFlies, SceneColor(0xE9FF8C, opacity: 0.75), glow: 5, still: true),
-                SceneElement(grass, SceneColor(0x041510))
+                SceneElement(ScenePath.circle(310, 200, 60), SceneColor(0xE9FF8C, opacity: 0.08), blur: 20),
+                SceneElement(ScenePath.ellipse(20, 640, 190, 50), SceneColor(0xE9FF8C, opacity: 0.08), blur: 12),
+                SceneElement(smallFlies, SceneColor(0xE9FF8C, opacity: 0.75), glow: 5, still: true)
             ],
             ambience: ambience(for: 6)
         )
@@ -315,18 +442,30 @@ enum JourneySceneCatalog {
     // MARK: 7월 · 여름 바다 — stars come out; when full, the Milky Way, a shooting star and a sailboat
 
     static let summerSea: JourneyScene = {
-        let reflection = ScenePath.group([ScenePath.ellipse(62, 574, 36, 3), ScenePath.ellipse(68, 594, 24, 3), ScenePath.ellipse(72, 616, 16, 3), ScenePath.ellipse(76, 640, 9, 2)])
-        let background: [SceneElement] = [
-            SceneElement(ScenePath.circle(80, 230, 24), SceneColor(0xF8F4DC), glow: 12),
-            SceneElement(ScenePath.rect(0, 560, 390, 140), SceneColor(0x0A2342)),
-            SceneElement(reflection, SceneColor(0xF8F4DC, opacity: 0.35)),
-            SceneElement(ScenePath.polygon([(330, 463), (190, 425), (190, 480)]), SceneColor(0xFFF2A8, opacity: 0.12)),
-            SceneElement(ScenePath.polygon([(262, 700), (270, 600), (300, 570), (360, 564), (390, 580), (390, 700)]), SceneColor(0x07152C)),
-            SceneElement(ScenePath.polygon([(318, 568), (322, 470), (338, 470), (342, 568)]), SceneColor(0xE8E6F0)),
-            SceneElement(ScenePath.group([ScenePath.rect(320, 500, 20, 10), ScenePath.rect(319, 530, 22, 10)]), SceneColor(0xD9534F)),
-            SceneElement(ScenePath.rect(316, 455, 28, 16), SceneColor(0x2A2F4A)),
-            SceneElement(ScenePath.polygon([(314, 455), (330, 440), (346, 455)]), SceneColor(0xD9534F)),
-            SceneElement(ScenePath.circle(330, 463, 5), SceneColor(0xFFF2A8), glow: 6)
+        let lighthouse = ScenePath.polygon([(318, 568), (322, 470), (338, 470), (342, 568)])
+        let stripes = ScenePath.group([ScenePath.polygon([(320.8, 500), (339.2, 500), (339.6, 512), (320.4, 512)]),
+                                       ScenePath.polygon([(319.6, 532), (340.4, 532), (340.9, 545), (319.1, 545)])])
+        let background: [SceneElement] = SceneArt.stars(seed: 701, count: 120, area: CGRect(x: 0, y: 60, width: 390, height: 480)) + SceneArt.moon(80, 230, radius: 24) + [
+            // The horizon glows faintly where the sky meets the sea.
+            SceneElement(ScenePath.rect(0, 500, 390, 70), gradient: [SceneColor(0x3A6AA8, opacity: 0), SceneColor(0x5A86C0, opacity: 0.45)], blur: 6),
+            SceneElement(SceneArt.ridge(seed: 702, baseline: 562, height: 22, roughness: 0.5, left: 120, right: 260, bottom: 562), SceneColor(0x15305A)),
+            SceneElement(ScenePath.rect(0, 560, 390, 140), gradient: [SceneColor(0x1A3E6E), SceneColor(0x0C2448), SceneColor(0x061632)]),
+            SceneElement(SceneArt.ripples(seed: 703, area: CGRect(x: 0, y: 566, width: 390, height: 130), count: 60), SceneColor(0x6A92C8, opacity: 0.35), lineWidth: 0.8),
+            SceneElement(SceneArt.shimmer(seed: 704, x: 80, top: 566, bottom: 690, width: 56, rows: 12), SceneColor(0xF8F4DC, opacity: 0.45)),
+            SceneElement(ScenePath.polygon([(330, 463), (190, 425), (190, 480)]), gradient: [SceneColor(0xFFF2A8, opacity: 0.16), SceneColor(0xFFF2A8, opacity: 0.04)], blur: 3),
+            // Rocks under the lighthouse.
+            SceneElement(ScenePath.polygon([(250, 700), (262, 610), (286, 584), (312, 568), (360, 562), (390, 574), (390, 700)]), gradient: [SceneColor(0x1C2E4E), SceneColor(0x081428)]),
+            SceneElement(ScenePath.polygon([(262, 612), (286, 586), (300, 600), (284, 640)]), SceneColor(0x2A3E62, opacity: 0.7)),
+            SceneElement(ScenePath.group([ScenePath.ellipse(240, 676, 40, 14), ScenePath.ellipse(222, 690, 30, 10)]), SceneColor(0x0A1A33)),
+            SceneElement(SceneArt.ripples(seed: 705, area: CGRect(x: 214, y: 670, width: 70, height: 26), count: 6), SceneColor(0xDCE8FF, opacity: 0.5), lineWidth: 1),
+            SceneElement(lighthouse, gradient: [SceneColor(0xF4F2FA), SceneColor(0xB8BCD4)]),
+            SceneElement(stripes, SceneColor(0xD9534F)),
+            SceneElement(ScenePath.rect(312, 466, 36, 4, corner: 1), SceneColor(0x2A2F4A)),
+            SceneElement(ScenePath.group([CGFloat(316), 323, 330, 337, 344].map { ScenePath.line([($0, 455), ($0, 466)]) }), SceneColor(0x2A2F4A), lineWidth: 1),
+            SceneElement(ScenePath.rect(318, 455, 24, 11), SceneColor(0x3A405E)),
+            SceneElement(ScenePath.polygon([(314, 456), (330, 440), (346, 456)]), gradient: [SceneColor(0xE86A64), SceneColor(0xB8433E)]),
+            SceneElement(ScenePath.circle(330, 461, 5), SceneColor(0xFFF2A8), glow: 8),
+            SceneElement(ScenePath.rect(326, 552, 8, 16, corner: 1), SceneColor(0x4A3A3A))
         ]
         let points = scatter(count: 31, seed: 707, x: 12...378, y: 110...520, minimumDistance: 38) { point in
             hypot(point.x - 80, point.y - 230) > 44 && !(point.x > 296 && point.y > 424)
@@ -344,17 +483,20 @@ enum JourneySceneCatalog {
             return ScenePath.circle(-20 + t * 430 + dust.next(-15...15), 330 - t * 210 + dust.next(-30...30), dust.next(0.6...1.3))
         })
         return JourneyScene(
-            month: 7, title: "여름 바다", sky: [SceneColor(0x020617), SceneColor(0x0B1F4A), SceneColor(0x1E4478)],
+            month: 7, title: "여름 바다", sky: [SceneColor(0x020617), SceneColor(0x0A1C46), SceneColor(0x1B3F74), SceneColor(0x33609A)],
             background: background, lights: lights,
             completion: [
-                SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 300), to: CGPoint(x: 410, y: 95), bend: -30, thickness: 62), SceneColor(0xC9D6FF, opacity: 0.1), glow: 22),
+                SceneElement(ScenePath.band(from: CGPoint(x: -20, y: 300), to: CGPoint(x: 410, y: 95), bend: -30, thickness: 62),
+                             gradient: [SceneColor(0xB9A8FF, opacity: 0.08), SceneColor(0xDDE6FF, opacity: 0.22), SceneColor(0xFFD9C2, opacity: 0.08)], blur: 14),
                 SceneElement(milkyDots, SceneColor(0xFFFFFF, opacity: 0.6)),
                 SceneElement(ScenePath.polygon([(160, 176), (58, 120), (55, 126)]), SceneColor(0xFFFFFF, opacity: 0.85), glow: 6, still: true),
                 SceneElement(ScenePath.circle(160, 176, 2.4), SceneColor(0xFFFFFF), glow: 6, still: true),
-                SceneElement(ScenePath.polygon([(330, 463), (160, 405), (160, 510)]), SceneColor(0xFFF2A8, opacity: 0.2)),
-                SceneElement(ScenePath.polygon([(165, 538), (165, 584), (138, 584)]), SceneColor(0xE8E6F0, opacity: 0.95)),
+                SceneElement(ScenePath.polygon([(330, 463), (160, 405), (160, 510)]), gradient: [SceneColor(0xFFF2A8, opacity: 0.24), SceneColor(0xFFF2A8, opacity: 0.06)], blur: 4),
+                SceneElement(ScenePath.line([(166, 532), (166, 588)]), SceneColor(0x3A3040), lineWidth: 1.4),
+                SceneElement(ScenePath.polygon([(165, 538), (165, 584), (138, 584)]), gradient: [SceneColor(0xFFFFFF), SceneColor(0xC9CCE0)]),
                 SceneElement(ScenePath.polygon([(169, 548), (169, 584), (188, 584)]), SceneColor(0xE8E6F0, opacity: 0.8)),
-                SceneElement(ScenePath.polygon([(134, 587), (194, 587), (184, 598), (144, 598)]), SceneColor(0x07152C)),
+                SceneElement(ScenePath.polygon([(134, 587), (194, 587), (184, 598), (144, 598)]), gradient: [SceneColor(0x6A3A2A), SceneColor(0x3A1E16)]),
+                SceneElement(SceneArt.shimmer(seed: 706, x: 164, top: 602, bottom: 624, width: 50, rows: 4), SceneColor(0xE8E6F0, opacity: 0.25)),
                 SceneElement(ScenePath.circle(167, 535, 2), SceneColor(0xFFD27A), glow: 6)
             ],
             ambience: ambience(for: 7)
@@ -383,6 +525,17 @@ enum JourneySceneCatalog {
             }
             x += width
         }
+        // Rooftop details: antennas and water tanks.
+        let rooftops = ScenePath.group([ScenePath.rect(83, 490, 2, 12), ScenePath.rect(178, 555, 14, 10, corner: 2), ScenePath.rect(273, 512, 2, 14),
+                                        ScenePath.rect(330, 528, 12, 12, corner: 2), ScenePath.rect(18, 562, 10, 8, corner: 2)])
+        // A bridge with lit lamps across the river, and a far skyline in the haze.
+        let bridgeDeck = ScenePath.rect(-10, 648, 410, 5)
+        let bridgeArches = ScenePath.group(stride(from: CGFloat(-10), to: 400, by: 70).map { ScenePath.arc($0 + 35, 680, radius: 34, from: .pi, to: 2 * .pi) })
+        let bridgeLamps = ScenePath.group(stride(from: CGFloat(8), to: 390, by: 26).map { ScenePath.circle($0, 645, 1.6) })
+        let farSkyline = ScenePath.group((0..<18).map { index -> CGPath in
+            var random = SceneRandom(seed: 830 + UInt64(index))
+            return ScenePath.rect(CGFloat(index) * 22 - 4, 640 - random.next(70...170), 20, 200)
+        })
         let colors = [SceneColor(0xFF6B6B), SceneColor(0xFFD93D), SceneColor(0x6BCBFF), SceneColor(0xB388FF), SceneColor(0x7CFFB2), SceneColor(0xFF9F68)]
         var random = SceneRandom(seed: 818)
         func burst(_ center: CGPoint, radius: CGFloat, rays: Int) -> (rays: CGPath, tips: CGPath) {
@@ -406,17 +559,26 @@ enum JourneySceneCatalog {
             ScenePath.rect(20 + CGFloat(index) * 36 + windowRandom.next(-6...6), 648 + windowRandom.next(0...10), 3, windowRandom.next(14...34), corner: 1.5)
         })
         return JourneyScene(
-            month: 8, title: "불꽃놀이", sky: [SceneColor(0x07071C), SceneColor(0x17123F), SceneColor(0x33205A)],
-            background: [SceneElement(ScenePath.group(skyline), SceneColor(0x0B0A1F)),
-                         SceneElement(ScenePath.rect(0, 640, 390, 60), SceneColor(0x0E1030)),
-                         SceneElement(ScenePath.line([(0, 612), (390, 612)]), SceneColor(0x1B1840), lineWidth: 4)],
+            month: 8, title: "불꽃놀이", sky: [SceneColor(0x05051A), SceneColor(0x150F3C), SceneColor(0x2E1D58), SceneColor(0x5A2E6A)],
+            background: SceneArt.stars(seed: 801, count: 40, area: CGRect(x: 0, y: 60, width: 390, height: 120)) + [
+                SceneElement(farSkyline, gradient: [SceneColor(0x3A2A66), SceneColor(0x2A1E50)]),
+                SceneElement(ScenePath.rect(0, 470, 390, 120), gradient: [SceneColor(0x8A5AA0, opacity: 0), SceneColor(0x8A5AA0, opacity: 0.3)], blur: 10),
+                SceneElement(ScenePath.group(skyline), gradient: [SceneColor(0x1A1638), SceneColor(0x0B0A1F)]),
+                SceneElement(rooftops, SceneColor(0x0B0A1F)),
+                SceneElement(ScenePath.rect(0, 640, 390, 60), gradient: [SceneColor(0x241C52), SceneColor(0x0A0A24)]),
+                SceneElement(SceneArt.ripples(seed: 802, area: CGRect(x: 0, y: 656, width: 390, height: 44), count: 40), SceneColor(0x6A5AA8, opacity: 0.4), lineWidth: 0.8),
+                SceneElement(bridgeArches, SceneColor(0x1A1638), lineWidth: 4),
+                SceneElement(bridgeDeck, SceneColor(0x1A1638)),
+                SceneElement(bridgeLamps, SceneColor(0xFFD27A), glow: 4)
+            ],
             lights: lights,
             completion: [
                 SceneElement(finale.rays, SceneColor(0xFFE08A), lineWidth: 2.2, glow: 12, still: true),
                 SceneElement(finale.tips, SceneColor(0xFFF6D5), glow: 6, still: true),
                 SceneElement(finaleInner.rays, SceneColor(0xFF9FD0), lineWidth: 1.8, glow: 8, still: true),
                 SceneElement(ScenePath.group(cityWindows), SceneColor(0xFFD27A, opacity: 0.9)),
-                SceneElement(reflections, SceneColor(0xFFC46B, opacity: 0.35))
+                SceneElement(reflections, SceneColor(0xFFC46B, opacity: 0.35), blur: 1),
+                SceneElement(ScenePath.rect(0, 380, 390, 220), gradient: [SceneColor(0xFFB0D0, opacity: 0), SceneColor(0xFFB0D0, opacity: 0.08)], blur: 12)
             ],
             ambience: ambience(for: 8)
         )
@@ -426,9 +588,16 @@ enum JourneySceneCatalog {
 
     static let harvestMoon: JourneyScene = {
         let houseSpots: [(CGFloat, CGFloat)] = [(14, 72), (116, 80), (224, 68), (306, 76)]
-        let roofs = ScenePath.group(houseSpots.map { x, width in
-            ScenePath.polygon([(x - 12, 646), (x, 632), (x + width * 0.15, 620), (x + width * 0.85, 620), (x + width, 632), (x + width + 12, 646)])
-        })
+        let hanokRoofs = houseSpots.map { x, width in SceneArt.hanokRoof(x + width / 2, 648, width: width + 26, height: 28) }
+        // Silver grass along the bottom, its plumes catching the moonlight.
+        var plumeRandom = SceneRandom(seed: 931)
+        var stalks: [CGPath] = [], plumeShapes: [CGPath] = []
+        for _ in 0..<14 {
+            let x = plumeRandom.next(0...390), top = plumeRandom.next(612...650), lean = plumeRandom.next(-14...14)
+            stalks.append(ScenePath.curve(from: CGPoint(x: x, y: 700), to: CGPoint(x: x + lean, y: top), control: CGPoint(x: x, y: top + 30)))
+            plumeShapes.append(ScenePath.petal(from: CGPoint(x: x + lean, y: top + 4), length: 26, width: 6, angle: -.pi / 2 + lean / 40))
+        }
+        let plumes = ScenePath.group(plumeShapes)
         let houses = ScenePath.group(houseSpots.map { x, width in ScenePath.rect(x, 644, width, 56) })
         let points = scatter(count: 30, seed: 909, x: 20...370, y: 190...600, minimumDistance: 34) { point in
             hypot(point.x - 290, point.y - 200) > 72
@@ -450,14 +619,21 @@ enum JourneySceneCatalog {
         var far = SceneRandom(seed: 919)
         let farLanterns = ScenePath.group((0..<24).map { _ in ScenePath.rect(far.next(10...380), far.next(110...330), 2.5, 3.5) })
         return JourneyScene(
-            month: 9, title: "한가위 풍등", sky: [SceneColor(0x10183A), SceneColor(0x2B2D63), SceneColor(0x74507E)],
-            background: [
-                SceneElement(ScenePath.circle(290, 200, 70), SceneColor(0xFFF1C1, opacity: 0.12)),
-                SceneElement(ScenePath.circle(290, 200, 48), SceneColor(0xFFF1C1), glow: 14),
-                SceneElement(ScenePath.ellipse(-100, 596, 380, 200), SceneColor(0x1E1C3E)),
-                SceneElement(ScenePath.ellipse(160, 590, 360, 220), SceneColor(0x1A1836)),
-                SceneElement(houses, SceneColor(0x1A1633)),
-                SceneElement(roofs, SceneColor(0x120F28))
+            month: 9, title: "한가위 풍등", sky: [SceneColor(0x0B1233), SceneColor(0x232760), SceneColor(0x5A4282), SceneColor(0xA9688A)],
+            background: SceneArt.stars(seed: 901, count: 60, area: CGRect(x: 0, y: 60, width: 390, height: 260), avoiding: { hypot($0.x - 290, $0.y - 200) < 80 })
+                + SceneArt.moon(290, 200, radius: 48, light: SceneColor(0xFFF6D2), shade: SceneColor(0xF2D58E), halo: SceneColor(0xFFE6A8), seas: false) + [
+                // Thin clouds drift across the lower edge of the moon.
+                SceneElement(ScenePath.group([ScenePath.ellipse(206, 228, 130, 10), ScenePath.ellipse(250, 240, 120, 8)]), SceneColor(0x6A5A92, opacity: 0.55), blur: 3),
+                SceneElement(SceneArt.ridge(seed: 902, baseline: 600, height: 90, roughness: 0.5, bottom: 640), gradient: [SceneColor(0x3E3470), SceneColor(0x2A2452)]),
+                SceneElement(ScenePath.rect(0, 560, 390, 70), gradient: [SceneColor(0xC48AA0, opacity: 0), SceneColor(0xC48AA0, opacity: 0.25)], blur: 6),
+                SceneElement(SceneArt.hills([(-30, 630), (100, 608), (240, 624), (420, 606)]), gradient: [SceneColor(0x2A2450), SceneColor(0x1A1636)]),
+                SceneElement(houses, gradient: [SceneColor(0x3A3058), SceneColor(0x241E3C)]),
+                SceneElement(ScenePath.group(hanokRoofs.map(\.roof)), gradient: [SceneColor(0x2C2A4E), SceneColor(0x15132C)]),
+                SceneElement(ScenePath.group(hanokRoofs.map(\.tiles)), SceneColor(0x4A4676, opacity: 0.8), lineWidth: 1.2),
+                SceneElement(ScenePath.group(hanokRoofs.map(\.ridge)), SceneColor(0x55508A), lineWidth: 3.5),
+                SceneElement(SceneArt.grass(seed: 932, count: 40, x: 0...390, baseline: 700, height: 12...26, width: 2.6), SceneColor(0x1E1A32)),
+                SceneElement(ScenePath.group(stalks), SceneColor(0x3A3252), lineWidth: 1.2),
+                SceneElement(plumes, gradient: [SceneColor(0xF4E6CC), SceneColor(0xB8A4A8, opacity: 0.8)], glow: 2)
             ],
             lights: lights,
             completion: [
@@ -502,14 +678,34 @@ enum JourneySceneCatalog {
         let birds = ScenePath.group([(CGFloat(78), CGFloat(232)), (104, 216), (96, 252), (124, 238)].map { x, y in
             ScenePath.line([(x - 7, y - 3), (x, y), (x + 7, y - 3)])
         })
+        let canopy = ScenePath.group([(CGFloat(195), CGFloat(410), CGFloat(122)), (100, 455, 76), (292, 455, 78), (150, 345, 70), (245, 342, 72), (195, 490, 66)].enumerated().map { index, spot in
+            SceneArt.crown(seed: 1020 + UInt64(index), spot.0, spot.1, radius: spot.2, puffs: 8)
+        })
+        // Lighter puffs on the upper left, where the light falls on the canopy.
+        let canopyLight = ScenePath.group([(CGFloat(165), CGFloat(370), CGFloat(70)), (110, 430, 44), (220, 330, 46)].enumerated().map { index, spot in
+            SceneArt.crown(seed: 1040 + UInt64(index), spot.0, spot.1, radius: spot.2, puffs: 6)
+        })
+        // A bench under the tree.
+        let bench = ScenePath.group([ScenePath.rect(250, 652, 64, 5, corner: 1.5), ScenePath.rect(250, 640, 64, 4, corner: 1.5),
+                                     ScenePath.rect(254, 657, 4, 16), ScenePath.rect(306, 657, 4, 16), ScenePath.rect(254, 644, 3, 10), ScenePath.rect(307, 644, 3, 10)])
         return JourneyScene(
-            month: 10, title: "단풍", sky: [SceneColor(0x2A1A3D), SceneColor(0x9A4E3E), SceneColor(0xF0A65A)],
-            background: [SceneElement(ScenePath.circle(300, 590, 40), SceneColor(0xFFD28A, opacity: 0.8)),
-                         SceneElement(ScenePath.ellipse(-80, 600, 300, 200), SceneColor(0x6B3A2E)),
-                         SceneElement(ScenePath.ellipse(180, 610, 320, 200), SceneColor(0x5A2F26)),
-                         SceneElement(ScenePath.rect(0, 660, 390, 40), SceneColor(0x4A261F))]
-                + tree(color: SceneColor(0x3B2320))
-                + [SceneElement(fallen, SceneColor(0xE8452C, opacity: 0.85))],
+            month: 10, title: "단풍", sky: [SceneColor(0x241638), SceneColor(0x6E3A52), SceneColor(0xC8664A), SceneColor(0xF4AE62)],
+            background: [
+                SceneElement(ScenePath.circle(300, 585, 80), SceneColor(0xFFC878, opacity: 0.35), blur: 24),
+                SceneElement(ScenePath.circle(300, 590, 38), gradient: [SceneColor(0xFFF0C0), SceneColor(0xFFC070)], glow: 18),
+                SceneElement(SceneArt.ridge(seed: 1002, baseline: 615, height: 90, roughness: 0.55, bottom: 650), gradient: [SceneColor(0xA85A4A), SceneColor(0x7E3E3C)]),
+                SceneElement(SceneArt.ridge(seed: 1003, baseline: 640, height: 60, roughness: 0.5, bottom: 680), gradient: [SceneColor(0x8A3A2E), SceneColor(0x5E2A26)]),
+                SceneElement(SceneArt.hills([(-30, 668), (110, 652), (250, 664), (420, 650)]), gradient: [SceneColor(0x5A2E24), SceneColor(0x3A1C18)]),
+                SceneElement(canopy, gradient: [SceneColor(0xF2A050, opacity: 0.5), SceneColor(0xC8502E, opacity: 0.5)]),
+                SceneElement(canopyLight, SceneColor(0xFFD08A, opacity: 0.2)),
+                SceneElement(SceneArt.trunk(root: CGPoint(x: 195, y: 690), fork: CGPoint(x: 192, y: 540), width: 22, branches: [
+                    (CGPoint(x: 80, y: 445), 3), (CGPoint(x: 128, y: 365), 3), (CGPoint(x: 196, y: 318), 3), (CGPoint(x: 262, y: 362), 3),
+                    (CGPoint(x: 318, y: 442), 3), (CGPoint(x: 148, y: 478), 2.5), (CGPoint(x: 244, y: 476), 2.5)
+                ]), gradient: [SceneColor(0x4A2A24), SceneColor(0x2A1614)]),
+                SceneElement(bench, gradient: [SceneColor(0x6A3E2A), SceneColor(0x3E2418)]),
+                SceneElement(SceneArt.grass(seed: 1004, count: 70, x: 0...390, baseline: 700, height: 5...12, width: 2.4), SceneColor(0x3A1C18)),
+                SceneElement(fallen, SceneColor(0xE8452C, opacity: 0.85))
+            ],
             lights: lights,
             completion: [
                 SceneElement(carpetRed, SceneColor(0xD9432A)),
@@ -580,13 +776,41 @@ enum JourneySceneCatalog {
         }
         let towerShapes = ScenePath.group(towers.map { ScenePath.rect($0.x, $0.top, $0.width, $0.roof - $0.top) }
                                           + [ScenePath.polygon([(222, 318), (230, 296), (238, 318)])])
+        // A far skyline in the evening haze, and rooftop details on the near buildings.
+        var cityRandom = SceneRandom(seed: 1120)
+        var farBlocks: [CGPath] = [], farLights: [CGPath] = []
+        var left: CGFloat = -6
+        while left < 396 {
+            let width = cityRandom.next(18...34), top = cityRandom.next(330...410)
+            farBlocks.append(ScenePath.rect(left, top, width, 700 - top))
+            for y in stride(from: top + 6, to: 480, by: 9) where cityRandom.next() > 0.6 {
+                farLights.append(ScenePath.rect(left + cityRandom.next(3...(width - 6)), y, 2.5, 3.5))
+            }
+            left += width + cityRandom.next(0...4)
+        }
+        let farCity = ScenePath.group(farBlocks), farWindows = ScenePath.group(farLights)
+        let backDetails = ScenePath.group([ScenePath.rect(20, 340, 10, 10, corner: 2), ScenePath.rect(100, 375, 2, 10), ScenePath.rect(300, 378, 14, 10, corner: 2),
+                                           ScenePath.rect(340, 326, 2, 14), ScenePath.rect(356, 330, 12, 8, corner: 2)])
+        let frontDetails = ScenePath.group([ScenePath.rect(20, 446, 12, 10, corner: 2), ScenePath.rect(120, 448, 2, 7), ScenePath.rect(195, 518, 12, 8, corner: 2),
+                                            ScenePath.rect(290, 410, 16, 10, corner: 2)])
+        let frontEdges = ScenePath.group([ScenePath.line([(0, 455), (34, 455)]), ScenePath.line([(95.5, 455), (148, 455)]), ScenePath.line([(205, 525), (259, 525)]),
+                                          ScenePath.line([(265, 420), (351, 420)]), ScenePath.line([(351, 455), (382, 455)])])
         var random = SceneRandom(seed: 1111)
         let stars = ScenePath.group((0..<22).map { _ in ScenePath.circle(random.next(10...380), random.next(90...270), random.next(0.8...1.6)) })
         return JourneyScene(
-            month: 11, title: "도시의 밤", sky: [SceneColor(0x7D2493), SceneColor(0xB4419A), SceneColor(0xEA5DA2)],
-            background: [SceneElement(back, SceneColor(0x555555)), SceneElement(front, SceneColor(0x000000))], lights: lights,
-            completion: [
-                SceneElement(ScenePath.circle(312, 150, 20), SceneColor(0xFFF4D6), glow: 16),
+            month: 11, title: "도시의 밤", sky: [SceneColor(0x2A1050), SceneColor(0x6A2287), SceneColor(0xB4419A), SceneColor(0xF07A9E)],
+            background: [
+                SceneElement(farCity, gradient: [SceneColor(0x9A4A9E, opacity: 0.7), SceneColor(0xB4519A, opacity: 0.5)]),
+                SceneElement(farWindows, SceneColor(0xFFD9A0, opacity: 0.45)),
+                SceneElement(ScenePath.rect(0, 300, 390, 160), gradient: [SceneColor(0xF07A9E, opacity: 0), SceneColor(0xF07A9E, opacity: 0.25)], blur: 10),
+                SceneElement(back, gradient: [SceneColor(0x5E4A72), SceneColor(0x3A2C4C)]),
+                SceneElement(backDetails, SceneColor(0x3A2C4C)),
+                SceneElement(front, gradient: [SceneColor(0x1C1430), SceneColor(0x06040C)]),
+                SceneElement(frontDetails, SceneColor(0x06040C)),
+                SceneElement(frontEdges, SceneColor(0xF07A9E, opacity: 0.35), lineWidth: 1)
+            ],
+            lights: lights,
+            completion: SceneArt.moon(312, 150, radius: 20) + [
                 SceneElement(stars, SceneColor(0xFFFFFF, opacity: 0.85), still: true),
                 SceneElement(towerShapes, SceneColor(0x6E5B85)),
                 SceneElement(ScenePath.line([(230, 296), (230, 284)]), SceneColor(0x6E5B85), lineWidth: 1.5),
@@ -607,15 +831,36 @@ enum JourneySceneCatalog {
         let tiers: [(tip: CGFloat, base: CGFloat, half: CGFloat, color: UInt32)] = [
             (490, 645, 120, 0x174A2F), (420, 560, 100, 0x1F5B3A), (350, 480, 80, 0x174A2F), (300, 400, 55, 0x1F5B3A)
         ]
-        var background: [SceneElement] = [
+        // Each tier of the tree droops into soft scallops, with snow resting along its lower edge.
+        func tier(_ tip: CGFloat, _ base: CGFloat, _ half: CGFloat) -> (body: CGPath, snow: CGPath) {
+            let scallops = max(Int(half / 14), 3)
+            var points: [(CGFloat, CGFloat)] = [(195, tip), (195 + half, base)]
+            var snowPoints: [(CGFloat, CGFloat)] = []
+            for index in stride(from: scallops, through: 0, by: -1) {
+                let x = 195 - half + 2 * half * CGFloat(index) / CGFloat(scallops)
+                points.append((x, base + (index.isMultiple(of: 2) ? 0 : 6)))
+                snowPoints.append((x, base - 4 + (index.isMultiple(of: 2) ? 0 : 6)))
+            }
+            let snow = ScenePath.polygon(snowPoints + points.dropFirst(2).reversed().map { ($0.0, $0.1 + 0.5) })
+            return (ScenePath.polygon(points), snow)
+        }
+        let treeTiers = tiers.map { tier($0.tip, $0.base, $0.half) }
+        var background: [SceneElement] = SceneArt.stars(seed: 1201, count: 90, area: CGRect(x: 0, y: 60, width: 390, height: 260)) + [
             SceneElement(snow, SceneColor(0xFFFFFF, opacity: 0.7), still: true),
-            SceneElement(ScenePath.group([ScenePath.rect(10, 606, 60, 50), ScenePath.polygon([(4, 608), (40, 580), (76, 608)]),
-                                          ScenePath.rect(320, 612, 60, 44), ScenePath.polygon([(314, 614), (350, 588), (386, 614)])]), SceneColor(0x1A2447)),
-            SceneElement(ScenePath.ellipse(-60, 640, 510, 140), SceneColor(0xE8EEF8)),
-            SceneElement(ScenePath.rect(0, 672, 390, 28), SceneColor(0xE8EEF8)),
-            SceneElement(ScenePath.rect(183, 640, 24, 40), SceneColor(0x4A2F24))
+            SceneElement(SceneArt.ridge(seed: 1202, baseline: 600, height: 70, roughness: 0.55, bottom: 640), gradient: [SceneColor(0x8A9ACB), SceneColor(0x5A6A9E)]),
+            SceneElement(SceneArt.pines(seed: 1203, x: -10...400, base: 640, height: 30...56, spacing: 14), gradient: [SceneColor(0x2E4470), SceneColor(0x1E2E52)]),
+            SceneElement(ScenePath.group([ScenePath.rect(10, 606, 60, 50), ScenePath.rect(320, 612, 60, 44)]), gradient: [SceneColor(0x4A3A5A), SceneColor(0x2E2440)]),
+            SceneElement(ScenePath.group([ScenePath.polygon([(4, 608), (40, 580), (76, 608)]), ScenePath.polygon([(314, 614), (350, 588), (386, 614)])]),
+                         gradient: [SceneColor(0x6B3E4E), SceneColor(0x3E2434)]),
+            SceneElement(ScenePath.group([ScenePath.polygon([(1, 610), (40, 576), (79, 610), (72, 612), (40, 584), (8, 612)]),
+                                          ScenePath.polygon([(311, 616), (350, 584), (389, 616), (382, 618), (350, 592), (318, 618)])]), SceneColor(0xF4F7FD)),
+            SceneElement(SceneArt.hills([(-30, 660), (120, 640), (270, 650), (420, 636)]), gradient: [SceneColor(0xF4F7FD), SceneColor(0xCAD4EC)]),
+            SceneElement(ScenePath.rect(0, 672, 390, 28), gradient: [SceneColor(0xEEF2FB), SceneColor(0xD2DAEE)]),
+            SceneElement(ScenePath.ellipse(120, 662, 150, 16), SceneColor(0xA9B6D8, opacity: 0.5), blur: 3),
+            SceneElement(ScenePath.rect(183, 640, 24, 40), gradient: [SceneColor(0x6A4430), SceneColor(0x3E2618)])
         ]
-        background += tiers.map { SceneElement(ScenePath.polygon([(195, $0.tip), (195 - $0.half, $0.base), (195 + $0.half, $0.base)]), SceneColor($0.color)) }
+        background += zip(tiers, treeTiers).map { SceneElement($0.1.body, gradient: [SceneColor($0.0.color == 0x174A2F ? 0x2A7048 : 0x33804F), SceneColor($0.0.color)]) }
+        background.append(SceneElement(ScenePath.group(treeTiers.map(\.snow)), SceneColor(0xF4F7FD, opacity: 0.9)))
         let colors = [SceneColor(0xFF5A5F), SceneColor(0xFFD95A), SceneColor(0x5AC8FA), SceneColor(0x7CFF8A), SceneColor(0xFF9FF3)]
         var lights: [SceneLight] = []
         for (y, half, count) in [(CGFloat(385), CGFloat(38), 3), (440, 45, 4), (505, 50, 5), (545, 75, 5), (600, 72, 6), (635, 95, 7)] {
@@ -646,7 +891,7 @@ enum JourneySceneCatalog {
             ScenePath.star(flakes.next(0...390), flakes.next(100...620), outer: flakes.next(2.5...4.5), inner: 1.1, points: 6)
         })
         return JourneyScene(
-            month: 12, title: "크리스마스트리", sky: [SceneColor(0x0B1430), SceneColor(0x1D2B5A), SceneColor(0x3E4E86)],
+            month: 12, title: "크리스마스트리", sky: [SceneColor(0x070E28), SceneColor(0x16234E), SceneColor(0x34457E), SceneColor(0x6A7AAE)],
             background: background, lights: lights,
             completion: [
                 SceneElement(ScenePath.circle(195, 290, 30), SceneColor(0xFFE9A0, opacity: 0.06)),
@@ -654,7 +899,7 @@ enum JourneySceneCatalog {
                 SceneElement(ScenePath.group([ScenePath.rect(26, 620, 12, 12), ScenePath.rect(44, 620, 12, 12), ScenePath.rect(336, 624, 12, 12), ScenePath.rect(354, 624, 12, 12)]),
                              SceneColor(0xFFD27A), glow: 8),
                 SceneElement(bigSnow, SceneColor(0xFFFFFF, opacity: 0.9), still: true)
-            ] + gifts.map { SceneElement(ScenePath.rect($0.0, $0.1, $0.2, $0.3, corner: 2), SceneColor($0.4)) } + [
+            ] + gifts.map { SceneElement(ScenePath.rect($0.0, $0.1, $0.2, $0.3, corner: 2), gradient: [SceneColor($0.4), SceneColor($0.4).darker(0.75)]) } + [
                 SceneElement(ribbons, SceneColor(0xFFD43B), lineWidth: 2.2),
                 SceneElement(bows, SceneColor(0xFFD43B))
             ],
@@ -664,17 +909,6 @@ enum JourneySceneCatalog {
     }()
 
     // MARK: - Layout helpers
-
-    /// A trunk with branches reaching into the canopy used by the April and October trees.
-    private static func tree(color: SceneColor) -> [SceneElement] {
-        [
-            SceneElement(ScenePath.polygon([(182, 700), (178, 600), (170, 540), (186, 520), (198, 540), (206, 600), (210, 700)]), color),
-            SceneElement(ScenePath.group([ScenePath.line([(190, 540), (130, 470), (80, 430)]), ScenePath.line([(190, 540), (250, 470), (310, 440)])]), color, lineWidth: 10),
-            SceneElement(ScenePath.line([(190, 530), (195, 440), (200, 370)]), color, lineWidth: 9),
-            SceneElement(ScenePath.group([ScenePath.line([(130, 470), (120, 400)]), ScenePath.line([(250, 470), (270, 390)])]), color, lineWidth: 6),
-            SceneElement(ScenePath.group([ScenePath.line([(195, 440), (150, 390)]), ScenePath.line([(195, 440), (240, 380)])]), color, lineWidth: 5)
-        ]
-    }
 
     /// Evenly spread points inside an ellipse, from the center outward.
     static func sunflower(count: Int, center: CGPoint, radiusX: CGFloat, radiusY: CGFloat) -> [CGPoint] {

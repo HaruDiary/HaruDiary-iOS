@@ -109,23 +109,44 @@ struct SceneColor: Equatable {
     func withOpacity(_ opacity: Double) -> SceneColor {
         SceneColor(red: red, green: green, blue: blue, opacity: opacity)
     }
+
+    /// The same color with its light scaled by `amount` (below 1 is darker).
+    func darker(_ amount: Double) -> SceneColor {
+        SceneColor(red: red * amount, green: green * amount, blue: blue * amount, opacity: opacity)
+    }
 }
 
 struct SceneElement {
     let path: CGPath
     let color: SceneColor
+    /// Colors from the top of the shape to its bottom; nil paints `color` alone.
+    let gradient: [SceneColor]?
     /// nil fills the path; a width strokes it.
     let lineWidth: CGFloat?
     let glow: CGFloat
+    /// Softens the edges, for mist, haze and halos.
+    let blur: CGFloat
     /// A still stand-in for the ambience (settled snow, a frozen shooting star …).
     /// Shown in still pictures and faded out while the ambience plays.
     let isStill: Bool
 
-    init(_ path: CGPath, _ color: SceneColor, lineWidth: CGFloat? = nil, glow: CGFloat = 0, still: Bool = false) {
+    init(_ path: CGPath, _ color: SceneColor, lineWidth: CGFloat? = nil, glow: CGFloat = 0, blur: CGFloat = 0, still: Bool = false) {
         self.path = path
         self.color = color
+        gradient = nil
         self.lineWidth = lineWidth
         self.glow = glow
+        self.blur = blur
+        isStill = still
+    }
+
+    init(_ path: CGPath, gradient: [SceneColor], lineWidth: CGFloat? = nil, glow: CGFloat = 0, blur: CGFloat = 0, still: Bool = false) {
+        self.path = path
+        color = gradient.first ?? SceneColor(0x000000)
+        self.gradient = gradient
+        self.lineWidth = lineWidth
+        self.glow = glow
+        self.blur = blur
         isStill = still
     }
 }
