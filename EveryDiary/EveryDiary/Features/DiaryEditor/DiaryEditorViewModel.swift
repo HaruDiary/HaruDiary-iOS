@@ -9,12 +9,19 @@ struct EditorPhoto: Identifiable {
     let assetIdentifier: String?
     /// Stored as the photo library gave it ("2026-09-30 09:12:00 +0000"), or "Unknown" for stored photos without it.
     let captureTime: String?
-    /// "lat, lon", or "Unknown" for stored photos without it.
-    let location: String?
+    /// "lat, lon", or "Unknown" for stored photos without it. Read on this device only and never uploaded;
+    /// older photos still carry it in their stored metadata.
+    var location: String?
     /// Set for a photo downloaded from the stored diary: saving keeps its file instead of uploading it again.
     var storedURL: String? = nil
+    /// The photo's iCloud Photos identifier, the same on every device signed in to the same Apple ID.
+    /// Stored with the photo instead of its place, so another device can look the place up in its own library.
+    var cloudIdentifier: String? = nil
 
     var coordinate: DiaryCoordinate? { DiaryCoordinate(stored: location) }
+    /// A stored photo whose place this device could not find (no iCloud Photos, another Apple ID, the photo removed):
+    /// it may still be the diary's place on the device that has it.
+    var mayHoldPlaceElsewhere: Bool { coordinate == nil && cloudIdentifier != nil }
     var captureDate: Date? { captureTime.flatMap(DateFormatter.yyyyMMddHHmmss.date(from:)) }
 }
 
@@ -41,11 +48,12 @@ protocol DiaryWeatherLooking {
     func attribution() async -> WeatherAttribution?
 }
 
+/// Places for the photo place line. Coordinates stay on the device; only the place's name is looked up.
 @MainActor
 protocol DiaryLocating {
-    /// Nil when location is off or not found in time.
-    func currentCoordinate() async -> DiaryCoordinate?
     func placeName(for coordinate: DiaryCoordinate) async -> String?
+    /// Where a stored photo was taken, read from this device's photo library. Nil when the library does not have it.
+    func photoCoordinate(cloudIdentifier: String?, assetIdentifier: String?) async -> DiaryCoordinate?
 }
 
 /// How a save ended, for the screen that opened the editor (the editor is already closed by then).
@@ -190,13 +198,8 @@ final class DiaryEditorViewModel {
             // Another account's writing is not shown. It stays kept for its writer until this account writes.
             draft = fresh
         }
+        // Where the diary is written is no longer stored; the weather looks the place up on its own.
         refreshWeather()
-        Task { [weak self] in
-            guard let self, let coordinate = await locating.currentCoordinate() else { return }
-            // Kept by the draft only; it does not make the diary count as changed.
-            draft.currentLocationInfo = coordinate.stored
-            initialDraft.currentLocationInfo = coordinate.stored
-        }
         loadAttribution()
     }
 
@@ -445,7 +448,8 @@ final class DiaryEditorViewModel {
     }
 
     private func forgetPlaceIfItsPhotoIsGone() {
-        if draft.useMetadataLocation, !isLoadingPhotos, placeCoordinate == nil {
+        // A stored photo whose place is only known on another device keeps the place for that device.
+        if draft.useMetadataLocation, !isLoadingPhotos, placeCoordinate == nil, !photos.contains(where: \.mayHoldPlaceElsewhere) {
             draft.useMetadataLocation = false
         }
         refreshPlaceName()
@@ -469,7 +473,8 @@ final class DiaryEditorViewModel {
                     let metadata = downloaded.metadata
                     slots[index] = EditorPhoto(image: downloaded.image, assetIdentifier: metadata?["assetIdentifier"],
                                                captureTime: metadata?["captureTime"] ?? "Unknown",
-                                               location: metadata?["location"] ?? "Unknown", storedURL: url)
+                                               location: metadata?["location"] ?? "Unknown", storedURL: url,
+                                               cloudIdentifier: metadata?["cloudIdentifier"])
                 } else {
                     // A photo that failed to load is not shown; saving then leaves the stored photos as they are.
                     existingPhotoLoad.photoFailed()
@@ -478,7 +483,27 @@ final class DiaryEditorViewModel {
                     photos = slots.compactMap { $0 }
                     loadingPhotoCount = 0
                     refreshPlaceName()
+                    findStoredPhotoPlaces(generation: generation)
                 }
+            }
+        }
+    }
+
+    /// Photos saved without their place: when the diary shows its photo place, this device's library is asked
+    /// where they were taken. The answer stays in memory.
+    private func findStoredPhotoPlaces(generation: Int) {
+        guard draft.useMetadataLocation, placeCoordinate == nil else { return }
+        let missing = photos.filter(\.mayHoldPlaceElsewhere)
+        guard !missing.isEmpty else { return }
+        Task { [weak self] in
+            for photo in missing {
+                guard let self else { return }
+                let found = await locating.photoCoordinate(cloudIdentifier: photo.cloudIdentifier, assetIdentifier: photo.assetIdentifier)
+                guard generation == loadGeneration else { return }
+                guard let found, let index = photos.firstIndex(where: { $0.id == photo.id }) else { continue }
+                photos[index].location = found.stored
+                refreshPlaceName()
+                return
             }
         }
     }
@@ -627,6 +652,7 @@ final class DiaryEditorViewModel {
     }
 
     /// JPEG at the previous quality, off the main thread. A photo without a library identifier cannot be uploaded.
+    /// Its place is not uploaded: only its iCloud Photos identifier goes with it.
     nonisolated static func encode(_ photos: [EditorPhoto]) async -> (uploads: [DiaryImageUpload], unreadable: Int) {
         await Task.detached(priority: .userInitiated) {
             var uploads: [DiaryImageUpload] = []
@@ -638,7 +664,7 @@ final class DiaryEditorViewModel {
                     continue
                 }
                 uploads.append(DiaryImageUpload(data: data, assetIdentifier: assetIdentifier,
-                                                captureTime: photo.captureTime, location: photo.location))
+                                                captureTime: photo.captureTime, cloudIdentifier: photo.cloudIdentifier))
             }
             return (uploads, unreadable)
         }.value
