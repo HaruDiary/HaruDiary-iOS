@@ -4,7 +4,8 @@ struct DiaryImageUpload {
     let data: Data
     let assetIdentifier: String
     let captureTime: String?
-    let location: String?
+    /// iCloud Photos identifier; the place the photo was taken is not stored.
+    let cloudIdentifier: String?
 }
 
 /// A photo of an edited diary, in the order the diary shows it.

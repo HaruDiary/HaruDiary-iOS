@@ -10,7 +10,7 @@ final class DiarySaveCoordinatorTests: XCTestCase {
 
     private func image(_ value: UInt8) -> DiaryImageUpload {
         DiaryImageUpload(data: Data([value]), assetIdentifier: "asset-\(value)",
-                         captureTime: "2026-09-27", location: "Seoul")
+                         captureTime: "2026-09-27", cloudIdentifier: "cloud")
     }
 
     func testCreateWithoutImagesStillWritesOneDiary() {

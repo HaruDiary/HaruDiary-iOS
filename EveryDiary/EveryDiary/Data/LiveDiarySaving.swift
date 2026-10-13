@@ -25,7 +25,7 @@ final class LiveDiaryImageStore: DiaryImageStoring {
     func upload(_ image: DiaryImageUpload, userID: String, completion: @escaping (String?) -> Void) {
         FirebaseStorageManager.uploadImage(data: image.data, pathRoot: userID,
                                            assetIdentifier: image.assetIdentifier,
-                                           captureTime: image.captureTime, location: image.location) { url in
+                                           captureTime: image.captureTime, cloudIdentifier: image.cloudIdentifier) { url in
             DispatchQueue.main.async { completion(url?.absoluteString) }
         }
     }

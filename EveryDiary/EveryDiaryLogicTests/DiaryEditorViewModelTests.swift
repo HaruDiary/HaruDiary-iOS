@@ -500,15 +500,25 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(stamp, .unavailable)
     }
 
-    func testCurrentPlaceIsKeptWithoutMarkingTheDiaryChanged() async throws {
-        locating.coordinate = DiaryCoordinate(latitude: 37.5665, longitude: 126.978)
+    func testWhereANewDiaryIsWrittenIsNotStored() async throws {
         let model = makeModel()
         model.startComposing()
-        try await waitUntil { model.draft.currentLocationInfo == "37.5665, 126.978" }
-        XCTAssertFalse(model.hasChanges)
-        // Stored as before, but not shown: only a photo's place is shown, when the user adds it.
+        model.draft.title = "오늘"
+        try await Task.sleep(nanoseconds: 20_000_000)
+        XCTAssertNil(model.draft.currentLocationInfo)
+        XCTAssertTrue(model.save())
+        try await waitUntil { saver.created.count == 1 }
+        XCTAssertEqual(saver.created.first?.currentLocationInfo, "", "Saved empty, as a diary without a place always was")
         XCTAssertNil(model.placeCoordinate)
-        XCTAssertNil(model.placeName)
+    }
+
+    func testAPhotoIsUploadedWithItsCloudIdentifierButNotItsPlace() async {
+        var picked = photo("a", location: "37.51, 126.99", captureTime: "2026-09-28 18:42:00 +0900")
+        picked.cloudIdentifier = "cloud-a"
+        let encoded = await DiaryEditorViewModel.encode([picked])
+        XCTAssertEqual(encoded.uploads.first?.cloudIdentifier, "cloud-a")
+        XCTAssertEqual(encoded.uploads.first?.captureTime, "2026-09-28 18:42:00 +0900")
+        XCTAssertEqual(encoded.uploads.first?.assetIdentifier, "a")
     }
 
     func testEmptyTitleIsRefusedLikeBefore() {
@@ -888,6 +898,54 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertTrue(model.draft.useMetadataLocation)
     }
 
+    func testAStoredPhotoPlaceIsFoundInThisDevicesLibrary() async throws {
+        downloader.photos = ["u1": .init(image: .testPixel, metadata: ["assetIdentifier": "elsewhere", "cloudIdentifier": "cloud-1"])]
+        locating.libraryPlaces = ["cloud-1": DiaryCoordinate(latitude: 37.51, longitude: 126.99)]
+        locating.names = ["37.51, 126.99": "한강공원"]
+        var entry = stored(photos: ["u1"])
+        entry.useMetadataLocation = true
+        let model = makeModel()
+        model.open(entry, editing: false)
+        try await waitUntil { model.placeName == "한강공원" }
+        XCTAssertEqual(locating.libraryLookups, 1)
+    }
+
+    func testAPhotoOutsideICloudIsFoundByItsLibraryIdentifier() async throws {
+        downloader.photos = ["u1": .init(image: .testPixel, metadata: ["assetIdentifier": "local-1"])]
+        locating.libraryPlacesByAsset = ["local-1": DiaryCoordinate(latitude: 37.51, longitude: 126.99)]
+        locating.names = ["37.51, 126.99": "한강공원"]
+        var entry = stored(photos: ["u1"])
+        entry.useMetadataLocation = true
+        let model = makeModel()
+        model.open(entry, editing: false)
+        try await waitUntil { model.placeName == "한강공원" }
+    }
+
+    func testAPlaceOnlyAnotherDeviceKnowsIsKept() async throws {
+        downloader.photos = [
+            "u1": .init(image: .testPixel, metadata: ["assetIdentifier": "elsewhere", "cloudIdentifier": "cloud-1"]),
+            "u2": .init(image: .testPixel, metadata: ["assetIdentifier": "a2", "cloudIdentifier": "cloud-2"]),
+        ]
+        var entry = stored(photos: ["u1", "u2"])
+        entry.useMetadataLocation = true
+        let model = makeModel()
+        model.open(entry, editing: true)
+        try await waitUntil { !model.isLoadingPhotos && locating.libraryLookups == 2 }
+        XCTAssertNil(model.placeName, "This library has neither photo")
+        // Removing a photo here does not drop the place the other device still shows.
+        model.removePhoto(model.photos[1].id)
+        XCTAssertTrue(model.draft.useMetadataLocation)
+    }
+
+    func testAStoredDiaryWithoutItsPhotoPlaceDoesNotReadTheLibrary() async throws {
+        downloader.photos = ["u1": .init(image: .testPixel, metadata: ["assetIdentifier": "a1", "cloudIdentifier": "cloud-1"])]
+        let model = makeModel()
+        model.open(stored(photos: ["u1"]), editing: false)
+        try await waitUntil { !model.isLoadingPhotos }
+        try await Task.sleep(nanoseconds: 20_000_000)
+        XCTAssertEqual(locating.libraryLookups, 0)
+    }
+
     func testEditingSignedOutAsksToSignIn() {
         saver.userID = nil
         let model = makeModel()
@@ -896,13 +954,11 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(model.notice, .signInRequired)
     }
 
-    func testEditingDoesNotReplaceStoredPlaceWithCurrentOne() async throws {
-        locating.coordinate = DiaryCoordinate(latitude: 1, longitude: 2)
+    func testEditingKeepsThePlaceAnOlderVersionStored() async throws {
         let model = makeModel()
         model.open(stored(), editing: true)
         try await Task.sleep(nanoseconds: 20_000_000)
-        XCTAssertEqual(model.draft.currentLocationInfo, "37.5, 127.0")
-        XCTAssertEqual(locating.coordinateRequests, 0)
+        XCTAssertEqual(model.draft.currentLocationInfo, "37.5, 127.0", "Older diaries keep what they stored; nothing new is added")
     }
 }
 
@@ -1110,14 +1166,17 @@ private final class FakeWeatherLooking: DiaryWeatherLooking {
 
 @MainActor
 private final class FakeLocating: DiaryLocating {
-    var coordinate: DiaryCoordinate?
     var names: [String: String] = [:]
     var nameDelay: UInt64 = 0
-    private(set) var coordinateRequests = 0
+    /// This device's library: cloud identifier → where the photo was taken.
+    var libraryPlaces: [String: DiaryCoordinate] = [:]
+    /// Photos this device picked, by library identifier.
+    var libraryPlacesByAsset: [String: DiaryCoordinate] = [:]
+    private(set) var libraryLookups = 0
 
-    func currentCoordinate() async -> DiaryCoordinate? {
-        coordinateRequests += 1
-        return coordinate
+    func photoCoordinate(cloudIdentifier: String?, assetIdentifier: String?) async -> DiaryCoordinate? {
+        libraryLookups += 1
+        return cloudIdentifier.flatMap { libraryPlaces[$0] } ?? assetIdentifier.flatMap { libraryPlacesByAsset[$0] }
     }
 
     func placeName(for coordinate: DiaryCoordinate) async -> String? {

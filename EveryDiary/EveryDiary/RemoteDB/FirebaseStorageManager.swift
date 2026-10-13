@@ -11,13 +11,15 @@ import FirebaseStorage
 
 class FirebaseStorageManager {
     static func uploadImage(data: Data, pathRoot: String, assetIdentifier: String,
-                            captureTime: String? = nil, location: String? = nil,
+                            captureTime: String? = nil, cloudIdentifier: String? = nil,
                             completion: @escaping (URL?) -> Void) {
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
         var customMetadata = [String: String]()
         if let captureTime { customMetadata["captureTime"] = captureTime }
-        if let location { customMetadata["location"] = location }
+        // The place is not stored (older photos still have "location"); the iCloud Photos identifier lets the
+        // writer's own devices find the photo, and its place, in their library.
+        if let cloudIdentifier { customMetadata["cloudIdentifier"] = cloudIdentifier }
         customMetadata["assetIdentifier"] = assetIdentifier
         metadata.customMetadata = customMetadata
 

@@ -152,7 +152,10 @@ final class UserDirectoryTests: XCTestCase {
         try await waitUntil { directory.attempts == 3 }
         directory.release()
         await changed
-        XCTAssertEqual(directory.writes.map(\.entry.nickname), ["하루", "새 이름", "또 다른 이름"])
+        // The two held writes may finish in either order here; Firestore applies them in the order they were made.
+        XCTAssertEqual(directory.writes.first?.entry.nickname, "하루")
+        XCTAssertEqual(Set(directory.writes.map(\.entry.nickname)), ["하루", "새 이름", "또 다른 이름"])
+        XCTAssertEqual(directory.writes.count, 3)
     }
 
     func testAnAccountBeingWithdrawnIsNotWrittenBack() async throws {

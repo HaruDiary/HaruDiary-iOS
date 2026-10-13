@@ -52,33 +52,10 @@ private final class LiveDiaryWeather: DiaryWeatherLooking {
 
 // MARK: - Location
 
-/// One location for a new diary, as the previous editor asked for when it opened. No alert when location is off.
+/// Place names for the photo place line, and the place of a stored photo from this device's photo library.
+/// Nothing here leaves the device except the name lookup itself.
 @MainActor
-private final class LiveDiaryLocating: NSObject, DiaryLocating, CLLocationManagerDelegate {
-    private static let timeout: UInt64 = 10_000_000_000
-    private let manager = CLLocationManager()
-    private var waiting: [CheckedContinuation<DiaryCoordinate?, Never>] = []
-
-    override init() {
-        super.init()
-        manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyBest
-    }
-
-    func currentCoordinate() async -> DiaryCoordinate? {
-        switch manager.authorizationStatus {
-        case .denied, .restricted: return nil
-        case .notDetermined: manager.requestWhenInUseAuthorization()
-        default: manager.requestLocation()
-        }
-        let timeout = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: Self.timeout)
-            self?.finish(nil)
-        }
-        defer { timeout.cancel() }
-        return await withCheckedContinuation { waiting.append($0) }
-    }
-
+private final class LiveDiaryLocating: DiaryLocating {
     func placeName(for coordinate: DiaryCoordinate) async -> String? {
         // As the previous editor showed: the place's own name, otherwise its full address.
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
@@ -89,40 +66,27 @@ private final class LiveDiaryLocating: NSObject, DiaryLocating, CLLocationManage
         return formatted.isEmpty ? nil : formatted
     }
 
-    private func finish(_ coordinate: DiaryCoordinate?) {
-        let continuations = waiting
-        waiting = []
-        continuations.forEach { $0.resume(returning: coordinate) }
-    }
-
-    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let coordinate = locations.last?.coordinate else { return }
-        Task { @MainActor in self.finish(DiaryCoordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)) }
-    }
-
-    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        Task { @MainActor in self.finish(nil) }
-    }
-
-    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        let status = manager.authorizationStatus
-        Task { @MainActor in
-            switch status {
-            case .authorizedWhenInUse, .authorizedAlways:
-                if !self.waiting.isEmpty { self.manager.requestLocation() }
-            case .denied, .restricted:
-                self.finish(nil)
-            default:
-                break
-            }
+    /// The iCloud Photos identifier finds the photo on any device with the same Apple ID; the library identifier
+    /// finds it on the device that picked it. Without library access there is nothing to read.
+    func photoCoordinate(cloudIdentifier: String?, assetIdentifier: String?) async -> DiaryCoordinate? {
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        guard status == .authorized || status == .limited else { return nil }
+        var candidates: [String] = []
+        if let cloudIdentifier,
+           case .success(let local)? = PHPhotoLibrary.shared().localIdentifierMappings(for: [PHCloudIdentifier(stringValue: cloudIdentifier)]).values.first {
+            candidates.append(local)
         }
+        if let assetIdentifier { candidates.append(assetIdentifier) }
+        guard !candidates.isEmpty,
+              let location = PHAsset.fetchAssets(withLocalIdentifiers: candidates, options: nil).firstObject?.location else { return nil }
+        return DiaryCoordinate(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
     }
 }
 
 // MARK: - Photo library
 
 /// Loads photos picked with the system photo picker, with each photo's library identifier, capture time and
-/// place, which saving stores with the photo.
+/// place. Saving stores the identifiers and capture time with the photo; the place stays on the device.
 enum DiaryPhotoLoader {
     /// Asked once, so the capture time and place can be read from the library. The picker itself needs no
     /// permission, so a refusal does not stop the user from adding photos.
@@ -152,10 +116,20 @@ enum DiaryPhotoLoader {
         guard let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) else { return nil }
         if let asset = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject {
             let location = asset.location.map { "\($0.coordinate.latitude), \($0.coordinate.longitude)" }
-            return EditorPhoto(image: image, assetIdentifier: id, captureTime: asset.creationDate?.description, location: location)
+            var photo = EditorPhoto(image: image, assetIdentifier: id, captureTime: asset.creationDate?.description, location: location)
+            photo.cloudIdentifier = cloudIdentifier(of: id)
+            return photo
         }
         let file = fileMetadata(of: data)
         return EditorPhoto(image: image, assetIdentifier: id, captureTime: file.date?.description, location: file.location?.stored)
+    }
+
+    /// Nil for a photo that is not in iCloud Photos; such a photo's place can only be found on this device.
+    private static func cloudIdentifier(of localIdentifier: String) -> String? {
+        guard case .success(let cloud)? = PHPhotoLibrary.shared().cloudIdentifierMappings(forLocalIdentifiers: [localIdentifier])[localIdentifier] else {
+            return nil
+        }
+        return cloud.stringValue
     }
 
     private static func fileMetadata(of data: Data) -> (date: Date?, location: DiaryCoordinate?) {
