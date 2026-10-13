@@ -19,9 +19,11 @@ struct EditorPhoto: Identifiable {
     var cloudIdentifier: String? = nil
 
     var coordinate: DiaryCoordinate? { DiaryCoordinate(stored: location) }
-    /// A stored photo whose place this device could not find (no iCloud Photos, another Apple ID, the photo removed):
-    /// it may still be the diary's place on the device that has it.
-    var mayHoldPlaceElsewhere: Bool { coordinate == nil && cloudIdentifier != nil }
+    /// A stored photo whose place is not known yet: this device's library may have it (by its iCloud Photos
+    /// identifier, or by its library identifier on the device that picked it), and if not, another device may.
+    var mayHoldPlaceElsewhere: Bool {
+        storedURL != nil && coordinate == nil && (cloudIdentifier != nil || assetIdentifier != nil)
+    }
     var captureDate: Date? { captureTime.flatMap(DateFormatter.yyyyMMddHHmmss.date(from:)) }
 }
 

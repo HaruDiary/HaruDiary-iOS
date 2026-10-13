@@ -910,6 +910,17 @@ final class DiaryEditorViewModelTests: XCTestCase {
         XCTAssertEqual(locating.libraryLookups, 1)
     }
 
+    func testAPhotoOutsideICloudIsFoundByItsLibraryIdentifier() async throws {
+        downloader.photos = ["u1": .init(image: .testPixel, metadata: ["assetIdentifier": "local-1"])]
+        locating.libraryPlacesByAsset = ["local-1": DiaryCoordinate(latitude: 37.51, longitude: 126.99)]
+        locating.names = ["37.51, 126.99": "한강공원"]
+        var entry = stored(photos: ["u1"])
+        entry.useMetadataLocation = true
+        let model = makeModel()
+        model.open(entry, editing: false)
+        try await waitUntil { model.placeName == "한강공원" }
+    }
+
     func testAPlaceOnlyAnotherDeviceKnowsIsKept() async throws {
         downloader.photos = [
             "u1": .init(image: .testPixel, metadata: ["assetIdentifier": "elsewhere", "cloudIdentifier": "cloud-1"]),
@@ -1159,11 +1170,13 @@ private final class FakeLocating: DiaryLocating {
     var nameDelay: UInt64 = 0
     /// This device's library: cloud identifier → where the photo was taken.
     var libraryPlaces: [String: DiaryCoordinate] = [:]
+    /// Photos this device picked, by library identifier.
+    var libraryPlacesByAsset: [String: DiaryCoordinate] = [:]
     private(set) var libraryLookups = 0
 
     func photoCoordinate(cloudIdentifier: String?, assetIdentifier: String?) async -> DiaryCoordinate? {
         libraryLookups += 1
-        return cloudIdentifier.flatMap { libraryPlaces[$0] }
+        return cloudIdentifier.flatMap { libraryPlaces[$0] } ?? assetIdentifier.flatMap { libraryPlacesByAsset[$0] }
     }
 
     func placeName(for coordinate: DiaryCoordinate) async -> String? {
